@@ -1,16 +1,25 @@
-services:
-  # 1. База данных PostgreSQL
-  - type: pserv
-    name: erp-postgres
-    runtime: postgres
-    version: "14"
-    plan: free # Начинаем с бесплатного тарифа
+# mezon_admin/render.yaml
 
-  # 2. Бэкенд-сервис
+# Используем последнюю версию спецификации
+version: "1"
+
+# Сначала определяем базу данных
+databases:
+  - name: erp-postgres
+    databaseName: erp_db # Имя базы внутри PostgreSQL
+    user: erp_user # Имя пользователя
+    plan: free
+
+# Затем описываем веб-сервисы
+services:
+  # Бэкенд-сервис
   - type: web
     name: erp-backend
     env: docker
-    plan: free # Начинаем с бесплатного тарифа
+    plan: free
+    # Указываем, где находится Dockerfile
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
     healthCheck:
       path: /api/health
     # Фильтр, чтобы сервис пересобирался только при изменениях в папке backend
@@ -19,8 +28,7 @@ services:
         - backend/**
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: pserv
+        fromDatabase:
           name: erp-postgres
           property: connectionString
       - key: JWT_SECRET
@@ -28,11 +36,14 @@ services:
       - key: NODE_ENV
         value: production
 
-  # 3. Фронтенд-сервис
+  # Фронтенд-сервис
   - type: web
     name: erp-frontend
     env: docker
     plan: free
+    # Указываем, где находится Dockerfile
+    dockerContext: ./frontend
+    dockerfilePath: ./frontend/Dockerfile
     # Фильтр, чтобы сервис пересобирался только при изменениях в папке frontend
     buildFilter:
       paths:
