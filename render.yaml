@@ -15,7 +15,6 @@ services:
     plan: free
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
-    # ИСПРАВЛЕНИЕ: Заменяем 'healthCheck' на 'healthCheckPath'
     healthCheckPath: /api/health
     buildFilter:
       paths:
@@ -40,9 +39,4 @@ services:
     buildFilter:
       paths:
         - frontend/**
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: erp-backend
-          property: url
+    # Мы убрали отсюда envVars, так как VITE_API_URL мы добавим вручную
