@@ -1,0 +1,58 @@
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom'; // <-- 1. ИМПОРТИРУЕМ useNavigate
+import { useAuth } from '../hooks/useAuth';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { FormError } from '../components/ui/FormError';
+
+const loginSchema = z.object({
+  email: z.string().email('Неверный формат email'),
+  password: z.string().min(1, 'Пароль обязателен'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+export default function LoginPage() {
+  const navigate = useNavigate(); // <-- 2. ИНИЦИАЛИЗИРУЕМ ЕГО
+  const { login } = useAuth();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      await login(data.email, data.password);
+      toast.success('Вход выполнен успешно');
+      navigate('/'); // <-- 3. ПЕРЕНАПРАВЛЯЕМ ПОЛЬЗОВАТЕЛЯ НА ГЛАВНУЮ
+    } catch (error: any) {
+      const msg = error?.message || 'Неверные учетные данные';
+      toast.error('Ошибка входа', { description: msg });
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-center">Вход в систему</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <label htmlFor="email">Email</label>
+            <Input id="email" type="email" {...register('email')} defaultValue="director@school.erp" />
+            <FormError message={errors.email?.message} />
+          </div>
+          <div>
+            <label htmlFor="password">Пароль</label>
+            <Input id="password" type="password" {...register('password')} defaultValue="password123" />
+            <FormError message={errors.password?.message} />
+          </div>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Вход...' : 'Войти'}
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+}

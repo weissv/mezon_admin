@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Сервис базы данных PostgreSQL
+  postgres:
+    image: postgres:14-alpine
+    container_name: erp_postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: erp_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Бэкенд на Express
+  backend:
+    build:
+      context: ./backend
+    container_name: erp_backend
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres:5432/erp_db?schema=public"
+      PORT: 4000
+      JWT_SECRET: "your_super_secret_jwt_key_that_is_long_and_secure"
+      NODE_ENV: "development"
+    restart: unless-stopped
+    command: >
+      sh -c "npx prisma migrate deploy && npx prisma db seed && npm run dev"
+
+  # Фронтенд на React
+  frontend:
+    build:
+      context: ./frontend
+    container_name: erp_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: "http://localhost:4000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
