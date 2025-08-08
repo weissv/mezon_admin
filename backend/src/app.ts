@@ -27,6 +27,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // --- Правильная маршрутизация ---
+app.get("/api/health", (_req, res) => res.status(200).send("OK"));
 
 // 1. Регистрируем роутер авторизации. Он сам решает, что в нем публичное (/login),
 // а что приватное (/me), так как у /me есть свой authMiddleware.
