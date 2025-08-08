@@ -1,28 +1,22 @@
 # mezon_admin/render.yaml
-
-# Используем последнюю версию спецификации
 version: "1"
 
-# Сначала определяем базу данных
 databases:
   - name: erp-postgres
-    databaseName: erp_db # Имя базы внутри PostgreSQL
-    user: erp_user # Имя пользователя
+    databaseName: erp_db
+    user: erp_user
     plan: free
 
-# Затем описываем веб-сервисы
 services:
   # Бэкенд-сервис
   - type: web
     name: erp-backend
     env: docker
     plan: free
-    # Указываем, где находится Dockerfile
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
-    healthCheck:
-      path: /api/health
-    # Фильтр, чтобы сервис пересобирался только при изменениях в папке backend
+    # ИСПРАВЛЕНИЕ: Заменяем 'healthCheck' на 'healthCheckPath'
+    healthCheckPath: /api/health
     buildFilter:
       paths:
         - backend/**
@@ -32,7 +26,7 @@ services:
           name: erp-postgres
           property: connectionString
       - key: JWT_SECRET
-        generateValue: true # Render сгенерирует случайный секретный ключ
+        generateValue: true
       - key: NODE_ENV
         value: production
 
@@ -41,10 +35,8 @@ services:
     name: erp-frontend
     env: docker
     plan: free
-    # Указываем, где находится Dockerfile
     dockerContext: ./frontend
     dockerfilePath: ./frontend/Dockerfile
-    # Фильтр, чтобы сервис пересобирался только при изменениях в папке frontend
     buildFilter:
       paths:
         - frontend/**
@@ -53,4 +45,4 @@ services:
         fromService:
           type: web
           name: erp-backend
-          property: url # Render автоматически подставит публичный URL бэкенда
+          property: url
