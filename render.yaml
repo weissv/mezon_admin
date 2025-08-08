@@ -1,0 +1,45 @@
+services:
+  # 1. База данных PostgreSQL
+  - type: pserv
+    name: erp-postgres
+    runtime: postgres
+    version: "14"
+    plan: free # Начинаем с бесплатного тарифа
+
+  # 2. Бэкенд-сервис
+  - type: web
+    name: erp-backend
+    env: docker
+    plan: free # Начинаем с бесплатного тарифа
+    healthCheck:
+      path: /api/health
+    # Фильтр, чтобы сервис пересобирался только при изменениях в папке backend
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: erp-postgres
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true # Render сгенерирует случайный секретный ключ
+      - key: NODE_ENV
+        value: production
+
+  # 3. Фронтенд-сервис
+  - type: web
+    name: erp-frontend
+    env: docker
+    plan: free
+    # Фильтр, чтобы сервис пересобирался только при изменениях в папке frontend
+    buildFilter:
+      paths:
+        - frontend/**
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: erp-backend
+          property: url # Render автоматически подставит публичный URL бэкенда
