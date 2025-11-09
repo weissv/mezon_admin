@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import { useMemo } from "react";
 import React from "react"; // <-- Добавил импорт React для JSX
 
-type Column<T> = { key: string; header: string; render?: (row: T) => React.ReactNode };
+export type Column<T> = { key: string; header: string; render?: (row: T) => React.ReactNode };
 
 export function DataTable<T extends Record<string, any>>({
   data,

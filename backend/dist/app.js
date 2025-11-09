@@ -7,7 +7,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
+const auth_1 = require("./middleware/auth");
 const errorHandler_1 = require("./middleware/errorHandler");
+// Импорты роутов
+const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
 const children_routes_1 = __importDefault(require("./routes/children.routes"));
 const employees_routes_1 = __importDefault(require("./routes/employees.routes"));
@@ -26,7 +29,14 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use((0, morgan_1.default)("dev"));
-// ... (rest of the file is same until the routes)
+// Health check endpoint (public)
+app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+// Публичные роуты
+app.use("/api/auth", auth_routes_1.default);
+// Защита всех последующих роутов
+app.use(auth_1.authMiddleware);
 // 3. Эти роуты теперь защищены:
 app.use("/api/dashboard", dashboard_routes_1.default);
 app.use("/api/children", children_routes_1.default);

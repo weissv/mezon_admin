@@ -8,7 +8,7 @@ import { Card } from '../components/Card';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import FormError from '../components/ui/FormError';
+import { FormError } from '../components/ui/FormError';
 
 // Схема валидации на основе бэкенд-схемы
 const mealSchema = z.object({
@@ -62,12 +62,9 @@ export default function MenuPage() {
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
     try {
-      const response = await api.get('/menu', {
-        params: {
-          startDate: start.toISOString(),
-          endDate: end.toISOString(),
-        },
-      });
+      const startDate = start.toISOString();
+      const endDate = end.toISOString();
+      const response = await api.get(`/menu?startDate=${startDate}&endDate=${endDate}`);
       setMenus(response.data.items || []);
     } catch (error) {
       console.error('Failed to fetch menu:', error);
@@ -169,12 +166,8 @@ export default function MenuPage() {
       </div>
 
       {isModalOpen && selectedDate && (
-        <Modal onClose={() => setIsModalOpen(false)}>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Меню на ${selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}`}>
           <form onSubmit={handleSubmit(onSubmit)} className="p-4">
-            <h2 className="text-xl font-bold mb-4">
-              Меню на {selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
-            </h2>
-            
             <div className="mb-4">
               <label htmlFor="ageGroup" className="block mb-1">Возрастная группа</label>
               <select {...register('ageGroup')} id="ageGroup" className="w-full p-2 border rounded">

@@ -8,7 +8,7 @@ import { Card } from '../components/Card';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import FormError from '../components/ui/FormError';
+import { FormError } from '../components/ui/FormError';
 import { DataTable } from '../components/DataTable/DataTable';
 
 // Схема на основе createSecurityLogSchema
@@ -74,23 +74,23 @@ export default function SecurityPage() {
 
   const columns = [
     {
-      accessorKey: 'eventType',
+      key: 'eventType',
       header: 'Тип происшествия',
     },
     {
-      accessorKey: 'description',
+      key: 'description',
       header: 'Описание',
     },
     {
-      accessorKey: 'date',
+      key: 'date',
       header: 'Дата',
-      cell: ({ row }: any) => new Date(row.original.date).toLocaleString(),
+      render: (row: any) => new Date(row.date).toLocaleString(),
     },
     {
-      accessorKey: 'documentUrl',
+      key: 'documentUrl',
       header: 'Документ',
-      cell: ({ row }: any) => row.original.documentUrl ? (
-        <a href={row.original.documentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+      render: (row: any) => row.documentUrl ? (
+        <a href={row.documentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
           Ссылка
         </a>
       ) : 'Нет',
@@ -108,12 +108,12 @@ export default function SecurityPage() {
         {loading ? (
           <div className="p-4 text-center">Загрузка...</div>
         ) : (
-          <DataTable columns={columns} data={logs} />
+          <DataTable columns={columns} data={logs} page={1} pageSize={logs.length} total={logs.length} onPageChange={() => {}} />
         )}
       </Card>
 
       {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)}>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Добавить запись">
           <form onSubmit={handleSubmit(onSubmit)} className="p-4">
             <h2 className="text-xl font-bold mb-4">Новая запись</h2>
             

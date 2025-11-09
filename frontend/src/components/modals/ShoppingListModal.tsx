@@ -11,7 +11,7 @@ interface ShoppingListModalProps {
   onGenerate: (shoppingList: ShoppingListItem[]) => void;
 }
 
-export function ShoppingListModal({ onClose, onGenerate }: ShoppingListModalProps) {
+export function ShoppingListModal({ isOpen, onClose, onGenerate }: { isOpen: boolean; onClose: () => void; onGenerate: (shoppingList: ShoppingListItem[]) => void }) {
   const [dates, setDates] = useState({
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0],
@@ -33,8 +33,8 @@ export function ShoppingListModal({ onClose, onGenerate }: ShoppingListModalProp
   };
 
   return (
-    <Modal onClose={onClose}>
-      <div className="p-4">
+    <Modal isOpen={isOpen} onClose={onClose} title="Список покупок">
+      <div className="space-y-4">
         <h2 className="text-xl font-bold mb-4">Выбор периода для списка закупок</h2>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>

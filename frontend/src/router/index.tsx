@@ -52,7 +52,7 @@ export default function Router() {
           <Route path="attendance" element={<AttendancePage />} />
           <Route path="finance" element={<FinancePage />} />
           <Route path="inventory" element={<InventoryPage />} />
-          <_route path="menu" element={<MenuPage />} />
+          <Route path="menu" element={<MenuPage />} />
           <Route path="maintenance" element={<MaintenancePage />} />
           <Route path="security" element={<SecurityPage />} />
           <Route path="branches" element={<BranchesPage />} />
