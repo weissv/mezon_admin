@@ -8,7 +8,7 @@ import { getMenuSchema, upsertMenuSchema } from "../schemas/menu.schema";
 const router = Router();
 
 // GET /api/menu?startDate&endDate
-router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.get("/", checkRole(["DEPUTY", "ADMIN"]), validate(getMenuSchema), async (req, res) => {
   const { startDate, endDate } = req.query as any;
   const where: any = {};
   if (startDate || endDate) where.date = {};
@@ -19,7 +19,7 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 });
 
 // POST /api/menu
-router.post("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(upsertMenuSchema), async (req, res) => {
   // Валидация и расчёт КБЖУ можно делать на фронте и/или бэке
   const created = await prisma.menu.upsert({
     where: { date_ageGroup: { date: new Date(req.body.date), ageGroup: req.body.ageGroup } },
@@ -28,8 +28,5 @@ router.post("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
   });
   return res.status(201).json(created);
 });
-
-router.get("/", checkRole(["DEPUTY", "ADMIN"]), validate(getMenuSchema), async (req, res) => { /* ... */ });
-router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(upsertMenuSchema), async (req, res) => { /* ... */ });
 
 export default router;

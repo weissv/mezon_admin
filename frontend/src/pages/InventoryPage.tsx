@@ -88,7 +88,7 @@ export default function InventoryPage() {
         </Card>
       )}
 
-      {isModalOpen && <ShoppingListModal onClose={() => setIsModalOpen(false)} onGenerate={setShoppingList} />}
+      {isModalOpen && <ShoppingListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onGenerate={setShoppingList} />}
     </div>
   );
 }

@@ -28,6 +28,11 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
+// Health check endpoint (public)
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // Публичные роуты
 app.use("/api/auth", authRoutes);
 

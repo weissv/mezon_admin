@@ -8,8 +8,8 @@ import { Card } from '../components/Card';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import FormError from '../components/ui/FormError';
-import { DataTable } from '../components/DataTable/DataTable'; // Предполагаем, что DataTable готов к использованию
+import { FormError } from '../components/ui/FormError';
+import { DataTable, Column } from '../components/DataTable/DataTable'; // Предполагаем, что DataTable готов к использованию
 
 // Схема на основе createMaintenanceSchema
 const maintenanceFormSchema = z.object({
@@ -79,28 +79,28 @@ export default function MaintenancePage() {
 
   const columns = [
     {
-      accessorKey: 'title',
+      key: 'title',
       header: 'Тема',
     },
     {
-      accessorKey: 'requester.lastName',
+      key: 'requester',
       header: 'Заявитель',
-      cell: ({ row }: any) => `${row.original.requester?.lastName || ''} ${row.original.requester?.firstName || ''}`
+      render: (row: any) => `${row.requester?.lastName || ''} ${row.requester?.firstName || ''}`
     },
     {
-      accessorKey: 'type',
+      key: 'type',
       header: 'Тип',
-      cell: ({ row }: any) => typeMapping[row.original.type as keyof typeof typeMapping] || row.original.type,
+      render: (row: any) => typeMapping[row.type as keyof typeof typeMapping] || row.type,
     },
     {
-      accessorKey: 'status',
+      key: 'status',
       header: 'Статус',
-      cell: ({ row }: any) => statusMapping[row.original.status as keyof typeof statusMapping] || row.original.status,
+      render: (row: any) => statusMapping[row.status as keyof typeof statusMapping] || row.status,
     },
     {
-      accessorKey: 'createdAt',
+      key: 'createdAt',
       header: 'Дата создания',
-      cell: ({ row }: any) => new Date(row.original.createdAt).toLocaleDateString(),
+      render: (row: any) => new Date(row.createdAt).toLocaleDateString(),
     },
   ];
 
@@ -115,15 +115,13 @@ export default function MaintenancePage() {
         {loading ? (
           <div className="p-4 text-center">Загрузка...</div>
         ) : (
-          <DataTable columns={columns} data={requests} />
+          <DataTable columns={columns} data={requests} page={1} pageSize={requests.length} total={requests.length} onPageChange={() => {}} />
         )}
       </Card>
 
       {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)}>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Новая заявка">
           <form onSubmit={handleSubmit(onSubmit)} className="p-4">
-            <h2 className="text-xl font-bold mb-4">Новая заявка</h2>
-            
             <div className="mb-4">
               <label htmlFor="title" className="block mb-1">Тема</label>
               <Input {...register('title')} id="title" />
