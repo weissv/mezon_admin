@@ -19,6 +19,8 @@ import maintenanceRoutes from "./routes/maintenance.routes";
 import securityRoutes from "./routes/security.routes";
 import branchesRoutes from "./routes/branches.routes";
 import actionlogRoutes from "./routes/actionlog.routes";
+import groupsRoutes from "./routes/groups.routes";
+import notificationsRoutes from "./routes/notifications.routes";
 
 const app = express();
 
@@ -26,15 +28,11 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
-// --- Правильная маршрутизация ---
-app.get("/api/health", (_req, res) => res.status(200).send("OK"));
-
-// 1. Регистрируем роутер авторизации. Он сам решает, что в нем публичное (/login),
-// а что приватное (/me), так как у /me есть свой authMiddleware.
+// Публичные роуты
 app.use("/api/auth", authRoutes);
 
-// 2. ВСЕ последующие роуты, начинающиеся с /api, будут защищены authMiddleware.
-app.use("/api", authMiddleware);
+// Защита всех последующих роутов
+app.use(authMiddleware);
 
 // 3. Эти роуты теперь защищены:
 app.use("/api/dashboard", dashboardRoutes);
@@ -49,6 +47,8 @@ app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/security", securityRoutes);
 app.use("/api/branches", branchesRoutes);
 app.use("/api/actionlog", actionlogRoutes);
+app.use("/api/groups", groupsRoutes);
+app.use("/api/notifications", notificationsRoutes);
 
 // Обработчик ошибок
 app.use(errorHandler);

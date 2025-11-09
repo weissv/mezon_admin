@@ -16,6 +16,7 @@ const linksByRole: Record<string, { to: string; label: string }[]> = {
     { to: "/security", label: "Безопасность" },
     { to: "/branches", label: "Филиалы" },
     { to: "/action-log", label: "Журнал действий" },
+    { to: "/notifications", label: "Уведомления" },
   ],
   ACCOUNTANT: [
     { to: "/", label: "Дашборд" },
@@ -38,6 +39,7 @@ const linksByRole: Record<string, { to: string; label: string }[]> = {
     { to: "/maintenance", label: "Заявки" },
     { to: "/security", label: "Безопасность" },
     { to: "/action-log", label: "Журнал действий" },
+    { to: "/notifications", label: "Уведомления" },
   ],
   ADMIN: [
     { to: "/", label: "Дашборд" },
@@ -52,6 +54,7 @@ const linksByRole: Record<string, { to: string; label: string }[]> = {
     { to: "/security", label: "Безопасность" },
     { to: "/branches", label: "Филиалы" },
     { to: "/action-log", label: "Журнал действий" },
+    { to: "/notifications", label: "Уведомления" },
   ],
 };
 

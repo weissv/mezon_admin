@@ -14,7 +14,7 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
   res.json(items);
 });
 
-router.post("/", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
+router.post("/", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), validate(createMaintenanceSchema), async (req, res) => {
   const data = req.body;
   const created = await prisma.maintenanceRequest.create({
     data: { ...data, requesterId: req.user!.employeeId },
@@ -22,12 +22,9 @@ router.post("/", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => 
   res.status(201).json(created);
 });
 
-router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateMaintenanceSchema), async (req, res) => {
   const id = Number(req.params.id);
   const updated = await prisma.maintenanceRequest.update({ where: { id }, data: req.body });
   res.json(updated);
 });
-
-router.post("/", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), validate(createMaintenanceSchema), async (req, res) => { /* ... */ });
-router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateMaintenanceSchema), async (req, res) => { /* ... */ });
 export default router;
