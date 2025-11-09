@@ -14,7 +14,8 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
 });
 
 // POST /api/inventory/generate-shopping-list
-router.post("/generate-shopping-list", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+// TODO: Cron job для проверки сроков годности и создания уведомлений.
+router.post("/generate-shopping-list", checkRole(["DEPUTY", "ADMIN"]), validate(generateShoppingListSchema), async (req, res) => {
   // Вход: { startDate, endDate }
   // Бизнес-логика: суммировать блюда из меню, сопоставить с остатками
   const { startDate, endDate } = req.body as { startDate: string; endDate: string };
@@ -46,8 +47,4 @@ router.post("/generate-shopping-list", checkRole(["DEPUTY", "ADMIN"]), async (re
 
   return res.json({ period: { startDate, endDate }, items: shoppingList });
 });
-router.get("/", checkRole(["DEPUTY", "ADMIN"]), validate(listInventorySchema), async (_req, res) => { /* ... */ });
-
-// TODO: Cron job для проверки сроков годности и создания уведомлений.
-router.post("/generate-shopping-list", checkRole(["DEPUTY", "ADMIN"]), validate(generateShoppingListSchema), async (req, res) => { /* ... */ });
 export default router;

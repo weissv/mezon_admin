@@ -23,30 +23,6 @@ router.get(
   }
 );
 
-// POST /api/children
-router.post(
-  "/",
-  checkRole(["DEPUTY", "ADMIN"]),
-  logAction("CREATE_CHILD", (req) => ({ body: req.body })),
-  async (req, res) => {
-    const data = req.body;
-    const child = await prisma.child.create({ data });
-    return res.status(201).json(child);
-  }
-);
-
-// PUT /api/children/:id
-router.put(
-  "/:id",
-  checkRole(["DEPUTY", "ADMIN"]),
-  logAction("UPDATE_CHILD", (req) => ({ id: req.params.id, body: req.body })),
-  async (req, res) => {
-    const id = Number(req.params.id);
-    const child = await prisma.child.update({ where: { id }, data: req.body });
-    return res.json(child);
-  }
-);
-
 
 router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createChildSchema), logAction("CREATE_CHILD", (req) => ({ body: req.body })), async (req, res) => {
   const child = await prisma.child.create({ data: req.body });

@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import { useMemo } from "react";
 import React from "react"; // <-- Добавил импорт React для JSX
 
-type Column<T> = { key: keyof T; header: string; render?: (row: T) => React.ReactNode };
+type Column<T> = { key: string; header: string; render?: (row: T) => React.ReactNode };
 
 export function DataTable<T extends Record<string, any>>({
   data,
@@ -24,7 +24,7 @@ export function DataTable<T extends Record<string, any>>({
 
   const csv = useMemo(() => {
     const rows = data.map((row) =>
-      Object.fromEntries(columns.map((c) => [String(c.header), row[c.key]]))
+      Object.fromEntries(columns.map((c) => [String(c.header), c.key in row ? row[c.key as keyof T] : '']))
     );
     return Papa.unparse(rows);
   }, [data, columns]);
@@ -48,12 +48,11 @@ export function DataTable<T extends Record<string, any>>({
         <thead>
           <tr className="bg-gray-50">
             {columns.map((c) => (
-              <th key={String(c.key)} className="text-left p-2">{c.header}</th>
+              <th key={c.key} className="text-left p-2">{c.header}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {/* ИСПРАВЛЕНИЕ: Убрано дублирование. Теперь либо сообщение "Нет данных", либо строки таблицы. */}
           {data.length === 0 ? (
             <tr>
               <td className="p-4 text-center text-gray-500" colSpan={columns.length}>
@@ -64,8 +63,8 @@ export function DataTable<T extends Record<string, any>>({
             data.map((row, i) => (
               <tr key={i} className="border-t">
                 {columns.map((c) => (
-                  <td key={String(c.key)} className="p-2">
-                    {c.render ? c.render(row) : String(row[c.key] ?? "")}
+                  <td key={c.key} className="p-2">
+                    {c.render ? c.render(row) : c.key in row ? String(row[c.key as keyof T] ?? "") : ""}
                   </td>
                 ))}
               </tr>
@@ -92,7 +91,6 @@ export function DataTable<T extends Record<string, any>>({
             Вперёд
           </button>
         </div>
-        {/* ИСПРАВЛЕНИЕ: Вот здесь не хватало закрывающих тегов */}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 // src/router/index.tsx
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
 import LoginPage from "../pages/LoginPage";
@@ -15,121 +15,53 @@ import MaintenancePage from "../pages/MaintenancePage";
 import SecurityPage from "../pages/SecurityPage";
 import BranchesPage from "../pages/BranchesPage";
 import ActionLogPage from "../pages/ActionLogPage";
+import NotificationsPage from "../pages/NotificationsPage";
 import { useAuth } from "../hooks/useAuth";
 
-function PrivateRoute({ children, roles }: { children: JSX.Element; roles?: string[] }) {
+function PrivateRoute() {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(user.role) && user.role !== "DIRECTOR") {
-    return <Navigate to="/" replace />;
+  if (!user) {
+    return <Navigate to="/auth/login" replace />;
   }
-  return children;
+  return <Outlet />;
 }
 
-export default function AppRouter() {
+function RoleBasedRoute({ roles }: { roles: string[] }) {
+  const { user } = useAuth();
+  if (!user || !roles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Outlet />;
+}
+
+export default function Router() {
   return (
     <Routes>
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<LoginPage />} />
+      <Route path="/auth" element={<AuthLayout />}>
+        <Route index element={<Navigate to="login" replace />} />
+        <Route path="login" element={<LoginPage />} />
       </Route>
 
-      <Route element={<MainLayout />}>
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <DashboardPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/children"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]}>
-              <ChildrenPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/employees"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN"]}>
-              <EmployeesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/clubs"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]}>
-              <ClubsPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/attendance"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN", "TEACHER"]}>
-              <AttendancePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/finance"
-          element={
-            <PrivateRoute roles={["ACCOUNTANT", "DEPUTY", "ADMIN"]}>
-              <FinancePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/inventory"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN"]}>
-              <InventoryPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/menu"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN"]}>
-              <MenuPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/maintenance"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN", "TEACHER"]}>
-              <MaintenancePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/security"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN"]}>
-              <SecurityPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/branches"
-          element={
-            <PrivateRoute roles={["ADMIN"]}>
-              <BranchesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/action-log"
-          element={
-            <PrivateRoute roles={["DEPUTY", "ADMIN"]}>
-              <ActionLogPage />
-            </PrivateRoute>
-          }
-        />
+      <Route element={<PrivateRoute />}>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="children" element={<ChildrenPage />} />
+          <Route path="employees" element={<EmployeesPage />} />
+          <Route path="clubs" element={<ClubsPage />} />
+          <Route path="attendance" element={<AttendancePage />} />
+          <Route path="finance" element={<FinancePage />} />
+          <Route path="inventory" element={<InventoryPage />} />
+          <_route path="menu" element={<MenuPage />} />
+          <Route path="maintenance" element={<MaintenancePage />} />
+          <Route path="security" element={<SecurityPage />} />
+          <Route path="branches" element={<BranchesPage />} />
+
+          <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
+            <Route path="action-log" element={<ActionLogPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+          </Route>
+        </Route>
       </Route>
     </Routes>
   );

@@ -23,8 +23,10 @@ async function main() {
     },
   });
 
-  await prisma.user.create({
-    data: {
+  await prisma.user.upsert({
+    where: { email: "director@school.erp" }, // Уникальное поле для поиска
+    update: {}, // Что делать, если он найден (здесь - ничего)
+    create: {
       email: "director@school.erp",
       passwordHash: await bcrypt.hash("password123", 10),
       role: "DIRECTOR",

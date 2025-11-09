@@ -1,20 +1,9 @@
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { api } from '../lib/api';
+import { useApi } from '../hooks/useApi';
 import { Card } from '../components/Card';
-
-type Club = { id: number; name: string; description: string; teacher: { firstName: string; lastName: string } };
+import { Club } from '../types/club';
 
 export default function ClubsPage() {
-  const [clubs, setClubs] = useState<Club[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    api.get('/api/clubs')
-      .then(setClubs)
-      .catch(err => toast.error('Ошибка загрузки кружков', { description: err?.message }))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: clubs, loading } = useApi<Club>({ url: '/api/clubs' });
 
   if (loading) return <div>Загрузка...</div>;
 
