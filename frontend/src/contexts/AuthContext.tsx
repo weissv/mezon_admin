@@ -7,7 +7,7 @@ type User = { id: number; email: string; role: string; employee: any };
 export const AuthContext = createContext<{
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   logout: () => void;
 }>({ user: null, token: null, login: async () => {}, logout: () => {} });
 
@@ -51,8 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, [token]);
 
-  const login = async (email: string, password: string) => {
-    const res = await api.post("/api/auth/login", { email, password });
+  const login = async (identifier: string, password: string) => {
+    const res = await api.post("/api/auth/login", { login: identifier, password });
     setToken(res.token);
     // Save to both cookie and localStorage for compatibility
     setCookie("auth_token", res.token, 7); // 7 days
