@@ -13,9 +13,13 @@ import InventoryPage from "../pages/InventoryPage";
 import MenuPage from "../pages/MenuPage";
 import MaintenancePage from "../pages/MaintenancePage";
 import SecurityPage from "../pages/SecurityPage";
-import BranchesPage from "../pages/BranchesPage";
 import ActionLogPage from "../pages/ActionLogPage";
 import NotificationsPage from "../pages/NotificationsPage";
+import DocumentsPage from "../pages/DocumentsPage";
+import CalendarPage from "../pages/CalendarPage";
+import FeedbackPage from "../pages/FeedbackPage";
+import ProcurementPage from "../pages/ProcurementPage";
+import RecipesPage from "../pages/RecipesPage";
 import { useAuth } from "../hooks/useAuth";
 
 function PrivateRoute() {
@@ -55,7 +59,11 @@ export default function Router() {
           <Route path="menu" element={<MenuPage />} />
           <Route path="maintenance" element={<MaintenancePage />} />
           <Route path="security" element={<SecurityPage />} />
-          <Route path="branches" element={<BranchesPage />} />
+          <Route path="documents" element={<DocumentsPage />} />
+          <Route path="calendar" element={<CalendarPage />} />
+          <Route path="feedback" element={<FeedbackPage />} />
+          <Route path="procurement" element={<ProcurementPage />} />
+          <Route path="recipes" element={<RecipesPage />} />
 
           <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
             <Route path="action-log" element={<ActionLogPage />} />

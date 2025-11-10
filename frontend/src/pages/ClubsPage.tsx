@@ -1,24 +1,227 @@
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { useApi } from '../hooks/useApi';
-import { Card } from '../components/Card';
-import { Club } from '../types/club';
+import { DataTable, Column } from '../components/DataTable/DataTable';
+import { Button } from '../components/ui/button';
+import { Modal } from '../components/Modal';
+import { Input } from '../components/ui/input';
+import { PlusCircle } from 'lucide-react';
+import { api } from '../lib/api';
+
+interface Club {
+  id: number;
+  name: string;
+  description?: string | null;
+  teacherId: number;
+  teacher: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  };
+  cost: number;
+  maxStudents: number;
+}
 
 export default function ClubsPage() {
-  const { data: clubs, loading } = useApi<Club>({ url: '/api/clubs' });
+  const { data: clubs, total, page, setPage, fetchData } = useApi<Club>({
+    url: '/api/clubs',
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingClub, setEditingClub] = useState<Club | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    teacherId: '',
+    cost: '',
+    maxStudents: ''
+  });
+  const [saving, setSaving] = useState(false);
 
-  if (loading) return <div>Загрузка...</div>;
+  const handleCreate = () => {
+    setEditingClub(null);
+    setFormData({
+      name: '',
+      description: '',
+      teacherId: '',
+      cost: '',
+      maxStudents: ''
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (club: Club) => {
+    setEditingClub(club);
+    setFormData({
+      name: club.name,
+      description: club.description || '',
+      teacherId: String(club.teacherId),
+      cost: String(club.cost),
+      maxStudents: String(club.maxStudents)
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Удалить кружок?')) return;
+    try {
+      await api.delete('/api/clubs/' + id);
+      toast.success('Кружок удален');
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload = {
+        name: formData.name,
+        description: formData.description || null,
+        teacherId: parseInt(formData.teacherId),
+        cost: parseFloat(formData.cost),
+        maxStudents: parseInt(formData.maxStudents)
+      };
+
+      if (editingClub) {
+        await api.put('/api/clubs/' + editingClub.id, payload);
+        toast.success('Кружок обновлен');
+      } else {
+        await api.post('/api/clubs', payload);
+        toast.success('Кружок создан');
+      }
+      setIsModalOpen(false);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка сохранения', { description: error?.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const columns: Column<Club>[] = [
+    { key: 'id', header: 'ID' },
+    { key: 'name', header: 'Название' },
+    { 
+      key: 'teacher', 
+      header: 'Педагог',
+      render: (row) => row.teacher.firstName + ' ' + row.teacher.lastName
+    },
+    { 
+      key: 'cost', 
+      header: 'Стоимость',
+      render: (row) => row.cost + ' ₽/мес'
+    },
+    { key: 'maxStudents', header: 'Макс. детей' },
+    {
+      key: 'actions',
+      header: 'Действия',
+      render: (row) => (
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            Редактировать
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => handleDelete(row.id)}>
+            Удалить
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Кружки</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {clubs.map(club => (
-          <Card key={club.id}>
-            <h2 className="font-bold">{club.name}</h2>
-            <p className="text-sm text-gray-600">Педагог: {club.teacher.firstName} {club.teacher.lastName}</p>
-            <p className="text-sm mt-2">{club.description}</p>
-          </Card>
-        ))}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Кружки и секции</h1>
+        <Button onClick={handleCreate}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Добавить кружок
+        </Button>
       </div>
+
+      <DataTable
+        columns={columns}
+        data={clubs}
+        page={page}
+        pageSize={10}
+        total={total}
+        onPageChange={setPage}
+      />
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingClub ? 'Редактировать кружок' : 'Новый кружок'}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4 p-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Название *</label>
+            <Input
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+              placeholder="Рисование"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Описание</label>
+            <Input
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Творческое развитие детей"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">ID педагога *</label>
+            <Input
+              type="number"
+              value={formData.teacherId}
+              onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
+              required
+              placeholder="1"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Стоимость (₽/мес) *</label>
+            <Input
+              type="number"
+              value={formData.cost}
+              onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+              required
+              placeholder="1000"
+              step="0.01"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Максимум детей *</label>
+            <Input
+              type="number"
+              value={formData.maxStudents}
+              onChange={(e) => setFormData({ ...formData, maxStudents: e.target.value })}
+              required
+              placeholder="15"
+            />
+          </div>
+
+          <div className="flex gap-2 justify-end pt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsModalOpen(false)}
+              disabled={saving}
+            >
+              Отмена
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? 'Сохранение...' : 'Сохранить'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

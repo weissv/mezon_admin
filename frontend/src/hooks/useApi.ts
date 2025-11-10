@@ -37,8 +37,24 @@ export function useApi<T>({
         });
       }
       const response = await api.get(`${url}?${params.toString()}`);
-      setData(response.items);
-      setTotal(response.total);
+
+      const resolvedItems = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.items)
+          ? response.items
+          : Array.isArray(response?.data)
+            ? response.data
+            : [];
+
+      setData(resolvedItems);
+
+      const resolvedTotal = typeof response?.total === 'number'
+        ? response.total
+        : typeof response?.count === 'number'
+          ? response.count
+          : resolvedItems.length;
+
+      setTotal(resolvedTotal);
     } catch (error: any) {
       const msg = error?.message || error?.issues?.[0]?.message || 'Ошибка';
       toast.error('Ошибка загрузки данных', { description: msg });

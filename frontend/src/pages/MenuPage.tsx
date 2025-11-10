@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { api } from '../lib/api';
 import { Card } from '../components/Card';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
+import { Calculator, ShoppingCart } from 'lucide-react';
 
 // Схема валидации на основе бэкенд-схемы
 const mealSchema = z.object({
@@ -38,6 +40,9 @@ export default function MenuPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [weekStart, setWeekStart] = useState(getStartOfWeek(new Date()));
+  const [kbzhuData, setKbzhuData] = useState<any>(null);
+  const [shoppingList, setShoppingList] = useState<any>(null);
+  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null);
 
   const {
     register,
@@ -116,6 +121,28 @@ export default function MenuPage() {
     setWeekStart(newWeekStart);
   };
 
+  const handleCalculateKBZHU = async (menuId: number) => {
+    try {
+      const result = await api.post(`/api/menu/${menuId}/calculate-kbju`, {});
+      setKbzhuData(result);
+      setSelectedMenuId(menuId);
+      toast.success('КБЖУ рассчитано успешно');
+    } catch (error: any) {
+      toast.error('Ошибка расчета КБЖУ', { description: error?.message });
+    }
+  };
+
+  const handleGenerateShoppingList = async (menuId: number, portions: number = 25) => {
+    try {
+      const result = await api.get(`/api/menu/${menuId}/shopping-list?portions=${portions}`);
+      setShoppingList(result);
+      setSelectedMenuId(menuId);
+      toast.success('Список покупок сформирован');
+    } catch (error: any) {
+      toast.error('Ошибка генерации списка', { description: error?.message });
+    }
+  };
+
   const renderDay = (date: Date) => {
     const menuForDay = menus.find(m => new Date(m.date).toDateString() === date.toDateString());
     return (
@@ -130,6 +157,24 @@ export default function MenuPage() {
                   <li key={i}><strong>{meal.name}:</strong> {meal.dish} ({meal.calories} ккал)</li>
                 ))}
               </ul>
+              <div className="flex gap-2 mt-3">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleCalculateKBZHU(menuForDay.id)}
+                  className="flex-1"
+                >
+                  <Calculator className="h-3 w-3 mr-1" /> КБЖУ
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleGenerateShoppingList(menuForDay.id)}
+                  className="flex-1"
+                >
+                  <ShoppingCart className="h-3 w-3 mr-1" /> Список
+                </Button>
+              </div>
             </div>
           ) : (
             <p className="text-gray-500 mt-2">Меню не составлено</p>
@@ -164,6 +209,66 @@ export default function MenuPage() {
       <div className="flex gap-4 overflow-x-auto pb-4">
         {weekDates.map(date => renderDay(date))}
       </div>
+
+      {/* КБЖУ Modal */}
+      <Modal isOpen={!!kbzhuData} onClose={() => setKbzhuData(null)} title="Пищевая ценность меню">
+        {kbzhuData && (
+          <div className="p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-orange-50 rounded-md">
+                <div className="text-sm text-gray-600">Калорийность</div>
+                <div className="text-2xl font-bold">{kbzhuData.kbju?.calories?.toFixed(1) || 0} ккал</div>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-md">
+                <div className="text-sm text-gray-600">Белки</div>
+                <div className="text-2xl font-bold">{kbzhuData.kbju?.protein?.toFixed(1) || 0} г</div>
+              </div>
+              <div className="p-3 bg-yellow-50 rounded-md">
+                <div className="text-sm text-gray-600">Жиры</div>
+                <div className="text-2xl font-bold">{kbzhuData.kbju?.fat?.toFixed(1) || 0} г</div>
+              </div>
+              <div className="p-3 bg-green-50 rounded-md">
+                <div className="text-sm text-gray-600">Углеводы</div>
+                <div className="text-2xl font-bold">{kbzhuData.kbju?.carbs?.toFixed(1) || 0} г</div>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500">
+              Возрастная группа: {kbzhuData.ageGroup}
+            </p>
+          </div>
+        )}
+      </Modal>
+
+      {/* Shopping List Modal */}
+      <Modal isOpen={!!shoppingList} onClose={() => setShoppingList(null)} title="Список покупок">
+        {shoppingList && (
+          <div className="p-4">
+            <p className="text-sm text-gray-600 mb-4">
+              Порций: {shoppingList.portions} | Дата: {shoppingList.date && new Date(shoppingList.date).toLocaleDateString('ru-RU')}
+            </p>
+            <div className="space-y-2">
+              {shoppingList.items?.map((item: any, idx: number) => (
+                <div key={idx} className="flex justify-between p-2 border rounded">
+                  <span className="font-medium">{item.ingredientName}</span>
+                  <div className="text-right">
+                    <div className="text-sm">
+                      Нужно: <span className="font-semibold">{item.requiredQty} {item.unit}</span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      На складе: {item.inStock} {item.unit}
+                    </div>
+                    {item.toBuy > 0 && (
+                      <div className="text-sm font-bold text-red-600">
+                        Купить: {item.toBuy} {item.unit}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {isModalOpen && selectedDate && (
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Меню на ${selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}`}>

@@ -22,7 +22,7 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createEmployeeSchema), async (req, res) => {
   const { body } = req as any;
   const { user, ...employee } = body;
-  const created = await prisma.$transaction(async (tx) => {
+  const created = await prisma.$transaction(async (tx: any) => {
     const emp = await tx.employee.create({ data: employee });
     let usr = null;
     if (user) {
@@ -45,6 +45,61 @@ router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateEmployeeSchema
   const id = Number(req.params.id);
   const updated = await prisma.employee.update({ where: { id }, data: req.body });
   return res.json(updated);
+});
+
+// GET /api/employees/reminders - напоминания о медосмотрах и аттестации
+router.get("/reminders", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+  const { days = 30 } = req.query;
+  const futureDate = new Date(Date.now() + Number(days) * 24 * 3600 * 1000);
+  
+  const [medicalCheckups, attestations] = await Promise.all([
+    // Сотрудники, которым скоро нужен медосмотр
+    prisma.employee.findMany({
+      where: {
+        fireDate: null,
+        medicalCheckupDate: {
+          lte: futureDate,
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        position: true,
+        medicalCheckupDate: true,
+      },
+      orderBy: { medicalCheckupDate: "asc" },
+    }),
+    
+    // Сотрудники, которым скоро нужна аттестация
+    prisma.employee.findMany({
+      where: {
+        fireDate: null,
+        attestationDate: {
+          lte: futureDate,
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        position: true,
+        attestationDate: true,
+      },
+      orderBy: { attestationDate: "asc" },
+    }),
+  ]);
+  
+  return res.json({
+    medicalCheckups: medicalCheckups.map((e: any) => ({
+      ...e,
+      daysUntil: Math.ceil((new Date(e.medicalCheckupDate!).getTime() - Date.now()) / (24 * 3600 * 1000)),
+    })),
+    attestations: attestations.map((e: any) => ({
+      ...e,
+      daysUntil: Math.ceil((new Date(e.attestationDate!).getTime() - Date.now()) / (24 * 3600 * 1000)),
+    })),
+  });
 });
 
 export default router;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { useApi } from "../hooks/useApi";
 import { DataTable, Column } from "../components/DataTable/DataTable";
 import { Card } from "../components/Card";
@@ -7,6 +8,8 @@ import { Modal } from "../components/Modal";
 import { TransactionForm } from "../components/forms/TransactionForm";
 import { Transaction } from "../types/finance";
 import { FINANCE_TYPES, FINANCE_CATEGORIES } from "../lib/constants";
+import { api } from "../lib/api";
+import { Download, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
 const TransactionsView = () => {
   const { data: transactions, total, page, setPage, fetchData } = useApi<Transaction>({
@@ -20,6 +23,27 @@ const TransactionsView = () => {
     fetchData();
   };
 
+  const handleExport = async () => {
+    try {
+      const baseURL = (import.meta as any).env?.VITE_API_URL || '';
+      const response = await fetch(`${baseURL}/api/finance/export`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `finance_export_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Экспорт завершен');
+    } catch (error: any) {
+      toast.error('Ошибка экспорта', { description: error?.message });
+    }
+  };
+
   const columns: Column<Transaction>[] = [
     { key: "date", header: "Дата", render: (row) => new Date(row.date).toLocaleDateString() },
     { key: "type", header: "Тип", render: (row) => FINANCE_TYPES[row.type as keyof typeof FINANCE_TYPES] || row.type },
@@ -30,7 +54,10 @@ const TransactionsView = () => {
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-between mb-4">
+        <Button variant="outline" onClick={handleExport}>
+          <Download className="mr-2 h-4 w-4" /> Экспорт CSV
+        </Button>
         <Button onClick={() => setIsModalOpen(true)}>Добавить транзакцию</Button>
       </div>
       <DataTable columns={columns} data={transactions} page={page} pageSize={20} total={total} onPageChange={setPage} />
@@ -43,14 +70,109 @@ const TransactionsView = () => {
 };
 
 const ReportsView = () => {
+  const [summary, setSummary] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const loadSummary = async () => {
+    setLoading(true);
+    try {
+      const data = await api.get('/api/finance/reports/summary');
+      setSummary(data);
+    } catch (error: any) {
+      toast.error('Ошибка загрузки отчета', { description: error?.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    loadSummary();
+  }, []);
+
+  if (loading) return <div className="p-4">Загрузка отчета...</div>;
+
   return (
-    <Card>
-      <div className="p-4 text-center text-gray-500">
-        Раздел отчетов находится в разработке.
-      </div>
-    </Card>
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      {summary && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="p-6">
+              <div className="flex items-center">
+                <DollarSign className="h-8 w-8 text-blue-500 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-600">Всего транзакций</p>
+                  <p className="text-2xl font-bold">{summary.totals?.totalTransactions || 0}</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center">
+                <TrendingUp className="h-8 w-8 text-green-500 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-600">Доходы</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {summary.byType?.find((t: any) => t.type === 'INCOME')?._sum?.amount?.toLocaleString('ru-RU') || 0} ₽
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center">
+                <TrendingDown className="h-8 w-8 text-red-500 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-600">Расходы</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {summary.byType?.find((t: any) => t.type === 'EXPENSE')?._sum?.amount?.toLocaleString('ru-RU') || 0} ₽
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* By Category */}
+          <Card className="p-6">
+            <h3 className="font-bold text-lg mb-4">По категориям</h3>
+            <div className="space-y-2">
+              {summary.byCategory?.map((cat: any, idx: number) => (
+                <div key={idx} className="flex justify-between p-3 bg-gray-50 rounded">
+                  <span className="font-medium">{FINANCE_CATEGORIES[cat.category as keyof typeof FINANCE_CATEGORIES] || cat.category}</span>
+                  <div className="text-right">
+                    <div className="font-bold">{cat._sum?.amount?.toLocaleString('ru-RU') || 0} ₽</div>
+                    <div className="text-sm text-gray-600">{cat._count?.id || 0} транзакций</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* By Source */}
+          {summary.bySource && summary.bySource.length > 0 && (
+            <Card className="p-6">
+              <h3 className="font-bold text-lg mb-4">По источникам</h3>
+              <div className="space-y-2">
+                {summary.bySource.map((src: any, idx: number) => (
+                  <div key={idx} className="flex justify-between p-3 bg-gray-50 rounded">
+                    <span className="font-medium">{src.source || 'Не указан'}</span>
+                    <div className="text-right">
+                      <div className="font-bold">{src._sum?.amount?.toLocaleString('ru-RU') || 0} ₽</div>
+                      <div className="text-sm text-gray-600">{src._count?.id || 0} транзакций</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </>
+      )}
+    </div>
   );
 };
+
+// Add React import at the top
+import React from "react";
 
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState<"transactions" | "reports">("transactions");

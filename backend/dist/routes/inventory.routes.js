@@ -17,28 +17,45 @@ router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (_req, re
 // TODO: Cron job для проверки сроков годности и создания уведомлений.
 router.post("/generate-shopping-list", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(inventory_schema_1.generateShoppingListSchema), async (req, res) => {
     // Вход: { startDate, endDate }
-    // Бизнес-логика: суммировать блюда из меню, сопоставить с остатками
+    // Бизнес-логика: суммировать блюда из меню через MenuDish -> Dish -> DishIngredient -> Ingredient, сопоставить с остатками
     const { startDate, endDate } = req.body;
     const menus = await prisma_1.prisma.menu.findMany({
         where: { date: { gte: new Date(startDate), lte: new Date(endDate) } },
+        include: {
+            meals: {
+                include: {
+                    dish: {
+                        include: {
+                            ingredients: {
+                                include: {
+                                    ingredient: true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     });
-    // Предположим meals содержат [{ name, dish, calories, ingredients: [{name, qty, unit}] }]
+    // Суммируем требуемые ингредиенты из всех блюд
     const required = {};
-    for (const m of menus) {
-        const meals = m.meals || [];
-        for (const meal of meals) {
-            const ings = meal.ingredients || [];
-            for (const ing of ings) {
+    for (const menu of menus) {
+        for (const menuDish of menu.meals) {
+            const dish = menuDish.dish;
+            for (const dishIng of dish.ingredients) {
+                const ing = dishIng.ingredient;
                 const key = `${ing.name}|${ing.unit}`;
                 required[key] = required[key] || { qty: 0, unit: ing.unit };
-                required[key].qty += Number(ing.qty) || 0;
+                required[key].qty += dishIng.quantity;
             }
         }
     }
-    const inventory = await prisma_1.prisma.inventoryItem.findMany();
+    const inventory = await prisma_1.prisma.inventoryItem.findMany({
+        include: { ingredient: true }
+    });
     const shoppingList = Object.entries(required).map(([key, val]) => {
         const [name, unit] = key.split("|");
-        const stock = inventory.find((i) => i.name === name && i.unit === unit);
+        const stock = inventory.find((i) => i.ingredient?.name === name && i.ingredient?.unit === unit);
         const remaining = (val.qty - (stock?.quantity || 0));
         return { name, unit, requiredQty: val.qty, inStock: stock?.quantity || 0, toBuy: Math.max(remaining, 0) };
     });

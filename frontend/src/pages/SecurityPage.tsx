@@ -41,11 +41,10 @@ export default function SecurityPage() {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/security');
-      setLogs(response.data);
+      const response = await api.get('/api/security');
+      setLogs(response || []);
     } catch (error) {
       console.error('Failed to fetch security logs:', error);
-      alert('Не удалось загрузить журнал происшествий.');
     } finally {
       setLoading(false);
     }
@@ -62,13 +61,12 @@ export default function SecurityPage() {
         date: new Date(data.date).toISOString(),
         documentUrl: data.documentUrl || null,
       };
-      await api.post('/security', payload);
+      await api.post('/api/security', payload);
       setIsModalOpen(false);
       fetchLogs(); // Обновляем список
       reset({ date: new Date().toISOString().split('T')[0] });
     } catch (error) {
       console.error('Failed to create log:', error);
-      alert('Не удалось создать запись.');
     }
   };
 

@@ -1,14 +1,28 @@
 // src/pages/InventoryPage.tsx
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useApi } from '../hooks/useApi';
 import { Card } from '../components/Card';
 import { Button } from '../components/ui/button';
+import { Modal } from '../components/Modal';
+import { Input } from '../components/ui/input';
 import { ShoppingListModal } from '../components/modals/ShoppingListModal';
 import { Item, ShoppingListItem } from '../types/inventory';
+import { api } from '../lib/api';
+import { PlusCircle } from 'lucide-react';
 
 export default function InventoryPage() {
-  const { data: items, loading } = useApi<Item>({ url: '/inventory' });
+  const { data: items, loading, fetchData } = useApi<Item>({ url: '/api/inventory' });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    quantity: '',
+    unit: '',
+    expiryDate: ''
+  });
+  const [saving, setSaving] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[] | null>(null);
 
   const getExpiryClass = (expiryDate?: string) => {
@@ -19,11 +33,71 @@ export default function InventoryPage() {
     return '';
   };
 
+  const handleCreate = () => {
+    setEditingItem(null);
+    setFormData({ name: '', quantity: '', unit: '', expiryDate: '' });
+    setIsItemModalOpen(true);
+  };
+
+  const handleEdit = (item: Item) => {
+    setEditingItem(item);
+    setFormData({
+      name: item.name,
+      quantity: String(item.quantity),
+      unit: item.unit,
+      expiryDate: item.expiryDate ? new Date(item.expiryDate).toISOString().split('T')[0] : ''
+    });
+    setIsItemModalOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Удалить товар?')) return;
+    try {
+      await api.delete('/api/inventory/' + id);
+      toast.success('Товар удален');
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload = {
+        name: formData.name,
+        quantity: parseFloat(formData.quantity),
+        unit: formData.unit,
+        expiryDate: formData.expiryDate || null
+      };
+
+      if (editingItem) {
+        await api.put('/api/inventory/' + editingItem.id, payload);
+        toast.success('Товар обновлен');
+      } else {
+        await api.post('/api/inventory', payload);
+        toast.success('Товар добавлен');
+      }
+      setIsItemModalOpen(false);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка сохранения', { description: error?.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Складской учет</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Сформировать список закупок</Button>
+        <div className="flex gap-2">
+          <Button onClick={handleCreate}>
+            <PlusCircle className="mr-2 h-4 w-4" /> Добавить товар
+          </Button>
+          <Button onClick={() => setIsModalOpen(true)}>Сформировать список закупок</Button>
+        </div>
       </div>
 
       <Card>
@@ -37,16 +111,27 @@ export default function InventoryPage() {
                 <th className="text-left p-2">Наименование</th>
                 <th className="text-left p-2">Количество</th>
                 <th className="text-left p-2">Срок годности</th>
+                <th className="text-left p-2">Действия</th>
               </tr>
             </thead>
             <tbody>
               {items.map((item) => (
-                <tr key={item.id} className={`border-t ${getExpiryClass(item.expiryDate)}`}>
+                <tr key={item.id} className={'border-t ' + getExpiryClass(item.expiryDate)}>
                   <td className="p-2">{item.name}</td>
                   <td className="p-2">
                     {item.quantity} {item.unit}
                   </td>
                   <td className="p-2">{item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A'}</td>
+                  <td className="p-2">
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                        Изменить
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
+                        Удалить
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -89,6 +174,69 @@ export default function InventoryPage() {
       )}
 
       {isModalOpen && <ShoppingListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onGenerate={setShoppingList} />}
+
+      <Modal
+        isOpen={isItemModalOpen}
+        onClose={() => setIsItemModalOpen(false)}
+        title={editingItem ? 'Редактировать товар' : 'Новый товар'}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4 p-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Наименование *</label>
+            <Input
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+              placeholder="Молоко"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Количество *</label>
+            <Input
+              type="number"
+              value={formData.quantity}
+              onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+              required
+              placeholder="10"
+              step="0.01"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Единица измерения *</label>
+            <Input
+              value={formData.unit}
+              onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+              required
+              placeholder="л"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Срок годности</label>
+            <Input
+              type="date"
+              value={formData.expiryDate}
+              onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+            />
+          </div>
+
+          <div className="flex gap-2 justify-end pt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsItemModalOpen(false)}
+              disabled={saving}
+            >
+              Отмена
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? 'Сохранение...' : 'Сохранить'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -55,4 +55,169 @@ router.post("/:id/enroll", checkRole(["DEPUTY", "ADMIN"]), validate(enrollClubSc
   return res.status(201).json({ enrollment, message: "Enrolled" });
 });
 
+// --- ClubRating CRUD ---
+
+// GET /api/clubs/:id/ratings - получить оценки кружка
+router.get("/:id/ratings", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
+  const { id } = req.params;
+  
+  const ratings = await prisma.clubRating.findMany({
+    where: { clubId: Number(id) },
+    include: {
+      child: { select: { id: true, firstName: true, lastName: true } },
+    },
+    orderBy: { rating: "desc" },
+  });
+  
+  // Средняя оценка
+  const avgRating = ratings.length > 0
+    ? ratings.reduce((sum: number, r: any) => sum + r.rating, 0) / ratings.length
+    : 0;
+  
+  return res.json({
+    ratings,
+    average: Math.round(avgRating * 10) / 10,
+    count: ratings.length,
+  });
+});
+
+// POST /api/clubs/:id/ratings - добавить оценку кружку
+router.post("/:id/ratings", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+  const { id } = req.params;
+  const { childId, rating, comment } = req.body;
+  
+  // Проверяем, что ребенок записан в кружок
+  const enrollment = await prisma.clubEnrollment.findUnique({
+    where: {
+      childId_clubId: {
+        childId: Number(childId),
+        clubId: Number(id),
+      },
+    },
+  });
+  
+  if (!enrollment) {
+    return res.status(400).json({ error: "Child is not enrolled in this club" });
+  }
+  
+  const clubRating = await prisma.clubRating.upsert({
+    where: {
+      clubId_childId: {
+        clubId: Number(id),
+        childId: Number(childId),
+      },
+    },
+    update: { rating, comment: comment || null },
+    create: {
+      clubId: Number(id),
+      childId: Number(childId),
+      rating,
+      comment: comment || null,
+    },
+  });
+  
+  return res.status(201).json(clubRating);
+});
+
+// DELETE /api/clubs/ratings/:ratingId - удалить оценку
+router.delete("/ratings/:ratingId", checkRole(["ADMIN"]), async (req, res) => {
+  const { ratingId } = req.params;
+  await prisma.clubRating.delete({ where: { id: Number(ratingId) } });
+  return res.status(204).send();
+});
+
+// GET /api/clubs/:id/reports - отчет по кружку (посещаемость + финансы)
+router.get("/:id/reports", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
+  const { id } = req.params;
+  const { startDate, endDate } = req.query;
+  
+  const club = await prisma.club.findUnique({
+    where: { id: Number(id) },
+    include: {
+      teacher: { select: { firstName: true, lastName: true } },
+    },
+  });
+  
+  if (!club) {
+    return res.status(404).json({ error: "Club not found" });
+  }
+  
+  // Проверка прав для учителя
+  if (req.user!.role === "TEACHER" && club.teacherId !== req.user!.employeeId) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+  
+  const where: any = {};
+  if (startDate || endDate) {
+    where.date = {};
+    if (startDate) where.date.gte = new Date(String(startDate));
+    if (endDate) where.date.lte = new Date(String(endDate));
+  }
+  
+  const [enrollments, attendance, finances] = await Promise.all([
+    // Записи на кружок
+    prisma.clubEnrollment.findMany({
+      where: { clubId: Number(id) },
+      include: {
+        child: { select: { id: true, firstName: true, lastName: true } },
+      },
+    }),
+    
+    // Посещаемость (из общей таблицы Attendance)
+    // TODO: может потребоваться отдельная модель ClubAttendance
+    prisma.attendance.count({
+      where: {
+        ...where,
+        child: {
+          enrollments: {
+            some: {
+              clubId: Number(id),
+              status: "ACTIVE",
+            },
+          },
+        },
+        isPresent: true,
+      },
+    }),
+    
+    // Финансовые транзакции по кружку
+    prisma.financeTransaction.findMany({
+      where: {
+        ...where,
+        clubId: Number(id),
+      },
+    }),
+  ]);
+  
+  const totalIncome = finances
+    .filter((f: any) => f.type === "INCOME")
+    .reduce((sum: number, f: any) => sum + Number(f.amount), 0);
+  
+  const totalExpense = finances
+    .filter((f: any) => f.type === "EXPENSE")
+    .reduce((sum: number, f: any) => sum + Number(f.amount), 0);
+  
+  return res.json({
+    club: {
+      id: club.id,
+      name: club.name,
+      teacher: `${club.teacher.firstName} ${club.teacher.lastName}`,
+      maxStudents: club.maxStudents,
+    },
+    enrollments: {
+      active: enrollments.filter((e: any) => e.status === "ACTIVE").length,
+      waiting: enrollments.filter((e: any) => e.status === "WAITING_LIST").length,
+      total: enrollments.length,
+    },
+    attendance: {
+      totalPresent: attendance,
+    },
+    finances: {
+      income: totalIncome,
+      expense: totalExpense,
+      balance: totalIncome - totalExpense,
+    },
+  });
+});
+
 export default router;

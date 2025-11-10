@@ -24,11 +24,10 @@ export default function NotificationsPage() {
     const fetchNotifications = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/notifications');
-        setNotifications(response.data);
+        const response = await api.get('/api/notifications');
+        setNotifications(response || []);
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
-        alert('Не удалось загрузить уведомления.');
       } finally {
         setLoading(false);
       }

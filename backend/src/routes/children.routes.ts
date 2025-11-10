@@ -35,4 +35,59 @@ router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateChildSchema), 
   return res.json(child);
 });
 
+// --- TemporaryAbsence CRUD ---
+
+// GET /api/children/:id/absences - список временных отсутствий ребенка
+router.get("/:id/absences", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
+  const { id } = req.params;
+  
+  const absences = await prisma.temporaryAbsence.findMany({
+    where: { childId: Number(id) },
+    orderBy: { startDate: "desc" },
+  });
+  
+  return res.json(absences);
+});
+
+// POST /api/children/:id/absences - добавить отсутствие
+router.post("/:id/absences", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+  const { id } = req.params;
+  const { startDate, endDate, reason } = req.body;
+  
+  const absence = await prisma.temporaryAbsence.create({
+    data: {
+      childId: Number(id),
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      reason,
+    },
+  });
+  
+  return res.status(201).json(absence);
+});
+
+// PUT /api/children/absences/:absenceId - обновить отсутствие
+router.put("/absences/:absenceId", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+  const { absenceId } = req.params;
+  const { startDate, endDate, reason } = req.body;
+  
+  const absence = await prisma.temporaryAbsence.update({
+    where: { id: Number(absenceId) },
+    data: {
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      reason,
+    },
+  });
+  
+  return res.json(absence);
+});
+
+// DELETE /api/children/absences/:absenceId
+router.delete("/absences/:absenceId", checkRole(["ADMIN"]), async (req, res) => {
+  const { absenceId } = req.params;
+  await prisma.temporaryAbsence.delete({ where: { id: Number(absenceId) } });
+  return res.status(204).send();
+});
+
 export default router;
