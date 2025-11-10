@@ -25,11 +25,8 @@ const TransactionsView = () => {
 
   const handleExport = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || ''}/api/finance/export`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include', // Send HttpOnly cookie
       });
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

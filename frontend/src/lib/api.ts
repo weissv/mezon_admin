@@ -9,7 +9,13 @@ class API {
   private async request(path: string, options: RequestInit = {}) {
     const headers: any = { "Content-Type": "application/json", ...(options.headers || {}) };
     if (this.token) headers.Authorization = `Bearer ${this.token}`;
-    const res = await fetch(baseURL + path, { ...options, headers });
+    
+    const res = await fetch(baseURL + path, { 
+      ...options, 
+      headers,
+      credentials: 'include' // CRITICAL: Send cookies with requests
+    });
+    
     const data = await res.json().catch(() => null);
     if (!res.ok) {
       // Возвращаем тело как есть: могут быть issues от Zod
