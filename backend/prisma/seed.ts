@@ -30,15 +30,42 @@ async function main() {
 
   // 3. Создать пользователя-директора
   await prisma.user.upsert({
-    where: { email: "director@school.erp" },
+    where: { email: "director" },
     update: {},
     create: {
-      email: "director@school.erp",
+      email: "director",
       passwordHash: await bcrypt.hash("password123", 10),
       role: "DIRECTOR",
       employeeId: directorEmployee.id,
     },
   });
+
+  // 3.1. Создать администратора Izumi
+  const izumiEmployee = await prisma.employee.upsert({
+    where: { id: 999 },
+    update: {},
+    create: {
+      id: 999,
+      firstName: "Izumi",
+      lastName: "Amano",
+      position: "Администратор",
+      rate: 1.0,
+      hireDate: new Date(),
+      branchId: branch.id,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "izumi" },
+    update: {},
+    create: {
+      email: "izumi",
+      passwordHash: await bcrypt.hash("8p09VhXW", 10),
+      role: "ADMIN",
+      employeeId: izumiEmployee.id,
+    },
+  });
+  console.log("Created users: director, izumi");
 
   // 4. Создать тестовую группу
   const group = await prisma.group.upsert({
