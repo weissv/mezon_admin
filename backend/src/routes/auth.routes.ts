@@ -40,11 +40,19 @@ router.post("/login", async (req, res) => {
   );
 
   // Set HttpOnly cookie
-  res.cookie('auth_token', token, {
+  const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax', // Changed from 'strict' for cross-origin compatibility
+    sameSite: 'none' as const, // Changed from 'lax' to 'none' for cross-origin
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  };
+  
+  res.cookie('auth_token', token, cookieOptions);
+  
+  console.log('[AUTH] Cookie set with options:', { 
+    ...cookieOptions, 
+    domain: req.hostname,
+    origin: req.headers.origin 
   });
 
   console.log('[AUTH] Login successful for:', user.email);
@@ -73,7 +81,7 @@ router.post("/logout", (req, res) => {
     httpOnly: true,
     expires: new Date(0),
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
+    sameSite: 'none' as const
   });
   return res.status(200).json({ message: 'Logged out successfully' });
 });
