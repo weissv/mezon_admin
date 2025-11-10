@@ -59,7 +59,7 @@ router.post("/login", async (req, res) => {
   
   // Remove sensitive data
   const { passwordHash, ...sanitizedUser } = user;
-  return res.json({ user: sanitizedUser });
+  return res.json({ user: sanitizedUser, token });
 });
 
 // Приватный роут, защищенный своим middleware
