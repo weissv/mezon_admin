@@ -23,7 +23,7 @@ export function ShoppingListModal({ isOpen, onClose, onGenerate }: { isOpen: boo
 
   const handleGenerateShoppingList = async () => {
     try {
-      const response = await api.post('/inventory/generate-shopping-list', dates);
+      const response = await api.post('/api/inventory/generate-shopping-list', dates);
       onGenerate(response.data.items);
       onClose();
     } catch (error: any) {
