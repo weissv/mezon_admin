@@ -39,4 +39,6 @@ services:
     buildFilter:
       paths:
         - frontend/**
-    # Мы убрали отсюда envVars, так как VITE_API_URL мы добавим вручную
+    envVars:
+      - key: VITE_API_URL
+        value: https://mezon-admin.onrender.com
