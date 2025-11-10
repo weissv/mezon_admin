@@ -63,6 +63,6 @@ router.post("/generate-shopping-list", checkRole(["DEPUTY", "ADMIN"]), validate(
     return { name, unit, requiredQty: val.qty, inStock: stock?.quantity || 0, toBuy: Math.max(remaining, 0) };
   });
 
-  return res.json({ period: { startDate, endDate }, items: shoppingList });
+  return res.json({ data: { period: { startDate, endDate }, items: shoppingList } });
 });
 export default router;

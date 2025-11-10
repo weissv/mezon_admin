@@ -14,8 +14,18 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), validate(getMenuSchema), async (
   if (startDate || endDate) where.date = {};
   if (startDate) where.date.gte = new Date(String(startDate));
   if (endDate) where.date.lte = new Date(String(endDate));
-  const items = await prisma.menu.findMany({ where, orderBy: { date: "asc" } });
-  return res.json(items);
+  const items = await prisma.menu.findMany({ 
+    where, 
+    orderBy: { date: "asc" },
+    include: {
+      meals: {
+        include: {
+          dish: true
+        }
+      }
+    }
+  });
+  return res.json({ data: { items } });
 });
 
 // POST /api/menu
