@@ -25,10 +25,10 @@ const TransactionsView = () => {
 
   const handleExport = async () => {
     try {
-      const baseURL = (import.meta as any).env?.VITE_API_URL || '';
-      const response = await fetch(`${baseURL}/api/finance/export`, {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || ''}/api/finance/export`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       const blob = await response.blob();
