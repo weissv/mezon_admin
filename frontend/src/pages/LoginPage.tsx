@@ -9,7 +9,7 @@ import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
 
 const loginSchema = z.object({
-  email: z.string().email('Неверный формат email'),
+  login: z.string().min(1, 'Логин обязателен'),
   password: z.string().min(1, 'Пароль обязателен'),
 });
 
@@ -24,9 +24,10 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password);
+      // Передаём первое поле как login — бэкенд принимает login или email
+      await login(data.login, data.password);
       toast.success('Вход выполнен успешно');
-      navigate('/'); // <-- 3. ПЕРЕНАПРАВЛЯЕМ ПОЛЬЗОВАТЕЛЯ НА ГЛАВНУЮ
+      navigate('/'); // Перенаправляем пользователя на главную
     } catch (error: any) {
       const msg = error?.message || 'Неверные учетные данные';
       toast.error('Ошибка входа', { description: msg });
@@ -39,9 +40,9 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-center">Вход в систему</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label htmlFor="email">Email</label>
-            <Input id="email" type="email" {...register('email')} defaultValue="director@school.erp" />
-            <FormError message={errors.email?.message} />
+            <label htmlFor="login">Логин</label>
+            <Input id="login" type="text" {...register('login')} defaultValue="director" />
+            <FormError message={errors.login?.message} />
           </div>
           <div>
             <label htmlFor="password">Пароль</label>
