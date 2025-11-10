@@ -69,7 +69,7 @@ export default function MenuPage() {
     try {
       const startDate = start.toISOString();
       const endDate = end.toISOString();
-      const response = await api.get(`/menu?startDate=${startDate}&endDate=${endDate}`);
+      const response = await api.get(`/api/menu?startDate=${startDate}&endDate=${endDate}`);
       setMenus(response.data.items || []);
     } catch (error) {
       console.error('Failed to fetch menu:', error);

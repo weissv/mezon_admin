@@ -38,15 +38,25 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center">Вход в систему</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" autoComplete="off">
           <div>
             <label htmlFor="login">Логин</label>
-            <Input id="login" type="text" {...register('login')} defaultValue="director" />
+            <Input 
+              id="login" 
+              type="text" 
+              autoComplete="off"
+              {...register('login')} 
+            />
             <FormError message={errors.login?.message} />
           </div>
           <div>
             <label htmlFor="password">Пароль</label>
-            <Input id="password" type="password" {...register('password')} defaultValue="password123" />
+            <Input 
+              id="password" 
+              type="password" 
+              autoComplete="new-password"
+              {...register('password')} 
+            />
             <FormError message={errors.password?.message} />
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
