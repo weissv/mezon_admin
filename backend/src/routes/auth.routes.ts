@@ -39,8 +39,19 @@ router.post("/login", async (req, res) => {
     config.jwtSecret
   );
 
+  // Set HttpOnly cookie
+  res.cookie('auth_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax', // Changed from 'strict' for cross-origin compatibility
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  });
+
   console.log('[AUTH] Login successful for:', user.email);
-  return res.json({ token, user });
+  
+  // Remove sensitive data
+  const { passwordHash, ...sanitizedUser } = user;
+  return res.json({ user: sanitizedUser });
 });
 
 // Приватный роут, защищенный своим middleware
@@ -50,7 +61,21 @@ router.get("/me", authMiddleware, async (req, res) => {
     include: { employee: true },
   });
   if (!me) return res.status(404).json({ message: "User not found" });
-  return res.json(me);
+  
+  // Remove sensitive data
+  const { passwordHash, ...sanitizedUser } = me;
+  return res.json({ user: sanitizedUser });
+});
+
+// Logout route - clears the cookie
+router.post("/logout", (req, res) => {
+  res.cookie('auth_token', '', {
+    httpOnly: true,
+    expires: new Date(0),
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  });
+  return res.status(200).json({ message: 'Logged out successfully' });
 });
 
 export default router;
