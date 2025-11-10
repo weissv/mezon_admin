@@ -21,6 +21,12 @@ import branchesRoutes from "./routes/branches.routes";
 import actionlogRoutes from "./routes/actionlog.routes";
 import groupsRoutes from "./routes/groups.routes";
 import notificationsRoutes from "./routes/notifications.routes";
+import documentsRoutes from "./routes/documents.routes";
+import calendarRoutes from "./routes/calendar.routes";
+import feedbackRoutes from "./routes/feedback.routes";
+import procurementRoutes from "./routes/procurement.routes";
+import recipesRoutes from "./routes/recipes.routes";
+import staffingRoutes from "./routes/staffing.routes";
 
 const app = express();
 
@@ -54,6 +60,12 @@ app.use("/api/branches", branchesRoutes);
 app.use("/api/actionlog", actionlogRoutes);
 app.use("/api/groups", groupsRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/documents", documentsRoutes);
+app.use("/api/calendar", calendarRoutes);
+app.use("/api/feedback", feedbackRoutes);
+app.use("/api/procurement", procurementRoutes);
+app.use("/api/recipes", recipesRoutes);
+app.use("/api/staffing", staffingRoutes);
 
 // Обработчик ошибок
 app.use(errorHandler);

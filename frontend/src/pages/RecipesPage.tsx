@@ -1,0 +1,257 @@
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useApi } from '../hooks/useApi';
+import { DataTable, Column } from '../components/DataTable/DataTable';
+import { Button } from '../components/ui/button';
+import { Modal } from '../components/Modal';
+import { PlusCircle, ChefHat, Apple } from 'lucide-react';
+import { Ingredient, Dish, DishNutrition } from '../types/recipe';
+import { IngredientForm } from '../components/forms/IngredientForm';
+import { DishForm } from '../components/forms/DishForm';
+import { api } from '../lib/api';
+
+export default function RecipesPage() {
+  const [viewMode, setViewMode] = useState<'ingredients' | 'dishes'>('dishes');
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <ChefHat className="h-6 w-6" />
+          Рецепты и ингредиенты
+        </h1>
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === 'dishes' ? 'default' : 'outline'}
+            onClick={() => setViewMode('dishes')}
+          >
+            <ChefHat className="mr-2 h-4 w-4" /> Блюда
+          </Button>
+          <Button
+            variant={viewMode === 'ingredients' ? 'default' : 'outline'}
+            onClick={() => setViewMode('ingredients')}
+          >
+            <Apple className="mr-2 h-4 w-4" /> Ингредиенты
+          </Button>
+        </div>
+      </div>
+
+      {viewMode === 'dishes' ? <DishesView /> : <IngredientsView />}
+    </div>
+  );
+}
+
+function DishesView() {
+  const { data, total, page, setPage, fetchData } = useApi<Dish>({
+    url: '/api/recipes/dishes',
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingDish, setEditingDish] = useState<Dish | null>(null);
+  const [nutritionData, setNutritionData] = useState<DishNutrition | null>(null);
+
+  const handleCreate = () => {
+    setEditingDish(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (dish: Dish) => {
+    setEditingDish(dish);
+    setIsModalOpen(true);
+  };
+
+  const handleViewNutrition = async (dish: Dish) => {
+    try {
+      const nutrition = await api.get(`/api/recipes/dishes/${dish.id}/nutrition`);
+      setNutritionData(nutrition);
+    } catch (error) {
+      toast.error('Ошибка загрузки КБЖУ');
+    }
+  };
+
+  const handleFormSuccess = () => {
+    setIsModalOpen(false);
+    fetchData();
+    toast.success(editingDish ? 'Блюдо обновлено' : 'Блюдо создано');
+  };
+
+  const columns: Column<Dish>[] = [
+    { key: 'id', header: 'ID' },
+    { key: 'name', header: 'Название' },
+    { key: 'category', header: 'Категория' },
+    {
+      key: 'preparationTime',
+      header: 'Время приготовления',
+      render: (row) => `${row.preparationTime} мин`
+    },
+    {
+      key: 'ingredients',
+      header: 'Ингредиентов',
+      render: (row) => row.ingredients?.length || 0
+    },
+    {
+      key: 'actions',
+      header: 'Действия',
+      render: (row) => (
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            Редактировать
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => handleViewNutrition(row)}>
+            КБЖУ
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <div className="mb-4 flex justify-end">
+        <Button onClick={handleCreate}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Добавить блюдо
+        </Button>
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={data}
+        page={page}
+        pageSize={10}
+        total={total}
+        onPageChange={setPage}
+      />
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingDish ? 'Редактировать блюдо' : 'Новое блюдо'}
+      >
+        <DishForm
+          initialData={editingDish}
+          onSuccess={handleFormSuccess}
+          onCancel={() => setIsModalOpen(false)}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={!!nutritionData}
+        onClose={() => setNutritionData(null)}
+        title="Пищевая ценность"
+      >
+        {nutritionData && (
+          <div className="space-y-3">
+            <h3 className="font-semibold text-lg">{nutritionData.dishName}</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-orange-50 rounded-md">
+                <div className="text-sm text-gray-600">Калорийность</div>
+                <div className="text-2xl font-bold">{nutritionData.calories.toFixed(1)} ккал</div>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-md">
+                <div className="text-sm text-gray-600">Белки</div>
+                <div className="text-2xl font-bold">{nutritionData.protein.toFixed(1)} г</div>
+              </div>
+              <div className="p-3 bg-yellow-50 rounded-md">
+                <div className="text-sm text-gray-600">Жиры</div>
+                <div className="text-2xl font-bold">{nutritionData.fat.toFixed(1)} г</div>
+              </div>
+              <div className="p-3 bg-green-50 rounded-md">
+                <div className="text-sm text-gray-600">Углеводы</div>
+                <div className="text-2xl font-bold">{nutritionData.carbs.toFixed(1)} г</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </>
+  );
+}
+
+function IngredientsView() {
+  const { data, total, page, setPage, fetchData } = useApi<Ingredient>({
+    url: '/api/recipes/ingredients',
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null);
+
+  const handleCreate = () => {
+    setEditingIngredient(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (ingredient: Ingredient) => {
+    setEditingIngredient(ingredient);
+    setIsModalOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    setIsModalOpen(false);
+    fetchData();
+    toast.success(editingIngredient ? 'Ингредиент обновлен' : 'Ингредиент добавлен');
+  };
+
+  const columns: Column<Ingredient>[] = [
+    { key: 'id', header: 'ID' },
+    { key: 'name', header: 'Название' },
+    { key: 'unit', header: 'Единица' },
+    {
+      key: 'calories',
+      header: 'Калории',
+      render: (row) => `${row.calories} ккал`
+    },
+    {
+      key: 'protein',
+      header: 'Белки',
+      render: (row) => `${row.protein} г`
+    },
+    {
+      key: 'fat',
+      header: 'Жиры',
+      render: (row) => `${row.fat} г`
+    },
+    {
+      key: 'carbs',
+      header: 'Углеводы',
+      render: (row) => `${row.carbs} г`
+    },
+    {
+      key: 'actions',
+      header: 'Действия',
+      render: (row) => (
+        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+          Редактировать
+        </Button>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <div className="mb-4 flex justify-end">
+        <Button onClick={handleCreate}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Добавить ингредиент
+        </Button>
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={data}
+        page={page}
+        pageSize={10}
+        total={total}
+        onPageChange={setPage}
+      />
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingIngredient ? 'Редактировать ингредиент' : 'Новый ингредиент'}
+      >
+        <IngredientForm
+          initialData={editingIngredient}
+          onSuccess={handleFormSuccess}
+          onCancel={() => setIsModalOpen(false)}
+        />
+      </Modal>
+    </>
+  );
+}

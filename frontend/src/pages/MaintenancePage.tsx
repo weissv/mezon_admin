@@ -51,11 +51,10 @@ export default function MaintenancePage() {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/maintenance');
-      setRequests(response.data);
+      const response = await api.get('/api/maintenance');
+      setRequests(response || []);
     } catch (error) {
       console.error('Failed to fetch maintenance requests:', error);
-      alert('Не удалось загрузить заявки.');
     } finally {
       setLoading(false);
     }
@@ -67,13 +66,12 @@ export default function MaintenancePage() {
 
   const onSubmit = async (data: MaintenanceFormData) => {
     try {
-      await api.post('/maintenance', data);
+      await api.post('/api/maintenance', data);
       setIsModalOpen(false);
       fetchRequests(); // Обновляем список
       reset();
     } catch (error) {
       console.error('Failed to create request:', error);
-      alert('Не удалось создать заявку.');
     }
   };
 

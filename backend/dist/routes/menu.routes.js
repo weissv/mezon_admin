@@ -30,4 +30,117 @@ router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1
     });
     return res.status(201).json(created);
 });
+// POST /api/menu/:id/calculate-kbju - рассчитать КБЖУ для меню
+router.post("/:id/calculate-kbju", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
+    const { id } = req.params;
+    const menu = await prisma_1.prisma.menu.findUnique({
+        where: { id: Number(id) },
+        include: {
+            meals: {
+                include: {
+                    dish: {
+                        include: {
+                            ingredients: {
+                                include: {
+                                    ingredient: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+    if (!menu) {
+        return res.status(404).json({ error: "Menu not found" });
+    }
+    // Суммируем КБЖУ всех блюд в меню
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalFat = 0;
+    let totalCarbs = 0;
+    for (const menuDish of menu.meals) {
+        for (const dishIng of menuDish.dish.ingredients) {
+            const ing = dishIng.ingredient;
+            totalCalories += ing.calories * dishIng.quantity;
+            totalProtein += ing.protein * dishIng.quantity;
+            totalFat += ing.fat * dishIng.quantity;
+            totalCarbs += ing.carbs * dishIng.quantity;
+        }
+    }
+    return res.json({
+        menuId: menu.id,
+        date: menu.date,
+        ageGroup: menu.ageGroup,
+        kbju: {
+            calories: Math.round(totalCalories),
+            protein: Math.round(totalProtein * 10) / 10,
+            fat: Math.round(totalFat * 10) / 10,
+            carbs: Math.round(totalCarbs * 10) / 10,
+        },
+    });
+});
+// GET /api/menu/:id/shopping-list - список покупок для меню
+router.get("/:id/shopping-list", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
+    const { id } = req.params;
+    const { portions } = req.query; // количество порций
+    const menu = await prisma_1.prisma.menu.findUnique({
+        where: { id: Number(id) },
+        include: {
+            meals: {
+                include: {
+                    dish: {
+                        include: {
+                            ingredients: {
+                                include: {
+                                    ingredient: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+    if (!menu) {
+        return res.status(404).json({ error: "Menu not found" });
+    }
+    const portionsCount = Number(portions) || 1;
+    // Собираем требуемые ингредиенты
+    const required = {};
+    for (const menuDish of menu.meals) {
+        for (const dishIng of menuDish.dish.ingredients) {
+            const ing = dishIng.ingredient;
+            const key = `${ing.name}|${ing.unit}`;
+            if (!required[key]) {
+                required[key] = { qty: 0, unit: ing.unit, ingredientId: ing.id };
+            }
+            required[key].qty += dishIng.quantity * portionsCount;
+        }
+    }
+    // Получаем текущие остатки
+    const inventory = await prisma_1.prisma.inventoryItem.findMany({
+        include: { ingredient: true },
+    });
+    const shoppingList = Object.entries(required).map(([key, val]) => {
+        const [name] = key.split("|");
+        const stock = inventory.find((i) => i.ingredient?.id === val.ingredientId);
+        const inStock = stock?.quantity || 0;
+        const toBuy = Math.max(val.qty - inStock, 0);
+        return {
+            ingredientName: name,
+            unit: val.unit,
+            requiredQty: Math.round(val.qty * 10) / 10,
+            inStock: Math.round(inStock * 10) / 10,
+            toBuy: Math.round(toBuy * 10) / 10,
+        };
+    });
+    return res.json({
+        menuId: menu.id,
+        date: menu.date,
+        ageGroup: menu.ageGroup,
+        portions: portionsCount,
+        items: shoppingList,
+    });
+});
 exports.default = router;

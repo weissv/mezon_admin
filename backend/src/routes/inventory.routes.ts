@@ -17,30 +17,48 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
 // TODO: Cron job для проверки сроков годности и создания уведомлений.
 router.post("/generate-shopping-list", checkRole(["DEPUTY", "ADMIN"]), validate(generateShoppingListSchema), async (req, res) => {
   // Вход: { startDate, endDate }
-  // Бизнес-логика: суммировать блюда из меню, сопоставить с остатками
+  // Бизнес-логика: суммировать блюда из меню через MenuDish -> Dish -> DishIngredient -> Ingredient, сопоставить с остатками
   const { startDate, endDate } = req.body as { startDate: string; endDate: string };
   const menus = await prisma.menu.findMany({
     where: { date: { gte: new Date(startDate), lte: new Date(endDate) } },
+    include: {
+      meals: {
+        include: {
+          dish: {
+            include: {
+              ingredients: {
+                include: {
+                  ingredient: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   });
 
-  // Предположим meals содержат [{ name, dish, calories, ingredients: [{name, qty, unit}] }]
+  // Суммируем требуемые ингредиенты из всех блюд
   const required: Record<string, { qty: number; unit: string }> = {};
-  for (const m of menus) {
-    const meals = (m.meals as any[]) || [];
-    for (const meal of meals) {
-      const ings = (meal.ingredients as any[]) || [];
-      for (const ing of ings) {
+  for (const menu of menus) {
+    for (const menuDish of menu.meals) {
+      const dish = menuDish.dish;
+      for (const dishIng of dish.ingredients) {
+        const ing = dishIng.ingredient;
         const key = `${ing.name}|${ing.unit}`;
         required[key] = required[key] || { qty: 0, unit: ing.unit };
-        required[key].qty += Number(ing.qty) || 0;
+        required[key].qty += dishIng.quantity;
       }
     }
   }
 
-  const inventory = await prisma.inventoryItem.findMany();
+  const inventory = await prisma.inventoryItem.findMany({
+    include: { ingredient: true }
+  });
+  
   const shoppingList = Object.entries(required).map(([key, val]) => {
     const [name, unit] = key.split("|");
-    const stock = inventory.find((i) => i.name === name && i.unit === unit);
+    const stock = inventory.find((i: any) => i.ingredient?.name === name && i.ingredient?.unit === unit);
     const remaining = (val.qty - (stock?.quantity || 0));
     return { name, unit, requiredQty: val.qty, inStock: stock?.quantity || 0, toBuy: Math.max(remaining, 0) };
   });

@@ -77,4 +77,55 @@ router.put("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate
     const updated = await prisma_1.prisma.employee.update({ where: { id }, data: req.body });
     return res.json(updated);
 });
+// GET /api/employees/reminders - напоминания о медосмотрах и аттестации
+router.get("/reminders", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
+    const { days = 30 } = req.query;
+    const futureDate = new Date(Date.now() + Number(days) * 24 * 3600 * 1000);
+    const [medicalCheckups, attestations] = await Promise.all([
+        // Сотрудники, которым скоро нужен медосмотр
+        prisma_1.prisma.employee.findMany({
+            where: {
+                fireDate: null,
+                medicalCheckupDate: {
+                    lte: futureDate,
+                },
+            },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                position: true,
+                medicalCheckupDate: true,
+            },
+            orderBy: { medicalCheckupDate: "asc" },
+        }),
+        // Сотрудники, которым скоро нужна аттестация
+        prisma_1.prisma.employee.findMany({
+            where: {
+                fireDate: null,
+                attestationDate: {
+                    lte: futureDate,
+                },
+            },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                position: true,
+                attestationDate: true,
+            },
+            orderBy: { attestationDate: "asc" },
+        }),
+    ]);
+    return res.json({
+        medicalCheckups: medicalCheckups.map((e) => ({
+            ...e,
+            daysUntil: Math.ceil((new Date(e.medicalCheckupDate).getTime() - Date.now()) / (24 * 3600 * 1000)),
+        })),
+        attestations: attestations.map((e) => ({
+            ...e,
+            daysUntil: Math.ceil((new Date(e.attestationDate).getTime() - Date.now()) / (24 * 3600 * 1000)),
+        })),
+    });
+});
 exports.default = router;
