@@ -10,13 +10,14 @@ const router = Router();
 
 // Публичный роут для входа
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, login, password } = req.body;
+  const identifier = login || email;
   
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required" });
+  if (!identifier || !password) {
+    return res.status(400).json({ message: "Email/login and password are required" });
   }
 
-  const user = await prisma.user.findUnique({ where: { email }, include: { employee: true } });
+  const user = await prisma.user.findUnique({ where: { email: identifier }, include: { employee: true } });
   if (!user) {
     return res.status(401).json({ message: "Invalid credentials" });
   }
