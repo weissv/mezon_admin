@@ -21,6 +21,13 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   // Try to get token from cookie first
   let token = req.cookies?.auth_token;
   
+  console.log('[AUTH MIDDLEWARE]', {
+    path: req.path,
+    hasCookie: !!token,
+    cookieKeys: Object.keys(req.cookies || {}),
+    hasAuthHeader: !!req.headers.authorization
+  });
+  
   // Fallback to Authorization header for non-browser clients
   if (!token) {
     const header = req.headers.authorization;
@@ -30,6 +37,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   }
   
   if (!token) {
+    console.log('[AUTH MIDDLEWARE] No token found');
     return res.status(401).json({ message: "Unauthorized" });
   }
   
@@ -37,7 +45,8 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     const payload = jwt.verify(token, config.jwtSecret) as AuthUser;
     req.user = payload;
     next();
-  } catch {
+  } catch (error) {
+    console.log('[AUTH MIDDLEWARE] Invalid token:', error);
     return res.status(401).json({ message: "Invalid token" });
   }
 };
