@@ -1,9 +1,11 @@
 // src/routes/children.routes.ts
 import { Router } from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
 import { buildPagination, buildOrderBy, buildWhere } from "../utils/query";
-import { logAction } from "../middleware/actionLogger";import { validate } from "../middleware/validate";
+import { logAction } from "../middleware/actionLogger";
+import { validate } from "../middleware/validate";
 import { createChildSchema, updateChildSchema } from "../schemas/child.schema";
 const router = Router();
 
@@ -34,6 +36,30 @@ router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateChildSchema), 
   const child = await prisma.child.update({ where: { id }, data: req.body });
   return res.json(child);
 });
+
+router.delete(
+  "/:id",
+  checkRole(["ADMIN"]),
+  logAction("DELETE_CHILD", (req) => ({ id: req.params.id })),
+  async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ message: "Invalid child id" });
+    }
+
+    try {
+      await prisma.child.delete({ where: { id } });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        // Deleting an already-removed child should be idempotent for the client
+        return res.status(204).send();
+      }
+      throw error;
+    }
+
+    return res.status(204).send();
+  }
+);
 
 // --- TemporaryAbsence CRUD ---
 

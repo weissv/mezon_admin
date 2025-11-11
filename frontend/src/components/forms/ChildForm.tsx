@@ -34,8 +34,16 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
 
   const onSubmit = async (data: ChildFormData) => {
     try {
-      if (initialData) { await api.put(`/api/children/${initialData.id}`, data); }
-      else { await api.post('/api/children', data); }
+      const payload = {
+        ...data,
+        birthDate: new Date(data.birthDate).toISOString(),
+      }
+
+      if (initialData) {
+        await api.put(`/api/children/${initialData.id}`, payload);
+      } else {
+        await api.post('/api/children', payload);
+      }
       onSuccess();
     } catch (error: any) {
       const msg = error?.message || error?.issues?.[0]?.message || 'Ошибка сохранения';

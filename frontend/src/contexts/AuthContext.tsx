@@ -1,10 +1,26 @@
 // src/contexts/AuthContext.tsx
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState, ReactNode } from "react";
 import { api } from "../lib/api";
 
 type User = { id: number; email: string; role: string; employee: any };
 
 const TOKEN_STORAGE_KEY = "auth_token";
+const USER_STORAGE_KEY = "auth_user";
+
+const readStoredUser = (): User | null => {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(USER_STORAGE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as User;
+  } catch (error) {
+    console.warn("Failed to parse stored auth user", error);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(USER_STORAGE_KEY);
+    }
+    return null;
+  }
+};
 
 export const AuthContext = createContext<{
   user: User | null;
@@ -20,60 +36,93 @@ export const AuthContext = createContext<{
   isLoading: true,
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_STORAGE_KEY));
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => readStoredUser());
+  const [token, setToken] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : localStorage.getItem(TOKEN_STORAGE_KEY)
+  );
   const [isLoading, setIsLoading] = useState(true);
 
-  // Attempt to restore session on mount using HttpOnly cookie or stored token fallback
-  useEffect(() => {
-    const initializeSession = async () => {
-      try {
-        // First try cookie-based session (preferred)
-        const response = await api.get("/api/auth/me");
-        const resolvedUser = response?.user ?? response;
-        setUser(resolvedUser);
-        setToken(null);
+  const persistSession = useCallback((nextToken: string | null, nextUser: User | null) => {
+    setToken(nextToken);
+    setUser(nextUser);
+
+    if (typeof window !== "undefined") {
+      if (nextToken) {
+        localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
+      } else {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
-        api.setToken(null);
-        return;
-      } catch (cookieError) {
-        // Ignore and fallback to token storage if available
       }
 
-      const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+      if (nextUser) {
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(nextUser));
+      } else {
+        localStorage.removeItem(USER_STORAGE_KEY);
+      }
+    }
+
+    api.setToken(nextToken);
+  }, []);
+
+  useEffect(() => {
+    const initializeSession = async () => {
+      // Attempt to use HttpOnly cookie session first
+      try {
+        const response = await api.get("/api/auth/me");
+        const resolvedUser = response?.user ?? response ?? null;
+        if (resolvedUser) {
+          persistSession(null, resolvedUser);
+          return;
+        }
+      } catch (cookieError) {
+        // Ignore errors and continue with token fallback
+      }
+
+  const storedToken = typeof window === "undefined" ? null : localStorage.getItem(TOKEN_STORAGE_KEY);
+      const storedUser = readStoredUser();
+
       if (storedToken) {
         try {
           api.setToken(storedToken);
           const response = await api.get("/api/auth/me");
-          const resolvedUser = response?.user ?? response;
-          setUser(resolvedUser);
-          setToken(storedToken);
+          const resolvedUser = response?.user ?? response ?? storedUser ?? null;
+          persistSession(storedToken, resolvedUser);
           return;
-        } catch (tokenError) {
-          // Stored token is invalid - clean up
-          api.setToken(null);
-          setToken(null);
-          localStorage.removeItem(TOKEN_STORAGE_KEY);
+        } catch (error: any) {
+          const message = String(error?.message || "").toLowerCase();
+          if (message.includes("unauthorized") || message.includes("invalid")) {
+            persistSession(null, null);
+            return;
+          }
+
+          if (storedUser) {
+            // Keep optimistic session if network temporarily failed
+            persistSession(storedToken, storedUser);
+            return;
+          }
+
+          persistSession(null, null);
+          return;
         }
       }
 
-      setUser(null);
+      if (storedUser) {
+        persistSession(null, storedUser);
+        return;
+      }
+
+      persistSession(null, null);
     };
 
     initializeSession().finally(() => setIsLoading(false));
-  }, []);
+  }, [persistSession]);
 
   const login = async (identifier: string, password: string) => {
     const res = await api.post("/api/auth/login", { login: identifier, password });
     const resolvedUser = res?.user ?? null;
-    setUser(resolvedUser);
+    const resolvedToken = res?.token ?? null;
 
-    if (res?.token) {
-      api.setToken(res.token);
-      setToken(res.token);
-      localStorage.setItem(TOKEN_STORAGE_KEY, res.token);
-    }
+    persistSession(resolvedToken, resolvedUser);
   };
 
   const logout = async () => {
@@ -82,16 +131,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
-      setUser(null);
-      setToken(null);
-      api.setToken(null);
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      persistSession(null, null);
     }
   };
-
-  if (isLoading) {
-    return null;
-  }
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
