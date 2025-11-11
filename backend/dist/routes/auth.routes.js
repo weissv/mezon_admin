@@ -13,20 +13,42 @@ const auth_1 = require("../middleware/auth"); // Убедись, что импо
 const router = (0, express_1.Router)();
 // Публичный роут для входа
 router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+    const { email, login, password } = req.body;
+    const identifier = login || email;
+    console.log('[AUTH] Login attempt:', { identifier, hasPassword: !!password, body: req.body });
+    if (!identifier || !password) {
+        console.log('[AUTH] Missing credentials');
+        return res.status(400).json({ message: "Email/login and password are required" });
     }
-    const user = await prisma_1.prisma.user.findUnique({ where: { email }, include: { employee: true } });
+    const user = await prisma_1.prisma.user.findUnique({ where: { email: identifier }, include: { employee: true } });
     if (!user) {
+        console.log('[AUTH] User not found:', identifier);
         return res.status(401).json({ message: "Invalid credentials" });
     }
+    console.log('[AUTH] User found:', { email: user.email, hasHash: !!user.passwordHash });
     const isValid = await bcryptjs_1.default.compare(password, user.passwordHash);
+    console.log('[AUTH] Password valid:', isValid);
     if (!isValid) {
         return res.status(401).json({ message: "Invalid credentials" });
     }
     const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role, employeeId: user.employeeId }, config_1.config.jwtSecret);
-    return res.json({ token, user });
+    // Set HttpOnly cookie
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'none', // Changed from 'lax' to 'none' for cross-origin
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    };
+    res.cookie('auth_token', token, cookieOptions);
+    console.log('[AUTH] Cookie set with options:', {
+        ...cookieOptions,
+        domain: req.hostname,
+        origin: req.headers.origin
+    });
+    console.log('[AUTH] Login successful for:', user.email);
+    // Remove sensitive data
+    const { passwordHash, ...sanitizedUser } = user;
+    return res.json({ user: sanitizedUser, token });
 });
 // Приватный роут, защищенный своим middleware
 router.get("/me", auth_1.authMiddleware, async (req, res) => {
@@ -36,6 +58,18 @@ router.get("/me", auth_1.authMiddleware, async (req, res) => {
     });
     if (!me)
         return res.status(404).json({ message: "User not found" });
-    return res.json(me);
+    // Remove sensitive data
+    const { passwordHash, ...sanitizedUser } = me;
+    return res.json({ user: sanitizedUser });
+});
+// Logout route - clears the cookie
+router.post("/logout", (req, res) => {
+    res.cookie('auth_token', '', {
+        httpOnly: true,
+        expires: new Date(0),
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'none'
+    });
+    return res.status(200).json({ message: 'Logged out successfully' });
 });
 exports.default = router;
