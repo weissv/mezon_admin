@@ -18,6 +18,11 @@ declare global {
 }
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  // Allow preflight requests to pass through without authentication
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+  
   // Try to get token from cookie first
   let token = req.cookies?.auth_token;
   
