@@ -21,9 +21,22 @@ import FeedbackPage from "../pages/FeedbackPage";
 import ProcurementPage from "../pages/ProcurementPage";
 import RecipesPage from "../pages/RecipesPage";
 import { useAuth } from "../hooks/useAuth";
+import NotFoundPage from "../pages/NotFoundPage";
+
+function LoadingScreen() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <span className="text-sm text-gray-500">Загрузка...</span>
+    </div>
+  );
+}
 
 function PrivateRoute() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   if (!user) {
     return <Navigate to="/auth/login" replace />;
   }
@@ -31,7 +44,12 @@ function PrivateRoute() {
 }
 
 function RoleBasedRoute({ roles }: { roles: string[] }) {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   if (!user || !roles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -69,8 +87,12 @@ export default function Router() {
             <Route path="action-log" element={<ActionLogPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
           </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
