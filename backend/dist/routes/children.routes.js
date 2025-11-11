@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // src/routes/children.routes.ts
 const express_1 = require("express");
+const client_1 = require("@prisma/client");
 const prisma_1 = require("../prisma");
 const checkRole_1 = require("../middleware/checkRole");
 const query_1 = require("../utils/query");
@@ -28,6 +29,23 @@ router.put("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate
     const id = Number(req.params.id);
     const child = await prisma_1.prisma.child.update({ where: { id }, data: req.body });
     return res.json(child);
+});
+router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), (0, actionLogger_1.logAction)("DELETE_CHILD", (req) => ({ id: req.params.id })), async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid child id" });
+    }
+    try {
+        await prisma_1.prisma.child.delete({ where: { id } });
+    }
+    catch (error) {
+        if (error instanceof client_1.Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+            // Deleting an already-removed child should be idempotent for the client
+            return res.status(204).send();
+        }
+        throw error;
+    }
+    return res.status(204).send();
 });
 // --- TemporaryAbsence CRUD ---
 // GET /api/children/:id/absences - список временных отсутствий ребенка

@@ -59,6 +59,6 @@ router.post("/generate-shopping-list", (0, checkRole_1.checkRole)(["DEPUTY", "AD
         const remaining = (val.qty - (stock?.quantity || 0));
         return { name, unit, requiredQty: val.qty, inStock: stock?.quantity || 0, toBuy: Math.max(remaining, 0) };
     });
-    return res.json({ period: { startDate, endDate }, items: shoppingList });
+    return res.json({ data: { period: { startDate, endDate }, items: shoppingList } });
 });
 exports.default = router;

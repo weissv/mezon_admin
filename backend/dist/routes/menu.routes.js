@@ -17,8 +17,18 @@ router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.
         where.date.gte = new Date(String(startDate));
     if (endDate)
         where.date.lte = new Date(String(endDate));
-    const items = await prisma_1.prisma.menu.findMany({ where, orderBy: { date: "asc" } });
-    return res.json(items);
+    const items = await prisma_1.prisma.menu.findMany({
+        where,
+        orderBy: { date: "asc" },
+        include: {
+            meals: {
+                include: {
+                    dish: true
+                }
+            }
+        }
+    });
+    return res.json({ data: { items } });
 });
 // POST /api/menu
 router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(menu_schema_1.upsertMenuSchema), async (req, res) => {

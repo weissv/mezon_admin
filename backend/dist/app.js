@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const auth_1 = require("./middleware/auth");
 const errorHandler_1 = require("./middleware/errorHandler");
 // Импорты роутов
@@ -32,8 +33,23 @@ const procurement_routes_1 = __importDefault(require("./routes/procurement.route
 const recipes_routes_1 = __importDefault(require("./routes/recipes.routes"));
 const staffing_routes_1 = __importDefault(require("./routes/staffing.routes"));
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
+// CORS configuration - allow requests from frontend domains
+app.use((0, cors_1.default)({
+    origin: [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://mezon-front.onrender.com',
+        'https://erp.mezon.uz'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+    exposedHeaders: ['Set-Cookie']
+}));
+// Handle preflight requests
+app.options('*', (0, cors_1.default)());
 app.use(express_1.default.json());
+app.use((0, cookie_parser_1.default)());
 app.use((0, morgan_1.default)("dev"));
 // Health check endpoint (public)
 app.get("/api/health", (_req, res) => {
