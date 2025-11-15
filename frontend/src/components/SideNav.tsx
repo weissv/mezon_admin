@@ -1,5 +1,5 @@
 // src/components/SideNav.tsx
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import { Facebook, Instagram, Send, X } from "lucide-react";
@@ -80,6 +80,9 @@ export default function SideNav() {
   const { user, logout } = useAuth();
   const loc = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
+  const [isLogoSpinning, setIsLogoSpinning] = useState(false);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const role = user?.role || "TEACHER";
   const links = role === "DIRECTOR" ? linksByRole.DIRECTOR : linksByRole[role] || [];
 
@@ -89,6 +92,34 @@ export default function SideNav() {
   if (typeof window !== 'undefined') {
     (window as any).toggleMobileMenu = () => setIsMobileMenuOpen(prev => !prev);
   }
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    const newClickCount = logoClicks + 1;
+    setLogoClicks(newClickCount);
+
+    // Clear existing timeout
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+    }
+
+    // Reset clicks after 2 seconds of no clicking
+    clickTimeoutRef.current = setTimeout(() => {
+      setLogoClicks(0);
+    }, 2000);
+
+    // Trigger spin animation on 10th click
+    if (newClickCount === 10) {
+      setIsLogoSpinning(true);
+      setLogoClicks(0);
+      
+      // Reset spinning state after animation completes
+      setTimeout(() => {
+        setIsLogoSpinning(false);
+      }, 1000);
+    }
+  };
 
   const socialLinks = [
     { icon: Facebook, href: "https://www.facebook.com/MezonSchool/" },
@@ -109,9 +140,19 @@ export default function SideNav() {
       <aside className={clsx("mezon-sidenav", isMobileMenuOpen && "mezon-sidenav--mobile-open")}>
       <div className="mezon-sidenav__brand">
         <div className="flex items-center justify-between">
-          <Link to="/dashboard" className="flex items-center gap-3" onClick={closeMobileMenu}>
-            <img src="/logo.png" alt="Mezon"/>
-          </Link>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={handleLogoClick}>
+            <img 
+              src="/logo.png" 
+              alt="Mezon"
+              className={clsx(
+                "transition-transform duration-1000",
+                isLogoSpinning && "animate-spin-flip"
+              )}
+              style={{
+                transformStyle: 'preserve-3d',
+              }}
+            />
+          </div>
           {/* Close button for mobile */}
           <button 
             className="mezon-mobile-close" 

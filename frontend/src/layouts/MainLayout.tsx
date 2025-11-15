@@ -1,10 +1,20 @@
 // src/layouts/MainLayout.tsx
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Phone, Mail, Facebook, Instagram, Send, Menu } from "lucide-react";
 import SideNav from "../components/SideNav";
+import DoomGame from "../components/DoomGame";
 import { Toaster } from "sonner";
+import { useKonamiCode } from "../hooks/useKonamiCode";
 
 export default function MainLayout() {
+  const [showDoom, setShowDoom] = useState(false);
+
+  // Konami Code Easter Egg
+  useKonamiCode(() => {
+    setShowDoom(true);
+  });
+
   const contacts = [
     { icon: Phone, label: "+ 71 // 207 17 30" },
     { icon: Phone, label: "+ 90 // 006 31 37" },
@@ -19,6 +29,8 @@ export default function MainLayout() {
 
   return (
     <div className="mezon-app">
+      {showDoom && <DoomGame onClose={() => setShowDoom(false)} />}
+      
       <header className="mezon-top-bar">
         {/* Mobile menu button */}
         <button 
