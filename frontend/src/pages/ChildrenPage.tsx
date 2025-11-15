@@ -65,9 +65,9 @@ export default function ChildrenPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Управление контингентом детей</h1>
-      <div className="mb-4 flex items-center justify-between">
-        <div className="relative w-1/3">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4">Управление контингентом детей</h1>
+      <div className="mb-4 mobile-stack">
+        <div className="search-container">
           <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
           <Input
             placeholder="Поиск по фамилии..."
@@ -76,7 +76,7 @@ export default function ChildrenPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleCreate} className="w-full sm:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" /> Добавить ребенка
         </Button>
       </div>

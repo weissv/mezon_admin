@@ -40,53 +40,57 @@ export function DataTable<T extends Record<string, any>>({
   };
 
   return (
-    <div className="border rounded">
-      <div className="flex justify-end p-2">
-        <button className="text-sm px-3 py-1 border rounded" onClick={downloadCsv}>Экспорт CSV</button>
+    <div className="border rounded overflow-hidden">
+      <div className="flex justify-end p-2 bg-gray-50">
+        <button className="text-sm px-3 py-1 border rounded bg-white hover:bg-gray-100" onClick={downloadCsv}>
+          Экспорт CSV
+        </button>
       </div>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-gray-50">
-            {columns.map((c) => (
-              <th key={c.key} className="text-left p-2">{c.header}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.length === 0 ? (
-            <tr>
-              <td className="p-4 text-center text-gray-500" colSpan={columns.length}>
-                Нет данных
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-gray-50">
+              {columns.map((c) => (
+                <th key={c.key} className="text-left p-2 whitespace-nowrap">{c.header}</th>
+              ))}
             </tr>
-          ) : (
-            data.map((row, i) => (
-              <tr key={i} className="border-t">
-                {columns.map((c) => (
-                  <td key={c.key} className="p-2">
-                    {c.render ? c.render(row) : c.key in row ? String(row[c.key as keyof T] ?? "") : ""}
-                  </td>
-                ))}
+          </thead>
+          <tbody>
+            {data.length === 0 ? (
+              <tr>
+                <td className="p-4 text-center text-gray-500" colSpan={columns.length}>
+                  Нет данных
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-      <div className="flex justify-between items-center p-2 text-sm">
-        <div>Всего: {total}</div>
-        <div className="space-x-2">
+            ) : (
+              data.map((row, i) => (
+                <tr key={i} className="border-t hover:bg-gray-50">
+                  {columns.map((c) => (
+                    <td key={c.key} className="p-2 whitespace-nowrap">
+                      {c.render ? c.render(row) : c.key in row ? String(row[c.key as keyof T] ?? "") : ""}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex flex-col sm:flex-row justify-between items-center p-3 text-sm gap-2 bg-gray-50 border-t">
+        <div className="text-gray-600">Всего: {total}</div>
+        <div className="flex items-center gap-2">
           <button
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className="px-2 py-1 border rounded disabled:opacity-50"
+            className="px-3 py-1.5 border rounded bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
           >
             Назад
           </button>
-          <span>{page} / {pages}</span>
+          <span className="px-2 text-gray-700">{page} / {pages}</span>
           <button
             disabled={page >= pages}
             onClick={() => onPageChange(page + 1)}
-            className="px-2 py-1 border rounded disabled:opacity-50"
+            className="px-3 py-1.5 border rounded bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
           >
             Вперёд
           </button>

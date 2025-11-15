@@ -1,6 +1,6 @@
 // src/layouts/MainLayout.tsx
 import { Outlet } from "react-router-dom";
-import { Phone, Mail, Facebook, Instagram, Send } from "lucide-react";
+import { Phone, Mail, Facebook, Instagram, Send, Menu } from "lucide-react";
 import SideNav from "../components/SideNav";
 import { Toaster } from "sonner";
 
@@ -20,6 +20,19 @@ export default function MainLayout() {
   return (
     <div className="mezon-app">
       <header className="mezon-top-bar">
+        {/* Mobile menu button */}
+        <button 
+          className="mezon-mobile-menu-btn"
+          onClick={() => {
+            if (typeof window !== 'undefined' && (window as any).toggleMobileMenu) {
+              (window as any).toggleMobileMenu();
+            }
+          }}
+          aria-label="Toggle menu"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+        
         <div className="mezon-top-bar__cluster">
           {contacts.map(({ icon: Icon, label }) => (
             <span key={label} className="mezon-chip">
