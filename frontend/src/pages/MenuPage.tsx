@@ -187,7 +187,7 @@ export default function MenuPage() {
     );
   };
 
-  const weekDates = Array.from({ length: 7 }).map((_, i) => {
+  const weekDates = Array.from({ length: 5 }).map((_, i) => {
     const date = new Date(weekStart);
     date.setDate(date.getDate() + i);
     return date;
@@ -200,7 +200,7 @@ export default function MenuPage() {
         <div className="flex items-center gap-2">
           <Button onClick={() => changeWeek(-7)}>Пред. неделя</Button>
           <span className="font-semibold">
-            {weekStart.toLocaleDateString('ru-RU')} - {new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU')}
+            {weekStart.toLocaleDateString('ru-RU')} - {new Date(weekStart.getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU')}
           </span>
           <Button onClick={() => changeWeek(7)}>След. неделя</Button>
         </div>
