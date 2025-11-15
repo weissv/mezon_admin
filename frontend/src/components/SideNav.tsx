@@ -1,7 +1,8 @@
 // src/components/SideNav.tsx
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import clsx from "clsx";
-import { Facebook, Instagram, Send } from "lucide-react";
+import { Facebook, Instagram, Send, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
 
@@ -78,8 +79,16 @@ const linksByRole: Record<string, { to: string; label: string }[]> = {
 export default function SideNav() {
   const { user, logout } = useAuth();
   const loc = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const role = user?.role || "TEACHER";
   const links = role === "DIRECTOR" ? linksByRole.DIRECTOR : linksByRole[role] || [];
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  
+  // Expose function for parent to toggle menu
+  if (typeof window !== 'undefined') {
+    (window as any).toggleMobileMenu = () => setIsMobileMenuOpen(prev => !prev);
+  }
 
   const socialLinks = [
     { icon: Facebook, href: "https://www.facebook.com/MezonSchool/" },
@@ -88,11 +97,30 @@ export default function SideNav() {
   ];
 
   return (
-    <aside className="mezon-sidenav">
+    <>
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="mezon-mobile-overlay" 
+          onClick={closeMobileMenu}
+        />
+      )}
+      
+      <aside className={clsx("mezon-sidenav", isMobileMenuOpen && "mezon-sidenav--mobile-open")}>
       <div className="mezon-sidenav__brand">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <img src="/logo.png" alt="Mezon"/>
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link to="/dashboard" className="flex items-center gap-3" onClick={closeMobileMenu}>
+            <img src="/logo.png" alt="Mezon"/>
+          </Link>
+          {/* Close button for mobile */}
+          <button 
+            className="mezon-mobile-close" 
+            onClick={closeMobileMenu}
+            aria-label="Close menu"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
         <p>Системность и уют из Mezon school теперь и в управлении.</p>
       </div>
 
@@ -102,7 +130,12 @@ export default function SideNav() {
           {links.map((l) => {
             const isActive = loc.pathname === l.to || loc.pathname.startsWith(`${l.to}/`);
             return (
-              <Link key={l.to} to={l.to} className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}> 
+              <Link 
+                key={l.to} 
+                to={l.to} 
+                className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}
+                onClick={closeMobileMenu}
+              > 
                 {l.label}
               </Link>
             );
@@ -125,5 +158,6 @@ export default function SideNav() {
         </Button>
       </div>
     </aside>
+    </>
   );
 }
