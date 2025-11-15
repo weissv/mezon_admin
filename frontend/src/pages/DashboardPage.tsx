@@ -22,16 +22,19 @@ type MetricsData = {
   employees: { needingMedicalCheckup: number };
 };
 
-function KPICard({ title, value, icon: Icon, colorClass }: { title: string; value: string | number; icon: React.ElementType, colorClass: string }) {
+function KPICard({ title, value, icon: Icon, accent = "var(--mezon-accent)" }: { title: string; value: string | number; icon: React.ElementType; accent?: string }) {
     return (
-        <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-                <div className={`p-3 rounded-full ${colorClass}`}>
-                    <Icon className="h-6 w-6 text-white" />
+        <div className="mezon-card">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-[var(--mezon-text-soft)]">{title}</p>
+                    <p className="text-3xl font-bold text-[var(--mezon-dark)]">{value}</p>
                 </div>
-                <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">{title}</p>
-                    <p className="text-2xl font-bold">{value}</p>
+                <div
+                    className="flex h-14 w-14 items-center justify-center rounded-2xl text-white"
+                    style={{ background: accent }}
+                >
+                    <Icon className="h-7 w-7" />
                 </div>
             </div>
         </div>
@@ -42,6 +45,7 @@ export default function DashboardPage() {
     const [summary, setSummary] = useState<SummaryData | null>(null);
     const [metrics, setMetrics] = useState<MetricsData | null>(null);
     const [loading, setLoading] = useState(true);
+    const currency = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -64,35 +68,62 @@ export default function DashboardPage() {
     const income = summary?.kpi.financeLast30d.find(f => f.type === 'INCOME')?._sum.amount || 0;
     const expense = summary?.kpi.financeLast30d.find(f => f.type === 'EXPENSE')?._sum.amount || 0;
 
-    if (loading) return <div>Загрузка...</div>;
+    if (loading) {
+      return <div className="mezon-card">Загружаем метрики...</div>;
+    }
 
     return (
-        <div>
-            <h1 className="text-3xl font-bold mb-6">Дашборд</h1>
-            
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <KPICard title="Детей (активных)" value={summary?.kpi.childrenCount ?? 0} icon={Users} colorClass="bg-blue-500" />
-                <KPICard title="Сотрудников" value={summary?.kpi.employeesCount ?? 0} icon={Briefcase} colorClass="bg-orange-500" />
-                <KPICard title="Кружков (активных)" value={summary?.kpi.activeClubs ?? 0} icon={School} colorClass="bg-purple-500" />
-                <KPICard title="Доход (30 дн.)" value={`${income} ₽`} icon={TrendingUp} colorClass="bg-green-500" />
-                <KPICard title="Расход (30 дн.)" value={`${expense} ₽`} icon={TrendingDown} colorClass="bg-red-500" />
-            </div>
-
-            {/* Additional Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Low Inventory Alert */}
-                {metrics && metrics.lowInventory.length > 0 && (
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="flex items-center mb-4">
-                            <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
-                            <h3 className="font-semibold">Низкие запасы</h3>
+        <div className="space-y-10">
+            <section className="mezon-hero-panel mezon-shine">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <span className="mezon-badge">Mezon ERP</span>
+                        <h1 className="mezon-section-title text-4xl">
+                            Оцифрованная забота <span>о школе</span>
+                        </h1>
+                        <p className="mezon-subtitle">
+                            Данные по детям, сотрудникам, финансам и хозяйственным задачам в едином пространстве с эстетикой главного сайта.
+                        </p>
+                    </div>
+                    <div className="grid gap-4 text-sm text-[var(--mezon-dark)] sm:grid-cols-2">
+                        <div className="mezon-card">
+                            <p className="text-xs uppercase tracking-[0.3em] text-[var(--mezon-text-soft)]">Активные дети</p>
+                            <p className="text-3xl font-bold">{metrics?.childrenCount ?? 0}</p>
                         </div>
-                        <ul className="space-y-2">
+                        <div className="mezon-card">
+                            <p className="text-xs uppercase tracking-[0.3em] text-[var(--mezon-text-soft)]">Команда</p>
+                            <p className="text-3xl font-bold">{metrics?.employeesCount ?? 0}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 className="text-2xl font-semibold text-[var(--mezon-dark)]">Ключевые показатели</h2>
+                    <span className="mezon-chip mezon-chip--teal">За последние 30 дней</span>
+                </div>
+                <div className="mezon-grid md:grid-cols-2 xl:grid-cols-4">
+                    <KPICard title="Детей (активных)" value={summary?.kpi.childrenCount ?? 0} icon={Users} accent="var(--mezon-teal)" />
+                    <KPICard title="Сотрудников" value={summary?.kpi.employeesCount ?? 0} icon={Briefcase} accent="#F1AE3D" />
+                    <KPICard title="Кружков" value={summary?.kpi.activeClubs ?? 0} icon={School} accent="#8F93C0" />
+                    <KPICard title="Доход" value={currency.format(income)} icon={TrendingUp} accent="#00A26A" />
+                    <KPICard title="Расход" value={currency.format(expense)} icon={TrendingDown} accent="#F75C4C" />
+                </div>
+            </section>
+
+            <section className="mezon-grid md:grid-cols-2 xl:grid-cols-3">
+                {metrics && metrics.lowInventory.length > 0 && (
+                    <div className="mezon-card">
+                        <div className="mb-4 flex items-center gap-3 text-[var(--mezon-dark)]">
+                            <AlertTriangle className="h-5 w-5 text-red-500" />
+                            <h3 className="text-lg font-semibold">Низкие запасы</h3>
+                        </div>
+                        <ul className="space-y-3 text-sm">
                             {metrics.lowInventory.map(item => (
-                                <li key={item.id} className="text-sm flex justify-between">
+                                <li key={item.id} className="flex justify-between font-medium">
                                     <span>{item.name}</span>
-                                    <span className="text-red-600 font-medium">
+                                    <span className="text-red-600">
                                         {item.quantity} {item.unit}
                                     </span>
                                 </li>
@@ -101,46 +132,43 @@ export default function DashboardPage() {
                     </div>
                 )}
 
-                {/* Attendance Today */}
                 {metrics && (
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="flex items-center mb-4">
-                            <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-                            <h3 className="font-semibold">Посещаемость сегодня</h3>
+                    <div className="mezon-card">
+                        <div className="mb-4 flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-[var(--mezon-teal)]" />
+                            <h3 className="text-lg font-semibold">Посещаемость сегодня</h3>
                         </div>
-                        <p className="text-3xl font-bold">{metrics.attendance.today}</p>
-                        <p className="text-sm text-gray-500 mt-1">детей присутствует</p>
+                        <p className="text-4xl font-bold text-[var(--mezon-dark)]">{metrics.attendance.today}</p>
+                        <p className="text-sm text-[var(--mezon-text-soft)]">детей присутствуют</p>
                     </div>
                 )}
 
-                {/* Maintenance Alerts */}
                 {metrics && metrics.maintenance.activeRequests > 0 && (
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="flex items-center mb-4">
-                            <Wrench className="h-5 w-5 text-yellow-500 mr-2" />
-                            <h3 className="font-semibold">Активные заявки</h3>
+                    <div className="mezon-card">
+                        <div className="mb-4 flex items-center gap-3">
+                            <Wrench className="h-5 w-5 text-[#F1AE3D]" />
+                            <h3 className="text-lg font-semibold">Активные заявки</h3>
                         </div>
-                        <p className="text-3xl font-bold text-yellow-600">
+                        <p className="text-4xl font-bold text-[#F1AE3D]">
                             {metrics.maintenance.activeRequests}
                         </p>
-                        <p className="text-sm text-gray-500 mt-1">требуют внимания</p>
+                        <p className="text-sm text-[var(--mezon-text-soft)]">требуют внимания</p>
                     </div>
                 )}
 
-                {/* Medical Checkup Reminders */}
                 {metrics && metrics.employees.needingMedicalCheckup > 0 && (
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="flex items-center mb-4">
-                            <AlertTriangle className="h-5 w-5 text-orange-500 mr-2" />
-                            <h3 className="font-semibold">Медосмотры</h3>
+                    <div className="mezon-card">
+                        <div className="mb-4 flex items-center gap-3">
+                            <AlertTriangle className="h-5 w-5 text-[#F75C4C]" />
+                            <h3 className="text-lg font-semibold">Медосмотры</h3>
                         </div>
-                        <p className="text-3xl font-bold text-orange-600">
+                        <p className="text-4xl font-bold text-[#F75C4C]">
                             {metrics.employees.needingMedicalCheckup}
                         </p>
-                        <p className="text-sm text-gray-500 mt-1">сотрудников нужны медосмотры</p>
+                        <p className="text-sm text-[var(--mezon-text-soft)]">сотрудникам нужна проверка</p>
                     </div>
                 )}
-            </div>
+            </section>
         </div>
     );
 }

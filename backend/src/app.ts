@@ -35,8 +35,8 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'http://localhost:3000', 
-    'https://mezon-front.onrender.com',
+    'http://localhost:3000',
+    'https://mezon-admin-frontend.onrender.com',
     'https://erp.mezon.uz'
   ],
   credentials: true,

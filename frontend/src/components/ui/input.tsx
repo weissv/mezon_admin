@@ -9,7 +9,10 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   return (
     <input
       ref={ref}
-      className={clsx("w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200", className)}
+      className={clsx(
+        "w-full rounded-2xl border border-[var(--mezon-border)] bg-white/90 px-4 py-3 text-[var(--mezon-dark)] shadow-sm transition focus:border-[var(--mezon-accent)] focus:outline-none focus:ring-2 focus:ring-[rgba(0,133,158,0.25)]",
+        className
+      )}
       {...props}
     />
   );

@@ -3,14 +3,18 @@ import { ButtonHTMLAttributes } from "react";
 import clsx from "clsx";
 
 export function Button({ className, variant = "default", size = "md", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "outline" | "ghost" | "secondary" | "destructive"; size?: "sm" | "md" | "lg" }) {
-  const base = "inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:opacity-50";
+  const base = "inline-flex items-center justify-center rounded-full font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed";
   const variants = {
-    default: "bg-blue-600 text-white hover:bg-blue-700",
-    outline: "border border-gray-300 text-gray-800 hover:bg-gray-50",
-    ghost: "text-gray-800 hover:bg-gray-100",
-    secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300",
+    default: "bg-[var(--mezon-accent)] text-white shadow-mezon hover:bg-[var(--mezon-accent-dark)]",
+    outline: "border-2 border-[var(--mezon-accent)] text-[var(--mezon-accent)] hover:bg-[var(--mezon-accent)] hover:text-white",
+    ghost: "text-[var(--mezon-accent)] hover:bg-[rgba(160,74,132,0.08)]",
+    secondary: "bg-[var(--mezon-sand)] text-[var(--mezon-dark)] hover:bg-[#f8c387]",
     destructive: "bg-red-600 text-white hover:bg-red-700",
-  };
-  const sizes = { sm: "h-8 px-3 text-sm", md: "h-10 px-4", lg: "h-12 px-6 text-lg" };
+  } as const;
+  const sizes = {
+    sm: "text-sm px-4 py-2",
+    md: "px-6 py-3",
+    lg: "px-8 py-4 text-lg",
+  } as const;
   return <button className={clsx(base, variants[variant], sizes[size], className)} {...props} />;
 }

@@ -1,5 +1,5 @@
 // src/lib/api.ts
-const baseURL = (import.meta as any).env?.VITE_API_URL || "";
+const baseURL = (import.meta as any).env?.VITE_API_URL || "http://localhost:4000/api";
 
 class API {
   private token: string | null = null;

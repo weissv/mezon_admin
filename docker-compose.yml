@@ -1,9 +1,9 @@
 
 services:
-  # Сервис базы данных PostgreSQL
+  # PostgreSQL Database Service
   postgres:
     image: postgres:14-alpine
-    container_name: erp_postgres
+    container_name: mezon_postgres
     env_file:
       - ./.env
     ports:
@@ -12,38 +12,59 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" # <-- ВОТ ТАК
+      test: "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
       timeout: 5s
       retries: 5
+    networks:
+      - mezon-network
 
-  # Бэкенд на Express
+  # Backend API Service
   backend:
     build:
       context: ./backend
-    container_name: erp_backend
+    container_name: mezon_backend
     env_file:
       - ./.env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     ports:
       - "4000:4000"
-    
     restart: unless-stopped
     command: >
-      sh -c "echo 'Waiting 5s for DB to be truly ready...' && sleep 5 && npx prisma migrate deploy && npx prisma db seed && npm run start" 
+      sh -c "echo 'Waiting for database...' && sleep 5 && 
+             npx prisma migrate deploy && 
+             npx prisma db seed && 
+             npm run start"
     depends_on:
       postgres:
         condition: service_healthy
-  # Фронтенд на React
+    networks:
+      - mezon-network
+
+  # Frontend Service
   frontend:
     build:
       context: ./frontend
-    container_name: erp_frontend
+      target: development
+    container_name: mezon_frontend
     env_file:
       - ./.env
+    environment:
+      - VITE_API_URL=http://localhost:4000/api
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - mezon-network
 
 volumes:
   postgres_data:
+
+networks:
+  mezon-network:
+    driver: bridge
