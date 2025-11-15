@@ -48,4 +48,18 @@
 	.btn-group-mobile {
 		@apply flex flex-col gap-2 w-full sm:flex-row sm:w-auto;
 	}
+
+	/* Logo spin animation for Easter Egg */
+	@keyframes spin-flip {
+		0% {
+			transform: rotateY(0deg);
+		}
+		100% {
+			transform: rotateY(720deg);
+		}
+	}
+
+	.animate-spin-flip {
+		animation: spin-flip 1s ease-in-out;
+	}
 }
