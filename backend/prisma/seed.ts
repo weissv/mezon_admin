@@ -29,12 +29,17 @@ async function main() {
   });
 
   // 3. Создать пользователя-директора
+  const directorPasswordHash = await bcrypt.hash("password123", 10);
   await prisma.user.upsert({
-    where: { email: "director" },
-    update: {},
+    where: { employeeId: directorEmployee.id },
+    update: {
+      email: "director",
+      passwordHash: directorPasswordHash,
+      role: "DIRECTOR",
+    },
     create: {
       email: "director",
-      passwordHash: await bcrypt.hash("password123", 10),
+      passwordHash: directorPasswordHash,
       role: "DIRECTOR",
       employeeId: directorEmployee.id,
     },
@@ -55,12 +60,17 @@ async function main() {
     },
   });
 
+  const izumiPasswordHash = await bcrypt.hash("8p09VhXW", 10);
   await prisma.user.upsert({
-    where: { email: "izumi" },
-    update: {},
+    where: { employeeId: izumiEmployee.id },
+    update: {
+      email: "izumi",
+      passwordHash: izumiPasswordHash,
+      role: "ADMIN",
+    },
     create: {
       email: "izumi",
-      passwordHash: await bcrypt.hash("8p09VhXW", 10),
+      passwordHash: izumiPasswordHash,
       role: "ADMIN",
       employeeId: izumiEmployee.id,
     },

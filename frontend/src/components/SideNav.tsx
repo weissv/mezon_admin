@@ -1,10 +1,13 @@
 // src/components/SideNav.tsx
 import { Link, useLocation } from "react-router-dom";
+import clsx from "clsx";
+import { Facebook, Instagram, Send } from "lucide-react";
+import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
 
 const linksByRole: Record<string, { to: string; label: string }[]> = {
   DIRECTOR: [
-    { to: "/", label: "Дашборд" },
+    { to: "/dashboard", label: "Дашборд" },
     { to: "/children", label: "Дети" },
     { to: "/employees", label: "Сотрудники" },
     { to: "/clubs", label: "Кружки" },
@@ -23,18 +26,18 @@ const linksByRole: Record<string, { to: string; label: string }[]> = {
     { to: "/notifications", label: "Уведомления" },
   ],
   ACCOUNTANT: [
-    { to: "/", label: "Дашборд" },
+    { to: "/dashboard", label: "Дашборд" },
     { to: "/finance", label: "Финансы" },
     { to: "/procurement", label: "Закупки" },
     { to: "/clubs", label: "Кружки" },
   ],
   TEACHER: [
-    { to: "/", label: "Дашборд" },
+    { to: "/dashboard", label: "Дашборд" },
     { to: "/clubs", label: "Кружки" },
     { to: "/attendance", label: "Посещаемость" },
   ],
   DEPUTY: [
-    { to: "/", label: "Дашборд" },
+    { to: "/dashboard", label: "Дашборд" },
     { to: "/children", label: "Дети" },
     { to: "/employees", label: "Сотрудники" },
     { to: "/clubs", label: "Кружки" },
@@ -52,7 +55,7 @@ const linksByRole: Record<string, { to: string; label: string }[]> = {
     { to: "/notifications", label: "Уведомления" },
   ],
   ADMIN: [
-    { to: "/", label: "Дашборд" },
+    { to: "/dashboard", label: "Дашборд" },
     { to: "/children", label: "Дети" },
     { to: "/employees", label: "Сотрудники" },
     { to: "/clubs", label: "Кружки" },
@@ -78,21 +81,49 @@ export default function SideNav() {
   const role = user?.role || "TEACHER";
   const links = role === "DIRECTOR" ? linksByRole.DIRECTOR : linksByRole[role] || [];
 
+  const socialLinks = [
+    { icon: Facebook, href: "https://www.facebook.com/MezonSchool/" },
+    { icon: Instagram, href: "https://instagram.com/mezonschool" },
+    { icon: Send, href: "http://t.me/mezon_school" },
+  ];
+
   return (
-    <aside className="w-64 bg-white border-r h-screen flex flex-col">
-      <div className="p-4 font-semibold">ERP</div>
-      <nav className="flex-1">
-        {links.map((l) => (
-          <Link
-            key={l.to}
-            to={l.to}
-            className={`block px-4 py-2 hover:bg-gray-100 ${loc.pathname === l.to ? "bg-gray-100 font-medium" : ""}`}
-          >
-            {l.label}
-          </Link>
-        ))}
-      </nav>
-      <button className="m-4 text-red-600" onClick={logout}>Выход</button>
+    <aside className="mezon-sidenav">
+      <div className="mezon-sidenav__brand">
+        <Link to="/dashboard" className="flex items-center gap-3">
+          <img src="/logo.png" alt="Mezon"/>
+        </Link>
+        <p>Системность и уют из Mezon school теперь и в управлении.</p>
+      </div>
+
+      <div className="mezon-sidenav__nav">
+        <p className="mezon-nav-label">Модули</p>
+        <div className="flex flex-col gap-1">
+          {links.map((l) => {
+            const isActive = loc.pathname === l.to || loc.pathname.startsWith(`${l.to}/`);
+            return (
+              <Link key={l.to} to={l.to} className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}> 
+                {l.label}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mezon-sidenav__footer">
+        <p>Есть вопрос? Свяжитесь с нами:</p>
+        <p className="font-semibold text-[var(--mezon-accent)]">+ 71 // 207 17 30</p>
+        <div className="mt-2 mezon-top-bar__social">
+          {socialLinks.map(({ icon: Icon, href }) => (
+            <a key={href} href={href} target="_blank" rel="noreferrer">
+              <Icon className="h-4 w-4" />
+            </a>
+          ))}
+        </div>
+        <Button type="button" className="mt-4 w-full" variant="outline" onClick={logout}>
+          Выйти
+        </Button>
+      </div>
     </aside>
   );
 }

@@ -44,7 +44,7 @@ A comprehensive ERP system for managing school and kindergarten operations inclu
 
 ## 🚀 Getting Started
 
-### Using Docker (Recommended)
+### Quick Start with Docker (Recommended)
 
 1. Clone the repository:
 ```bash
@@ -52,36 +52,27 @@ git clone https://github.com/weissv/mezon_admin.git
 cd mezon_admin
 ```
 
-2. Create a `.env` file in the root directory (or use the existing one):
-```env
-# PostgreSQL
-POSTGRES_USER=user
-POSTGRES_PASSWORD=password
-POSTGRES_DB=erp_db
-
-# Backend
-DATABASE_URL="postgresql://user:password@postgres:5432/erp_db?schema=public"
-PORT=4000
-JWT_SECRET="your_super_secret_jwt_key_that_is_long_and_secure"
-NODE_ENV="development"
-
-# Frontend
-VITE_API_URL="http://localhost:4000"
+2. Run the setup script:
+```bash
+./setup.sh
 ```
 
-3. Start the application:
+Or manually start with Docker Compose:
 ```bash
 docker-compose up --build
 ```
 
-4. Access the application:
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:4000
-   - Health Check: http://localhost:4000/api/health
+3. Access the application:
+   - **Frontend**: http://localhost:5173
+   - **Backend API**: http://localhost:4000/api
+   - **Health Check**: http://localhost:4000/api/health
 
-5. Default credentials:
-   - Email: `director@school.erp`
-   - Password: `password123`
+4. **Default credentials**:
+   - Admin: `admin@mezon.uz` / `admin123`
+   - Director: `director@mezon.uz` / `director123`
+   - Teacher: `teacher@mezon.uz` / `teacher123`
+
+For detailed deployment instructions, see [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
 
 ### Local Development (Without Docker)
 

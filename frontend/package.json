@@ -8,8 +8,8 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-  "cypress:open": "start-server-and-test 'cross-env VITE_API_URL=https://mezon-admin.onrender.com npm run dev -- --host 127.0.0.1 --port 5173' http://127.0.0.1:5173 'cross-env CYPRESS_BASE_URL=http://127.0.0.1:5173 cypress open'",
-  "cypress:run": "start-server-and-test 'cross-env VITE_API_URL=https://mezon-admin.onrender.com npm run dev -- --host 127.0.0.1 --port 5173' http://127.0.0.1:5173 'cross-env CYPRESS_BASE_URL=http://127.0.0.1:5173 cypress run'"
+  "cypress:open": "start-server-and-test 'cross-env VITE_API_URL=https://mezon-admin.onrender.com npm run dev -- --host 127.0.0.1 --port 5172' http://127.0.0.1:5172 'cross-env CYPRESS_BASE_URL=http://127.0.0.1:5172 cypress open'",
+  "cypress:run": "start-server-and-test 'cross-env VITE_API_URL=https://mezon-admin.onrender.com npm run dev -- --host 127.0.0.1 --port 5172' http://127.0.0.1:5172 'cross-env CYPRESS_BASE_URL=http://127.0.0.1:5172 cypress run'"
   },
   "dependencies": {
     "clsx": "^2.1.1",
