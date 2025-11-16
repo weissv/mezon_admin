@@ -7,7 +7,6 @@ import { Modal } from '../components/Modal';
 import { Input } from '../components/ui/input';
 import { PlusCircle } from 'lucide-react';
 import { api } from '../lib/api';
-import { useTranslation } from 'react-i18next';
 
 interface Club {
   id: number;
@@ -24,7 +23,6 @@ interface Club {
 }
 
 export default function ClubsPage() {
-  const { t } = useTranslation();
   const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
   const { data: clubs, total, page, setPage, fetchData } = useApi<Club>({
     url: '/api/clubs',
@@ -65,13 +63,13 @@ export default function ClubsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm(t('clubs.confirmDelete'))) return;
+    if (!confirm('Удалить кружок?')) return;
     try {
       await api.delete('/api/clubs/' + id);
-      toast.success(t('clubs.deleteClub'));
+      toast.success('Кружок удален');
       fetchData();
     } catch (error: any) {
-      toast.error(t('errors.genericError'), { description: error?.message });
+      toast.error('Ошибка удаления', { description: error?.message });
     }
   };
 
@@ -89,15 +87,15 @@ export default function ClubsPage() {
 
       if (editingClub) {
         await api.put('/api/clubs/' + editingClub.id, payload);
-        toast.success(t('clubs.editClub'));
+        toast.success('Кружок обновлен');
       } else {
         await api.post('/api/clubs', payload);
-        toast.success(t('clubs.addClub'));
+        toast.success('Кружок создан');
       }
       setIsModalOpen(false);
       fetchData();
     } catch (error: any) {
-      toast.error(t('errors.genericError'), { description: error?.message });
+      toast.error('Ошибка сохранения', { description: error?.message });
     } finally {
       setSaving(false);
     }
@@ -105,28 +103,28 @@ export default function ClubsPage() {
 
   const columns: Column<Club>[] = [
     { key: 'id', header: 'ID' },
-    { key: 'name', header: t('clubs.name') },
+    { key: 'name', header: 'Название' },
     { 
       key: 'teacher', 
-      header: t('clubs.teacherId'),
+      header: 'Педагог',
       render: (row) => row.teacher.firstName + ' ' + row.teacher.lastName
     },
     { 
       key: 'cost', 
-      header: t('clubs.price'),
+      header: 'Стоимость',
       render: (row) => `${currency.format(row.cost)}/мес`
     },
-    { key: 'maxStudents', header: t('clubs.maxChildren') },
+    { key: 'maxStudents', header: 'Макс. детей' },
     {
       key: 'actions',
-      header: t('common.actions'),
+      header: 'Действия',
       render: (row) => (
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-            {t('common.edit')}
+            Редактировать
           </Button>
           <Button variant="destructive" size="sm" onClick={() => handleDelete(row.id)}>
-            {t('common.delete')}
+            Удалить
           </Button>
         </div>
       ),
@@ -136,9 +134,9 @@ export default function ClubsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t('clubs.title')}</h1>
+        <h1 className="text-3xl font-bold">Кружки и секции</h1>
         <Button onClick={handleCreate}>
-          <PlusCircle className="mr-2 h-4 w-4" /> {t('clubs.addClub')}
+          <PlusCircle className="mr-2 h-4 w-4" /> Добавить кружок
         </Button>
       </div>
 
@@ -154,30 +152,30 @@ export default function ClubsPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingClub ? t('clubs.editClub') : t('clubs.addClub')}
+        title={editingClub ? 'Редактировать кружок' : 'Новый кружок'}
       >
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
           <div>
-            <label className="block text-sm font-medium mb-1">{t('clubs.name')} *</label>
+            <label className="block text-sm font-medium mb-1">Название *</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              placeholder={t('clubs.name')}
+              placeholder="Рисование"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">{t('clubs.description')}</label>
+            <label className="block text-sm font-medium mb-1">Описание</label>
             <Input
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder={t('clubs.description')}
+              placeholder="Творческое развитие детей"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">{t('clubs.teacherId')} *</label>
+            <label className="block text-sm font-medium mb-1">ID педагога *</label>
             <Input
               type="number"
               value={formData.teacherId}
@@ -188,7 +186,7 @@ export default function ClubsPage() {
           </div>
 
           <div>
-              <label className="block text-sm font-medium mb-1">{t('clubs.price')} *</label>
+              <label className="block text-sm font-medium mb-1">Стоимость (UZS/мес) *</label>
             <Input
               type="number"
               value={formData.cost}
@@ -200,7 +198,7 @@ export default function ClubsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">{t('clubs.maxChildren')} *</label>
+            <label className="block text-sm font-medium mb-1">Максимум детей *</label>
             <Input
               type="number"
               value={formData.maxStudents}
@@ -217,10 +215,10 @@ export default function ClubsPage() {
               onClick={() => setIsModalOpen(false)}
               disabled={saving}
             >
-              {t('common.cancel')}
+              Отмена
             </Button>
             <Button type="submit" disabled={saving}>
-              {saving ? t('common.loading') : t('common.save')}
+              {saving ? 'Сохранение...' : 'Сохранить'}
             </Button>
           </div>
         </form>
