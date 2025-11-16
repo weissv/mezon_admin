@@ -1,0 +1,22 @@
+{
+  "title": "Қызметкерлерді басқару",
+  "addEmployee": "Қызметкер қосу",
+  "editEmployee": "Деректерді өңдеу",
+  "addNewEmployee": "Жаңа қызметкер қосу",
+  "dataUpdated": "Қызметкер деректері жаңартылды",
+  "employeeAdded": "Қызметкер сәтті қосылды",
+  "reminders": {
+    "title": "Еске салулар",
+    "medicalCheckups": "Медициналық тексерулер",
+    "attestations": "Аттестаттаулар",
+    "daysUntil": "{{days}} күннен кейін"
+  },
+  "massUpload": {
+    "title": "Жылдам HR деректер алмасу",
+    "description": "Ағымдағы қызметкерлерді Excel-ге экспорттаңыз немесе топтық жаңартулар үшін импортқа өтіңіз.",
+    "excelTemplate": "Excel үлгісі",
+    "goToImport": "Импортқа өту",
+    "templateDownloaded": "Қызметкерлер үлгісі жүктелді",
+    "downloadFailed": "Үлгіні жүктеп алу мүмкін болмады"
+  }
+}

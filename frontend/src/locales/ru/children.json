@@ -1,0 +1,32 @@
+{
+  "title": "Управление контингентом детей",
+  "addChild": "Добавить ребенка",
+  "editChild": "Редактировать данные",
+  "addNewChild": "Добавить нового ребенка",
+  "searchPlaceholder": "Поиск по фамилии...",
+  "absences": "Отсутствия",
+  "viewAbsences": "Отсутствия",
+  "absencesTitle": "Отсутствия - {{firstName}} {{lastName}}",
+  "noAbsences": "Нет записей об отсутствиях",
+  "addAbsence": "Добавить отсутствие",
+  "startDate": "Дата начала",
+  "endDate": "Дата окончания",
+  "reason": "Причина",
+  "reasonPlaceholder": "Семейный отпуск",
+  "deleteAbsenceConfirm": "Удалить запись об отсутствии?",
+  "dataUpdated": "Данные ребенка обновлены",
+  "childAdded": "Ребенок успешно добавлен",
+  "absenceAdded": "Отсутствие добавлено",
+  "absenceDeleted": "Отсутствие удалено",
+  "loadError": "Ошибка загрузки отсутствий",
+  "addError": "Ошибка добавления",
+  "deleteError": "Ошибка удаления",
+  "massUpload": {
+    "title": "Массовая загрузка списков",
+    "description": "Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон для кураторов.",
+    "excelTemplate": "Шаблон Excel",
+    "goToImport": "Перейти к импорту",
+    "templateDownloaded": "Шаблон с детьми выгружен",
+    "downloadFailed": "Не удалось скачать шаблон"
+  }
+}
