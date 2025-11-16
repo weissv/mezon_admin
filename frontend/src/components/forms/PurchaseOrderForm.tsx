@@ -31,6 +31,7 @@ type PurchaseOrderFormProps = {
 };
 
 export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: PurchaseOrderFormProps) {
+  const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
   const { register, handleSubmit, control, formState: { errors, isSubmitting }, watch } = useForm<PurchaseOrderFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -162,8 +163,8 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: Purchase
 
       <div className="border-t pt-4">
         <div className="text-lg font-semibold text-right">
-          Итого: {totalAmount.toLocaleString('ru-RU')} ₽
-        </div>
+            Итого: {currency.format(totalAmount)}
+          </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-4">

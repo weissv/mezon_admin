@@ -45,7 +45,7 @@ export default function DashboardPage() {
     const [summary, setSummary] = useState<SummaryData | null>(null);
     const [metrics, setMetrics] = useState<MetricsData | null>(null);
     const [loading, setLoading] = useState(true);
-    const currency = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 });
+    const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
 
     useEffect(() => {
         const fetchData = async () => {
