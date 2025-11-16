@@ -17,6 +17,9 @@ RUN npm run build
 # Этап 3: Запуск в продакшене
 FROM node:20 AS runner
 WORKDIR /app
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends postgresql-client \
+	&& rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 # Копируем только то, что нужно для запуска
 COPY --from=builder /app/dist ./dist

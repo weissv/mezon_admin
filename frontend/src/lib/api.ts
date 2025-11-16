@@ -6,8 +6,28 @@ class API {
   setToken(token: string | null) {
     this.token = token;
   }
+  private normalizeHeaders(headers?: HeadersInit) {
+    if (!headers) return {} as Record<string, string>;
+    if (headers instanceof Headers) {
+      const acc: Record<string, string> = {};
+      headers.forEach((value, key) => {
+        acc[key] = value;
+      });
+      return acc;
+    }
+    if (Array.isArray(headers)) {
+      return headers.reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, string>);
+    }
+    return { ...headers } as Record<string, string>;
+  }
   private async request(path: string, options: RequestInit = {}) {
-    const headers: any = { "Content-Type": "application/json", ...(options.headers || {}) };
+    const headers = this.normalizeHeaders(options.headers);
+    if (!headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
     if (this.token) headers.Authorization = `Bearer ${this.token}`;
     
     const res = await fetch(baseURL + path, { 
@@ -27,6 +47,24 @@ class API {
   post(path: string, body?: any) { return this.request(path, { method: "POST", body: JSON.stringify(body) }); }
   put(path: string, body?: any) { return this.request(path, { method: "PUT", body: JSON.stringify(body) }); }
   delete(path: string) { return this.request(path, { method: "DELETE" }); }
+
+  async download(path: string, options: RequestInit = {}) {
+    const headers = this.normalizeHeaders(options.headers);
+    if (this.token) headers.Authorization = `Bearer ${this.token}`;
+
+    const res = await fetch(baseURL + path, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(text || `Request failed with status ${res.status}`);
+    }
+
+    return res.blob();
+  }
 }
 
 export const api = new API();

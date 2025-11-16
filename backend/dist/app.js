@@ -32,13 +32,14 @@ const feedback_routes_1 = __importDefault(require("./routes/feedback.routes"));
 const procurement_routes_1 = __importDefault(require("./routes/procurement.routes"));
 const recipes_routes_1 = __importDefault(require("./routes/recipes.routes"));
 const staffing_routes_1 = __importDefault(require("./routes/staffing.routes"));
+const export_routes_1 = __importDefault(require("./routes/export.routes"));
 const app = (0, express_1.default)();
 // CORS configuration - allow requests from frontend domains
 app.use((0, cors_1.default)({
     origin: [
         'http://localhost:5173',
         'http://localhost:3000',
-        'https://mezon-front.onrender.com',
+        'https://mezon-admin-frontend.onrender.com',
         'https://erp.mezon.uz'
     ],
     credentials: true,
@@ -48,7 +49,7 @@ app.use((0, cors_1.default)({
 }));
 // Handle preflight requests
 app.options('*', (0, cors_1.default)());
-app.use(express_1.default.json());
+app.use(express_1.default.json({ limit: "10mb" }));
 app.use((0, cookie_parser_1.default)());
 app.use((0, morgan_1.default)("dev"));
 // Health check endpoint (public)
@@ -80,6 +81,7 @@ app.use("/api/feedback", feedback_routes_1.default);
 app.use("/api/procurement", procurement_routes_1.default);
 app.use("/api/recipes", recipes_routes_1.default);
 app.use("/api/staffing", staffing_routes_1.default);
+app.use("/api/integration", export_routes_1.default);
 // Обработчик ошибок
 app.use(errorHandler_1.errorHandler);
 exports.default = app;

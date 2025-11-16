@@ -1,66 +1,284 @@
 // src/pages/NotificationsPage.tsx
-import { useState, useEffect } from 'react';
-import { api } from '../lib/api';
-import { Card } from '../components/Card';
-import { BellRing, FileText } from 'lucide-react';
+import { useEffect, useMemo, useState } from "react";
+import { BellRing, FileText, Megaphone, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { api } from "../lib/api";
+import { Card } from "../components/Card";
+import { Button } from "../components/ui/button";
+import { ROLE_LABELS } from "../lib/constants";
+import { useAuth } from "../hooks/useAuth";
 
-type Notification = {
-  type: 'CONTRACT_EXPIRING' | 'MEDICAL_CHECKUP_DUE';
+type SystemNotification = {
+  type: "CONTRACT_EXPIRING" | "MEDICAL_CHECKUP_DUE";
   message: string;
   employeeId: number;
   date: string;
 };
 
-const iconMap = {
+type Broadcast = {
+  id: number;
+  title: string;
+  content: string;
+  targetRole?: keyof typeof ROLE_LABELS | null;
+  targetGroup?: { id: number; name: string } | null;
+  createdAt: string;
+};
+
+type Group = { id: number; name: string };
+
+const iconMap: Record<SystemNotification["type"], JSX.Element> = {
   CONTRACT_EXPIRING: <FileText className="h-6 w-6 text-red-500" />,
   MEDICAL_CHECKUP_DUE: <BellRing className="h-6 w-6 text-yellow-500" />,
 };
 
+const ROLE_OPTIONS = [{ value: "", label: "Все роли" }].concat(
+  Object.entries(ROLE_LABELS).map(([value, label]) => ({ value, label }))
+);
+
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const canManageBroadcasts = useMemo(
+    () => !!user && ["DIRECTOR", "DEPUTY", "ADMIN"].includes(user.role),
+    [user]
+  );
+
+  const [systemNotifications, setSystemNotifications] = useState<SystemNotification[]>([]);
+  const [systemLoading, setSystemLoading] = useState(true);
+  const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
+  const [broadcastLoading, setBroadcastLoading] = useState(true);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [formState, setFormState] = useState({
+    title: "",
+    content: "",
+    targetRole: "",
+    targetGroupId: "",
+  });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      setLoading(true);
+    const loadSystemNotifications = async () => {
+      setSystemLoading(true);
       try {
-        const response = await api.get('/api/notifications');
-        setNotifications(response || []);
+        const response = await api.get("/api/notifications");
+        setSystemNotifications(response || []);
       } catch (error) {
-        console.error('Failed to fetch notifications:', error);
+        toast.error("Не удалось загрузить уведомления", { description: (error as any)?.message });
       } finally {
-        setLoading(false);
+        setSystemLoading(false);
       }
     };
 
-    fetchNotifications();
+    loadSystemNotifications();
   }, []);
 
+  useEffect(() => {
+    const loadBroadcasts = async () => {
+      setBroadcastLoading(true);
+      try {
+        const response = await api.get("/api/notifications/broadcasts");
+        setBroadcasts(response || []);
+      } catch (error) {
+        toast.error("Не удалось загрузить объявления", { description: (error as any)?.message });
+      } finally {
+        setBroadcastLoading(false);
+      }
+    };
+
+    loadBroadcasts();
+  }, []);
+
+  useEffect(() => {
+    if (!canManageBroadcasts) return;
+    const loadGroups = async () => {
+      try {
+        const data = await api.get("/api/groups");
+        setGroups(data || []);
+      } catch (error) {
+        toast.error("Группы недоступны", { description: (error as any)?.message });
+      }
+    };
+    loadGroups();
+  }, [canManageBroadcasts]);
+
+  const resetForm = () => {
+    setFormState({ title: "", content: "", targetRole: "", targetGroupId: "" });
+  };
+
+  const handleCreateBroadcast = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!formState.title.trim() || !formState.content.trim()) {
+      toast.error("Заполните заголовок и текст объявления");
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        title: formState.title.trim(),
+        content: formState.content.trim(),
+        targetRole: formState.targetRole || null,
+        targetGroupId: formState.targetGroupId ? Number(formState.targetGroupId) : null,
+      };
+      const created = await api.post("/api/notifications/broadcasts", payload);
+      setBroadcasts((prev) => [created, ...prev]);
+      toast.success("Объявление отправлено");
+      resetForm();
+    } catch (error: any) {
+      toast.error("Не удалось отправить объявление", { description: error?.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteBroadcast = async (id: number) => {
+    if (!window.confirm("Удалить объявление?")) return;
+    try {
+      await api.delete(`/api/notifications/broadcasts/${id}`);
+      setBroadcasts((prev) => prev.filter((item) => item.id !== id));
+      toast.success("Объявление удалено");
+    } catch (error: any) {
+      toast.error("Не удалось удалить", { description: error?.message });
+    }
+  };
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Уведомления</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Уведомления и объявления</h1>
+
       <Card>
-        {loading ? (
+        <h2 className="text-xl font-semibold mb-4">Системные напоминания</h2>
+        {systemLoading ? (
           <div className="p-4 text-center">Загрузка...</div>
-        ) : notifications.length === 0 ? (
+        ) : systemNotifications.length === 0 ? (
           <div className="p-4 text-center text-gray-500">Нет предстоящих событий.</div>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {notifications.map((notification, index) => (
+            {systemNotifications.map((notification, index) => (
               <li key={index} className="p-4 flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  {iconMap[notification.type]}
-                </div>
+                <div className="flex-shrink-0">{iconMap[notification.type]}</div>
                 <div className="flex-1">
                   <p className="font-semibold">{notification.message}</p>
                   <p className="text-sm text-gray-500">
-                    Событие произойдет: {new Date(notification.date).toLocaleDateString()}
+                    Событие произойдёт: {new Date(notification.date).toLocaleDateString()}
                   </p>
                 </div>
               </li>
             ))}
           </ul>
         )}
+      </Card>
+
+      <Card className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Массовые объявления</h2>
+          {broadcastLoading && <span className="text-sm text-gray-500">Обновляем...</span>}
+        </div>
+
+        {canManageBroadcasts && (
+          <form className="space-y-4" onSubmit={handleCreateBroadcast}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Заголовок</label>
+                <input
+                  type="text"
+                  value={formState.title}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Например, Инструктаж по пожарной безопасности"
+                  required
+                />
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Роль</label>
+                  <select
+                    value={formState.targetRole}
+                    onChange={(event) => setFormState((prev) => ({ ...prev, targetRole: event.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    {ROLE_OPTIONS.map((option) => (
+                      <option key={option.value || "all"} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Группа</label>
+                  <select
+                    value={formState.targetGroupId}
+                    onChange={(event) => setFormState((prev) => ({ ...prev, targetGroupId: event.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">Все филиалы</option>
+                    {groups.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Текст сообщения</label>
+              <textarea
+                value={formState.content}
+                onChange={(event) => setFormState((prev) => ({ ...prev, content: event.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                rows={4}
+                placeholder="Коротко опишите событие, прикрепите инструкции..."
+                required
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={saving}>
+                <Megaphone className="h-4 w-4 mr-2" />
+                {saving ? "Отправляем..." : "Отправить"}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        <div className="space-y-3">
+          {broadcasts.length === 0 && !broadcastLoading && (
+            <div className="text-sm text-gray-500">История объявлений пока пустая.</div>
+          )}
+          <ul className="space-y-3">
+            {broadcasts.map((broadcast) => (
+              <li key={broadcast.id} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">
+                      {new Date(broadcast.createdAt).toLocaleString("ru-RU")}
+                    </p>
+                    <h3 className="text-lg font-semibold">{broadcast.title}</h3>
+                  </div>
+                  {canManageBroadcasts && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteBroadcast(broadcast.id)}
+                      className="text-gray-400 hover:text-red-600"
+                      aria-label="Удалить объявление"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <p className="mt-2 text-gray-700 whitespace-pre-line">{broadcast.content}</p>
+                <div className="mt-2 text-sm text-gray-500 flex flex-wrap gap-4">
+                  <span>
+                    Роли: {broadcast.targetRole ? ROLE_LABELS[broadcast.targetRole] : "Все"}
+                  </span>
+                  <span>
+                    Группа: {broadcast.targetGroup?.name || "Все филиалы"}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Card>
     </div>
   );
