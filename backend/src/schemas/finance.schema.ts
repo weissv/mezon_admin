@@ -9,8 +9,8 @@ export const listFinanceSchema = z.object({
     sortOrder: z.enum(["asc", "desc"]).optional(),
     type: z.enum(["INCOME", "EXPENSE"]).optional(),
     category: z.enum(["NUTRITION", "CLUBS", "MAINTENANCE", "SALARY"]).optional(),
-    startDate: z.string().datetime().optional(),
-    endDate: z.string().datetime().optional(),
+    startDate: z.coerce.date().optional(),
+    endDate: z.coerce.date().optional(),
   }),
 });
 
@@ -20,8 +20,10 @@ export const createFinanceSchema = z.object({
     type: z.enum(["INCOME", "EXPENSE"]),
     category: z.enum(["NUTRITION", "CLUBS", "MAINTENANCE", "SALARY"]),
     description: z.string().optional(),
-    date: z.string().datetime(),
+    date: z.coerce.date(),
     documentUrl: z.string().url().optional().nullable(),
+    source: z.enum(["BUDGET", "EXTRA_BUDGET"]).optional(),
+    clubId: z.coerce.number().optional(),
   }),
 });
 
@@ -29,5 +31,13 @@ export const reportFinanceSchema = z.object({
   query: z.object({
     period: z.enum(["month", "year"]).optional(),
     category: z.enum(["NUTRITION", "CLUBS", "MAINTENANCE", "SALARY"]).optional(),
+  }),
+});
+
+export const summaryFinanceSchema = z.object({
+  query: z.object({
+    startDate: z.coerce.date().optional(),
+    endDate: z.coerce.date().optional(),
+    groupBy: z.enum(["month", "quarter", "year"]).optional(),
   }),
 });
