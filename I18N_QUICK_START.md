@@ -9,7 +9,6 @@ Create a JSON file for each language in the `frontend/src/locales/` directory:
 touch frontend/src/locales/en/mypage.json
 touch frontend/src/locales/ru/mypage.json
 touch frontend/src/locales/uz/mypage.json
-touch frontend/src/locales/kz/mypage.json
 ```
 
 ## Step 2: Add Translations
@@ -38,7 +37,7 @@ touch frontend/src/locales/kz/mypage.json
 }
 ```
 
-Repeat for `uz` and `kz` languages.
+Repeat for `uz` language.
 
 ## Step 3: Register Translations
 
@@ -49,7 +48,6 @@ Update `frontend/src/lib/i18n.ts`:
 import enMypage from '../locales/en/mypage.json';
 import ruMypage from '../locales/ru/mypage.json';
 import uzMypage from '../locales/uz/mypage.json';
-import kzMypage from '../locales/kz/mypage.json';
 
 // Add to resources object
 const resources = {
@@ -66,11 +64,6 @@ const resources = {
   uz: {
     common: uzCommon,
     mypage: uzMypage,  // Add this
-    // ...
-  },
-  kz: {
-    common: kzCommon,
-    mypage: kzMypage,  // Add this
     // ...
   },
 };
@@ -136,7 +129,7 @@ const { t } = useTranslation();
 
 ## Checklist
 
-- [ ] Created translation files for all 4 languages (en, ru, uz, kz)
+- [ ] Created translation files for all 3 languages (en, ru, uz)
 - [ ] Added all necessary translation keys
 - [ ] Registered translations in `i18n.ts`
 - [ ] Imported `useTranslation` in component

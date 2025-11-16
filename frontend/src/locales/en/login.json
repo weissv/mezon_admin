@@ -1,0 +1,21 @@
+{
+  "title": "Manage your school in Mezon style",
+  "subtitle": "The admin panel follows the Mezon aesthetic...",
+  "sellingPoints": [
+    "Digital dashboards and analytics",
+    "Food and procurement circuits",
+    "Document management and notifications"
+  ],
+  "badge": "Mezon // inspired.School",
+  "heading": "ERP Login",
+  "subheading": "Authorization",
+  "loginLabel": "Login",
+  "passwordLabel": "Password",
+  "loginButton": "Sign In",
+  "loggingIn": "Signing in...",
+  "success": "Login successful",
+  "error": "Login error",
+  "invalidCredentials": "Invalid credentials",
+  "loginRequired": "Login is required",
+  "passwordRequired": "Password is required"
+}
