@@ -1,0 +1,49 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "children": "Children",
+    "employees": "Employees",
+    "clubs": "Clubs",
+    "attendance": "Attendance",
+    "finance": "Finance",
+    "inventory": "Inventory",
+    "menu": "Menu",
+    "recipes": "Recipes",
+    "procurement": "Procurement",
+    "maintenance": "Requests",
+    "security": "Security",
+    "documents": "Documents",
+    "calendar": "Calendar",
+    "feedback": "Feedback",
+    "integration": "Import/Export",
+    "actionLog": "Action Log",
+    "notifications": "Notifications"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "close": "Close",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "preparing": "Preparing..."
+  },
+  "common": {
+    "id": "ID",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "position": "Position",
+    "branch": "Branch",
+    "group": "Group",
+    "actions": "Actions"
+  }
+}

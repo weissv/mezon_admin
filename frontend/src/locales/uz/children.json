@@ -1,0 +1,32 @@
+{
+  "title": "Bolalarni boshqarish",
+  "addChild": "Bola qo'shish",
+  "editChild": "Ma'lumotlarni tahrirlash",
+  "addNewChild": "Yangi bola qo'shish",
+  "searchPlaceholder": "Familiya bo'yicha qidirish...",
+  "absences": "Yo'qliklar",
+  "viewAbsences": "Yo'qliklar",
+  "absencesTitle": "Yo'qliklar - {{firstName}} {{lastName}}",
+  "noAbsences": "Yo'qlik yozuvlari yo'q",
+  "addAbsence": "Yo'qlik qo'shish",
+  "startDate": "Boshlanish sanasi",
+  "endDate": "Tugash sanasi",
+  "reason": "Sabab",
+  "reasonPlaceholder": "Oilaviy ta'til",
+  "deleteAbsenceConfirm": "Yo'qlik yozuvini o'chirish?",
+  "dataUpdated": "Bola ma'lumotlari yangilandi",
+  "childAdded": "Bola muvaffaqiyatli qo'shildi",
+  "absenceAdded": "Yo'qlik qo'shildi",
+  "absenceDeleted": "Yo'qlik o'chirildi",
+  "loadError": "Yo'qliklarni yuklashda xato",
+  "addError": "Qo'shishda xato",
+  "deleteError": "O'chirishda xato",
+  "massUpload": {
+    "title": "Ommaviy ro'yxat yuklash",
+    "description": "Bolalarni Excel/Google Sheets dan import qiling yoki kuratorlar uchun joriy shablonni yuklab oling.",
+    "excelTemplate": "Excel shabloni",
+    "goToImport": "Importga o'tish",
+    "templateDownloaded": "Bolalar shabloni yuklandi",
+    "downloadFailed": "Shablonni yuklab bo'lmadi"
+  }
+}

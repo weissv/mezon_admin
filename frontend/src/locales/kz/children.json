@@ -1,0 +1,32 @@
+{
+  "title": "Балаларды басқару",
+  "addChild": "Бала қосу",
+  "editChild": "Деректерді өңдеу",
+  "addNewChild": "Жаңа бала қосу",
+  "searchPlaceholder": "Тегі бойынша іздеу...",
+  "absences": "Жоқтықтар",
+  "viewAbsences": "Жоқтықтар",
+  "absencesTitle": "Жоқтықтар - {{firstName}} {{lastName}}",
+  "noAbsences": "Жоқтық жазбалары жоқ",
+  "addAbsence": "Жоқтық қосу",
+  "startDate": "Басталу күні",
+  "endDate": "Аяқталу күні",
+  "reason": "Себебі",
+  "reasonPlaceholder": "Отбасылық демалыс",
+  "deleteAbsenceConfirm": "Жоқтық жазбасын жою?",
+  "dataUpdated": "Бала деректері жаңартылды",
+  "childAdded": "Бала сәтті қосылды",
+  "absenceAdded": "Жоқтық қосылды",
+  "absenceDeleted": "Жоқтық жойылды",
+  "loadError": "Жоқтықтарды жүктеу қатесі",
+  "addError": "Қосу қатесі",
+  "deleteError": "Жою қатесі",
+  "massUpload": {
+    "title": "Топтық тізім жүктеу",
+    "description": "Балаларды Excel/Google Sheets-тен импорттаңыз немесе кураторлар үшін ағымдағы үлгіні жүктеп алыңыз.",
+    "excelTemplate": "Excel үлгісі",
+    "goToImport": "Импортқа өту",
+    "templateDownloaded": "Балалар үлгісі жүктелді",
+    "downloadFailed": "Үлгіні жүктеп алу мүмкін болмады"
+  }
+}
