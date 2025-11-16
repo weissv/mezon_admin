@@ -7,6 +7,7 @@ import { Modal } from '../components/Modal';
 import { Input } from '../components/ui/input';
 import { PlusCircle, MapPin } from 'lucide-react';
 import { api } from '../lib/api';
+import { useTranslation } from 'react-i18next';
 
 interface Branch {
   id: number;
@@ -16,6 +17,7 @@ interface Branch {
 }
 
 export default function BranchesPage() {
+  const { t } = useTranslation();
   const { data: branches, fetchData } = useApi<Branch>({ url: '/api/branches' });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', address: '', phone: '' });
@@ -26,12 +28,12 @@ export default function BranchesPage() {
     setSaving(true);
     try {
       await api.post('/api/branches', formData);
-      toast.success('Филиал добавлен');
+      toast.success(t('branches.addBranch'));
       setIsModalOpen(false);
       setFormData({ name: '', address: '', phone: '' });
       fetchData();
     } catch (error: any) {
-      toast.error('Ошибка создания филиала', { description: error?.message });
+      toast.error(t('errors.genericError'), { description: error?.message });
     } finally {
       setSaving(false);
     }
@@ -40,9 +42,9 @@ export default function BranchesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Филиалы</h1>
+        <h1 className="text-2xl font-bold">{t('branches.title')}</h1>
         <Button onClick={() => setIsModalOpen(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Добавить филиал
+          <PlusCircle className="mr-2 h-4 w-4" /> {t('branches.addBranch')}
         </Button>
       </div>
 
@@ -57,7 +59,7 @@ export default function BranchesPage() {
               <p className="text-sm text-gray-600 ml-7">{branch.address}</p>
               {branch.phone && (
                 <p className="text-sm text-gray-500 ml-7 mt-1">
-                  Телефон: {branch.phone}
+                  {t('branches.phone')}: {branch.phone}
                 </p>
               )}
             </div>
@@ -68,7 +70,7 @@ export default function BranchesPage() {
       {branches.length === 0 && (
         <Card>
           <div className="p-8 text-center text-gray-500">
-            Нет филиалов. Добавьте первый филиал.
+            {t('branches.noBranches')}. {t('branches.clickToAdd')}
           </div>
         </Card>
       )}
@@ -76,33 +78,33 @@ export default function BranchesPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Добавить филиал"
+        title={t('branches.addBranch')}
       >
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Название *</label>
+            <label className="block text-sm font-medium mb-1">{t('branches.name')} *</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              placeholder="Филиал №1"
+              placeholder={t('branches.name')}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Адрес *</label>
+            <label className="block text-sm font-medium mb-1">{t('branches.address')} *</label>
             <Input
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               required
-              placeholder="ул. Примерная, д. 1"
+              placeholder={t('branches.address')}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Телефон</label>
+            <label className="block text-sm font-medium mb-1">{t('branches.phone')}</label>
             <Input
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="+7 (999) 123-45-67"
+              placeholder={t('branches.phone')}
             />
           </div>
           <div className="flex gap-2 justify-end">
@@ -112,10 +114,10 @@ export default function BranchesPage() {
               onClick={() => setIsModalOpen(false)}
               disabled={saving}
             >
-              Отмена
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={saving}>
-              {saving ? 'Сохранение...' : 'Сохранить'}
+              {saving ? t('common.loading') : t('common.save')}
             </Button>
           </div>
         </form>
