@@ -44,6 +44,7 @@ function OrdersView() {
   const { data, total, page, setPage, fetchData } = useApi<PurchaseOrder>({
     url: '/api/procurement/orders',
   });
+  const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<PurchaseOrder | null>(null);
 
@@ -101,7 +102,7 @@ function OrdersView() {
     {
       key: 'totalAmount',
       header: 'Сумма',
-      render: (row) => `${row.totalAmount.toLocaleString('ru-RU')} ₽`
+      render: (row) => currency.format(row.totalAmount)
     },
     {
       key: 'status',

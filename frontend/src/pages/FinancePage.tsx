@@ -11,6 +11,8 @@ import { FINANCE_TYPES, FINANCE_CATEGORIES } from "../lib/constants";
 import { api } from "../lib/api";
 import { Download, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
+const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
+
 const TransactionsView = () => {
   const { data: transactions, total, page, setPage, fetchData } = useApi<Transaction>({
     url: "/api/finance/transactions",
@@ -45,7 +47,7 @@ const TransactionsView = () => {
     { key: "date", header: "Дата", render: (row) => new Date(row.date).toLocaleDateString() },
     { key: "type", header: "Тип", render: (row) => FINANCE_TYPES[row.type as keyof typeof FINANCE_TYPES] || row.type },
     { key: "category", header: "Категория", render: (row) => FINANCE_CATEGORIES[row.category as keyof typeof FINANCE_CATEGORIES] || row.category },
-    { key: "amount", header: "Сумма", render: (row) => `${row.amount} руб.` },
+    { key: "amount", header: "Сумма", render: (row) => currency.format(row.amount) },
     { key: "description", header: "Описание" },
   ];
 
@@ -110,7 +112,7 @@ const ReportsView = () => {
                 <div>
                   <p className="text-sm text-gray-600">Доходы</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {summary.byType?.find((t: any) => t.type === 'INCOME')?._sum?.amount?.toLocaleString('ru-RU') || 0} ₽
+                    {currency.format(summary.byType?.find((t: any) => t.type === 'INCOME')?._sum?.amount || 0)}
                   </p>
                 </div>
               </div>
@@ -122,7 +124,7 @@ const ReportsView = () => {
                 <div>
                   <p className="text-sm text-gray-600">Расходы</p>
                   <p className="text-2xl font-bold text-red-600">
-                    {summary.byType?.find((t: any) => t.type === 'EXPENSE')?._sum?.amount?.toLocaleString('ru-RU') || 0} ₽
+                    {currency.format(summary.byType?.find((t: any) => t.type === 'EXPENSE')?._sum?.amount || 0)}
                   </p>
                 </div>
               </div>
@@ -137,7 +139,7 @@ const ReportsView = () => {
                 <div key={idx} className="flex justify-between p-3 bg-gray-50 rounded">
                   <span className="font-medium">{FINANCE_CATEGORIES[cat.category as keyof typeof FINANCE_CATEGORIES] || cat.category}</span>
                   <div className="text-right">
-                    <div className="font-bold">{cat._sum?.amount?.toLocaleString('ru-RU') || 0} ₽</div>
+                    <div className="font-bold">{currency.format(cat._sum?.amount || 0)}</div>
                     <div className="text-sm text-gray-600">{cat._count?.id || 0} транзакций</div>
                   </div>
                 </div>
@@ -154,7 +156,7 @@ const ReportsView = () => {
                   <div key={idx} className="flex justify-between p-3 bg-gray-50 rounded">
                     <span className="font-medium">{src.source || 'Не указан'}</span>
                     <div className="text-right">
-                      <div className="font-bold">{src._sum?.amount?.toLocaleString('ru-RU') || 0} ₽</div>
+                      <div className="font-bold">{currency.format(src._sum?.amount || 0)}</div>
                       <div className="text-sm text-gray-600">{src._count?.id || 0} транзакций</div>
                     </div>
                   </div>
