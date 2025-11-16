@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 import { Phone, Mail, Facebook, Instagram, Send, Menu } from "lucide-react";
 import SideNav from "../components/SideNav";
 import DoomGame from "../components/DoomGame";
+import LanguageSelector from "../components/LanguageSelector";
 import { Toaster } from "sonner";
 import { useKonamiCode } from "../hooks/useKonamiCode";
 
@@ -62,6 +63,7 @@ export default function MainLayout() {
               </a>
             ))}
           </div>
+          <LanguageSelector />
         </div>
       </header>
       <div className="flex">

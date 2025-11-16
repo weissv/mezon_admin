@@ -5,82 +5,10 @@ import clsx from "clsx";
 import { Facebook, Instagram, Send, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
-
-const linksByRole: Record<string, { to: string; label: string }[]> = {
-  DIRECTOR: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/children", label: "Дети" },
-    { to: "/employees", label: "Сотрудники" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/attendance", label: "Посещаемость" },
-    { to: "/finance", label: "Финансы" },
-    { to: "/inventory", label: "Склад" },
-    { to: "/menu", label: "Меню" },
-    { to: "/recipes", label: "Рецепты" },
-    { to: "/procurement", label: "Закупки" },
-    { to: "/maintenance", label: "Заявки" },
-    { to: "/security", label: "Безопасность" },
-    { to: "/documents", label: "Документы" },
-    { to: "/calendar", label: "Календарь" },
-    { to: "/feedback", label: "Обратная связь" },
-    { to: "/integration", label: "Импорт/Экспорт" },
-    { to: "/action-log", label: "Журнал действий" },
-    { to: "/notifications", label: "Уведомления" },
-  ],
-  ACCOUNTANT: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/finance", label: "Финансы" },
-    { to: "/procurement", label: "Закупки" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/integration", label: "Импорт/Экспорт" },
-  ],
-  TEACHER: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/attendance", label: "Посещаемость" },
-  ],
-  DEPUTY: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/children", label: "Дети" },
-    { to: "/employees", label: "Сотрудники" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/attendance", label: "Посещаемость" },
-    { to: "/inventory", label: "Склад" },
-    { to: "/menu", label: "Меню" },
-    { to: "/recipes", label: "Рецепты" },
-    { to: "/procurement", label: "Закупки" },
-    { to: "/maintenance", label: "Заявки" },
-    { to: "/security", label: "Безопасность" },
-    { to: "/documents", label: "Документы" },
-    { to: "/calendar", label: "Календарь" },
-    { to: "/feedback", label: "Обратная связь" },
-    { to: "/integration", label: "Импорт/Экспорт" },
-    { to: "/action-log", label: "Журнал действий" },
-    { to: "/notifications", label: "Уведомления" },
-  ],
-  ADMIN: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/children", label: "Дети" },
-    { to: "/employees", label: "Сотрудники" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/attendance", label: "Посещаемость" },
-    { to: "/finance", label: "Финансы" },
-    { to: "/inventory", label: "Склад" },
-    { to: "/menu", label: "Меню" },
-    { to: "/recipes", label: "Рецепты" },
-    { to: "/procurement", label: "Закупки" },
-    { to: "/maintenance", label: "Заявки" },
-    { to: "/security", label: "Безопасность" },
-    { to: "/documents", label: "Документы" },
-    { to: "/calendar", label: "Календарь" },
-    { to: "/feedback", label: "Обратная связь" },
-    { to: "/integration", label: "Импорт/Экспорт" },
-    { to: "/action-log", label: "Журнал действий" },
-    { to: "/notifications", label: "Уведомления" },
-  ],
-};
+import { useTranslation } from "react-i18next";
 
 export default function SideNav() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const loc = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -88,6 +16,81 @@ export default function SideNav() {
   const [isLogoSpinning, setIsLogoSpinning] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const role = user?.role || "TEACHER";
+
+  const linksByRole: Record<string, { to: string; label: string }[]> = {
+    DIRECTOR: [
+      { to: "/dashboard", label: t('nav.dashboard') },
+      { to: "/children", label: t('nav.children') },
+      { to: "/employees", label: t('nav.employees') },
+      { to: "/clubs", label: t('nav.clubs') },
+      { to: "/attendance", label: t('nav.attendance') },
+      { to: "/finance", label: t('nav.finance') },
+      { to: "/inventory", label: t('nav.inventory') },
+      { to: "/menu", label: t('nav.menu') },
+      { to: "/recipes", label: t('nav.recipes') },
+      { to: "/procurement", label: t('nav.procurement') },
+      { to: "/maintenance", label: t('nav.maintenance') },
+      { to: "/security", label: t('nav.security') },
+      { to: "/documents", label: t('nav.documents') },
+      { to: "/calendar", label: t('nav.calendar') },
+      { to: "/feedback", label: t('nav.feedback') },
+      { to: "/integration", label: t('nav.integration') },
+      { to: "/action-log", label: t('nav.actionLog') },
+      { to: "/notifications", label: t('nav.notifications') },
+    ],
+    ACCOUNTANT: [
+      { to: "/dashboard", label: t('nav.dashboard') },
+      { to: "/finance", label: t('nav.finance') },
+      { to: "/procurement", label: t('nav.procurement') },
+      { to: "/clubs", label: t('nav.clubs') },
+      { to: "/integration", label: t('nav.integration') },
+    ],
+    TEACHER: [
+      { to: "/dashboard", label: t('nav.dashboard') },
+      { to: "/clubs", label: t('nav.clubs') },
+      { to: "/attendance", label: t('nav.attendance') },
+    ],
+    DEPUTY: [
+      { to: "/dashboard", label: t('nav.dashboard') },
+      { to: "/children", label: t('nav.children') },
+      { to: "/employees", label: t('nav.employees') },
+      { to: "/clubs", label: t('nav.clubs') },
+      { to: "/attendance", label: t('nav.attendance') },
+      { to: "/inventory", label: t('nav.inventory') },
+      { to: "/menu", label: t('nav.menu') },
+      { to: "/recipes", label: t('nav.recipes') },
+      { to: "/procurement", label: t('nav.procurement') },
+      { to: "/maintenance", label: t('nav.maintenance') },
+      { to: "/security", label: t('nav.security') },
+      { to: "/documents", label: t('nav.documents') },
+      { to: "/calendar", label: t('nav.calendar') },
+      { to: "/feedback", label: t('nav.feedback') },
+      { to: "/integration", label: t('nav.integration') },
+      { to: "/action-log", label: t('nav.actionLog') },
+      { to: "/notifications", label: t('nav.notifications') },
+    ],
+    ADMIN: [
+      { to: "/dashboard", label: t('nav.dashboard') },
+      { to: "/children", label: t('nav.children') },
+      { to: "/employees", label: t('nav.employees') },
+      { to: "/clubs", label: t('nav.clubs') },
+      { to: "/attendance", label: t('nav.attendance') },
+      { to: "/finance", label: t('nav.finance') },
+      { to: "/inventory", label: t('nav.inventory') },
+      { to: "/menu", label: t('nav.menu') },
+      { to: "/recipes", label: t('nav.recipes') },
+      { to: "/procurement", label: t('nav.procurement') },
+      { to: "/maintenance", label: t('nav.maintenance') },
+      { to: "/security", label: t('nav.security') },
+      { to: "/documents", label: t('nav.documents') },
+      { to: "/calendar", label: t('nav.calendar') },
+      { to: "/feedback", label: t('nav.feedback') },
+      { to: "/integration", label: t('nav.integration') },
+      { to: "/action-log", label: t('nav.actionLog') },
+      { to: "/notifications", label: t('nav.notifications') },
+    ],
+  };
+
   const links = role === "DIRECTOR" ? linksByRole.DIRECTOR : linksByRole[role] || [];
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -166,11 +169,11 @@ export default function SideNav() {
             <X className="h-6 w-6" />
           </button>
         </div>
-        <p>Системность и уют из Mezon school теперь и в управлении.</p>
+        <p>{t('footer.tagline')}</p>
       </div>
 
       <div className="mezon-sidenav__nav">
-        <p className="mezon-nav-label">Модули</p>
+        <p className="mezon-nav-label">{t('nav.modules')}</p>
         <div className="flex flex-col gap-1">
           {links.map((l) => {
             const isActive = loc.pathname === l.to || loc.pathname.startsWith(`${l.to}/`);
@@ -189,8 +192,8 @@ export default function SideNav() {
       </div>
 
       <div className="mezon-sidenav__footer">
-        <p>Есть вопрос? Свяжитесь с нами:</p>
-        <p className="font-semibold text-[var(--mezon-accent)]">+ 71 // 207 17 30</p>
+        <p>{t('footer.contact')}</p>
+        <p className="font-semibold text-[var(--mezon-accent)]">{t('footer.phone')}</p>
         <div className="mt-2 mezon-top-bar__social">
           {socialLinks.map(({ icon: Icon, href }) => (
             <a key={href} href={href} target="_blank" rel="noreferrer">
@@ -199,7 +202,7 @@ export default function SideNav() {
           ))}
         </div>
         <Button type="button" className="mt-4 w-full" variant="outline" onClick={logout}>
-          Выйти
+          {t('auth.logout')}
         </Button>
       </div>
     </aside>
