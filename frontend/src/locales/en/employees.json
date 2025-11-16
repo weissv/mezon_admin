@@ -1,0 +1,22 @@
+{
+  "title": "Employee Management",
+  "addEmployee": "Add Employee",
+  "editEmployee": "Edit Details",
+  "addNewEmployee": "Add New Employee",
+  "dataUpdated": "Employee data updated",
+  "employeeAdded": "Employee successfully added",
+  "reminders": {
+    "title": "Reminders",
+    "medicalCheckups": "Medical Checkups",
+    "attestations": "Attestations",
+    "daysUntil": "in {{days}} days"
+  },
+  "massUpload": {
+    "title": "Quick HR Data Exchange",
+    "description": "Export current staff to Excel or go to import for bulk updates.",
+    "excelTemplate": "Excel Template",
+    "goToImport": "Go to Import",
+    "templateDownloaded": "Template with employees downloaded",
+    "downloadFailed": "Failed to download template"
+  }
+}

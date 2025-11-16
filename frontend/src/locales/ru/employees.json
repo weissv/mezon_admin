@@ -1,0 +1,22 @@
+{
+  "title": "Управление сотрудниками",
+  "addEmployee": "Добавить сотрудника",
+  "editEmployee": "Редактировать данные",
+  "addNewEmployee": "Добавить нового сотрудника",
+  "dataUpdated": "Данные сотрудника обновлены",
+  "employeeAdded": "Сотрудник успешно добавлен",
+  "reminders": {
+    "title": "Напоминания",
+    "medicalCheckups": "Медосмотры",
+    "attestations": "Аттестации",
+    "daysUntil": "через {{days}} дн."
+  },
+  "massUpload": {
+    "title": "Быстрый обмен данными HR",
+    "description": "Выгрузите текущий штат в Excel или перейдите к импорту для массовых обновлений.",
+    "excelTemplate": "Шаблон Excel",
+    "goToImport": "Перейти к импорту",
+    "templateDownloaded": "Шаблон с сотрудниками выгружен",
+    "downloadFailed": "Не удалось скачать шаблон"
+  }
+}
