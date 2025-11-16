@@ -1,0 +1,49 @@
+{
+  "navigation": {
+    "dashboard": "Басқару тақтасы",
+    "children": "Балалар",
+    "employees": "Қызметкерлер",
+    "clubs": "Үйірме",
+    "attendance": "Қатысу",
+    "finance": "Қаржы",
+    "inventory": "Қойма",
+    "menu": "Мәзір",
+    "recipes": "Рецепттер",
+    "procurement": "Сатып алулар",
+    "maintenance": "Өтініштер",
+    "security": "Қауіпсіздік",
+    "documents": "Құжаттар",
+    "calendar": "Күнтізбе",
+    "feedback": "Кері байланыс",
+    "integration": "Импорт/Экспорт",
+    "actionLog": "Әрекеттер журналы",
+    "notifications": "Хабарландырулар"
+  },
+  "actions": {
+    "save": "Сақтау",
+    "cancel": "Болдырмау",
+    "delete": "Жою",
+    "edit": "Өңдеу",
+    "add": "Қосу",
+    "create": "Жасау",
+    "update": "Жаңарту",
+    "search": "Іздеу",
+    "export": "Экспорт",
+    "import": "Импорт",
+    "download": "Жүктеп алу",
+    "upload": "Жүктеу",
+    "close": "Жабу",
+    "confirm": "Растау",
+    "loading": "Жүктелуде...",
+    "preparing": "Дайындалуда..."
+  },
+  "common": {
+    "id": "ID",
+    "firstName": "Аты",
+    "lastName": "Тегі",
+    "position": "Лауазымы",
+    "branch": "Филиал",
+    "group": "Топ",
+    "actions": "Әрекеттер"
+  }
+}

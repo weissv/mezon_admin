@@ -6,6 +6,7 @@ const languages = [
   { code: 'ru', name: 'Русский', flag: '🇷🇺' },
   { code: 'en', name: 'English', flag: '🇬🇧' },
   { code: 'uz', name: 'O\'zbek', flag: '🇺🇿' },
+  { code: 'kz', name: 'Қазақ', flag: '🇰🇿' },
 ];
 
 export function LanguageSelector() {
