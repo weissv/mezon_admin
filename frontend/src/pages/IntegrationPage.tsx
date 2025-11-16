@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Download, UploadCloud, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "../components/Card";
@@ -21,10 +21,15 @@ type LoadingMap = Record<IntegrationEntity, boolean>;
 export default function IntegrationPage() {
   const initialState = useMemo(() => ENTITIES.reduce((acc, item) => ({ ...acc, [item.key]: "" }), {} as Record<IntegrationEntity, string>), []);
   const initialLoading = useMemo(() => ENTITIES.reduce((acc, item) => ({ ...acc, [item.key]: false }), {} as LoadingMap), []);
+  const initialBooleans = useMemo(
+    () => ENTITIES.reduce((acc, item) => ({ ...acc, [item.key]: false }), {} as Record<IntegrationEntity, boolean>),
+    []
+  );
   const [sheetUrls, setSheetUrls] = useState<Record<IntegrationEntity, string>>(initialState);
   const [exporting, setExporting] = useState<LoadingMap>(initialLoading);
   const [importing, setImporting] = useState<LoadingMap>(initialLoading);
   const [sheetImporting, setSheetImporting] = useState<LoadingMap>(initialLoading);
+  const [dragActive, setDragActive] = useState<Record<IntegrationEntity, boolean>>(initialBooleans);
   const [highlightedEntity, setHighlightedEntity] = useState<IntegrationEntity | null>(null);
   const location = useLocation();
   const fileInputs = useRef<Record<IntegrationEntity, HTMLInputElement | null>>({
@@ -125,6 +130,31 @@ export default function IntegrationPage() {
     handleExcelImport(entity, file);
   };
 
+  const handleManualUpload = (entity: IntegrationEntity) => {
+    fileInputs.current[entity]?.click();
+  };
+
+  const handleDrag = (entity: IntegrationEntity, event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "dragenter" || event.type === "dragover") {
+      setDragActive((prev) => (prev[entity] ? prev : { ...prev, [entity]: true }));
+    } else if (event.type === "dragleave") {
+      const related = event.relatedTarget as Node | null;
+      if (!related || !event.currentTarget.contains(related)) {
+        setDragActive((prev) => ({ ...prev, [entity]: false }));
+      }
+    }
+  };
+
+  const handleDrop = (entity: IntegrationEntity, event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive((prev) => ({ ...prev, [entity]: false }));
+    const file = event.dataTransfer?.files?.[0];
+    handleExcelImport(entity, file);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
@@ -161,12 +191,12 @@ export default function IntegrationPage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => fileInputs.current[entity.key]?.click()}
+                  onClick={() => handleManualUpload(entity.key)}
                   disabled={importing[entity.key]}
                   className="flex-1 min-w-[160px]"
                 >
                   <UploadCloud className="h-4 w-4 mr-2" />
-                  {importing[entity.key] ? "Загружаем..." : "Импорт XLSX"}
+                  {importing[entity.key] ? "Загружаем..." : "Загрузить"}
                 </Button>
                 <input
                   type="file"
@@ -177,6 +207,25 @@ export default function IntegrationPage() {
                   }}
                   onChange={(event) => handleFileInputChange(entity.key, event)}
                 />
+              </div>
+
+              <div
+                className={clsx(
+                  "border-2 border-dashed rounded-lg p-4 text-center transition-all cursor-pointer",
+                  dragActive[entity.key] ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400",
+                  importing[entity.key] && "opacity-50 pointer-events-none"
+                )}
+                onClick={() => handleManualUpload(entity.key)}
+                onDragEnter={(event) => handleDrag(entity.key, event)}
+                onDragOver={(event) => handleDrag(entity.key, event)}
+                onDragLeave={(event) => handleDrag(entity.key, event)}
+                onDrop={(event) => handleDrop(entity.key, event)}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <UploadCloud className="h-6 w-6 text-gray-500" />
+                  <p className="font-medium">Перетащите XLSX-файл сюда</p>
+                  <p className="text-sm text-gray-500">или нажмите, чтобы выбрать файл в проводнике</p>
+                </div>
               </div>
 
               <div>
