@@ -12,24 +12,66 @@ router.get(
   async (req, res) => {
     // Базовая сводка, фильтруем для TEACHER только свои кружки
     const isTeacher = req.user!.role === "TEACHER";
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    const alertThreshold = new Date(Date.now() + 30 * 24 * 3600 * 1000);
 
-    const [childrenCount, employeesCount, activeClubs, financeLast30d] = await Promise.all([
+    const [
+      childrenCount,
+      childrenOnMeals,
+      employeesCount,
+      activeClubs,
+      financeLast30d,
+      maintenanceActive,
+      procurementActive,
+      medicalExpiringSoon,
+      contractsExpiringSoon,
+    ] = await Promise.all([
       prisma.child.count({ where: { status: "ACTIVE" } }),
-      prisma.employee.count(),
+      prisma.attendance.count({
+        where: {
+          date: { gte: startOfToday, lt: endOfToday },
+          clubId: null,
+          isPresent: true,
+        },
+      }),
+      prisma.employee.count({ where: { fireDate: null } }),
       prisma.club.count({ where: isTeacher ? { teacherId: req.user!.employeeId } : {} }),
       prisma.financeTransaction.groupBy({
         by: ["type"],
         _sum: { amount: true },
         where: { date: { gte: new Date(Date.now() - 30 * 24 * 3600 * 1000) } },
       }),
+      prisma.maintenanceRequest.count({ where: { status: { in: ["NEW", "IN_PROGRESS"] } } }),
+      prisma.purchaseOrder.count({ where: { status: { not: "DELIVERED" } } }),
+      prisma.employee.count({
+        where: {
+          fireDate: null,
+          medicalCheckupDate: { not: null, lte: alertThreshold, gte: startOfToday },
+        },
+      }),
+      prisma.employee.count({
+        where: {
+          fireDate: null,
+          contractEndDate: { not: null, lte: alertThreshold, gte: startOfToday },
+        },
+      }),
     ]);
 
     return res.json({
       kpi: {
         childrenCount,
+        childrenOnMeals,
         employeesCount,
         activeClubs,
         financeLast30d,
+      },
+      alerts: {
+        maintenanceActive,
+        procurementActive,
+        medicalExpiringSoon,
+        contractsExpiringSoon,
       },
     });
   }
@@ -42,6 +84,9 @@ router.get(
   async (_req, res) => {
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    const alertThreshold = new Date(Date.now() + 30 * 24 * 3600 * 1000);
 
     const [
       childrenCount,
@@ -49,8 +94,12 @@ router.get(
       activeClubs,
       lowInventory,
       attendanceToday,
+      childrenOnMeals,
       maintenanceActive,
-      employeesNeedingMedical,
+      procurementActive,
+      medicalExpiring,
+      contractsExpiring,
+      employeeAttendanceRecords,
     ] = await Promise.all([
       // Всего детей
       prisma.child.count({ where: { status: "ACTIVE" } }),
@@ -76,9 +125,22 @@ router.get(
       prisma.attendance.count({
         where: {
           date: {
-            gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-            lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+            gte: startOfToday,
+            lt: endOfToday,
           },
+          isPresent: true,
+          clubId: null,
+        },
+      }),
+
+      // Кол-во детей, получающих питание (пришли в основную группу)
+      prisma.attendance.count({
+        where: {
+          date: {
+            gte: startOfToday,
+            lt: endOfToday,
+          },
+          clubId: null,
           isPresent: true,
         },
       }),
@@ -88,16 +150,67 @@ router.get(
         where: { status: { in: ["NEW", "IN_PROGRESS"] } },
       }),
       
+      // Активные закупки
+      prisma.purchaseOrder.count({
+        where: { status: { not: "DELIVERED" } },
+      }),
+
       // Сотрудники, которым скоро нужен медосмотр (в течение 30 дней)
-      prisma.employee.count({
+      prisma.employee.findMany({
         where: {
           fireDate: null,
           medicalCheckupDate: {
-            lte: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+            not: null,
+            lte: alertThreshold,
+            gte: startOfToday,
           },
         },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          position: true,
+          medicalCheckupDate: true,
+        },
+        orderBy: { medicalCheckupDate: "asc" },
+      }),
+
+      // Сотрудники с истекающими контрактами
+      prisma.employee.findMany({
+        where: {
+          fireDate: null,
+          contractEndDate: {
+            not: null,
+            lte: alertThreshold,
+            gte: startOfToday,
+          },
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          position: true,
+          contractEndDate: true,
+        },
+        orderBy: { contractEndDate: "asc" },
+      }),
+
+      // Табель сотрудников на сегодня
+      prisma.employeeAttendance.findMany({
+        where: {
+          date: {
+            gte: startOfToday,
+            lt: endOfToday,
+          },
+        },
+        select: { status: true },
       }),
     ]);
+
+    const employeeAttendance = employeeAttendanceRecords.reduce((acc: Record<string, number>, record) => {
+      acc[record.status] = (acc[record.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
     return res.json({
       childrenCount,
@@ -108,11 +221,19 @@ router.get(
         today: attendanceToday,
         date: today.toISOString().split("T")[0],
       },
+      nutrition: {
+        childrenOnMeals: childrenOnMeals,
+      },
       maintenance: {
         activeRequests: maintenanceActive,
       },
+      procurement: {
+        activeOrders: procurementActive,
+      },
       employees: {
-        needingMedicalCheckup: employeesNeedingMedical,
+        needingMedicalCheckup: medicalExpiring,
+        contractsExpiringSoon: contractsExpiring,
+        attendanceToday: employeeAttendance,
       },
     });
   }

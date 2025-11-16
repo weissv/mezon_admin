@@ -15,7 +15,8 @@ A comprehensive ERP system for managing school and kindergarten operations inclu
 - **Maintenance Requests**: Track repair and purchase requests
 - **Security Logs**: Record security events and incidents
 - **Action Logging**: Audit trail of all system actions
-- **Notifications**: Automated alerts for expiring contracts and medical checkups
+- **Notifications**: Automated alerts plus targeted broadcasts for roles/groups
+- **Data Exchange**: Excel/Google Sheets import & export for core registries
 
 ## 🛠️ Tech Stack
 
@@ -153,7 +154,19 @@ npm run dev
 - `/api/branches` - Branch management
 - `/api/groups` - Group management
 - `/api/actionlog` - Action logs (Admin only)
-- `/api/notifications` - System notifications (Admin only)
+- `/api/notifications` - System notifications and alerts
+- `/api/notifications/broadcasts` - Mass announcements for roles/groups
+- `/api/integration` - Excel / Google Sheets import-export tools
+
+## 🗂️ Data Exchange
+
+### Excel / Google Sheets Import & Export
+- `GET /api/integration/export/excel/:entity` – download XLSX for `children`, `employees`, `inventory`, or `finance`
+- `POST /api/integration/import/excel/:entity` – send `{ "fileBase64": "..." }` payloads to bulk upsert rows from an Excel template
+- `POST /api/integration/import/google-sheets` – provide `{ entity, sheetUrl }` where the sheet is shared as CSV to ingest directly from Google Sheets
+
+Templates generated via the export endpoint include the required headers. The importer uses the ID column (when provided) to update existing entries; otherwise new records are inserted.
+
 
 ## 🔐 User Roles & Permissions
 

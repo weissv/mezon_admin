@@ -4,11 +4,12 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, AlertCircle } from 'lucide-react';
+import { PlusCircle, AlertCircle, UploadCloud, Download } from 'lucide-react';
 import { EmployeeForm } from '../components/forms/EmployeeForm';
 import { Employee } from '../types/employee';
 import { api } from '../lib/api';
 import { Card } from '../components/Card';
+import { useNavigate } from 'react-router-dom';
 
 export default function EmployeesPage() {
   const { data, total, page, setPage, fetchData } = useApi<Employee>({
@@ -17,6 +18,8 @@ export default function EmployeesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [reminders, setReminders] = useState<any>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadReminders();
@@ -47,6 +50,24 @@ export default function EmployeesPage() {
     toast.success(editingEmployee ? 'Данные сотрудника обновлены' : 'Сотрудник успешно добавлен');
   };
 
+  const handleEmployeesExport = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await api.download('/api/integration/export/excel/employees');
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `employees-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      toast.success('Шаблон с сотрудниками выгружен');
+    } catch (error: any) {
+      toast.error('Не удалось скачать шаблон', { description: error?.message });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const columns: Column<Employee>[] = [
     { key: 'id', header: 'ID' },
     { key: 'lastName', header: 'Фамилия' },
@@ -67,6 +88,21 @@ export default function EmployeesPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Управление сотрудниками</h1>
+
+      <Card className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-semibold">Быстрый обмен данными HR</p>
+          <p className="text-sm text-gray-600">Выгрузите текущий штат в Excel или перейдите к импорту для массовых обновлений.</p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button variant="outline" onClick={handleEmployeesExport} disabled={isExporting}>
+            <Download className="mr-2 h-4 w-4" /> {isExporting ? 'Готовим...' : 'Шаблон Excel'}
+          </Button>
+          <Button onClick={() => navigate('/integration#employees')}>
+            <UploadCloud className="mr-2 h-4 w-4" /> Перейти к импорту
+          </Button>
+        </div>
+      </Card>
 
       {/* Reminders Widget */}
       {reminders && (reminders.medicalCheckups.length > 0 || reminders.attestations.length > 0) && (

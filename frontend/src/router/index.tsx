@@ -20,13 +20,14 @@ import CalendarPage from "../pages/CalendarPage";
 import FeedbackPage from "../pages/FeedbackPage";
 import ProcurementPage from "../pages/ProcurementPage";
 import RecipesPage from "../pages/RecipesPage";
+import IntegrationPage from "../pages/IntegrationPage";
 import { useAuth } from "../hooks/useAuth";
 import NotFoundPage from "../pages/NotFoundPage";
 
 function LoadingScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <span className="text-sm text-gray-500">Загрузка...</span>
+      <span className="text-sm text-gray-500">Оно грузится. Терпите....</span>
     </div>
   );
 }
@@ -85,7 +86,14 @@ export default function Router() {
 
           <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
             <Route path="action-log" element={<ActionLogPage />} />
+          </Route>
+
+          <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
             <Route path="notifications" element={<NotificationsPage />} />
+          </Route>
+
+          <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT"]} />}>
+            <Route path="integration" element={<IntegrationPage />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />

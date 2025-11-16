@@ -1,7 +1,7 @@
 // src/pages/ChildrenPage.tsx
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { PlusCircle, Search, CalendarX } from 'lucide-react';
+import { PlusCircle, Search, CalendarX, UploadCloud, Download } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
@@ -10,6 +10,8 @@ import { Modal } from '../components/Modal';
 import { ChildForm } from '../components/forms/ChildForm';
 import { Child } from '../types/child';
 import { api } from '../lib/api';
+import { Card } from '../components/Card';
+import { useNavigate } from 'react-router-dom';
 
 export default function ChildrenPage() {
   const { data, total, page, search, setPage, setSearch, fetchData } = useApi<Child>({
@@ -20,10 +22,30 @@ export default function ChildrenPage() {
   const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [showAbsences, setShowAbsences] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const navigate = useNavigate();
 
   const handleCreate = () => {
     setEditingChild(null);
     setIsModalOpen(true);
+  };
+
+  const handleChildrenExport = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await api.download('/api/integration/export/excel/children');
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `children-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      toast.success('Шаблон с детьми выгружен');
+    } catch (error: any) {
+      toast.error('Не удалось скачать шаблон', { description: error?.message });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleEdit = (child: Child) => {
@@ -66,6 +88,21 @@ export default function ChildrenPage() {
   return (
     <div>
       <h1 className="text-xl sm:text-2xl font-bold mb-4">Управление контингентом детей</h1>
+
+      <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-semibold">Массовая загрузка списков</p>
+          <p className="text-sm text-gray-600">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон для кураторов.</p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button variant="outline" onClick={handleChildrenExport} disabled={isExporting}>
+            <Download className="mr-2 h-4 w-4" /> {isExporting ? 'Готовим...' : 'Шаблон Excel'}
+          </Button>
+          <Button onClick={() => navigate('/integration#children')}>
+            <UploadCloud className="mr-2 h-4 w-4" /> Перейти к импорту
+          </Button>
+        </div>
+      </Card>
       <div className="mb-4 mobile-stack">
         <div className="search-container">
           <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />

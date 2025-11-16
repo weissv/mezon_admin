@@ -28,6 +28,7 @@ import feedbackRoutes from "./routes/feedback.routes";
 import procurementRoutes from "./routes/procurement.routes";
 import recipesRoutes from "./routes/recipes.routes";
 import staffingRoutes from "./routes/staffing.routes";
+import integrationRoutes from "./routes/export.routes";
 
 const app = express();
 
@@ -48,7 +49,7 @@ app.use(cors({
 // Handle preflight requests
 app.options('*', cors());
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 
@@ -84,6 +85,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/procurement", procurementRoutes);
 app.use("/api/recipes", recipesRoutes);
 app.use("/api/staffing", staffingRoutes);
+app.use("/api/integration", integrationRoutes);
 
 // Обработчик ошибок
 app.use(errorHandler);
