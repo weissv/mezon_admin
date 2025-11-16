@@ -1,39 +1,105 @@
 // src/routes/finance.routes.ts
 import { Router } from "express";
+import type { z } from "zod";
 import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
+import { validate } from "../middleware/validate";
 import { buildPagination, buildOrderBy, buildWhere } from "../utils/query";
+import {
+  createFinanceSchema,
+  listFinanceSchema,
+  reportFinanceSchema,
+  summaryFinanceSchema,
+} from "../schemas/finance.schema";
 
 const router = Router();
 
-// GET /api/finance/transactions
-router.get("/transactions", checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (req, res) => {
-  const { skip, take } = buildPagination(req.query);
-  const orderBy = buildOrderBy(req.query);
-  const where = buildWhere<any>(req.query, ["type", "category"]);
-  // Доп. фильтры по датам
-  const { startDate, endDate } = req.query as any;
-  if (startDate || endDate) {
-    where.date = {};
-    if (startDate) where.date.gte = new Date(String(startDate));
-    if (endDate) where.date.lte = new Date(String(endDate));
+type ListFinanceQuery = z.infer<typeof listFinanceSchema>["query"];
+type CreateFinanceBody = z.infer<typeof createFinanceSchema>["body"];
+type SummaryFinanceQuery = z.infer<typeof summaryFinanceSchema>["query"];
+type ReportFinanceQuery = z.infer<typeof reportFinanceSchema>["query"];
+
+const isValidDate = (value: unknown): value is Date => value instanceof Date && !Number.isNaN(value.getTime());
+
+const coerceDate = (value: unknown) => {
+  if (value instanceof Date) return isValidDate(value) ? value : null;
+  if (value === undefined || value === null || value === "") return null;
+  const parsed = new Date(String(value));
+  return isValidDate(parsed) ? parsed : null;
+};
+
+const appendDateRange = (where: Record<string, any>, start?: unknown, end?: unknown) => {
+  const startDate = coerceDate(start);
+  const endDate = coerceDate(end);
+  if (!startDate && !endDate) return;
+  where.date = {};
+  if (startDate) where.date.gte = startDate;
+  if (endDate) where.date.lte = endDate;
+};
+
+const normalizeClubId = (value: unknown) => {
+  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (!Number.isNaN(parsed)) return parsed;
   }
+  return undefined;
+};
+
+// GET /api/finance/transactions
+router.get(
+  "/transactions",
+  checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]),
+  validate(listFinanceSchema),
+  async (req, res) => {
+    const query = req.query as ListFinanceQuery;
+    const { skip, take } = buildPagination(query);
+    const orderBy = buildOrderBy(query);
+    const where = buildWhere<any>(query, ["type", "category"]);
+    appendDateRange(where, query.startDate, query.endDate);
   const [items, total] = await Promise.all([
     prisma.financeTransaction.findMany({ where, skip, take, orderBy }),
     prisma.financeTransaction.count({ where }),
   ]);
   return res.json({ items, total });
-});
+  }
+);
 
 // POST /api/finance/transactions
-router.post("/transactions", checkRole(["ACCOUNTANT", "ADMIN"]), async (req, res) => {
-  const tx = await prisma.financeTransaction.create({ data: req.body });
-  return res.status(201).json(tx);
-});
+router.post(
+  "/transactions",
+  checkRole(["ACCOUNTANT", "ADMIN"]),
+  validate(createFinanceSchema),
+  async (req, res) => {
+    const payload = req.body as CreateFinanceBody;
+    const normalizedDate = coerceDate(payload.date);
+    if (!normalizedDate) {
+      return res.status(400).json({ message: "Invalid transaction date" });
+    }
+
+    const tx = await prisma.financeTransaction.create({
+      data: {
+        amount: payload.amount,
+        type: payload.type,
+        category: payload.category,
+        description: payload.description,
+        date: normalizedDate,
+        documentUrl: payload.documentUrl,
+        source: payload.source,
+        clubId: normalizeClubId(payload.clubId),
+      },
+    });
+    return res.status(201).json(tx);
+  }
+);
 
 // GET /api/finance/reports?period=month&category=CLUBS
-router.get("/reports", checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (req, res) => {
-  const { period = "month", category } = req.query as any;
+router.get(
+  "/reports",
+  checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]),
+  validate(reportFinanceSchema),
+  async (req, res) => {
+    const { period = "month", category } = req.query as ReportFinanceQuery;
   const now = new Date();
   const start =
     period === "month"
@@ -49,19 +115,20 @@ router.get("/reports", checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (req,
     where,
   });
 
-  return res.json({ from: start, to: now, grouped });
-});
+    return res.json({ from: start, to: now, grouped });
+  }
+);
 
 // GET /api/finance/reports/summary - сводный отчет с группировкой
-router.get("/reports/summary", checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (req, res) => {
-  const { startDate, endDate, groupBy = "month" } = req.query as any;
+router.get(
+  "/reports/summary",
+  checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]),
+  validate(summaryFinanceSchema),
+  async (req, res) => {
+    const { startDate, endDate, groupBy = "month" } = req.query as SummaryFinanceQuery;
   
-  const where: any = {};
-  if (startDate || endDate) {
-    where.date = {};
-    if (startDate) where.date.gte = new Date(String(startDate));
-    if (endDate) where.date.lte = new Date(String(endDate));
-  }
+    const where: Record<string, any> = {};
+    appendDateRange(where, startDate, endDate);
 
   // Группировка по категории, типу, источнику
   const [byCategory, byType, bySource] = await Promise.all([
@@ -92,8 +159,8 @@ router.get("/reports/summary", checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]), asy
     where,
   });
 
-  return res.json({
-    period: { startDate, endDate },
+    return res.json({
+      period: { startDate, endDate },
     totals: {
       totalAmount: totals._sum.amount || 0,
       totalTransactions: totals._count.id,
@@ -101,19 +168,20 @@ router.get("/reports/summary", checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]), asy
     byCategory,
     byType,
     bySource,
-  });
-});
+    });
+  }
+);
 
 // GET /api/finance/export - экспорт в CSV
-router.get("/export", checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (req, res) => {
-  const { startDate, endDate } = req.query as any;
+router.get(
+  "/export",
+  checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]),
+  validate(summaryFinanceSchema),
+  async (req, res) => {
+    const { startDate, endDate } = req.query as SummaryFinanceQuery;
   
-  const where: any = {};
-  if (startDate || endDate) {
-    where.date = {};
-    if (startDate) where.date.gte = new Date(String(startDate));
-    if (endDate) where.date.lte = new Date(String(endDate));
-  }
+    const where: Record<string, any> = {};
+    appendDateRange(where, startDate, endDate);
 
   const transactions = await prisma.financeTransaction.findMany({
     where,
@@ -133,9 +201,13 @@ router.get("/export", checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (req, 
 
   const csv = header + rows;
 
-  res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", `attachment; filename=finance_export_${new Date().toISOString().split("T")[0]}.csv`);
-  return res.send("\uFEFF" + csv); // BOM для правильной кодировки в Excel
-});
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=finance_export_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    return res.send("\uFEFF" + csv); // BOM для правильной кодировки в Excel
+  }
+);
 
 export default router;
