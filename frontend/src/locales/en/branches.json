@@ -1,0 +1,18 @@
+{
+  "title": "Branches",
+  "addBranch": "Add Branch",
+  "noBranches": "No branches. Add the first branch.",
+  "phone": "Phone:",
+  "modal": {
+    "title": "Add Branch",
+    "nameLabel": "Name *",
+    "namePlaceholder": "Branch #1",
+    "addressLabel": "Address *",
+    "addressPlaceholder": "st. Example, building 1",
+    "phoneLabel": "Phone",
+    "phonePlaceholder": "+7 (999) 123-45-67"
+  },
+  "success": "Branch added",
+  "error": "Error creating branch",
+  "saving": "Saving..."
+}

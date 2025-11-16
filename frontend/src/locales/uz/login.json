@@ -1,0 +1,21 @@
+{
+  "title": "Maktabni Mezon uslubida boshqaring",
+  "subtitle": "Admin panel Mezon estetikasini takrorlaydi...",
+  "sellingPoints": [
+    "Raqamli panellar va analitika",
+    "Ovqatlanish va xarid zanjiri",
+    "Hujjat aylanishi va bildirishnomalar"
+  ],
+  "badge": "Mezon // inspired.School",
+  "heading": "ERP ga kirish",
+  "subheading": "Avtorizatsiya",
+  "loginLabel": "Login",
+  "passwordLabel": "Parol",
+  "loginButton": "Kirish",
+  "loggingIn": "Kirilmoqda...",
+  "success": "Kirish muvaffaqiyatli",
+  "error": "Kirish xatosi",
+  "invalidCredentials": "Noto'g'ri ma'lumotlar",
+  "loginRequired": "Login talab qilinadi",
+  "passwordRequired": "Parol talab qilinadi"
+}

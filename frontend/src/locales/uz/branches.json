@@ -1,0 +1,18 @@
+{
+  "title": "Filiallar",
+  "addBranch": "Filial qo'shish",
+  "noBranches": "Filiallar yo'q. Birinchi filialni qo'shing.",
+  "phone": "Telefon:",
+  "modal": {
+    "title": "Filial qo'shish",
+    "nameLabel": "Nomi *",
+    "namePlaceholder": "Filial №1",
+    "addressLabel": "Manzil *",
+    "addressPlaceholder": "ko'cha. Misol, uy 1",
+    "phoneLabel": "Telefon",
+    "phonePlaceholder": "+998 (99) 123-45-67"
+  },
+  "success": "Filial qo'shildi",
+  "error": "Filial yaratishda xato",
+  "saving": "Saqlanmoqda..."
+}
