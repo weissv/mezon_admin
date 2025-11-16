@@ -5,86 +5,83 @@ import clsx from "clsx";
 import { Facebook, Instagram, Send, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
-import { useTranslation } from "react-i18next";
-import { LanguageSelector } from "./LanguageSelector";
 
-const linksByRole: Record<string, { to: string; key: string }[]> = {
+const linksByRole: Record<string, { to: string; label: string }[]> = {
   DIRECTOR: [
-    { to: "/dashboard", key: "dashboard" },
-    { to: "/children", key: "children" },
-    { to: "/employees", key: "employees" },
-    { to: "/clubs", key: "clubs" },
-    { to: "/attendance", key: "attendance" },
-    { to: "/finance", key: "finance" },
-    { to: "/inventory", key: "inventory" },
-    { to: "/menu", key: "menu" },
-    { to: "/recipes", key: "recipes" },
-    { to: "/procurement", key: "procurement" },
-    { to: "/maintenance", key: "maintenance" },
-    { to: "/security", key: "security" },
-    { to: "/documents", key: "documents" },
-    { to: "/calendar", key: "calendar" },
-    { to: "/feedback", key: "feedback" },
-    { to: "/integration", key: "integration" },
-    { to: "/action-log", key: "actionLog" },
-    { to: "/notifications", key: "notifications" },
+    { to: "/dashboard", label: "Дашборд" },
+    { to: "/children", label: "Дети" },
+    { to: "/employees", label: "Сотрудники" },
+    { to: "/clubs", label: "Кружки" },
+    { to: "/attendance", label: "Посещаемость" },
+    { to: "/finance", label: "Финансы" },
+    { to: "/inventory", label: "Склад" },
+    { to: "/menu", label: "Меню" },
+    { to: "/recipes", label: "Рецепты" },
+    { to: "/procurement", label: "Закупки" },
+    { to: "/maintenance", label: "Заявки" },
+    { to: "/security", label: "Безопасность" },
+    { to: "/documents", label: "Документы" },
+    { to: "/calendar", label: "Календарь" },
+    { to: "/feedback", label: "Обратная связь" },
+    { to: "/integration", label: "Импорт/Экспорт" },
+    { to: "/action-log", label: "Журнал действий" },
+    { to: "/notifications", label: "Уведомления" },
   ],
   ACCOUNTANT: [
-    { to: "/dashboard", key: "dashboard" },
-    { to: "/finance", key: "finance" },
-    { to: "/procurement", key: "procurement" },
-    { to: "/clubs", key: "clubs" },
-    { to: "/integration", key: "integration" },
+    { to: "/dashboard", label: "Дашборд" },
+    { to: "/finance", label: "Финансы" },
+    { to: "/procurement", label: "Закупки" },
+    { to: "/clubs", label: "Кружки" },
+    { to: "/integration", label: "Импорт/Экспорт" },
   ],
   TEACHER: [
-    { to: "/dashboard", key: "dashboard" },
-    { to: "/clubs", key: "clubs" },
-    { to: "/attendance", key: "attendance" },
+    { to: "/dashboard", label: "Дашборд" },
+    { to: "/clubs", label: "Кружки" },
+    { to: "/attendance", label: "Посещаемость" },
   ],
   DEPUTY: [
-    { to: "/dashboard", key: "dashboard" },
-    { to: "/children", key: "children" },
-    { to: "/employees", key: "employees" },
-    { to: "/clubs", key: "clubs" },
-    { to: "/attendance", key: "attendance" },
-    { to: "/inventory", key: "inventory" },
-    { to: "/menu", key: "menu" },
-    { to: "/recipes", key: "recipes" },
-    { to: "/procurement", key: "procurement" },
-    { to: "/maintenance", key: "maintenance" },
-    { to: "/security", key: "security" },
-    { to: "/documents", key: "documents" },
-    { to: "/calendar", key: "calendar" },
-    { to: "/feedback", key: "feedback" },
-    { to: "/integration", key: "integration" },
-    { to: "/action-log", key: "actionLog" },
-    { to: "/notifications", key: "notifications" },
+    { to: "/dashboard", label: "Дашборд" },
+    { to: "/children", label: "Дети" },
+    { to: "/employees", label: "Сотрудники" },
+    { to: "/clubs", label: "Кружки" },
+    { to: "/attendance", label: "Посещаемость" },
+    { to: "/inventory", label: "Склад" },
+    { to: "/menu", label: "Меню" },
+    { to: "/recipes", label: "Рецепты" },
+    { to: "/procurement", label: "Закупки" },
+    { to: "/maintenance", label: "Заявки" },
+    { to: "/security", label: "Безопасность" },
+    { to: "/documents", label: "Документы" },
+    { to: "/calendar", label: "Календарь" },
+    { to: "/feedback", label: "Обратная связь" },
+    { to: "/integration", label: "Импорт/Экспорт" },
+    { to: "/action-log", label: "Журнал действий" },
+    { to: "/notifications", label: "Уведомления" },
   ],
   ADMIN: [
-    { to: "/dashboard", key: "dashboard" },
-    { to: "/children", key: "children" },
-    { to: "/employees", key: "employees" },
-    { to: "/clubs", key: "clubs" },
-    { to: "/attendance", key: "attendance" },
-    { to: "/finance", key: "finance" },
-    { to: "/inventory", key: "inventory" },
-    { to: "/menu", key: "menu" },
-    { to: "/recipes", key: "recipes" },
-    { to: "/procurement", key: "procurement" },
-    { to: "/maintenance", key: "maintenance" },
-    { to: "/security", key: "security" },
-    { to: "/documents", key: "documents" },
-    { to: "/calendar", key: "calendar" },
-    { to: "/feedback", key: "feedback" },
-    { to: "/integration", key: "integration" },
-    { to: "/action-log", key: "actionLog" },
-    { to: "/notifications", key: "notifications" },
+    { to: "/dashboard", label: "Дашборд" },
+    { to: "/children", label: "Дети" },
+    { to: "/employees", label: "Сотрудники" },
+    { to: "/clubs", label: "Кружки" },
+    { to: "/attendance", label: "Посещаемость" },
+    { to: "/finance", label: "Финансы" },
+    { to: "/inventory", label: "Склад" },
+    { to: "/menu", label: "Меню" },
+    { to: "/recipes", label: "Рецепты" },
+    { to: "/procurement", label: "Закупки" },
+    { to: "/maintenance", label: "Заявки" },
+    { to: "/security", label: "Безопасность" },
+    { to: "/documents", label: "Документы" },
+    { to: "/calendar", label: "Календарь" },
+    { to: "/feedback", label: "Обратная связь" },
+    { to: "/integration", label: "Импорт/Экспорт" },
+    { to: "/action-log", label: "Журнал действий" },
+    { to: "/notifications", label: "Уведомления" },
   ],
 };
 
 export default function SideNav() {
   const { user, logout } = useAuth();
-  const { t } = useTranslation();
   const loc = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
@@ -160,17 +157,14 @@ export default function SideNav() {
               }}
             />
           </div>
-          <div className="flex items-center gap-2">
-            <LanguageSelector />
-            {/* Close button for mobile */}
-            <button 
-              className="mezon-mobile-close" 
-              onClick={closeMobileMenu}
-              aria-label="Close menu"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
+          {/* Close button for mobile */}
+          <button 
+            className="mezon-mobile-close" 
+            onClick={closeMobileMenu}
+            aria-label="Close menu"
+          >
+            <X className="h-6 w-6" />
+          </button>
         </div>
         <p>Системность и уют из Mezon school теперь и в управлении.</p>
       </div>
@@ -187,7 +181,7 @@ export default function SideNav() {
                 className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}
                 onClick={closeMobileMenu}
               > 
-                {t(`navigation.${l.key}`)}
+                {l.label}
               </Link>
             );
           })}

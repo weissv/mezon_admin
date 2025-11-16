@@ -12,10 +12,8 @@ import { Child } from '../types/child';
 import { api } from '../lib/api';
 import { Card } from '../components/Card';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 
 export default function ChildrenPage() {
-  const { t } = useTranslation(['children', 'common']);
   const { data, total, page, search, setPage, setSearch, fetchData } = useApi<Child>({
     url: '/api/children',
     searchFields: ['lastName'],
@@ -42,9 +40,9 @@ export default function ChildrenPage() {
       anchor.download = `children-export-${new Date().toISOString().split('T')[0]}.xlsx`;
       anchor.click();
       URL.revokeObjectURL(url);
-      toast.success(t('massUpload.templateDownloaded'));
+      toast.success('Шаблон с детьми выгружен');
     } catch (error: any) {
-      toast.error(t('massUpload.downloadFailed'), { description: error?.message });
+      toast.error('Не удалось скачать шаблон', { description: error?.message });
     } finally {
       setIsExporting(false);
     }
@@ -58,7 +56,7 @@ export default function ChildrenPage() {
   const handleFormSuccess = () => {
     setIsModalOpen(false);
     fetchData();
-    toast.success(editingChild ? t('dataUpdated') : t('childAdded'));
+    toast.success(editingChild ? 'Данные ребенка обновлены' : 'Ребенок успешно добавлен');
   };
 
   const handleViewAbsences = (child: Child) => {
@@ -67,20 +65,20 @@ export default function ChildrenPage() {
   };
 
   const columns: Column<Child>[] = [
-    { key: 'id', header: t('common:common.id') },
-    { key: 'lastName', header: t('common:common.lastName') },
-    { key: 'firstName', header: t('common:common.firstName') },
-    { key: 'group', header: t('common:common.group'), render: (row) => row.group.name },
+    { key: 'id', header: 'ID' },
+    { key: 'lastName', header: 'Фамилия' },
+    { key: 'firstName', header: 'Имя' },
+    { key: 'group', header: 'Группа', render: (row) => row.group.name },
     {
       key: 'actions',
-      header: t('common:common.actions'),
+      header: 'Действия',
       render: (row) => (
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-            {t('common:actions.edit')}
+            Редактировать
           </Button>
           <Button variant="ghost" size="sm" onClick={() => handleViewAbsences(row)}>
-            <CalendarX className="h-4 w-4 mr-1" /> {t('absences')}
+            <CalendarX className="h-4 w-4 mr-1" /> Отсутствия
           </Button>
         </div>
       ),
@@ -89,19 +87,19 @@ export default function ChildrenPage() {
 
   return (
     <div>
-      <h1 className="text-xl sm:text-2xl font-bold mb-4">{t('title')}</h1>
+      <h1 className="text-xl sm:text-2xl font-bold mb-4">Управление контингентом детей</h1>
 
       <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-semibold">{t('massUpload.title')}</p>
-          <p className="text-sm text-gray-600">{t('massUpload.description')}</p>
+          <p className="font-semibold">Массовая загрузка списков</p>
+          <p className="text-sm text-gray-600">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон для кураторов.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={handleChildrenExport} disabled={isExporting}>
-            <Download className="mr-2 h-4 w-4" /> {isExporting ? t('common:actions.preparing') : t('massUpload.excelTemplate')}
+            <Download className="mr-2 h-4 w-4" /> {isExporting ? 'Готовим...' : 'Шаблон Excel'}
           </Button>
           <Button onClick={() => navigate('/integration#children')}>
-            <UploadCloud className="mr-2 h-4 w-4" /> {t('massUpload.goToImport')}
+            <UploadCloud className="mr-2 h-4 w-4" /> Перейти к импорту
           </Button>
         </div>
       </Card>
@@ -109,14 +107,14 @@ export default function ChildrenPage() {
         <div className="search-container">
           <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
           <Input
-            placeholder={t('searchPlaceholder')}
+            placeholder="Поиск по фамилии..."
             className="pl-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <Button onClick={handleCreate} className="w-full sm:w-auto">
-          <PlusCircle className="mr-2 h-4 w-4" /> {t('addChild')}
+          <PlusCircle className="mr-2 h-4 w-4" /> Добавить ребенка
         </Button>
       </div>
       <DataTable
@@ -130,7 +128,7 @@ export default function ChildrenPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingChild ? t('editChild') : t('addNewChild')}
+        title={editingChild ? 'Редактировать данные' : 'Добавить нового ребенка'}
       >
         <ChildForm
           initialData={editingChild}
@@ -143,7 +141,7 @@ export default function ChildrenPage() {
       <Modal
         isOpen={showAbsences}
         onClose={() => setShowAbsences(false)}
-        title={t('absencesTitle', { firstName: selectedChild?.firstName, lastName: selectedChild?.lastName })}
+        title={`Отсутствия - ${selectedChild?.firstName} ${selectedChild?.lastName}`}
       >
         {selectedChild && <AbsencesView childId={selectedChild.id} />}
       </Modal>
@@ -152,7 +150,6 @@ export default function ChildrenPage() {
 }
 
 function AbsencesView({ childId }: { childId: number }) {
-  const { t } = useTranslation('children');
   const [absences, setAbsences] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -166,7 +163,7 @@ function AbsencesView({ childId }: { childId: number }) {
       const data = await api.get(`/api/children/${childId}/absences`);
       setAbsences(data);
     } catch (error: any) {
-      toast.error(t('loadError'), { description: error?.message });
+      toast.error('Ошибка загрузки отсутствий', { description: error?.message });
     } finally {
       setLoading(false);
     }
@@ -184,40 +181,40 @@ function AbsencesView({ childId }: { childId: number }) {
         endDate: new Date(endDate).toISOString(),
         reason,
       });
-      toast.success(t('absenceAdded'));
+      toast.success('Отсутствие добавлено');
       setShowForm(false);
       setStartDate('');
       setEndDate('');
       setReason('');
       loadAbsences();
     } catch (error: any) {
-      toast.error(t('addError'), { description: error?.message });
+      toast.error('Ошибка добавления', { description: error?.message });
     }
   };
 
   const handleDelete = async (absenceId: number) => {
-    if (!confirm(t('deleteAbsenceConfirm'))) return;
+    if (!confirm('Удалить запись об отсутствии?')) return;
     try {
       await api.delete(`/api/children/absences/${absenceId}`);
-      toast.success(t('absenceDeleted'));
+      toast.success('Отсутствие удалено');
       loadAbsences();
     } catch (error: any) {
-      toast.error(t('deleteError'), { description: error?.message });
+      toast.error('Ошибка удаления', { description: error?.message });
     }
   };
 
-  if (loading) return <div className="p-4">{t('common:actions.loading')}</div>;
+  if (loading) return <div className="p-4">Загрузка...</div>;
 
   return (
     <div className="p-4 space-y-4">
       {!showForm ? (
         <Button onClick={() => setShowForm(true)} size="sm">
-          <PlusCircle className="mr-2 h-4 w-4" /> {t('addAbsence')}
+          <PlusCircle className="mr-2 h-4 w-4" /> Добавить отсутствие
         </Button>
       ) : (
         <form onSubmit={handleAddAbsence} className="border p-4 rounded space-y-3">
           <div>
-            <label className="block text-sm font-medium mb-1">{t('startDate')}</label>
+            <label className="block text-sm font-medium mb-1">Дата начала</label>
             <Input 
               type="date" 
               value={startDate} 
@@ -226,7 +223,7 @@ function AbsencesView({ childId }: { childId: number }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">{t('endDate')}</label>
+            <label className="block text-sm font-medium mb-1">Дата окончания</label>
             <Input 
               type="date" 
               value={endDate} 
@@ -235,18 +232,18 @@ function AbsencesView({ childId }: { childId: number }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">{t('reason')}</label>
+            <label className="block text-sm font-medium mb-1">Причина</label>
             <Input 
               value={reason} 
               onChange={(e) => setReason(e.target.value)} 
-              placeholder={t('reasonPlaceholder')} 
+              placeholder="Семейный отпуск" 
               required 
             />
           </div>
           <div className="flex gap-2">
-            <Button type="submit" size="sm">{t('common:actions.save')}</Button>
+            <Button type="submit" size="sm">Сохранить</Button>
             <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)}>
-              {t('common:actions.cancel')}
+              Отмена
             </Button>
           </div>
         </form>
@@ -254,7 +251,7 @@ function AbsencesView({ childId }: { childId: number }) {
 
       <div className="space-y-2">
         {absences.length === 0 ? (
-          <p className="text-gray-500 text-sm">{t('noAbsences')}</p>
+          <p className="text-gray-500 text-sm">Нет записей об отсутствиях</p>
         ) : (
           absences.map((absence) => (
             <div key={absence.id} className="flex justify-between items-center p-3 border rounded">
@@ -269,7 +266,7 @@ function AbsencesView({ childId }: { childId: number }) {
                 size="sm" 
                 onClick={() => handleDelete(absence.id)}
               >
-                {t('common:actions.delete')}
+                Удалить
               </Button>
             </div>
           ))

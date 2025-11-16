@@ -10,10 +10,8 @@ import { Employee } from '../types/employee';
 import { api } from '../lib/api';
 import { Card } from '../components/Card';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 
 export default function EmployeesPage() {
-  const { t } = useTranslation(['employees', 'common']);
   const { data, total, page, setPage, fetchData } = useApi<Employee>({
     url: '/api/employees',
   });
@@ -49,7 +47,7 @@ export default function EmployeesPage() {
   const handleFormSuccess = () => {
     setIsModalOpen(false);
     fetchData();
-    toast.success(editingEmployee ? t('dataUpdated') : t('employeeAdded'));
+    toast.success(editingEmployee ? 'Данные сотрудника обновлены' : 'Сотрудник успешно добавлен');
   };
 
   const handleEmployeesExport = async () => {
@@ -62,26 +60,26 @@ export default function EmployeesPage() {
       anchor.download = `employees-export-${new Date().toISOString().split('T')[0]}.xlsx`;
       anchor.click();
       URL.revokeObjectURL(url);
-      toast.success(t('massUpload.templateDownloaded'));
+      toast.success('Шаблон с сотрудниками выгружен');
     } catch (error: any) {
-      toast.error(t('massUpload.downloadFailed'), { description: error?.message });
+      toast.error('Не удалось скачать шаблон', { description: error?.message });
     } finally {
       setIsExporting(false);
     }
   };
 
   const columns: Column<Employee>[] = [
-    { key: 'id', header: t('common:common.id') },
-    { key: 'lastName', header: t('common:common.lastName') },
-    { key: 'firstName', header: t('common:common.firstName') },
-    { key: 'position', header: t('common:common.position') },
-    { key: 'branch', header: t('common:common.branch'), render: (row) => row.branch.name },
+    { key: 'id', header: 'ID' },
+    { key: 'lastName', header: 'Фамилия' },
+    { key: 'firstName', header: 'Имя' },
+    { key: 'position', header: 'Должность' },
+    { key: 'branch', header: 'Филиал', render: (row) => row.branch.name },
     {
       key: 'actions',
-      header: t('common:common.actions'),
+      header: 'Действия',
       render: (row) => (
         <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-          {t('common:actions.edit')}
+          Редактировать
         </Button>
       ),
     },
@@ -89,19 +87,19 @@ export default function EmployeesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
+      <h1 className="text-2xl font-bold mb-4">Управление сотрудниками</h1>
 
       <Card className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-semibold">{t('massUpload.title')}</p>
-          <p className="text-sm text-gray-600">{t('massUpload.description')}</p>
+          <p className="font-semibold">Быстрый обмен данными HR</p>
+          <p className="text-sm text-gray-600">Выгрузите текущий штат в Excel или перейдите к импорту для массовых обновлений.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={handleEmployeesExport} disabled={isExporting}>
-            <Download className="mr-2 h-4 w-4" /> {isExporting ? t('common:actions.preparing') : t('massUpload.excelTemplate')}
+            <Download className="mr-2 h-4 w-4" /> {isExporting ? 'Готовим...' : 'Шаблон Excel'}
           </Button>
           <Button onClick={() => navigate('/integration#employees')}>
-            <UploadCloud className="mr-2 h-4 w-4" /> {t('massUpload.goToImport')}
+            <UploadCloud className="mr-2 h-4 w-4" /> Перейти к импорту
           </Button>
         </div>
       </Card>
@@ -112,17 +110,17 @@ export default function EmployeesPage() {
           <div className="flex items-start">
             <AlertCircle className="h-5 w-5 text-orange-500 mr-3 mt-0.5" />
             <div className="flex-1">
-              <h3 className="font-semibold text-orange-900 mb-2">{t('reminders.title')}</h3>
+              <h3 className="font-semibold text-orange-900 mb-2">Напоминания</h3>
               
               {reminders.medicalCheckups.length > 0 && (
                 <div className="mb-3">
                   <p className="text-sm font-medium text-orange-800 mb-1">
-                    {t('reminders.medicalCheckups')} ({reminders.medicalCheckups.length}):
+                    Медосмотры ({reminders.medicalCheckups.length}):
                   </p>
                   <ul className="text-sm text-orange-700 space-y-1">
                     {reminders.medicalCheckups.map((emp: any) => (
                       <li key={emp.id}>
-                        {emp.firstName} {emp.lastName} ({emp.position}) - {t('reminders.daysUntil', { days: emp.daysUntil })}
+                        {emp.firstName} {emp.lastName} ({emp.position}) - через {emp.daysUntil} дн.
                       </li>
                     ))}
                   </ul>
@@ -132,12 +130,12 @@ export default function EmployeesPage() {
               {reminders.attestations.length > 0 && (
                 <div>
                   <p className="text-sm font-medium text-orange-800 mb-1">
-                    {t('reminders.attestations')} ({reminders.attestations.length}):
+                    Аттестации ({reminders.attestations.length}):
                   </p>
                   <ul className="text-sm text-orange-700 space-y-1">
                     {reminders.attestations.map((emp: any) => (
                       <li key={emp.id}>
-                        {emp.firstName} {emp.lastName} ({emp.position}) - {t('reminders.daysUntil', { days: emp.daysUntil })}
+                        {emp.firstName} {emp.lastName} ({emp.position}) - через {emp.daysUntil} дн.
                       </li>
                     ))}
                   </ul>
@@ -150,7 +148,7 @@ export default function EmployeesPage() {
 
       <div className="mb-4 flex justify-end">
         <Button onClick={handleCreate}>
-          <PlusCircle className="mr-2 h-4 w-4" /> {t('addEmployee')}
+          <PlusCircle className="mr-2 h-4 w-4" /> Добавить сотрудника
         </Button>
       </div>
       <DataTable
@@ -164,7 +162,7 @@ export default function EmployeesPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingEmployee ? t('editEmployee') : t('addNewEmployee')}
+        title={editingEmployee ? 'Редактировать данные' : 'Добавить нового сотрудника'}
       >
         <EmployeeForm
           initialData={editingEmployee}
