@@ -5,6 +5,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { authMiddleware } from "./middleware/auth";
 import { errorHandler } from "./middleware/errorHandler";
+import { config } from "./config";
 
 // Импорты роутов
 import authRoutes from "./routes/auth.routes";
@@ -32,22 +33,27 @@ import integrationRoutes from "./routes/export.routes";
 
 const app = express();
 
-// CORS configuration - allow requests from frontend domains
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://mezon-admin-frontend.onrender.com',
-    'https://erp.mezon.uz'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
-  exposedHeaders: ['Set-Cookie']
-}));
+const allowedOrigins = new Set(config.corsOrigins);
+const allowPattern = [/\.onrender\.com$/];
 
-// Handle preflight requests
-app.options('*', cors());
+const corsOptions: cors.CorsOptions = {
+  origin(origin, callback) {
+    if (!origin) {
+      return callback(null, true);
+    }
+    if (allowedOrigins.has(origin) || allowPattern.some((regex) => regex.test(origin))) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin ${origin} is not allowed by CORS`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
+  exposedHeaders: ["Set-Cookie"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
