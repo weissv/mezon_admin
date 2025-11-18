@@ -29,4 +29,4 @@ COPY package*.json ./
 
 EXPOSE 4000
 # Run migrations, seed database, then start server
-CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]

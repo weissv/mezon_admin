@@ -42,7 +42,7 @@ const normalizeClubId = (value) => {
 router.get("/transactions", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.listFinanceSchema), async (req, res) => {
     const query = req.query;
     const { skip, take } = (0, query_1.buildPagination)(query);
-    const orderBy = (0, query_1.buildOrderBy)(query);
+    const orderBy = (0, query_1.buildOrderBy)(query, ["date", "amount", "category", "type", "source", "id"]);
     const where = (0, query_1.buildWhere)(query, ["type", "category"]);
     appendDateRange(where, query.startDate, query.endDate);
     const [items, total] = await Promise.all([
@@ -71,6 +71,29 @@ router.post("/transactions", (0, checkRole_1.checkRole)(["ACCOUNTANT", "ADMIN"])
         },
     });
     return res.status(201).json(tx);
+});
+// PUT /api/finance/transactions/:id
+router.put("/transactions/:id", (0, checkRole_1.checkRole)(["ACCOUNTANT", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.updateFinanceSchema), async (req, res) => {
+    const payload = req.body;
+    const normalizedDate = coerceDate(payload.date);
+    if (!normalizedDate) {
+        return res.status(400).json({ message: "Invalid transaction date" });
+    }
+    const id = Number(req.params.id);
+    const tx = await prisma_1.prisma.financeTransaction.update({
+        where: { id },
+        data: {
+            amount: payload.amount,
+            type: payload.type,
+            category: payload.category,
+            description: payload.description,
+            date: normalizedDate,
+            documentUrl: payload.documentUrl,
+            source: payload.source,
+            clubId: normalizeClubId(payload.clubId),
+        },
+    });
+    return res.json(tx);
 });
 // GET /api/finance/reports?period=month&category=CLUBS
 router.get("/reports", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.reportFinanceSchema), async (req, res) => {

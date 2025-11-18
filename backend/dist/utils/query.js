@@ -9,8 +9,10 @@ const buildPagination = (q) => {
     return { page, pageSize, skip, take };
 };
 exports.buildPagination = buildPagination;
-const buildOrderBy = (q) => {
-    const sortBy = q.sortBy || "id";
+const buildOrderBy = (q, allowed = ["id"]) => {
+    const safeColumns = allowed.length ? allowed : ["id"];
+    const requestedColumn = typeof q.sortBy === "string" ? q.sortBy : "";
+    const sortBy = safeColumns.includes(requestedColumn) ? requestedColumn : safeColumns[0];
     const sortOrder = q.sortOrder === "desc" ? "desc" : "asc";
     return { [sortBy]: sortOrder };
 };

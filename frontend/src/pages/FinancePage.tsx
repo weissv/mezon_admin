@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import { useApi } from "../hooks/useApi";
 import { DataTable, Column } from "../components/DataTable/DataTable";
@@ -27,10 +27,7 @@ const TransactionsView = () => {
 
   const handleExport = async () => {
     try {
-      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || ''}/api/finance/export`, {
-        credentials: 'include', // Send HttpOnly cookie
-      });
-      const blob = await response.blob();
+      const blob = await api.download('/api/finance/export');
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -169,9 +166,6 @@ const ReportsView = () => {
     </div>
   );
 };
-
-// Add React import at the top
-import React from "react";
 
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState<"transactions" | "reports">("transactions");

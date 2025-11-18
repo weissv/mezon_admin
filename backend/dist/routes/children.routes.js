@@ -13,7 +13,15 @@ const router = (0, express_1.Router)();
 // GET /api/children
 router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
     const { skip, take } = (0, query_1.buildPagination)(req.query);
-    const orderBy = (0, query_1.buildOrderBy)(req.query);
+    const orderBy = (0, query_1.buildOrderBy)(req.query, [
+        "id",
+        "firstName",
+        "lastName",
+        "birthDate",
+        "status",
+        "groupId",
+        "createdAt",
+    ]);
     const where = (0, query_1.buildWhere)(req.query, ["status", "groupId", "lastName"]);
     const [items, total] = await Promise.all([
         prisma_1.prisma.child.findMany({ where, skip, take, orderBy, include: { group: true } }),

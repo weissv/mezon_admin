@@ -15,7 +15,7 @@ const router = (0, express_1.Router)();
 router.post("/login", async (req, res) => {
     const { email, login, password } = req.body;
     const identifier = login || email;
-    console.log('[AUTH] Login attempt:', { identifier, hasPassword: !!password, body: req.body });
+    console.log('[AUTH] Login attempt:', { identifier });
     if (!identifier || !password) {
         console.log('[AUTH] Missing credentials');
         return res.status(400).json({ message: "Email/login and password are required" });
@@ -25,9 +25,7 @@ router.post("/login", async (req, res) => {
         console.log('[AUTH] User not found:', identifier);
         return res.status(401).json({ message: "Invalid credentials" });
     }
-    console.log('[AUTH] User found:', { email: user.email, hasHash: !!user.passwordHash });
     const isValid = await bcryptjs_1.default.compare(password, user.passwordHash);
-    console.log('[AUTH] Password valid:', isValid);
     if (!isValid) {
         return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -40,11 +38,6 @@ router.post("/login", async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     };
     res.cookie('auth_token', token, cookieOptions);
-    console.log('[AUTH] Cookie set with options:', {
-        ...cookieOptions,
-        domain: req.hostname,
-        origin: req.headers.origin
-    });
     console.log('[AUTH] Login successful for:', user.email);
     // Remove sensitive data
     const { passwordHash, ...sanitizedUser } = user;

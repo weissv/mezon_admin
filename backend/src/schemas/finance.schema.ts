@@ -27,6 +27,12 @@ export const createFinanceSchema = z.object({
   }),
 });
 
+export const updateFinanceSchema = createFinanceSchema.extend({
+  params: z.object({
+    id: z.string().regex(/^\d+$/),
+  }),
+});
+
 export const reportFinanceSchema = z.object({
   query: z.object({
     period: z.enum(["month", "year"]).optional(),

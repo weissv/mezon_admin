@@ -17,10 +17,12 @@ export const buildPagination = (q: ListQuery) => {
   return { page, pageSize, skip, take };
 };
 
-export const buildOrderBy = (q: ListQuery) => {
-  const sortBy = q.sortBy || "id";
-  const sortOrder = q.sortOrder === "desc" ? "desc" : "asc";
-  return { [sortBy]: sortOrder } as Prisma.Enumerable<any>;
+export const buildOrderBy = (q: ListQuery, allowed: string[] = ["id"]) => {
+  const safeColumns = allowed.length ? allowed : ["id"];
+  const requestedColumn = typeof q.sortBy === "string" ? q.sortBy : "";
+  const sortBy = safeColumns.includes(requestedColumn) ? requestedColumn : safeColumns[0];
+  const sortOrder: Prisma.SortOrder = q.sortOrder === "desc" ? "desc" : "asc";
+  return { [sortBy]: sortOrder } as Prisma.Enumerable<Record<string, Prisma.SortOrder>>;
 };
 
 // Простой конструктор where из query: eq-поиск по полям

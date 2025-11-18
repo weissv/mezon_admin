@@ -43,7 +43,16 @@ const employee_schema_1 = require("../schemas/employee.schema");
 const router = (0, express_1.Router)();
 router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
     const { skip, take } = (0, query_1.buildPagination)(req.query);
-    const orderBy = (0, query_1.buildOrderBy)(req.query);
+    const orderBy = (0, query_1.buildOrderBy)(req.query, [
+        "id",
+        "firstName",
+        "lastName",
+        "position",
+        "hireDate",
+        "rate",
+        "branchId",
+        "createdAt",
+    ]);
     const where = (0, query_1.buildWhere)(req.query, ["branchId", "position", "lastName"]);
     const [items, total] = await Promise.all([
         prisma_1.prisma.employee.findMany({ where, skip, take, orderBy, include: { branch: true, user: true } }),

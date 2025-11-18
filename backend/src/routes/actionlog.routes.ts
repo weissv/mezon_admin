@@ -4,11 +4,26 @@ import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
 const router = Router();
 
-router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
   const logs = await prisma.actionLog.findMany({
     orderBy: { timestamp: "desc" },
     take: 200,
-    include: { user: true },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          employee: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
   });
   res.json(logs);
 });
