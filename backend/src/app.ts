@@ -34,7 +34,7 @@ import integrationRoutes from "./routes/export.routes";
 const app = express();
 
 const allowedOrigins = new Set(config.corsOrigins);
-const allowPattern = [/\.onrender\.com$/];
+const allowPattern = [/\.onrender\.com$/, /\.mezon\.uz$/];
 
 const corsOptions: cors.CorsOptions = {
   origin(origin, callback) {
@@ -44,12 +44,15 @@ const corsOptions: cors.CorsOptions = {
     if (allowedOrigins.has(origin) || allowPattern.some((regex) => regex.test(origin))) {
       return callback(null, true);
     }
+    console.log(`CORS blocked origin: ${origin}`);
     return callback(new Error(`Origin ${origin} is not allowed by CORS`));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
   exposedHeaders: ["Set-Cookie"],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
