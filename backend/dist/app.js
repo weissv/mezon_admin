@@ -10,6 +10,7 @@ const morgan_1 = __importDefault(require("morgan"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const auth_1 = require("./middleware/auth");
 const errorHandler_1 = require("./middleware/errorHandler");
+const config_1 = require("./config");
 // Импорты роутов
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
@@ -34,21 +35,25 @@ const recipes_routes_1 = __importDefault(require("./routes/recipes.routes"));
 const staffing_routes_1 = __importDefault(require("./routes/staffing.routes"));
 const export_routes_1 = __importDefault(require("./routes/export.routes"));
 const app = (0, express_1.default)();
-// CORS configuration - allow requests from frontend domains
-app.use((0, cors_1.default)({
-    origin: [
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'https://mezon-admin-frontend.onrender.com',
-        'https://erp.mezon.uz'
-    ],
+const allowedOrigins = new Set(config_1.config.corsOrigins);
+const allowPattern = [/\.onrender\.com$/];
+const corsOptions = {
+    origin(origin, callback) {
+        if (!origin) {
+            return callback(null, true);
+        }
+        if (allowedOrigins.has(origin) || allowPattern.some((regex) => regex.test(origin))) {
+            return callback(null, true);
+        }
+        return callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
-    exposedHeaders: ['Set-Cookie']
-}));
-// Handle preflight requests
-app.options('*', (0, cors_1.default)());
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
+    exposedHeaders: ["Set-Cookie"],
+};
+app.use((0, cors_1.default)(corsOptions));
+app.options("*", (0, cors_1.default)(corsOptions));
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use((0, cookie_parser_1.default)());
 app.use((0, morgan_1.default)("dev"));
