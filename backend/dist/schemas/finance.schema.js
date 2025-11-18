@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.summaryFinanceSchema = exports.reportFinanceSchema = exports.createFinanceSchema = exports.listFinanceSchema = void 0;
+exports.summaryFinanceSchema = exports.reportFinanceSchema = exports.updateFinanceSchema = exports.createFinanceSchema = exports.listFinanceSchema = void 0;
 // src/schemas/finance.schema.ts
 const zod_1 = require("zod");
 exports.listFinanceSchema = zod_1.z.object({
@@ -25,6 +25,11 @@ exports.createFinanceSchema = zod_1.z.object({
         documentUrl: zod_1.z.string().url().optional().nullable(),
         source: zod_1.z.enum(["BUDGET", "EXTRA_BUDGET"]).optional(),
         clubId: zod_1.z.coerce.number().optional(),
+    }),
+});
+exports.updateFinanceSchema = exports.createFinanceSchema.extend({
+    params: zod_1.z.object({
+        id: zod_1.z.string().regex(/^\d+$/),
     }),
 });
 exports.reportFinanceSchema = zod_1.z.object({

@@ -1,7 +1,6 @@
 // src/components/DataTable/DataTable.tsx
 import Papa from "papaparse";
-import { useMemo } from "react";
-import React from "react"; // <-- Добавил импорт React для JSX
+import React from "react";
 
 export type Column<T> = { key: string; header: string; render?: (row: T) => React.ReactNode };
 
@@ -22,14 +21,11 @@ export function DataTable<T extends Record<string, any>>({
 }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
-  const csv = useMemo(() => {
-    const rows = data.map((row) =>
-      Object.fromEntries(columns.map((c) => [String(c.header), c.key in row ? row[c.key as keyof T] : '']))
-    );
-    return Papa.unparse(rows);
-  }, [data, columns]);
-
   const downloadCsv = () => {
+    const rows = data.map((row) =>
+      Object.fromEntries(columns.map((c) => [String(c.header), c.key in row ? row[c.key as keyof T] : ""]))
+    );
+    const csv = Papa.unparse(rows);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

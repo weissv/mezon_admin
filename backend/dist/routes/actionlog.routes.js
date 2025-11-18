@@ -5,11 +5,26 @@ const express_1 = require("express");
 const prisma_1 = require("../prisma");
 const checkRole_1 = require("../middleware/checkRole");
 const router = (0, express_1.Router)();
-router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (_req, res) => {
     const logs = await prisma_1.prisma.actionLog.findMany({
         orderBy: { timestamp: "desc" },
         take: 200,
-        include: { user: true },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                    employee: {
+                        select: {
+                            id: true,
+                            firstName: true,
+                            lastName: true,
+                        },
+                    },
+                },
+            },
+        },
     });
     res.json(logs);
 });

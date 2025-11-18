@@ -1,6 +1,20 @@
 // prisma/seed.ts
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
+
+const resolveSeedPassword = (envKey: string, label: string) => {
+  const envValue = process.env[envKey];
+  if (envValue && envValue.length >= 12) {
+    return envValue;
+  }
+  const generated = randomBytes(12).toString("base64url");
+  console.warn(
+    `[seed] Environment variable ${envKey} is not set. Generated a temporary password for ${label}: ${generated}`
+  );
+  console.warn(`[seed] Please store this password securely or rerun seeding with ${envKey} defined.`);
+  return generated;
+};
 
 const prisma = new PrismaClient();
 
@@ -29,7 +43,7 @@ async function main() {
   });
 
   // 3. Создать пользователя-директора
-  const directorPasswordHash = await bcrypt.hash("password123", 10);
+  const directorPasswordHash = await bcrypt.hash(resolveSeedPassword("SEED_DIRECTOR_PASSWORD", "director"), 10);
   await prisma.user.upsert({
     where: { employeeId: directorEmployee.id },
     update: {
@@ -60,7 +74,7 @@ async function main() {
     },
   });
 
-  const izumiPasswordHash = await bcrypt.hash("8p09VhXW", 10);
+  const izumiPasswordHash = await bcrypt.hash(resolveSeedPassword("SEED_ADMIN_PASSWORD", "admin"), 10);
   await prisma.user.upsert({
     where: { employeeId: izumiEmployee.id },
     update: {
@@ -136,16 +150,31 @@ async function main() {
   });
 
   // 7. Создать остатки на складе
-  await prisma.inventoryItem.create({
-    data: {
-      name: "Картофель",
-      quantity: 50,
-      unit: "кг",
-      type: "FOOD",
-      expiryDate: new Date(Date.now() + 30 * 24 * 3600 * 1000),
-      ingredientId: potato.id,
-    },
-  });
+  const existingInventory = await prisma.inventoryItem.findFirst({ where: { ingredientId: potato.id } });
+  if (existingInventory) {
+    await prisma.inventoryItem.update({
+      where: { id: existingInventory.id },
+      data: {
+        name: "Картофель",
+        quantity: 50,
+        unit: "кг",
+        type: "FOOD",
+        expiryDate: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+        ingredientId: potato.id,
+      },
+    });
+  } else {
+    await prisma.inventoryItem.create({
+      data: {
+        name: "Картофель",
+        quantity: 50,
+        unit: "кг",
+        type: "FOOD",
+        expiryDate: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+        ingredientId: potato.id,
+      },
+    });
+  }
 
   console.log("Seeding finished.");
 }

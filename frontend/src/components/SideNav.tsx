@@ -5,80 +5,8 @@ import clsx from "clsx";
 import { Facebook, Instagram, Send, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
-
-const linksByRole: Record<string, { to: string; label: string }[]> = {
-  DIRECTOR: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/children", label: "Дети" },
-    { to: "/employees", label: "Сотрудники" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/attendance", label: "Посещаемость" },
-    { to: "/finance", label: "Финансы" },
-    { to: "/inventory", label: "Склад" },
-    { to: "/menu", label: "Меню" },
-    { to: "/recipes", label: "Рецепты" },
-    { to: "/procurement", label: "Закупки" },
-    { to: "/maintenance", label: "Заявки" },
-    { to: "/security", label: "Безопасность" },
-    { to: "/documents", label: "Документы" },
-    { to: "/calendar", label: "Календарь" },
-    { to: "/feedback", label: "Обратная связь" },
-    { to: "/integration", label: "Импорт/Экспорт" },
-    { to: "/action-log", label: "Журнал действий" },
-    { to: "/notifications", label: "Уведомления" },
-  ],
-  ACCOUNTANT: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/finance", label: "Финансы" },
-    { to: "/procurement", label: "Закупки" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/integration", label: "Импорт/Экспорт" },
-  ],
-  TEACHER: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/attendance", label: "Посещаемость" },
-  ],
-  DEPUTY: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/children", label: "Дети" },
-    { to: "/employees", label: "Сотрудники" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/attendance", label: "Посещаемость" },
-    { to: "/inventory", label: "Склад" },
-    { to: "/menu", label: "Меню" },
-    { to: "/recipes", label: "Рецепты" },
-    { to: "/procurement", label: "Закупки" },
-    { to: "/maintenance", label: "Заявки" },
-    { to: "/security", label: "Безопасность" },
-    { to: "/documents", label: "Документы" },
-    { to: "/calendar", label: "Календарь" },
-    { to: "/feedback", label: "Обратная связь" },
-    { to: "/integration", label: "Импорт/Экспорт" },
-    { to: "/action-log", label: "Журнал действий" },
-    { to: "/notifications", label: "Уведомления" },
-  ],
-  ADMIN: [
-    { to: "/dashboard", label: "Дашборд" },
-    { to: "/children", label: "Дети" },
-    { to: "/employees", label: "Сотрудники" },
-    { to: "/clubs", label: "Кружки" },
-    { to: "/attendance", label: "Посещаемость" },
-    { to: "/finance", label: "Финансы" },
-    { to: "/inventory", label: "Склад" },
-    { to: "/menu", label: "Меню" },
-    { to: "/recipes", label: "Рецепты" },
-    { to: "/procurement", label: "Закупки" },
-    { to: "/maintenance", label: "Заявки" },
-    { to: "/security", label: "Безопасность" },
-    { to: "/documents", label: "Документы" },
-    { to: "/calendar", label: "Календарь" },
-    { to: "/feedback", label: "Обратная связь" },
-    { to: "/integration", label: "Импорт/Экспорт" },
-    { to: "/action-log", label: "Журнал действий" },
-    { to: "/notifications", label: "Уведомления" },
-  ],
-};
+import { getLinksForRole } from "../lib/modules";
+import type { UserRole } from "../types/auth";
 
 export default function SideNav() {
   const { user, logout } = useAuth();
@@ -87,8 +15,8 @@ export default function SideNav() {
   const [logoClicks, setLogoClicks] = useState(0);
   const [isLogoSpinning, setIsLogoSpinning] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const role = user?.role || "TEACHER";
-  const links = role === "DIRECTOR" ? linksByRole.DIRECTOR : linksByRole[role] || [];
+  const role = (user?.role || "TEACHER") as UserRole;
+  const links = getLinksForRole(role);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   
@@ -173,11 +101,11 @@ export default function SideNav() {
         <p className="mezon-nav-label">Модули</p>
         <div className="flex flex-col gap-1">
           {links.map((l) => {
-            const isActive = loc.pathname === l.to || loc.pathname.startsWith(`${l.to}/`);
+            const isActive = loc.pathname === l.path || loc.pathname.startsWith(`${l.path}/`);
             return (
               <Link 
-                key={l.to} 
-                to={l.to} 
+                key={l.path} 
+                to={l.path} 
                 className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}
                 onClick={closeMobileMenu}
               > 

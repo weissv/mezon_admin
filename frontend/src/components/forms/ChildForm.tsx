@@ -1,4 +1,5 @@
 // src/components/forms/ChildForm.tsx
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +22,8 @@ type Child = { id: number; firstName: string; lastName: string; birthDate: strin
 type ChildFormProps = { initialData?: Child | null; onSuccess: () => void; onCancel: () => void; };
 
 export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) {
+  const [groups, setGroups] = useState<Array<{ id: number; name: string }>>([]);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ChildFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,6 +34,27 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
       healthInfo: initialData?.healthInfo || '',
     },
   });
+
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoadingGroups(true);
+    api.get('/api/groups')
+      .then((data) => {
+        if (!isMounted) return;
+        setGroups(Array.isArray(data) ? data : []);
+      })
+      .catch((error: any) => {
+        const msg = error?.message || 'Не удалось загрузить список групп';
+        toast.error('Ошибка загрузки групп', { description: msg });
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingGroups(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const onSubmit = async (data: ChildFormData) => {
     try {
@@ -69,9 +93,30 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
         <FormError message={errors.birthDate?.message} />
       </div>
       <div>
-        <label>ID Группы</label>
-        <Input type="number" {...register('groupId')} />
+        <label>Группа</label>
+        <select
+          className="w-full rounded-md border border-gray-300 px-3 py-2"
+          disabled={isLoadingGroups}
+          {...register('groupId', { valueAsNumber: true })}
+        >
+          <option value="">{isLoadingGroups ? 'Загружаем...' : 'Выберите группу'}</option>
+          {groups.map((group) => (
+            <option key={group.id} value={group.id}>
+              {group.name}
+            </option>
+          ))}
+        </select>
         <FormError message={errors.groupId?.message} />
+      </div>
+      <div>
+        <label>Мед. сведения (опционально)</label>
+        <textarea
+          className="w-full rounded-md border border-gray-300 px-3 py-2"
+          rows={3}
+          placeholder="Аллергии, рекомендации..."
+          {...register('healthInfo')}
+        />
+        <FormError message={errors.healthInfo?.message} />
       </div>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="ghost" onClick={onCancel}>Отмена</Button>

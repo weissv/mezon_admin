@@ -10,6 +10,7 @@ import {
   listFinanceSchema,
   reportFinanceSchema,
   summaryFinanceSchema,
+  updateFinanceSchema,
 } from "../schemas/finance.schema";
 
 const router = Router();
@@ -18,6 +19,7 @@ type ListFinanceQuery = z.infer<typeof listFinanceSchema>["query"];
 type CreateFinanceBody = z.infer<typeof createFinanceSchema>["body"];
 type SummaryFinanceQuery = z.infer<typeof summaryFinanceSchema>["query"];
 type ReportFinanceQuery = z.infer<typeof reportFinanceSchema>["query"];
+type UpdateFinanceBody = z.infer<typeof updateFinanceSchema>["body"];
 
 const isValidDate = (value: unknown): value is Date => value instanceof Date && !Number.isNaN(value.getTime());
 
@@ -54,7 +56,7 @@ router.get(
   async (req, res) => {
     const query = req.query as ListFinanceQuery;
     const { skip, take } = buildPagination(query);
-    const orderBy = buildOrderBy(query);
+    const orderBy = buildOrderBy(query, ["date", "amount", "category", "type", "source", "id"]);
     const where = buildWhere<any>(query, ["type", "category"]);
     appendDateRange(where, query.startDate, query.endDate);
   const [items, total] = await Promise.all([
@@ -90,6 +92,37 @@ router.post(
       },
     });
     return res.status(201).json(tx);
+  }
+);
+
+// PUT /api/finance/transactions/:id
+router.put(
+  "/transactions/:id",
+  checkRole(["ACCOUNTANT", "ADMIN"]),
+  validate(updateFinanceSchema),
+  async (req, res) => {
+    const payload = req.body as UpdateFinanceBody;
+    const normalizedDate = coerceDate(payload.date);
+    if (!normalizedDate) {
+      return res.status(400).json({ message: "Invalid transaction date" });
+    }
+
+    const id = Number(req.params.id);
+    const tx = await prisma.financeTransaction.update({
+      where: { id },
+      data: {
+        amount: payload.amount,
+        type: payload.type,
+        category: payload.category,
+        description: payload.description,
+        date: normalizedDate,
+        documentUrl: payload.documentUrl,
+        source: payload.source,
+        clubId: normalizeClubId(payload.clubId),
+      },
+    });
+
+    return res.json(tx);
   }
 );
 

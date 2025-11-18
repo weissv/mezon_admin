@@ -33,12 +33,14 @@ if [ ! -f .env ]; then
     
     cat > .env << 'EOF'
 # PostgreSQL Database Configuration
-POSTGRES_USER=erp_user
-POSTGRES_PASSWORD=erp_password_123
-POSTGRES_DB=erp_db
+    POSTGRES_USER=postgres
+    POSTGRES_PASSWORD=postgres_password_123
+    POSTGRES_DB=erp_db
+    POSTGRES_APP_USER=erp_user
+    POSTGRES_APP_PASSWORD=erp_password_123
 
 # Backend API Configuration
-DATABASE_URL="postgresql://erp_user:erp_password_123@postgres:5432/erp_db?schema=public"
+    DATABASE_URL="postgresql://erp_user:erp_password_123@postgres:5432/erp_db?schema=public"
 PORT=4000
 JWT_SECRET="your_super_secret_jwt_key_that_is_long_and_secure"
 NODE_ENV=development

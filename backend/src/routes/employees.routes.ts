@@ -10,7 +10,16 @@ const router = Router();
 
 router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
   const { skip, take } = buildPagination(req.query);
-  const orderBy = buildOrderBy(req.query);
+  const orderBy = buildOrderBy(req.query, [
+    "id",
+    "firstName",
+    "lastName",
+    "position",
+    "hireDate",
+    "rate",
+    "branchId",
+    "createdAt",
+  ]);
   const where = buildWhere<any>(req.query, ["branchId", "position", "lastName"]);
   const [items, total] = await Promise.all([
     prisma.employee.findMany({ where, skip, take, orderBy, include: { branch: true, user: true } }),

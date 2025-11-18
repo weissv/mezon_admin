@@ -1,18 +1,22 @@
 // src/layouts/MainLayout.tsx
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { Phone, Mail, Facebook, Instagram, Send, Menu } from "lucide-react";
 import SideNav from "../components/SideNav";
 import DoomGame from "../components/DoomGame";
 import { Toaster } from "sonner";
 import { useKonamiCode } from "../hooks/useKonamiCode";
+import { useAuth } from "../hooks/useAuth";
 
 export default function MainLayout() {
+  const { user, isLoading } = useAuth();
   const [showDoom, setShowDoom] = useState(false);
 
   // Konami Code Easter Egg
   useKonamiCode(() => {
-    setShowDoom(true);
+    if (user) {
+      setShowDoom(true);
+    }
   });
 
   const contacts = [
@@ -26,6 +30,34 @@ export default function MainLayout() {
     { icon: Instagram, href: "https://instagram.com/mezonschool" },
     { icon: Send, href: "http://t.me/mezon_school" },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <span className="text-sm text-gray-500">Оно грузится. Терпите....</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 text-center">
+        <div className="max-w-md space-y-4">
+          <p className="text-2xl font-semibold text-gray-800">Сессия потеряна</p>
+          <p className="text-gray-600">
+            Вы не авторизованы или ваша сессия устарела. Чтобы продолжить работу с системой,
+            войдите снова.
+          </p>
+          <Link
+            to="/auth/login"
+            className="inline-flex items-center justify-center rounded-lg bg-[var(--mezon-accent)] px-6 py-3 font-semibold text-white shadow-lg shadow-[var(--mezon-accent-transparent)] transition hover:opacity-90"
+          >
+            Перейти к входу
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mezon-app">
