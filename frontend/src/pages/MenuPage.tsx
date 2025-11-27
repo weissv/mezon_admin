@@ -146,8 +146,9 @@ export default function MenuPage() {
   const renderDay = (date: Date) => {
     const menuForDay = menus.find(m => new Date(m.date).toDateString() === date.toDateString());
     return (
-      <Card key={date.toISOString()} className="flex-1 min-w-[200px]">
-        <div className="p-4">
+      <div key={date.toISOString()}>
+        <Card className="flex-1 min-w-[200px]">
+          <div className="p-4">
           <h3 className="font-bold text-lg">{date.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
           {menuForDay ? (
             <div className="mt-2">
@@ -182,8 +183,9 @@ export default function MenuPage() {
           <Button onClick={() => handleOpenModal(date)} className="mt-4 w-full">
             {menuForDay ? 'Редактировать' : 'Создать'}
           </Button>
-        </div>
-      </Card>
+          </div>
+        </Card>
+      </div>
     );
   };
 
