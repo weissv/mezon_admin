@@ -48,20 +48,22 @@ export default function BranchesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {branches.map((branch) => (
-          <Card key={branch.id}>
-            <div className="p-4">
-              <div className="flex items-start mb-2">
-                <MapPin className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
-                <h2 className="font-bold text-lg">{branch.name}</h2>
+          <div key={branch.id}>
+            <Card>
+              <div className="p-4">
+                <div className="flex items-start mb-2">
+                  <MapPin className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                  <h2 className="font-bold text-lg">{branch.name}</h2>
+                </div>
+                <p className="text-sm text-gray-600 ml-7">{branch.address}</p>
+                {branch.phone && (
+                  <p className="text-sm text-gray-500 ml-7 mt-1">
+                    Телефон: {branch.phone}
+                  </p>
+                )}
               </div>
-              <p className="text-sm text-gray-600 ml-7">{branch.address}</p>
-              {branch.phone && (
-                <p className="text-sm text-gray-500 ml-7 mt-1">
-                  Телефон: {branch.phone}
-                </p>
-              )}
-            </div>
-          </Card>
+            </Card>
+          </div>
         ))}
       </div>
 
