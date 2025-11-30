@@ -17,6 +17,32 @@ router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createSecurityLogSchem
   res.status(201).json(created);
 });
 
+// PUT /api/security/:id
+router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ message: "Invalid id" });
+  }
+  const { eventType, description, date, documentUrl } = req.body;
+  try {
+    const updated = await prisma.securityLog.update({
+      where: { id },
+      data: {
+        eventType,
+        description,
+        date: date ? new Date(date) : undefined,
+        documentUrl,
+      },
+    });
+    return res.json(updated);
+  } catch (error: any) {
+    if (error?.code === "P2025") {
+      return res.status(404).json({ message: "Record not found" });
+    }
+    throw error;
+  }
+});
+
 // DELETE /api/security/:id
 router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
   const id = Number(req.params.id);
