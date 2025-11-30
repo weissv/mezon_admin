@@ -9,7 +9,6 @@ const router = Router();
 router.get("/", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
   const groups = await prisma.group.findMany({
     include: {
-      branch: true,
       _count: {
         select: { children: true }
       }
@@ -29,20 +28,14 @@ router.get("/", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (
 
 // POST /api/groups - создать класс
 router.post("/", checkRole(["ADMIN"]), async (req, res) => {
-  const { name, branchId } = req.body;
+  const { name } = req.body;
   
-  if (!name || !branchId) {
-    return res.status(400).json({ error: "Название и филиал обязательны" });
+  if (!name) {
+    return res.status(400).json({ error: "Название обязательно" });
   }
   
   const group = await prisma.group.create({
-    data: {
-      name,
-      branchId: Number(branchId)
-    },
-    include: {
-      branch: true
-    }
+    data: { name }
   });
   
   return res.status(201).json(group);
@@ -51,17 +44,11 @@ router.post("/", checkRole(["ADMIN"]), async (req, res) => {
 // PUT /api/groups/:id - обновить класс
 router.put("/:id", checkRole(["ADMIN"]), async (req, res) => {
   const { id } = req.params;
-  const { name, branchId } = req.body;
+  const { name } = req.body;
   
   const group = await prisma.group.update({
     where: { id: Number(id) },
-    data: {
-      ...(name && { name }),
-      ...(branchId && { branchId: Number(branchId) })
-    },
-    include: {
-      branch: true
-    }
+    data: { ...(name && { name }) }
   });
   
   return res.json(group);

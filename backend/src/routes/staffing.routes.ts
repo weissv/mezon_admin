@@ -9,15 +9,7 @@ const router = Router();
 
 // GET /api/staffing/tables - List all staffing tables
 router.get("/tables", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { branchId } = req.query;
-  
   const tables = await prisma.staffingTable.findMany({
-    where: {
-      ...(branchId ? { branchId: Number(branchId) } : {}),
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
-    },
     orderBy: { position: "asc" },
   });
   
@@ -26,16 +18,12 @@ router.get("/tables", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 
 // POST /api/staffing/tables - Create new staffing table entry
 router.post("/tables", checkRole(["ADMIN"]), async (req, res) => {
-  const { branchId, position, requiredRate } = req.body;
+  const { position, requiredRate } = req.body;
   
   const table = await prisma.staffingTable.create({
     data: {
-      branchId,
       position,
       requiredRate,
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
     },
   });
   
@@ -52,9 +40,6 @@ router.put("/tables/:id", checkRole(["ADMIN"]), async (req, res) => {
     data: {
       position,
       requiredRate,
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
     },
   });
   
@@ -147,36 +132,23 @@ router.delete("/attendance/:id", checkRole(["ADMIN"]), async (req, res) => {
 
 // GET /api/staffing/report - Generate staffing compliance report
 router.get("/report", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { branchId } = req.query;
-  
   // Get staffing table requirements
-  const requirements = await prisma.staffingTable.findMany({
-    where: {
-      ...(branchId ? { branchId: Number(branchId) } : {}),
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
-    },
-  });
+  const requirements = await prisma.staffingTable.findMany();
   
   // Get current employee distribution
   const employees = await prisma.employee.findMany({
-    where: {
-      ...(branchId ? { branchId: Number(branchId) } : {}),
-      fireDate: null,
-    },
+    where: { fireDate: null },
     select: {
       position: true,
       rate: true,
-      branchId: true,
     },
   });
   
-  // Group by position and branch
+  // Group by position
   const currentStaffing = employees.reduce((acc: any, emp: any) => {
-    const key = `${emp.branchId}-${emp.position}`;
+    const key = emp.position;
     if (!acc[key]) {
-      acc[key] = { branchId: emp.branchId, position: emp.position, currentRate: 0 };
+      acc[key] = { position: emp.position, currentRate: 0 };
     }
     acc[key].currentRate += emp.rate;
     return acc;
@@ -184,11 +156,9 @@ router.get("/report", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
   
   // Compare with requirements
   const report = requirements.map((req: any) => {
-    const key = `${req.branchId}-${req.position}`;
+    const key = req.position;
     const current = currentStaffing[key] || { currentRate: 0 };
     return {
-      branchId: req.branchId,
-      branchName: req.branch.name,
       position: req.position,
       requiredRate: req.requiredRate,
       currentRate: current.currentRate,

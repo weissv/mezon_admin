@@ -16,7 +16,7 @@ export default function SideNav() {
   const [isLogoSpinning, setIsLogoSpinning] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const role = (user?.role || "TEACHER") as UserRole;
-  const links = getLinksForRole(role);
+  const links = getLinksForRole(role, user?.email);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   

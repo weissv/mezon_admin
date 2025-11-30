@@ -3,8 +3,43 @@ import OpenAI from "openai";
 import { PrismaClient } from "@prisma/client";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import mammoth from "mammoth";
+import { EventEmitter } from "events";
 
 const prisma = new PrismaClient();
+
+// Event emitter для синхронизации
+export const syncEvents = new EventEmitter();
+
+// Статус текущей синхронизации
+interface SyncStatus {
+  isRunning: boolean;
+  startedAt: Date | null;
+  progress: number;
+  total: number;
+  current: number;
+  currentFile: string;
+  synced: number;
+  updated: number;
+  skipped: number;
+  errors: number;
+  completedAt: Date | null;
+  error: string | null;
+}
+
+let syncStatus: SyncStatus = {
+  isRunning: false,
+  startedAt: null,
+  progress: 0,
+  total: 0,
+  current: 0,
+  currentFile: "",
+  synced: 0,
+  updated: 0,
+  skipped: 0,
+  errors: 0,
+  completedAt: null,
+  error: null,
+};
 
 // Ленивая инициализация клиентов
 let geminiClient: GoogleGenerativeAI | null = null;
@@ -288,54 +323,313 @@ async function addDocumentFromText(
 }
 
 /**
- * Разбивает большой текст на чанки для лучшего поиска
+ * Разбивает большой текст на чанки с использованием семантического подхода
+ * Учитывает структуру документа: заголовки, абзацы, предложения
  */
 function splitIntoChunks(text: string, maxChunkSize: number = 2000, overlap: number = 200): string[] {
+  const chunks: string[] = [];
+  
+  // Определяем паттерны для разделения
+  const headingPattern = /^#{1,6}\s+.+$/gm;  // Markdown заголовки
+  const numberedHeadingPattern = /^\d+\.\s+[А-ЯA-Z].+$/gm; // Нумерованные заголовки
+  const paragraphSeparator = /\n\s*\n/; // Двойные переносы
+  const sentenceEnd = /[.!?]\s+(?=[А-ЯA-Z])/g; // Конец предложения
+  
+  // Разбиваем на логические секции сначала по заголовкам
+  const sections = splitByHeadings(text);
+  
+  for (const section of sections) {
+    if (section.length <= maxChunkSize) {
+      // Секция помещается целиком
+      if (section.trim().length >= 50) {
+        chunks.push(section.trim());
+      }
+    } else {
+      // Секция слишком большая - разбиваем по абзацам
+      const paragraphs = section.split(paragraphSeparator);
+      let currentChunk = "";
+      
+      for (const paragraph of paragraphs) {
+        const trimmedParagraph = paragraph.trim();
+        if (!trimmedParagraph) continue;
+        
+        if (currentChunk.length + trimmedParagraph.length + 2 <= maxChunkSize) {
+          // Добавляем абзац к текущему чанку
+          currentChunk += (currentChunk ? "\n\n" : "") + trimmedParagraph;
+        } else {
+          // Сохраняем текущий чанк и начинаем новый
+          if (currentChunk.trim().length >= 50) {
+            chunks.push(currentChunk.trim());
+          }
+          
+          // Если абзац сам по себе слишком большой
+          if (trimmedParagraph.length > maxChunkSize) {
+            const sentenceChunks = splitBySentences(trimmedParagraph, maxChunkSize, overlap);
+            chunks.push(...sentenceChunks);
+            currentChunk = "";
+          } else {
+            // Добавляем overlap из предыдущего чанка для сохранения контекста
+            const overlapText = getOverlapText(currentChunk, overlap);
+            currentChunk = overlapText + (overlapText ? "\n\n" : "") + trimmedParagraph;
+          }
+        }
+      }
+      
+      // Не забываем последний чанк
+      if (currentChunk.trim().length >= 50) {
+        chunks.push(currentChunk.trim());
+      }
+    }
+  }
+  
+  return chunks.filter(chunk => chunk.length >= 50);
+}
+
+/**
+ * Разбивает текст по заголовкам, сохраняя их в секциях
+ */
+function splitByHeadings(text: string): string[] {
+  // Паттерны для заголовков
+  const headingPatterns = [
+    /^(#{1,6}\s+.+)$/gm,                           // Markdown заголовки
+    /^(\d+\.\d*\s+[А-ЯA-Z].+)$/gm,                // Нумерованные (1.1 Заголовок)
+    /^([А-ЯA-Z][А-Яа-яA-Za-z\s]{5,50}:)$/gm,      // Заголовки с двоеточием
+    /^(Тема\s*\d*[:.]\s*.+)$/gim,                 // "Тема 1: ..."
+    /^(Урок\s*\d*[:.]\s*.+)$/gim,                 // "Урок 1: ..."
+    /^(Раздел\s*\d*[:.]\s*.+)$/gim,               // "Раздел 1: ..."
+    /^(Глава\s*\d*[:.]\s*.+)$/gim,                // "Глава 1: ..."
+  ];
+  
+  // Находим все позиции заголовков
+  const headingPositions: number[] = [0];
+  
+  for (const pattern of headingPatterns) {
+    let match;
+    const regex = new RegExp(pattern.source, pattern.flags);
+    while ((match = regex.exec(text)) !== null) {
+      if (!headingPositions.includes(match.index)) {
+        headingPositions.push(match.index);
+      }
+    }
+  }
+  
+  // Сортируем позиции
+  headingPositions.sort((a, b) => a - b);
+  
+  // Если заголовков нет или мало - возвращаем как есть
+  if (headingPositions.length <= 1) {
+    return [text];
+  }
+  
+  // Разбиваем на секции
+  const sections: string[] = [];
+  for (let i = 0; i < headingPositions.length; i++) {
+    const start = headingPositions[i];
+    const end = headingPositions[i + 1] || text.length;
+    const section = text.slice(start, end).trim();
+    if (section) {
+      sections.push(section);
+    }
+  }
+  
+  return sections;
+}
+
+/**
+ * Разбивает текст по предложениям для очень больших абзацев
+ */
+function splitBySentences(text: string, maxSize: number, overlap: number): string[] {
+  const chunks: string[] = [];
+  
+  // Разбиваем на предложения, учитывая разные знаки препинания
+  const sentencePattern = /[^.!?]*[.!?]+\s*/g;
+  const sentences: string[] = [];
+  let match;
+  
+  while ((match = sentencePattern.exec(text)) !== null) {
+    sentences.push(match[0]);
+  }
+  
+  // Если не удалось разбить на предложения - используем простое разбиение
+  if (sentences.length === 0) {
+    return splitSimple(text, maxSize, overlap);
+  }
+  
+  let currentChunk = "";
+  let overlapSentences: string[] = [];
+  
+  for (const sentence of sentences) {
+    if (currentChunk.length + sentence.length <= maxSize) {
+      currentChunk += sentence;
+    } else {
+      if (currentChunk.trim().length >= 50) {
+        chunks.push(currentChunk.trim());
+      }
+      
+      // Берём последние предложения для overlap
+      overlapSentences = getLastSentences(currentChunk, overlap);
+      currentChunk = overlapSentences.join("") + sentence;
+    }
+  }
+  
+  if (currentChunk.trim().length >= 50) {
+    chunks.push(currentChunk.trim());
+  }
+  
+  return chunks;
+}
+
+/**
+ * Простое разбиение текста (fallback)
+ */
+function splitSimple(text: string, maxSize: number, overlap: number): string[] {
   const chunks: string[] = [];
   let start = 0;
   
   while (start < text.length) {
-    let end = start + maxChunkSize;
+    let end = start + maxSize;
     
-    // Пытаемся найти конец предложения или абзаца
+    // Пытаемся найти хорошую точку разрыва
     if (end < text.length) {
-      const lastParagraph = text.lastIndexOf('\n\n', end);
-      const lastSentence = text.lastIndexOf('. ', end);
-      
-      if (lastParagraph > start + maxChunkSize / 2) {
-        end = lastParagraph + 2;
-      } else if (lastSentence > start + maxChunkSize / 2) {
-        end = lastSentence + 2;
+      // Ищем последний пробел
+      const lastSpace = text.lastIndexOf(" ", end);
+      if (lastSpace > start + maxSize / 2) {
+        end = lastSpace + 1;
       }
     }
     
-    chunks.push(text.slice(start, end).trim());
+    const chunk = text.slice(start, end).trim();
+    if (chunk.length >= 50) {
+      chunks.push(chunk);
+    }
+    
     start = end - overlap;
   }
   
-  return chunks.filter(chunk => chunk.length > 50);
+  return chunks;
+}
+
+/**
+ * Получает текст для overlap из конца чанка
+ */
+function getOverlapText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return "";
+  
+  // Ищем начало последнего предложения в пределах overlap
+  const lastPart = text.slice(-maxLength);
+  const sentenceStart = lastPart.search(/[.!?]\s+[А-ЯA-Z]/);
+  
+  if (sentenceStart > 0) {
+    return lastPart.slice(sentenceStart + 2);
+  }
+  
+  // Если не нашли предложение - берём от последнего пробела
+  const lastSpace = lastPart.lastIndexOf(" ");
+  if (lastSpace > 0) {
+    return lastPart.slice(lastSpace + 1);
+  }
+  
+  return lastPart;
+}
+
+/**
+ * Получает последние предложения для overlap
+ */
+function getLastSentences(text: string, maxLength: number): string[] {
+  const sentences: string[] = [];
+  const pattern = /[^.!?]*[.!?]+\s*/g;
+  let match;
+  
+  while ((match = pattern.exec(text)) !== null) {
+    sentences.push(match[0]);
+  }
+  
+  if (sentences.length === 0) return [];
+  
+  const result: string[] = [];
+  let totalLength = 0;
+  
+  for (let i = sentences.length - 1; i >= 0 && totalLength < maxLength; i--) {
+    result.unshift(sentences[i]);
+    totalLength += sentences[i].length;
+  }
+  
+  return result;
+}
+
+/**
+ * Получает текущий статус синхронизации
+ */
+function getSyncStatus(): SyncStatus {
+  return { ...syncStatus };
+}
+
+/**
+ * Сбрасывает статус синхронизации
+ */
+function resetSyncStatus(): void {
+  syncStatus = {
+    isRunning: false,
+    startedAt: null,
+    progress: 0,
+    total: 0,
+    current: 0,
+    currentFile: "",
+    synced: 0,
+    updated: 0,
+    skipped: 0,
+    errors: 0,
+    completedAt: null,
+    error: null,
+  };
+}
+
+/**
+ * Обновляет статус синхронизации и эмитит событие
+ */
+function updateSyncStatus(updates: Partial<SyncStatus>): void {
+  syncStatus = { ...syncStatus, ...updates };
+  if (syncStatus.total > 0) {
+    syncStatus.progress = Math.round((syncStatus.current / syncStatus.total) * 100);
+  }
+  syncEvents.emit("sync-progress", syncStatus);
 }
 
 /**
  * Синхронизирует документы из Google Drive в локальную базу знаний
- * Поддерживает обновление существующих документов и разбиение на чанки
+ * Асинхронная версия с прогрессом
  */
 async function syncGoogleDriveDocuments(): Promise<{ synced: number; updated: number; errors: number; skipped: number }> {
-  let synced = 0;
-  let updated = 0;
-  let errors = 0;
-  let skipped = 0;
+  // Проверяем, не запущена ли уже синхронизация
+  if (syncStatus.isRunning) {
+    throw new Error("Синхронизация уже выполняется");
+  }
+  
+  // Инициализируем статус
+  resetSyncStatus();
+  updateSyncStatus({
+    isRunning: true,
+    startedAt: new Date(),
+  });
   
   try {
     const files = await getGoogleDriveFiles();
     console.log(`📂 Found ${files.length} files in Google Drive folder`);
     
-    for (const file of files) {
+    updateSyncStatus({ total: files.length });
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      updateSyncStatus({
+        current: i + 1,
+        currentFile: file.name,
+      });
+      
       try {
         // Проверяем поддерживается ли тип файла
         if (!isSupportedFileType(file.mimeType, file.name)) {
           console.log(`⏭️ Skipping unsupported file type: ${file.name} (${file.mimeType})`);
-          skipped++;
+          updateSyncStatus({ skipped: syncStatus.skipped + 1 });
           continue;
         }
         
@@ -343,7 +637,7 @@ async function syncGoogleDriveDocuments(): Promise<{ synced: number; updated: nu
         const content = await getGoogleDriveFileContent(file.id, file.mimeType);
         if (!content || content.trim().length < 10) {
           console.log(`⏭️ File ${file.name} has no content or is too short`);
-          skipped++;
+          updateSyncStatus({ skipped: syncStatus.skipped + 1 });
           continue;
         }
         
@@ -368,7 +662,7 @@ async function syncGoogleDriveDocuments(): Promise<{ synced: number; updated: nu
             WHERE metadata->>'googleDriveFileId' = ${file.id}
           `;
           console.log(`🔄 Updating: ${file.name}`);
-          updated++;
+          updateSyncStatus({ updated: syncStatus.updated + 1 });
         }
         
         // Извлекаем метаданные из имени файла
@@ -383,34 +677,88 @@ async function syncGoogleDriveDocuments(): Promise<{ synced: number; updated: nu
           lastSyncedAt: new Date().toISOString(),
         };
         
-        // Разбиваем большие документы на чанки
+        // Разбиваем большие документы на чанки (используем улучшенный алгоритм)
         const chunks = splitIntoChunks(content, 3000, 300);
         
-        for (let i = 0; i < chunks.length; i++) {
+        for (let j = 0; j < chunks.length; j++) {
           const chunkMetadata: DocumentMetadata = {
             ...metadata,
-            chunkIndex: i,
+            chunkIndex: j,
             totalChunks: chunks.length,
-            title: chunks.length > 1 ? `${metadata.title} (часть ${i + 1}/${chunks.length})` : metadata.title,
+            title: chunks.length > 1 ? `${metadata.title} (часть ${j + 1}/${chunks.length})` : metadata.title,
           };
           
-          await addDocument(chunks[i], chunkMetadata);
+          await addDocument(chunks[j], chunkMetadata);
+          
+          // Небольшая пауза между запросами к API эмбеддингов
+          if (j < chunks.length - 1) {
+            await sleep(100);
+          }
         }
         
         if (existing.length === 0) {
-          synced++;
+          updateSyncStatus({ synced: syncStatus.synced + 1 });
           console.log(`✅ Synced: ${file.name} (${chunks.length} chunks)`);
         }
+        
+        // Пауза между файлами чтобы не перегружать API
+        await sleep(200);
+        
       } catch (fileError) {
         console.error(`❌ Error processing file ${file.name}:`, fileError);
-        errors++;
+        updateSyncStatus({ errors: syncStatus.errors + 1 });
       }
     }
+    
+    // Завершаем синхронизацию
+    updateSyncStatus({
+      isRunning: false,
+      completedAt: new Date(),
+      currentFile: "",
+    });
+    
+    syncEvents.emit("sync-complete", syncStatus);
+    
   } catch (error) {
     console.error("❌ Error syncing Google Drive documents:", error);
+    updateSyncStatus({
+      isRunning: false,
+      error: error instanceof Error ? error.message : "Неизвестная ошибка",
+      completedAt: new Date(),
+    });
+    syncEvents.emit("sync-error", syncStatus);
+    throw error;
   }
   
-  return { synced, updated, errors, skipped };
+  return {
+    synced: syncStatus.synced,
+    updated: syncStatus.updated,
+    errors: syncStatus.errors,
+    skipped: syncStatus.skipped,
+  };
+}
+
+/**
+ * Запускает синхронизацию в фоновом режиме (не блокирует запрос)
+ */
+function startBackgroundSync(): { started: boolean; message: string } {
+  if (syncStatus.isRunning) {
+    return { started: false, message: "Синхронизация уже выполняется" };
+  }
+  
+  // Запускаем синхронизацию асинхронно
+  syncGoogleDriveDocuments().catch((error) => {
+    console.error("Background sync error:", error);
+  });
+  
+  return { started: true, message: "Синхронизация запущена в фоновом режиме" };
+}
+
+/**
+ * Вспомогательная функция для паузы
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -617,6 +965,9 @@ export const AiService = {
   deleteDocument,
   generateEmbedding,
   syncGoogleDriveDocuments,
+  startBackgroundSync,
+  getSyncStatus,
+  resetSyncStatus,
   getGoogleDriveFiles,
   getSystemPrompt,
   setSystemPrompt,

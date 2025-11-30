@@ -24,8 +24,8 @@ import IntegrationPage from "../pages/IntegrationPage";
 import UsersPage from "../pages/UsersPage";
 import AiAssistantPage from "../pages/AiAssistantPage";
 import GroupsPage from "../pages/GroupsPage";
-import BranchesPage from "../pages/BranchesPage";
 import StaffingPage from "../pages/StaffingPage";
+import SchedulePage from "../pages/SchedulePage";
 import { useAuth } from "../hooks/useAuth";
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -62,6 +62,25 @@ function RoleBasedRoute({ roles }: { roles: string[] }) {
   return <Outlet />;
 }
 
+function UserRestrictedRoute({ roles, allowedUsers }: { roles: string[]; allowedUsers: string[] }) {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user || !roles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Проверяем что пользователь в списке разрешённых
+  if (!allowedUsers.includes(user.email)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <Outlet />;
+}
+
 export default function Router() {
   return (
     <Routes>
@@ -88,6 +107,7 @@ export default function Router() {
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="procurement" element={<ProcurementPage />} />
           <Route path="recipes" element={<RecipesPage />} />
+          <Route path="schedule" element={<SchedulePage />} />
 
           <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
             <Route path="action-log" element={<ActionLogPage />} />
@@ -96,10 +116,9 @@ export default function Router() {
           <Route element={<RoleBasedRoute roles={["ADMIN"]} />}>
             <Route path="users" element={<UsersPage />} />
             <Route path="groups" element={<GroupsPage />} />
-            <Route path="branches" element={<BranchesPage />} />
           </Route>
 
-          <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
+          <Route element={<UserRestrictedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} allowedUsers={["izumi"]} />}>
             <Route path="staffing" element={<StaffingPage />} />
           </Route>
 

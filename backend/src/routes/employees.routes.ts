@@ -17,12 +17,11 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
     "position",
     "hireDate",
     "rate",
-    "branchId",
     "createdAt",
   ]);
-  const where = buildWhere<any>(req.query, ["branchId", "position", "lastName"]);
+  const where = buildWhere<any>(req.query, ["position", "lastName"]);
   const [items, total] = await Promise.all([
-    prisma.employee.findMany({ where, skip, take, orderBy, include: { branch: true, user: true } }),
+    prisma.employee.findMany({ where, skip, take, orderBy, include: { user: true } }),
     prisma.employee.count({ where }),
   ]);
   return res.json({ items, total });

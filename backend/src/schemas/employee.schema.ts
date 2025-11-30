@@ -14,7 +14,6 @@ export const createEmployeeSchema = z.object({
     contractEndDate: z.string().datetime().nullable().optional(),
     medicalCheckupDate: z.string().datetime().nullable().optional(),
     attestationDate: z.string().datetime().nullable().optional(),
-    branchId: z.number().int().positive(),
     user: z
       .object({
         email: z.string().email(),
