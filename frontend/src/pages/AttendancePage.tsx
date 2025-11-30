@@ -101,7 +101,7 @@ export default function AttendancePage() {
           </div>
           <div>
             <label htmlFor="group-select" className="block text-sm font-medium text-gray-700 mb-1">
-              Группа
+              Класс
             </label>
             <select
               id="group-select"
@@ -147,7 +147,7 @@ export default function AttendancePage() {
               </li>
             ))}
             {children.length === 0 && !loading && (
-              <li className="p-4 text-center text-gray-500">В этой группе нет детей или группа не выбрана.</li>
+              <li className="p-4 text-center text-gray-500">В этом классе нет детей или класс не выбран.</li>
             )}
           </ul>
         )}

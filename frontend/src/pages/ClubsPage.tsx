@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
@@ -22,6 +22,13 @@ interface Club {
   maxStudents: number;
 }
 
+interface Teacher {
+  id: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+}
+
 export default function ClubsPage() {
   const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
   const { data: clubs, total, page, setPage, fetchData } = useApi<Club>({
@@ -37,6 +44,22 @@ export default function ClubsPage() {
     maxStudents: ''
   });
   const [saving, setSaving] = useState(false);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+
+  // Загрузка списка педагогов при монтировании
+  useEffect(() => {
+    setIsLoadingTeachers(true);
+    api.get('/api/employees?pageSize=200')
+      .then((data: any) => {
+        const items = data.items || data || [];
+        setTeachers(items);
+      })
+      .catch((error: any) => {
+        toast.error('Не удалось загрузить список педагогов', { description: error?.message });
+      })
+      .finally(() => setIsLoadingTeachers(false));
+  }, []);
 
   const handleCreate = () => {
     setEditingClub(null);
@@ -175,14 +198,21 @@ export default function ClubsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">ID педагога *</label>
-            <Input
-              type="number"
+            <label className="block text-sm font-medium mb-1">Педагог *</label>
+            <select
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               value={formData.teacherId}
               onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
               required
-              placeholder="1"
-            />
+              disabled={isLoadingTeachers}
+            >
+              <option value="">{isLoadingTeachers ? 'Загружаем...' : 'Выберите педагога'}</option>
+              {teachers.map((teacher) => (
+                <option key={teacher.id} value={teacher.id}>
+                  {teacher.lastName} {teacher.firstName} — {teacher.position}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -192,7 +222,7 @@ export default function ClubsPage() {
               value={formData.cost}
               onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
               required
-              placeholder="1000"
+              placeholder="1000000"
               step="0.01"
             />
           </div>

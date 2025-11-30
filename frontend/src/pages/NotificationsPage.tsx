@@ -94,7 +94,7 @@ export default function NotificationsPage() {
         const data = await api.get("/api/groups");
         setGroups(data || []);
       } catch (error) {
-        toast.error("Группы недоступны", { description: (error as any)?.message });
+        toast.error("Классы недоступны", { description: (error as any)?.message });
       }
     };
     loadGroups();
@@ -203,7 +203,7 @@ export default function NotificationsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Группа</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Класс</label>
                   <select
                     value={formState.targetGroupId}
                     onChange={(event) => setFormState((prev) => ({ ...prev, targetGroupId: event.target.value }))}
@@ -272,7 +272,7 @@ export default function NotificationsPage() {
                     Роли: {broadcast.targetRole ? ROLE_LABELS[broadcast.targetRole] : "Все"}
                   </span>
                   <span>
-                    Группа: {broadcast.targetGroup?.name || "Все филиалы"}
+                    Класс: {broadcast.targetGroup?.name || "Все филиалы"}
                   </span>
                 </div>
               </li>

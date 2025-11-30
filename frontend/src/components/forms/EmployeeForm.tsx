@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,14 +14,23 @@ const formSchema = z.object({
   position: z.string().min(2, 'Должность обязательна'),
   rate: z.coerce.number().positive('Ставка должна быть > 0'),
   hireDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
-  branchId: z.coerce.number().positive('ID филиала обязательно'),
+  branchId: z.coerce.number().positive('Выберите филиал'),
 });
 
 type EmployeeFormData = z.infer<typeof formSchema>;
 type Employee = { id: number; firstName: string; lastName: string; position: string; rate: number; hireDate: string, branch: { id: number } };
 type EmployeeFormProps = { initialData?: Employee | null; onSuccess: () => void; onCancel: () => void; };
 
+interface Branch {
+  id: number;
+  name: string;
+  address: string;
+}
+
 export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormProps) {
+    const [branches, setBranches] = useState<Branch[]>([]);
+    const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+    
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<EmployeeFormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -33,12 +43,32 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
         },
     });
 
+    useEffect(() => {
+        let isMounted = true;
+        setIsLoadingBranches(true);
+        api.get('/api/branches')
+            .then((data) => {
+                if (!isMounted) return;
+                setBranches(Array.isArray(data) ? data : []);
+            })
+            .catch((error: any) => {
+                const msg = error?.message || 'Не удалось загрузить список филиалов';
+                toast.error('Ошибка загрузки филиалов', { description: msg });
+            })
+            .finally(() => {
+                if (isMounted) setIsLoadingBranches(false);
+            });
+        return () => { isMounted = false; };
+    }, []);
+
     const onSubmit = async (data: EmployeeFormData) => {
         try {
-            const payload = { employee: data };
+            const payload = {
+                ...data,
+                hireDate: new Date(data.hireDate).toISOString(),
+            };
             if (initialData) {
-                // Assuming update logic is different and might not need the wrapper
-                await api.put(`/api/employees/${initialData.id}`, data);
+                await api.put(`/api/employees/${initialData.id}`, payload);
             } else {
                 await api.post('/api/employees', payload);
             }
@@ -51,19 +81,48 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Input {...register('firstName')} placeholder="Имя"/>
-            <FormError message={errors.firstName?.message} />
-            <Input {...register('lastName')} placeholder="Фамилия"/>
-            <FormError message={errors.lastName?.message} />
-            <Input {...register('position')} placeholder="Должность"/>
-            <FormError message={errors.position?.message} />
-            <Input type="number" step="0.1" {...register('rate')} placeholder="Ставка"/>
-            <FormError message={errors.rate?.message} />
-            <Input type="date" {...register('hireDate')} />
-            <FormError message={errors.hireDate?.message} />
-            <Input type="number" {...register('branchId')} placeholder="ID Филиала"/>
-            <FormError message={errors.branchId?.message} />
-            <div className="flex justify-end gap-2">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Имя *</label>
+                <Input {...register('firstName')} placeholder="Введите имя"/>
+                <FormError message={errors.firstName?.message} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Фамилия *</label>
+                <Input {...register('lastName')} placeholder="Введите фамилию"/>
+                <FormError message={errors.lastName?.message} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Должность *</label>
+                <Input {...register('position')} placeholder="Например: Учитель"/>
+                <FormError message={errors.position?.message} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ставка *</label>
+                <Input type="number" step="0.1" {...register('rate')} placeholder="1.0"/>
+                <FormError message={errors.rate?.message} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Дата приёма *</label>
+                <Input type="date" {...register('hireDate')} />
+                <FormError message={errors.hireDate?.message} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Филиал *</label>
+                <select
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    disabled={isLoadingBranches}
+                    {...register('branchId', { valueAsNumber: true })}
+                >
+                    <option value="">{isLoadingBranches ? 'Загружаем...' : 'Выберите филиал'}</option>
+                    {branches.map((branch) => (
+                        <option key={branch.id} value={branch.id}>
+                            {branch.name} — {branch.address}
+                        </option>
+                    ))}
+                </select>
+                <FormError message={errors.branchId?.message} />
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="ghost" onClick={onCancel}>Отмена</Button>
                 <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Сохранение...' : 'Сохранить'}</Button>
             </div>

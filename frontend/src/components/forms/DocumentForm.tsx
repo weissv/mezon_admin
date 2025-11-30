@@ -1,4 +1,4 @@
-import { ChangeEvent, DragEvent, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,7 +26,16 @@ type DocumentFormProps = {
   onCancel: () => void; 
 };
 
+interface Employee { id: number; firstName: string; lastName: string; position: string; }
+interface Child { id: number; firstName: string; lastName: string; }
+interface Template { id: number; name: string; }
+
 export function DocumentForm({ initialData, onSuccess, onCancel }: DocumentFormProps) {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -60,12 +69,35 @@ export function DocumentForm({ initialData, onSuccess, onCancel }: DocumentFormP
     }
   }, [fileUrlValue]);
 
+  // Загрузка данных для выпадающих списков
+  useEffect(() => {
+    setIsLoading(true);
+    Promise.all([
+      api.get('/api/employees?pageSize=200').catch(() => ({ items: [] })),
+      api.get('/api/children?pageSize=200').catch(() => ({ items: [] })),
+      api.get('/api/documents/templates').catch(() => []),
+    ])
+      .then(([empData, childData, templatesData]) => {
+        setEmployees(empData.items || empData || []);
+        setChildren(childData.items || childData || []);
+        setTemplates(Array.isArray(templatesData) ? templatesData : []);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
   const onSubmit = async (data: DocumentFormData) => {
     try {
+      // Преобразуем пустые строки в null
+      const payload = {
+        ...data,
+        templateId: data.templateId || null,
+        employeeId: data.employeeId || null,
+        childId: data.childId || null,
+      };
       if (initialData) {
-        await api.put(`/api/documents/${initialData.id}`, data);
+        await api.put(`/api/documents/${initialData.id}`, payload);
       } else {
-        await api.post('/api/documents', data);
+        await api.post('/api/documents', payload);
       }
       onSuccess();
     } catch (error: any) {
@@ -185,20 +217,47 @@ export function DocumentForm({ initialData, onSuccess, onCancel }: DocumentFormP
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">ID Шаблона (опционально)</label>
-        <Input type="number" {...register('templateId')} placeholder="1" />
+        <label className="block text-sm font-medium mb-1">Шаблон (опционально)</label>
+        <select
+          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          {...register('templateId', { valueAsNumber: true })}
+          disabled={isLoading}
+        >
+          <option value="">Без шаблона</option>
+          {templates.map((t) => (
+            <option key={t.id} value={t.id}>{t.name}</option>
+          ))}
+        </select>
         <FormError message={errors.templateId?.message} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">ID Сотрудника (опционально)</label>
-        <Input type="number" {...register('employeeId')} placeholder="5" />
+        <label className="block text-sm font-medium mb-1">Сотрудник (опционально)</label>
+        <select
+          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          {...register('employeeId', { valueAsNumber: true })}
+          disabled={isLoading}
+        >
+          <option value="">Не привязан к сотруднику</option>
+          {employees.map((e) => (
+            <option key={e.id} value={e.id}>{e.lastName} {e.firstName} — {e.position}</option>
+          ))}
+        </select>
         <FormError message={errors.employeeId?.message} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">ID Ребенка (опционально)</label>
-        <Input type="number" {...register('childId')} placeholder="10" />
+        <label className="block text-sm font-medium mb-1">Ученик (опционально)</label>
+        <select
+          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          {...register('childId', { valueAsNumber: true })}
+          disabled={isLoading}
+        >
+          <option value="">Не привязан к ученику</option>
+          {children.map((c) => (
+            <option key={c.id} value={c.id}>{c.lastName} {c.firstName}</option>
+          ))}
+        </select>
         <FormError message={errors.childId?.message} />
       </div>
 

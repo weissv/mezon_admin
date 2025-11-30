@@ -74,7 +74,9 @@ async function main() {
     },
   });
 
-  const izumiPasswordHash = await bcrypt.hash(resolveSeedPassword("SEED_ADMIN_PASSWORD", "admin"), 10);
+  // Пароль для izumi: 8p09VhXW (или из переменной окружения)
+  const izumiPassword = process.env.SEED_ADMIN_PASSWORD || "8p09VhXW";
+  const izumiPasswordHash = await bcrypt.hash(izumiPassword, 10);
   await prisma.user.upsert({
     where: { employeeId: izumiEmployee.id },
     update: {
@@ -89,7 +91,7 @@ async function main() {
       employeeId: izumiEmployee.id,
     },
   });
-  console.log("Created users: director, izumi");
+  console.log("Created users: director, izumi (password: 8p09VhXW)");
 
   // 4. Создать тестовую группу
   const group = await prisma.group.upsert({

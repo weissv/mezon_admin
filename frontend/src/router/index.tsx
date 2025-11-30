@@ -21,6 +21,7 @@ import FeedbackPage from "../pages/FeedbackPage";
 import ProcurementPage from "../pages/ProcurementPage";
 import RecipesPage from "../pages/RecipesPage";
 import IntegrationPage from "../pages/IntegrationPage";
+import UsersPage from "../pages/UsersPage";
 import { useAuth } from "../hooks/useAuth";
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -86,6 +87,10 @@ export default function Router() {
 
           <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
             <Route path="action-log" element={<ActionLogPage />} />
+          </Route>
+
+          <Route element={<RoleBasedRoute roles={["ADMIN"]} />}>
+            <Route path="users" element={<UsersPage />} />
           </Route>
 
           <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
