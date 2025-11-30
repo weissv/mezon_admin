@@ -11,6 +11,8 @@ export const MODULE_LINKS: ModuleLink[] = [
   { path: "/children", label: "Дети", roles: ["DIRECTOR", "DEPUTY", "ADMIN"] },
   { path: "/employees", label: "Сотрудники", roles: ["DIRECTOR", "DEPUTY", "ADMIN"] },
   { path: "/users", label: "Пользователи", roles: ["ADMIN"] },
+  { path: "/groups", label: "Классы", roles: ["ADMIN"] },
+  { path: "/branches", label: "Филиалы", roles: ["ADMIN"] },
   { path: "/clubs", label: "Кружки", roles: ["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"] },
   { path: "/attendance", label: "Посещаемость", roles: ["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"] },
   { path: "/finance", label: "Финансы", roles: ["DIRECTOR", "ADMIN", "ACCOUNTANT"] },
