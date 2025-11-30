@@ -11,7 +11,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
 import { DataTable } from '../components/DataTable/DataTable';
-import { Trash2, AlertCircle } from 'lucide-react';
+import { Trash2, AlertCircle, Edit, Plus, Filter, Shield } from 'lucide-react';
 
 const eventTypeLabels: Record<string, string> = {
   INCIDENT: 'Происшествие',
@@ -20,12 +20,19 @@ const eventTypeLabels: Record<string, string> = {
   DOCUMENT: 'Документ по охране',
 };
 
+const eventTypeColors: Record<string, string> = {
+  INCIDENT: 'bg-red-100 text-red-800',
+  FIRE_CHECK: 'bg-orange-100 text-orange-800',
+  VISITOR_LOG: 'bg-blue-100 text-blue-800',
+  DOCUMENT: 'bg-green-100 text-green-800',
+};
+
 // Схема на основе createSecurityLogSchema
 const securityLogFormSchema = z.object({
   eventType: z.enum(['INCIDENT', 'FIRE_CHECK', 'VISITOR_LOG', 'DOCUMENT']),
   description: z.string().optional(),
   date: z.string(),
-  documentUrl: z.string().url('Некорректный URL').optional().or(z.literal('')),
+  documentUrl: z.string().optional(),
 });
 
 type SecurityLogFormData = z.infer<typeof securityLogFormSchema>;
@@ -35,8 +42,10 @@ export default function SecurityPage() {
   const [logs, setLogs] = useState<SecurityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingLog, setEditingLog] = useState<SecurityLog | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<SecurityLog | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [filterType, setFilterType] = useState<string>('');
 
   const {
     register,
@@ -67,18 +76,47 @@ export default function SecurityPage() {
     fetchLogs();
   }, []);
 
+  const handleCreate = () => {
+    setEditingLog(null);
+    reset({
+      eventType: 'INCIDENT',
+      date: new Date().toISOString().slice(0, 16),
+      description: '',
+      documentUrl: '',
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (log: SecurityLog) => {
+    setEditingLog(log);
+    reset({
+      eventType: log.eventType as any,
+      date: new Date(log.date).toISOString().slice(0, 16),
+      description: log.description || '',
+      documentUrl: log.documentUrl || '',
+    });
+    setIsModalOpen(true);
+  };
+
   const onSubmit = async (data: SecurityLogFormData) => {
     try {
       const payload = {
-        ...data,
+        eventType: data.eventType,
+        description: data.description?.trim() || undefined,
         date: new Date(data.date).toISOString(),
-        documentUrl: data.documentUrl || null,
+        documentUrl: data.documentUrl?.trim() || null,
       };
-      await api.post('/api/security', payload);
-      toast.success('Запись добавлена');
+
+      if (editingLog) {
+        await api.put(`/api/security/${editingLog.id}`, payload);
+        toast.success('Запись обновлена');
+      } else {
+        await api.post('/api/security', payload);
+        toast.success('Запись добавлена');
+      }
       setIsModalOpen(false);
+      setEditingLog(null);
       fetchLogs();
-      reset({ eventType: 'INCIDENT', date: new Date().toISOString().slice(0, 16) });
     } catch (error: any) {
       toast.error('Ошибка сохранения', { description: error?.message });
     }
@@ -99,15 +137,33 @@ export default function SecurityPage() {
     }
   };
 
+  // Фильтрация логов
+  const filteredLogs = filterType 
+    ? logs.filter(log => log.eventType === filterType)
+    : logs;
+
+  // Статистика по типам
+  const stats = logs.reduce((acc, log) => {
+    acc[log.eventType] = (acc[log.eventType] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   const columns = [
     {
       key: 'eventType',
       header: 'Тип',
-      render: (row: SecurityLog) => eventTypeLabels[row.eventType] || row.eventType,
+      render: (row: SecurityLog) => (
+        <span className={`px-2 py-1 rounded text-sm ${eventTypeColors[row.eventType] || ''}`}>
+          {eventTypeLabels[row.eventType] || row.eventType}
+        </span>
+      ),
     },
     {
       key: 'description',
       header: 'Описание',
+      render: (row: SecurityLog) => (
+        <span className="line-clamp-2">{row.description || '—'}</span>
+      ),
     },
     {
       key: 'date',
@@ -127,39 +183,99 @@ export default function SecurityPage() {
       key: 'actions',
       header: 'Действия',
       render: (row: SecurityLog) => (
-        <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(row)}>
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(row)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       ),
     },
   ];
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Журнал происшествий</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Зафиксировать происшествие</Button>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Shield className="h-6 w-6" />
+          Журнал безопасности
+        </h1>
+        <Button onClick={handleCreate}>
+          <Plus className="mr-2 h-4 w-4" /> Добавить запись
+        </Button>
       </div>
+
+      {/* Статистика */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Object.entries(eventTypeLabels).map(([key, label]) => (
+          <div 
+            key={key} 
+            className={`bg-white rounded-lg border cursor-pointer transition-all hover:shadow-md ${filterType === key ? 'ring-2 ring-blue-500' : ''}`}
+            onClick={() => setFilterType(filterType === key ? '' : key)}
+          >
+            <div className="p-4 flex items-center gap-3">
+              <div className={`p-2 rounded-full ${eventTypeColors[key]}`}>
+                <Shield className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">{label}</p>
+                <p className="text-xl font-bold">{stats[key] || 0}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Фильтр */}
+      {filterType && (
+        <div className="flex items-center gap-2 text-sm bg-blue-50 text-blue-700 px-3 py-2 rounded-lg">
+          <Filter className="h-4 w-4" />
+          <span>Фильтр: {eventTypeLabels[filterType]}</span>
+          <button onClick={() => setFilterType('')} className="ml-2 underline hover:no-underline">
+            Сбросить
+          </button>
+        </div>
+      )}
 
       <Card>
         {loading ? (
-          <div className="p-4 text-center">Загрузка...</div>
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-gray-500">Загрузка...</p>
+          </div>
+        ) : filteredLogs.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            {filterType ? 'Нет записей выбранного типа' : 'Журнал пуст. Добавьте первую запись.'}
+          </div>
         ) : (
-          <DataTable columns={columns} data={logs} page={1} pageSize={logs.length} total={logs.length} onPageChange={() => {}} />
+          <DataTable 
+            columns={columns} 
+            data={filteredLogs} 
+            page={1} 
+            pageSize={filteredLogs.length} 
+            total={filteredLogs.length} 
+            onPageChange={() => {}} 
+          />
         )}
       </Card>
 
-      {/* Create Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Новая запись">
+      {/* Create/Edit Modal */}
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => { setIsModalOpen(false); setEditingLog(null); }} 
+        title={editingLog ? 'Редактировать запись' : 'Новая запись'}
+      >
         <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
           <div>
-            <label htmlFor="date" className="block mb-1 font-medium">Дата и время</label>
+            <label htmlFor="date" className="block mb-1 font-medium">Дата и время *</label>
             <Input type="datetime-local" {...register('date')} id="date" />
             {errors.date && <FormError message={errors.date.message} />}
           </div>
 
           <div>
-            <label htmlFor="eventType" className="block mb-1 font-medium">Тип события</label>
+            <label htmlFor="eventType" className="block mb-1 font-medium">Тип события *</label>
             <select {...register('eventType')} id="eventType" className="w-full p-2 border rounded">
               <option value="INCIDENT">Происшествие</option>
               <option value="FIRE_CHECK">Проверка пожарной безопасности</option>
@@ -171,18 +287,36 @@ export default function SecurityPage() {
 
           <div>
             <label htmlFor="description" className="block mb-1 font-medium">Описание</label>
-            <textarea {...register('description')} id="description" className="w-full p-2 border rounded" rows={3} />
+            <textarea 
+              {...register('description')} 
+              id="description" 
+              className="w-full p-2 border rounded" 
+              rows={4}
+              placeholder="Подробное описание события..."
+            />
           </div>
 
           <div>
-            <label htmlFor="documentUrl" className="block mb-1 font-medium">Ссылка на документ (необязательно)</label>
-            <Input {...register('documentUrl')} id="documentUrl" placeholder="https://example.com/doc.pdf" />
+            <label htmlFor="documentUrl" className="block mb-1 font-medium">Ссылка на документ</label>
+            <Input 
+              {...register('documentUrl')} 
+              id="documentUrl" 
+              placeholder="https://drive.google.com/..." 
+            />
             {errors.documentUrl && <FormError message={errors.documentUrl.message} />}
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Отмена</Button>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Сохранение...' : 'Сохранить'}</Button>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => { setIsModalOpen(false); setEditingLog(null); }}
+            >
+              Отмена
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Сохранение...' : editingLog ? 'Сохранить' : 'Добавить'}
+            </Button>
           </div>
         </form>
       </Modal>
@@ -196,9 +330,13 @@ export default function SecurityPage() {
             </div>
             <div>
               <p className="font-medium text-gray-900">Вы уверены, что хотите удалить эту запись?</p>
-              <p className="text-sm text-gray-600 mt-1">
-                <strong>{deleteConfirm && eventTypeLabels[deleteConfirm.eventType]}</strong> от {deleteConfirm && new Date(deleteConfirm.date).toLocaleDateString('ru-RU')}
-              </p>
+              {deleteConfirm && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+                  <p><strong>Тип:</strong> {eventTypeLabels[deleteConfirm.eventType]}</p>
+                  <p><strong>Дата:</strong> {new Date(deleteConfirm.date).toLocaleString('ru-RU')}</p>
+                  {deleteConfirm.description && <p><strong>Описание:</strong> {deleteConfirm.description}</p>}
+                </div>
+              )}
               <p className="text-sm text-red-600 mt-2">Это действие нельзя отменить!</p>
             </div>
           </div>
