@@ -13,6 +13,23 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
   return res.json(items);
 });
 
+// DELETE /api/inventory/:id - удаление товара со склада
+router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ message: "Invalid id" });
+  }
+  try {
+    await prisma.inventoryItem.delete({ where: { id } });
+  } catch (error: any) {
+    if (error?.code === "P2025") {
+      return res.status(204).send();
+    }
+    throw error;
+  }
+  return res.status(204).send();
+});
+
 // POST /api/inventory/generate-shopping-list
 // TODO: Cron job для проверки сроков годности и создания уведомлений.
 router.post("/generate-shopping-list", checkRole(["DEPUTY", "ADMIN"]), validate(generateShoppingListSchema), async (req, res) => {

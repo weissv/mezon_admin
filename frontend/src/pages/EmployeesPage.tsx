@@ -4,7 +4,7 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, AlertCircle, UploadCloud, Download } from 'lucide-react';
+import { PlusCircle, AlertCircle, UploadCloud, Download, Trash2 } from 'lucide-react';
 import { EmployeeForm } from '../components/forms/EmployeeForm';
 import { Employee } from '../types/employee';
 import { api } from '../lib/api';
@@ -19,6 +19,8 @@ export default function EmployeesPage() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [reminders, setReminders] = useState<any>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<Employee | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,6 +50,21 @@ export default function EmployeesPage() {
     setIsModalOpen(false);
     fetchData();
     toast.success(editingEmployee ? 'Данные сотрудника обновлены' : 'Сотрудник успешно добавлен');
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+    setIsDeleting(true);
+    try {
+      await api.delete(`/api/employees/${deleteConfirm.id}`);
+      toast.success('Сотрудник удалён');
+      setDeleteConfirm(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleEmployeesExport = async () => {
@@ -80,9 +97,14 @@ export default function EmployeesPage() {
       key: 'actions',
       header: 'Действия',
       render: (row) => (
-        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-          Редактировать
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            Редактировать
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(row)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -171,6 +193,43 @@ export default function EmployeesPage() {
           onSuccess={handleFormSuccess}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        title="Удаление сотрудника"
+      >
+        <div className="p-4">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 bg-red-100 rounded-full">
+              <AlertCircle className="h-6 w-6 text-red-600" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить сотрудника?</p>
+              <p className="text-sm text-gray-600 mt-1">
+                <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.position})
+              </p>
+              {deleteConfirm?.user && (
+                <p className="text-sm text-orange-600 mt-2">
+                  ⚠️ У сотрудника есть привязанный аккаунт ({deleteConfirm.user.email}), он тоже будет удалён.
+                </p>
+              )}
+              <p className="text-sm text-red-600 mt-2">
+                Это действие нельзя отменить!
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

@@ -28,6 +28,23 @@ router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateMaintenanceSch
   res.json(updated);
 });
 
+// DELETE /api/maintenance/:id - удаление заявки
+router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ message: "Invalid id" });
+  }
+  try {
+    await prisma.maintenanceRequest.delete({ where: { id } });
+  } catch (error: any) {
+    if (error?.code === "P2025") {
+      return res.status(204).send();
+    }
+    throw error;
+  }
+  return res.status(204).send();
+});
+
 // --- CleaningSchedule CRUD ---
 
 // GET /api/maintenance/cleaning - список графиков уборки

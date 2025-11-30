@@ -5,7 +5,7 @@ import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
 import { Input } from '../components/ui/input';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, AlertTriangle } from 'lucide-react';
 import { api } from '../lib/api';
 
 interface Club {
@@ -46,6 +46,11 @@ export default function ClubsPage() {
   const [saving, setSaving] = useState(false);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingClub, setDeletingClub] = useState<Club | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Загрузка списка педагогов при монтировании
   useEffect(() => {
@@ -85,14 +90,24 @@ export default function ClubsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Удалить кружок?')) return;
+  const openDeleteModal = (club: Club) => {
+    setDeletingClub(club);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingClub) return;
+    setDeleting(true);
     try {
-      await api.delete('/api/clubs/' + id);
+      await api.delete('/api/clubs/' + deletingClub.id);
       toast.success('Кружок удален');
+      setDeleteModalOpen(false);
+      setDeletingClub(null);
       fetchData();
     } catch (error: any) {
       toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -146,7 +161,7 @@ export default function ClubsPage() {
           <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
             Редактировать
           </Button>
-          <Button variant="destructive" size="sm" onClick={() => handleDelete(row.id)}>
+          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
             Удалить
           </Button>
         </div>
@@ -252,6 +267,37 @@ export default function ClubsPage() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить кружок. Это действие нельзя отменить. 
+                Все записи детей в этот кружок также будут удалены.
+              </p>
+            </div>
+          </div>
+          {deletingClub && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Название:</strong> {deletingClub.name}</p>
+              <p><strong>Педагог:</strong> {deletingClub.teacher.firstName} {deletingClub.teacher.lastName}</p>
+              <p><strong>Стоимость:</strong> {currency.format(deletingClub.cost)}/мес</p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

@@ -1,7 +1,7 @@
 // src/pages/ChildrenPage.tsx
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { PlusCircle, Search, CalendarX, UploadCloud, Download } from 'lucide-react';
+import { PlusCircle, Search, CalendarX, UploadCloud, Download, Trash2, AlertCircle } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
@@ -23,6 +23,8 @@ export default function ChildrenPage() {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [showAbsences, setShowAbsences] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<Child | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
   const handleCreate = () => {
@@ -64,6 +66,21 @@ export default function ChildrenPage() {
     setShowAbsences(true);
   };
 
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+    setIsDeleting(true);
+    try {
+      await api.delete(`/api/children/${deleteConfirm.id}`);
+      toast.success('Ученик удалён');
+      setDeleteConfirm(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const columns: Column<Child>[] = [
     { key: 'id', header: 'ID' },
     { key: 'lastName', header: 'Фамилия' },
@@ -79,6 +96,9 @@ export default function ChildrenPage() {
           </Button>
           <Button variant="ghost" size="sm" onClick={() => handleViewAbsences(row)}>
             <CalendarX className="h-4 w-4 mr-1" /> Отсутствия
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(row)}>
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -144,6 +164,38 @@ export default function ChildrenPage() {
         title={`Отсутствия - ${selectedChild?.firstName} ${selectedChild?.lastName}`}
       >
         {selectedChild && <AbsencesView childId={selectedChild.id} />}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        title="Удаление ученика"
+      >
+        <div className="p-4">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 bg-red-100 rounded-full">
+              <AlertCircle className="h-6 w-6 text-red-600" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить ученика?</p>
+              <p className="text-sm text-gray-600 mt-1">
+                <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.group?.name})
+              </p>
+              <p className="text-sm text-red-600 mt-2">
+                Это действие нельзя отменить! Все связанные данные (посещаемость, отсутствия, записи в кружки) будут удалены.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
