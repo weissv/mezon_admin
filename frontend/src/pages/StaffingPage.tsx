@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 import { Card } from '../components/Card';
@@ -11,46 +11,49 @@ import {
   Edit2, 
   Users, 
   AlertTriangle,
-  Building2,
   TrendingUp,
   TrendingDown,
   CheckCircle2,
-  BarChart3
+  BarChart3,
+  Search,
+  UserCheck,
+  Download,
+  RefreshCw
 } from 'lucide-react';
-
-interface Branch {
-  id: number;
-  name: string;
-}
 
 interface StaffingTable {
   id: number;
-  branchId: number;
   position: string;
   requiredRate: number;
-  branch: { id: number; name: string };
 }
 
 interface StaffingReport {
-  branchId: number;
-  branchName: string;
   position: string;
   requiredRate: number;
   currentRate: number;
   deficit: number;
 }
 
+interface Employee {
+  id: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+  rate: number;
+}
+
 export default function StaffingPage() {
   const [tables, setTables] = useState<StaffingTable[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [report, setReport] = useState<StaffingReport[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'table' | 'report'>('table');
+  const [activeTab, setActiveTab] = useState<'table' | 'report' | 'employees'>('table');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<StaffingTable | null>(null);
-  const [formData, setFormData] = useState({ branchId: '', position: '', requiredRate: '' });
+  const [formData, setFormData] = useState({ position: '', requiredRate: '' });
   const [isSaving, setIsSaving] = useState(false);
   
   // Delete confirmation
@@ -60,24 +63,17 @@ export default function StaffingPage() {
   });
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Filter
-  const [filterBranchId, setFilterBranchId] = useState<string>('');
+  // Position detail modal
+  const [selectedPosition, setSelectedPosition] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    fetchTables();
-    fetchReport();
-  }, [filterBranchId]);
-
   const fetchData = async () => {
     setLoading(true);
     try {
-      const branchesRes = await api.get('/api/branches') as Branch[];
-      setBranches(branchesRes);
-      await Promise.all([fetchTables(), fetchReport()]);
+      await Promise.all([fetchTables(), fetchReport(), fetchEmployees()]);
     } catch (error: any) {
       toast.error('Ошибка загрузки данных', { description: error?.message });
     } finally {
@@ -87,8 +83,7 @@ export default function StaffingPage() {
 
   const fetchTables = async () => {
     try {
-      const params = filterBranchId ? `?branchId=${filterBranchId}` : '';
-      const data = await api.get(`/api/staffing/tables${params}`) as StaffingTable[];
+      const data = await api.get('/api/staffing/tables') as StaffingTable[];
       setTables(data);
     } catch (error: any) {
       console.error('Error fetching staffing tables:', error);
@@ -97,24 +92,31 @@ export default function StaffingPage() {
 
   const fetchReport = async () => {
     try {
-      const params = filterBranchId ? `?branchId=${filterBranchId}` : '';
-      const data = await api.get(`/api/staffing/report${params}`) as StaffingReport[];
+      const data = await api.get('/api/staffing/report') as StaffingReport[];
       setReport(data);
     } catch (error: any) {
       console.error('Error fetching staffing report:', error);
     }
   };
 
+  const fetchEmployees = async () => {
+    try {
+      const data = await api.get('/api/employees') as Employee[];
+      setEmployees(data.filter(e => !('fireDate' in e) || !(e as any).fireDate));
+    } catch (error: any) {
+      console.error('Error fetching employees:', error);
+    }
+  };
+
   const openCreateModal = () => {
     setEditingItem(null);
-    setFormData({ branchId: branches[0]?.id?.toString() || '', position: '', requiredRate: '1' });
+    setFormData({ position: '', requiredRate: '1' });
     setIsModalOpen(true);
   };
 
   const openEditModal = (item: StaffingTable) => {
     setEditingItem(item);
     setFormData({
-      branchId: item.branchId.toString(),
       position: item.position,
       requiredRate: item.requiredRate.toString()
     });
@@ -123,7 +125,7 @@ export default function StaffingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.branchId || !formData.position || !formData.requiredRate) {
+    if (!formData.position || !formData.requiredRate) {
       toast.error('Заполните все обязательные поля');
       return;
     }
@@ -131,7 +133,6 @@ export default function StaffingPage() {
     setIsSaving(true);
     try {
       const payload = {
-        branchId: Number(formData.branchId),
         position: formData.position.trim(),
         requiredRate: Number(formData.requiredRate)
       };
@@ -175,25 +176,6 @@ export default function StaffingPage() {
     }
   };
 
-  // Group tables by branch
-  const tablesByBranch = tables.reduce((acc, item) => {
-    const branchName = item.branch.name;
-    if (!acc[branchName]) {
-      acc[branchName] = [];
-    }
-    acc[branchName].push(item);
-    return acc;
-  }, {} as Record<string, StaffingTable[]>);
-
-  // Group report by branch
-  const reportByBranch = report.reduce((acc, item) => {
-    if (!acc[item.branchName]) {
-      acc[item.branchName] = [];
-    }
-    acc[item.branchName].push(item);
-    return acc;
-  }, {} as Record<string, StaffingReport[]>);
-
   // Calculate summary
   const summary = report.reduce(
     (acc, item) => ({
@@ -203,6 +185,50 @@ export default function StaffingPage() {
     }),
     { totalRequired: 0, totalCurrent: 0, totalDeficit: 0 }
   );
+
+  // Filter tables by search
+  const filteredTables = useMemo(() => {
+    if (!searchQuery.trim()) return tables;
+    const query = searchQuery.toLowerCase();
+    return tables.filter(t => t.position.toLowerCase().includes(query));
+  }, [tables, searchQuery]);
+
+  // Filter report by search
+  const filteredReport = useMemo(() => {
+    if (!searchQuery.trim()) return report;
+    const query = searchQuery.toLowerCase();
+    return report.filter(r => r.position.toLowerCase().includes(query));
+  }, [report, searchQuery]);
+
+  // Get employees by position
+  const getEmployeesByPosition = (position: string) => {
+    return employees.filter(e => e.position === position);
+  };
+
+  // Export to CSV
+  const exportToCSV = () => {
+    const headers = ['Должность', 'По штату', 'Фактически', 'Дефицит', 'Статус'];
+    const rows = report.map(item => [
+      item.position,
+      item.requiredRate.toString(),
+      item.currentRate.toString(),
+      item.deficit.toString(),
+      item.deficit > 0 ? 'Недостаток' : item.deficit < 0 ? 'Избыток' : 'Укомплектовано'
+    ]);
+    
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+    
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `staffing-report-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success('Отчёт экспортирован');
+  };
 
   if (loading) {
     return (
@@ -214,14 +240,22 @@ export default function StaffingPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Users className="h-6 w-6" />
           Штатное расписание
         </h1>
-        <Button onClick={openCreateModal}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Добавить позицию
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => fetchData()}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Обновить
+          </Button>
+          <Button variant="outline" onClick={exportToCSV}>
+            <Download className="mr-2 h-4 w-4" /> Экспорт
+          </Button>
+          <Button onClick={openCreateModal}>
+            <PlusCircle className="mr-2 h-4 w-4" /> Добавить позицию
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -267,8 +301,8 @@ export default function StaffingPage() {
         </Card>
       </div>
 
-      {/* Tabs and Filter */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Tabs */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex gap-2">
           <Button
             variant={activeTab === 'table' ? 'default' : 'outline'}
@@ -281,53 +315,95 @@ export default function StaffingPage() {
             onClick={() => setActiveTab('report')}
           >
             <BarChart3 className="mr-2 h-4 w-4" />
-            Отчёт о соответствии
+            Отчёт
+          </Button>
+          <Button
+            variant={activeTab === 'employees' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('employees')}
+          >
+            <UserCheck className="mr-2 h-4 w-4" />
+            По сотрудникам
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Building2 className="h-4 w-4 text-gray-500" />
-          <select
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-            value={filterBranchId}
-            onChange={(e) => setFilterBranchId(e.target.value)}
-          >
-            <option value="">Все филиалы</option>
-            {branches.map((b) => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
-          </select>
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Поиск по должности..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
         </div>
       </div>
 
       {/* Content */}
       {activeTab === 'table' ? (
         <div className="space-y-6">
-          {Object.keys(tablesByBranch).length === 0 ? (
+          {filteredTables.length === 0 ? (
             <Card>
               <div className="p-8 text-center text-gray-500">
-                Штатное расписание пусто. Добавьте первую позицию.
+                {searchQuery ? 'Позиции не найдены' : 'Штатное расписание пусто. Добавьте первую позицию.'}
               </div>
             </Card>
           ) : (
-            Object.entries(tablesByBranch).map(([branchName, items]) => (
-              <Card key={branchName}>
-                <div className="p-4 border-b bg-gray-50 rounded-t-lg">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-gray-500" />
-                    {branchName}
-                    <span className="text-sm text-gray-500 font-normal">
-                      ({items.length} позиций, {items.reduce((sum, i) => sum + i.requiredRate, 0).toFixed(1)} ставок)
-                    </span>
-                  </h3>
-                </div>
-                <div className="divide-y">
-                  {items.map((item) => (
+            <Card>
+              <div className="divide-y">
+                {filteredTables.map((item) => {
+                  const reportItem = report.find(r => r.position === item.position);
+                  const currentRate = reportItem?.currentRate || 0;
+                  const deficit = reportItem?.deficit || item.requiredRate;
+                  
+                  return (
                     <div key={item.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                      <div>
-                        <p className="font-medium">{item.position}</p>
-                        <p className="text-sm text-gray-500">Требуется: {item.requiredRate} ставки</p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <p className="font-medium">{item.position}</p>
+                          {deficit > 0 && (
+                            <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">
+                              -{deficit}
+                            </span>
+                          )}
+                          {deficit < 0 && (
+                            <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                              +{Math.abs(deficit)}
+                            </span>
+                          )}
+                          {deficit === 0 && currentRate > 0 && (
+                            <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Укомплектовано
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-4 mt-1">
+                          <p className="text-sm text-gray-500">
+                            Требуется: <span className="font-medium text-gray-700">{item.requiredRate}</span> ставок
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Фактически: <span className="font-medium text-gray-700">{currentRate}</span> ставок
+                          </p>
+                        </div>
+                        {/* Progress bar */}
+                        <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden w-48">
+                          <div 
+                            className={`h-full transition-all ${
+                              currentRate >= item.requiredRate ? 'bg-green-500' : 
+                              currentRate >= item.requiredRate * 0.7 ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}
+                            style={{ width: `${Math.min(100, (currentRate / item.requiredRate) * 100)}%` }}
+                          />
+                        </div>
                       </div>
                       <div className="flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setSelectedPosition(item.position)}
+                          title="Показать сотрудников"
+                        >
+                          <UserCheck className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="sm" onClick={() => openEditModal(item)}>
                           <Edit2 className="h-4 w-4" />
                         </Button>
@@ -341,50 +417,69 @@ export default function StaffingPage() {
                         </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </Card>
-            ))
+                  );
+                })}
+              </div>
+            </Card>
           )}
         </div>
-      ) : (
+      ) : activeTab === 'report' ? (
         <div className="space-y-6">
-          {Object.keys(reportByBranch).length === 0 ? (
+          {filteredReport.length === 0 ? (
             <Card>
               <div className="p-8 text-center text-gray-500">
-                Нет данных для отчёта. Добавьте штатные позиции.
+                {searchQuery ? 'Позиции не найдены' : 'Нет данных для отчёта. Добавьте штатные позиции.'}
               </div>
             </Card>
           ) : (
-            Object.entries(reportByBranch).map(([branchName, items]) => (
-              <Card key={branchName}>
-                <div className="p-4 border-b bg-gray-50 rounded-t-lg">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-gray-500" />
-                    {branchName}
-                  </h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 text-sm">
-                      <tr>
-                        <th className="px-4 py-3 text-left">Должность</th>
-                        <th className="px-4 py-3 text-center">По штату</th>
-                        <th className="px-4 py-3 text-center">Фактически</th>
-                        <th className="px-4 py-3 text-center">Дефицит</th>
-                        <th className="px-4 py-3 text-center">Статус</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {items.map((item, idx) => (
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 text-sm">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Должность</th>
+                      <th className="px-4 py-3 text-center">По штату</th>
+                      <th className="px-4 py-3 text-center">Фактически</th>
+                      <th className="px-4 py-3 text-center">Дефицит</th>
+                      <th className="px-4 py-3 text-center">Укомплектованность</th>
+                      <th className="px-4 py-3 text-center">Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {filteredReport.map((item, idx) => {
+                      const percentage = item.requiredRate > 0 
+                        ? Math.round((item.currentRate / item.requiredRate) * 100) 
+                        : 0;
+                      return (
                         <tr key={idx} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 font-medium">{item.position}</td>
+                          <td className="px-4 py-3">
+                            <button 
+                              className="font-medium hover:text-blue-600 hover:underline text-left"
+                              onClick={() => setSelectedPosition(item.position)}
+                            >
+                              {item.position}
+                            </button>
+                          </td>
                           <td className="px-4 py-3 text-center">{item.requiredRate}</td>
                           <td className="px-4 py-3 text-center">{item.currentRate}</td>
                           <td className="px-4 py-3 text-center">
-                            <span className={item.deficit > 0 ? 'text-red-600 font-medium' : 'text-green-600'}>
+                            <span className={item.deficit > 0 ? 'text-red-600 font-medium' : item.deficit < 0 ? 'text-blue-600 font-medium' : 'text-green-600'}>
                               {item.deficit > 0 ? `-${item.deficit}` : item.deficit < 0 ? `+${Math.abs(item.deficit)}` : '0'}
                             </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full transition-all ${
+                                    percentage >= 100 ? 'bg-green-500' : 
+                                    percentage >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                                  }`}
+                                  style={{ width: `${Math.min(100, percentage)}%` }}
+                                />
+                              </div>
+                              <span className="text-sm text-gray-600 w-12 text-right">{percentage}%</span>
+                            </div>
                           </td>
                           <td className="px-4 py-3 text-center">
                             {item.deficit > 0 ? (
@@ -405,12 +500,71 @@ export default function StaffingPage() {
                             )}
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-            ))
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          )}
+        </div>
+      ) : (
+        /* Employees tab */
+        <div className="space-y-6">
+          {tables.length === 0 ? (
+            <Card>
+              <div className="p-8 text-center text-gray-500">
+                Добавьте штатные позиции для просмотра сотрудников.
+              </div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredTables.map((item) => {
+                const positionEmployees = getEmployeesByPosition(item.position);
+                const currentRate = positionEmployees.reduce((sum, e) => sum + e.rate, 0);
+                const deficit = item.requiredRate - currentRate;
+                
+                return (
+                  <Card key={item.id}>
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold">{item.position}</h3>
+                        {deficit > 0 && (
+                          <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">
+                            -{deficit}
+                          </span>
+                        )}
+                        {deficit < 0 && (
+                          <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                            +{Math.abs(deficit)}
+                          </span>
+                        )}
+                        {deficit === 0 && currentRate > 0 && (
+                          <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">
+                            <CheckCircle2 className="h-3 w-3" />
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 mb-3">
+                        {currentRate} из {item.requiredRate} ставок
+                      </p>
+                      {positionEmployees.length === 0 ? (
+                        <p className="text-sm text-gray-400 italic">Нет сотрудников</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {positionEmployees.map((emp) => (
+                            <div key={emp.id} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                              <span>{emp.lastName} {emp.firstName}</span>
+                              <span className="text-gray-500">{emp.rate} ст.</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           )}
         </div>
       )}
@@ -422,21 +576,6 @@ export default function StaffingPage() {
         title={editingItem ? 'Редактировать позицию' : 'Добавить позицию'}
       >
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Филиал *</label>
-            <select
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              value={formData.branchId}
-              onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
-              required
-              disabled={!!editingItem}
-            >
-              <option value="">Выберите филиал</option>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          </div>
           <div>
             <label className="block text-sm font-medium mb-1">Должность *</label>
             <Input
@@ -484,7 +623,6 @@ export default function StaffingPage() {
           {deleteConfirm.item && (
             <div className="bg-gray-50 p-3 rounded-lg">
               <p><strong>Должность:</strong> {deleteConfirm.item.position}</p>
-              <p><strong>Филиал:</strong> {deleteConfirm.item.branch.name}</p>
               <p><strong>Ставок:</strong> {deleteConfirm.item.requiredRate}</p>
             </div>
           )}
@@ -494,6 +632,89 @@ export default function StaffingPage() {
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
               {isDeleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Position Employees Modal */}
+      <Modal 
+        isOpen={!!selectedPosition} 
+        onClose={() => setSelectedPosition(null)} 
+        title={`Сотрудники: ${selectedPosition}`}
+      >
+        <div className="p-4">
+          {selectedPosition && (
+            <>
+              {(() => {
+                const positionEmployees = getEmployeesByPosition(selectedPosition);
+                const tableItem = tables.find(t => t.position === selectedPosition);
+                const requiredRate = tableItem?.requiredRate || 0;
+                const currentRate = positionEmployees.reduce((sum, e) => sum + e.rate, 0);
+                const deficit = requiredRate - currentRate;
+                
+                return (
+                  <>
+                    <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="text-sm text-gray-500">Укомплектованность</p>
+                        <p className="text-lg font-bold">{currentRate} / {requiredRate} ставок</p>
+                      </div>
+                      {deficit > 0 && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                          <AlertTriangle className="h-4 w-4" />
+                          Не хватает {deficit}
+                        </span>
+                      )}
+                      {deficit < 0 && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                          <TrendingUp className="h-4 w-4" />
+                          Избыток {Math.abs(deficit)}
+                        </span>
+                      )}
+                      {deficit === 0 && currentRate > 0 && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Укомплектовано
+                        </span>
+                      )}
+                    </div>
+                    
+                    {positionEmployees.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Users className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                        <p>На этой должности нет сотрудников</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {positionEmployees.map((emp) => (
+                          <div key={emp.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span className="text-blue-600 font-medium">
+                                  {emp.firstName[0]}{emp.lastName[0]}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="font-medium">{emp.lastName} {emp.firstName}</p>
+                                <p className="text-sm text-gray-500">{emp.position}</p>
+                              </div>
+                            </div>
+                            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm font-medium">
+                              {emp.rate} ставки
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </>
+          )}
+          <div className="flex justify-end mt-4">
+            <Button variant="outline" onClick={() => setSelectedPosition(null)}>
+              Закрыть
             </Button>
           </div>
         </div>

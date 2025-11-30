@@ -20,13 +20,6 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log("Start seeding...");
-  
-  // 1. Создать филиал
-  const branch = await prisma.branch.upsert({
-    where: { name: "Главный корпус" },
-    update: {},
-    create: { name: "Главный корпус", address: "ул. Центральная, 1" },
-  });
 
   // 2. Создать директора
   const directorEmployee = await prisma.employee.upsert({
@@ -38,7 +31,6 @@ async function main() {
       position: "Директор",
       rate: 1.0,
       hireDate: new Date(),
-      branchId: branch.id,
     },
   });
 
@@ -70,7 +62,6 @@ async function main() {
       position: "Администратор",
       rate: 1.0,
       hireDate: new Date(),
-      branchId: branch.id,
     },
   });
 
@@ -101,12 +92,9 @@ async function main() {
   
   for (let i = 0; i < classNames.length; i++) {
     await prisma.group.upsert({
-      where: { name_branchId: { name: classNames[i], branchId: branch.id } },
+      where: { name: classNames[i] },
       update: {},
-      create: {
-        name: classNames[i],
-        branchId: branch.id,
-      },
+      create: { name: classNames[i] },
     });
   }
   console.log("Created 11 classes (1-11 класс)");

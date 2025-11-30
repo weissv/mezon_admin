@@ -8,16 +8,9 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Modal } from '../components/Modal';
 
-interface Branch {
-  id: number;
-  name: string;
-}
-
 interface Group {
   id: number;
   name: string;
-  branchId: number;
-  branch: Branch;
   _count?: {
     children: number;
   };
@@ -25,7 +18,6 @@ interface Group {
 
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
@@ -35,17 +27,12 @@ export default function GroupsPage() {
 
   // Form state
   const [formName, setFormName] = useState('');
-  const [formBranchId, setFormBranchId] = useState('');
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [groupsData, branchesData] = await Promise.all([
-        api.get('/api/groups'),
-        api.get('/api/branches')
-      ]);
+      const groupsData = await api.get('/api/groups');
       setGroups(groupsData || []);
-      setBranches(branchesData || []);
     } catch (error: any) {
       toast.error('Ошибка загрузки данных', { description: error?.message });
     } finally {
@@ -60,21 +47,19 @@ export default function GroupsPage() {
   const handleCreate = () => {
     setEditingGroup(null);
     setFormName('');
-    setFormBranchId(branches[0]?.id?.toString() || '');
     setIsModalOpen(true);
   };
 
   const handleEdit = (group: Group) => {
     setEditingGroup(group);
     setFormName(group.name);
-    setFormBranchId(group.branchId.toString());
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim() || !formBranchId) {
-      toast.error('Заполните все поля');
+    if (!formName.trim()) {
+      toast.error('Заполните название');
       return;
     }
 
@@ -82,7 +67,6 @@ export default function GroupsPage() {
     try {
       const payload = {
         name: formName.trim(),
-        branchId: Number(formBranchId)
       };
 
       if (editingGroup) {
@@ -117,16 +101,6 @@ export default function GroupsPage() {
     }
   };
 
-  // Группировка классов по филиалам
-  const groupedByBranch = groups.reduce((acc, group) => {
-    const branchName = group.branch?.name || 'Без филиала';
-    if (!acc[branchName]) {
-      acc[branchName] = [];
-    }
-    acc[branchName].push(group);
-    return acc;
-  }, {} as Record<string, Group[]>);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -147,53 +121,48 @@ export default function GroupsPage() {
         </Button>
       </div>
 
-      <div className="space-y-6">
-        {Object.keys(groupedByBranch).length === 0 ? (
-          <Card className="p-8 text-center text-gray-500">
-            Классы не найдены. Добавьте первый класс.
-          </Card>
-        ) : (
-          Object.entries(groupedByBranch).map(([branchName, branchGroups]) => (
-            <Card key={branchName} className="p-4">
-              <h2 className="text-lg font-semibold mb-4 text-gray-700">{branchName}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {branchGroups.map((group) => (
-                  <div
-                    key={group.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+      {groups.length === 0 ? (
+        <Card className="p-8 text-center text-gray-500">
+          Классы не найдены. Добавьте первый класс.
+        </Card>
+      ) : (
+        <Card className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {groups.map((group) => (
+              <div
+                key={group.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+              >
+                <div>
+                  <p className="font-medium">{group.name}</p>
+                  {group._count && (
+                    <p className="text-xs text-gray-500">
+                      {group._count.children} детей
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(group)}
                   >
-                    <div>
-                      <p className="font-medium">{group.name}</p>
-                      {group._count && (
-                        <p className="text-xs text-gray-500">
-                          {group._count.children} детей
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(group)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteConfirm(group)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDeleteConfirm(group)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </Card>
-          ))
-        )}
-      </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Create/Edit Modal */}
       <Modal
@@ -213,26 +182,6 @@ export default function GroupsPage() {
               placeholder="Например: 1А класс"
               required
             />
-          </div>
-
-          <div>
-            <label htmlFor="branch" className="block mb-1 font-medium">
-              Филиал
-            </label>
-            <select
-              id="branch"
-              value={formBranchId}
-              onChange={(e) => setFormBranchId(e.target.value)}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Выберите филиал</option>
-              {branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
@@ -269,9 +218,6 @@ export default function GroupsPage() {
               {deleteConfirm && (
                 <div className="mt-2 p-3 bg-gray-50 rounded-md">
                   <p className="text-sm font-medium">{deleteConfirm.name}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Филиал: {deleteConfirm.branch?.name}
-                  </p>
                 </div>
               )}
               <p className="text-sm text-gray-500 mt-2">

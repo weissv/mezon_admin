@@ -216,7 +216,7 @@ export default function NotificationsPage() {
                     onChange={(event) => setFormState((prev) => ({ ...prev, targetGroupId: event.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   >
-                    <option value="">Все филиалы</option>
+                    <option value="">Все классы</option>
                     {groups.map((group) => (
                       <option key={group.id} value={group.id}>
                         {group.name}
@@ -279,7 +279,7 @@ export default function NotificationsPage() {
                     Роли: {broadcast.targetRole ? ROLE_LABELS[broadcast.targetRole] : "Все"}
                   </span>
                   <span>
-                    Класс: {broadcast.targetGroup?.name || "Все филиалы"}
+                    Класс: {broadcast.targetGroup?.name || "Все классы"}
                   </span>
                 </div>
               </li>

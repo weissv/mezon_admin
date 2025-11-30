@@ -48,15 +48,9 @@ router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
 // --- CleaningSchedule CRUD ---
 
 // GET /api/maintenance/cleaning - список графиков уборки
-router.get("/cleaning", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { branchId } = req.query;
-  
+router.get("/cleaning", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
   const schedules = await prisma.cleaningSchedule.findMany({
-    where: {
-      ...(branchId ? { branchId: Number(branchId) } : {}),
-    },
     include: {
-      branch: { select: { id: true, name: true } },
       assignedTo: { select: { id: true, firstName: true, lastName: true } },
       logs: {
         orderBy: { timestamp: "desc" },
@@ -71,17 +65,15 @@ router.get("/cleaning", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 
 // POST /api/maintenance/cleaning - создать график уборки
 router.post("/cleaning", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { branchId, area, frequency, assignedToId } = req.body;
+  const { area, frequency, assignedToId } = req.body;
   
   const schedule = await prisma.cleaningSchedule.create({
     data: {
-      branchId,
       area,
       frequency,
       assignedToId: assignedToId || null,
     },
     include: {
-      branch: { select: { id: true, name: true } },
       assignedTo: { select: { id: true, firstName: true, lastName: true } },
     },
   });
@@ -98,7 +90,6 @@ router.put("/cleaning/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => 
     where: { id: Number(id) },
     data: { area, frequency, assignedToId },
     include: {
-      branch: { select: { id: true, name: true } },
       assignedTo: { select: { id: true, firstName: true, lastName: true } },
     },
   });
@@ -129,16 +120,8 @@ router.post("/cleaning/:id/log", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), asyn
 // --- Equipment CRUD ---
 
 // GET /api/maintenance/equipment - список оборудования
-router.get("/equipment", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { branchId } = req.query;
-  
+router.get("/equipment", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
   const equipment = await prisma.equipment.findMany({
-    where: {
-      ...(branchId ? { branchId: Number(branchId) } : {}),
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
-    },
     orderBy: { nextCheckup: "asc" },
   });
   
@@ -147,18 +130,14 @@ router.get("/equipment", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 
 // POST /api/maintenance/equipment - добавить оборудование
 router.post("/equipment", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { branchId, name, location, lastCheckup, nextCheckup } = req.body;
+  const { name, location, lastCheckup, nextCheckup } = req.body;
   
   const equipment = await prisma.equipment.create({
     data: {
-      branchId,
       name,
       location: location || null,
       lastCheckup: new Date(lastCheckup),
       nextCheckup: new Date(nextCheckup),
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
     },
   });
   
@@ -177,9 +156,6 @@ router.put("/equipment/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) =>
       location,
       lastCheckup: lastCheckup ? new Date(lastCheckup) : undefined,
       nextCheckup: nextCheckup ? new Date(nextCheckup) : undefined,
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
     },
   });
   
@@ -202,9 +178,6 @@ router.get("/equipment/reminders", checkRole(["DEPUTY", "ADMIN"]), async (req, r
       nextCheckup: {
         lte: new Date(Date.now() + Number(days) * 24 * 3600 * 1000),
       },
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
     },
     orderBy: { nextCheckup: "asc" },
   });

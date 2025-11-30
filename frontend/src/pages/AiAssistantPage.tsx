@@ -40,6 +40,21 @@ interface KnowledgeDocument {
   createdAt: string;
 }
 
+interface SyncStatus {
+  isRunning: boolean;
+  startedAt: string | null;
+  progress: number;
+  total: number;
+  current: number;
+  currentFile: string;
+  synced: number;
+  updated: number;
+  skipped: number;
+  errors: number;
+  completedAt: string | null;
+  error: string | null;
+}
+
 /**
  * Парсит ответ и извлекает блок <think>...</think>
  */
@@ -71,6 +86,7 @@ export default function AiAssistantPage() {
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [showAddDocModal, setShowAddDocModal] = useState(false);
   const [newDocContent, setNewDocContent] = useState("");
   const [newDocMetadata, setNewDocMetadata] = useState({
@@ -236,18 +252,57 @@ export default function AiAssistantPage() {
   const handleSyncGoogleDrive = async () => {
     setSyncConfirmOpen(false);
     setIsSyncing(true);
+    setSyncStatus(null);
+    
     try {
-      const data = await api.post("/ai/sync-google-drive");
-      if (data.success) {
-        alert(data.message);
-        loadDocuments();
-      } else {
-        alert(data.message || "Ошибка синхронизации");
+      // Запускаем синхронизацию в фоновом режиме
+      const startData = await api.post("/ai/sync-google-drive?background=true");
+      
+      if (!startData.success) {
+        alert(startData.message || "Ошибка запуска синхронизации");
+        setIsSyncing(false);
+        return;
       }
+      
+      // Начинаем поллинг статуса
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusData = await api.get("/ai/sync-status");
+          if (statusData.success) {
+            setSyncStatus(statusData.data);
+            
+            // Если синхронизация завершена
+            if (!statusData.data.isRunning) {
+              clearInterval(pollInterval);
+              setIsSyncing(false);
+              loadDocuments();
+              
+              const { synced, updated, skipped, errors } = statusData.data;
+              if (statusData.data.error) {
+                alert(`Ошибка синхронизации: ${statusData.data.error}`);
+              } else {
+                alert(`Синхронизация завершена!\nДобавлено: ${synced}\nОбновлено: ${updated}\nПропущено: ${skipped}\nОшибок: ${errors}`);
+              }
+              setSyncStatus(null);
+            }
+          }
+        } catch (pollError) {
+          console.error("Poll error:", pollError);
+        }
+      }, 1000); // Поллинг каждую секунду
+      
+      // Таймаут на 5 минут
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (isSyncing) {
+          setIsSyncing(false);
+          alert("Синхронизация заняла слишком много времени. Проверьте статус позже.");
+        }
+      }, 5 * 60 * 1000);
+      
     } catch (error) {
       console.error("Error syncing Google Drive:", error);
       alert("Ошибка синхронизации с Google Drive");
-    } finally {
       setIsSyncing(false);
     }
   };
@@ -849,6 +904,71 @@ export default function AiAssistantPage() {
             <Button onClick={handleSyncGoogleDrive}>
               Синхронизировать
             </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Sync Progress Modal */}
+      <Modal isOpen={isSyncing} onClose={() => {}} title="Синхронизация с Google Drive">
+        <div className="p-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <RefreshCw className="h-6 w-6 text-blue-600 animate-spin" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-gray-900">
+                  {syncStatus ? 'Синхронизация...' : 'Запуск синхронизации...'}
+                </p>
+                {syncStatus?.currentFile && (
+                  <p className="text-sm text-gray-500 truncate mt-1" title={syncStatus.currentFile}>
+                    {syncStatus.currentFile}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {syncStatus && syncStatus.total > 0 && (
+              <>
+                {/* Progress bar */}
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.round((syncStatus.current / syncStatus.total) * 100)}%` }}
+                  />
+                </div>
+                
+                {/* Progress text */}
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>
+                    Файл {syncStatus.current} из {syncStatus.total}
+                  </span>
+                  <span>
+                    {Math.round((syncStatus.current / syncStatus.total) * 100)}%
+                  </span>
+                </div>
+                
+                {/* Statistics */}
+                <div className="grid grid-cols-4 gap-2 text-center text-xs mt-2">
+                  <div className="bg-green-50 rounded p-2">
+                    <div className="font-semibold text-green-700">{syncStatus.synced}</div>
+                    <div className="text-green-600">Добавлено</div>
+                  </div>
+                  <div className="bg-blue-50 rounded p-2">
+                    <div className="font-semibold text-blue-700">{syncStatus.updated}</div>
+                    <div className="text-blue-600">Обновлено</div>
+                  </div>
+                  <div className="bg-gray-50 rounded p-2">
+                    <div className="font-semibold text-gray-700">{syncStatus.skipped}</div>
+                    <div className="text-gray-600">Пропущено</div>
+                  </div>
+                  <div className="bg-red-50 rounded p-2">
+                    <div className="font-semibold text-red-700">{syncStatus.errors}</div>
+                    <div className="text-red-600">Ошибок</div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </Modal>

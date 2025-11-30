@@ -106,8 +106,6 @@ model Employee {
   contractEndDate    DateTime?
   medicalCheckupDate DateTime?
   attestationDate    DateTime?
-  branchId           Int
-  branch             Branch    @relation(fields: [branchId], references: [id])
 
   user                User?
   clubs               Club[]               @relation("TeacherClubs")
@@ -117,8 +115,6 @@ model Employee {
   cleaningSchedules   CleaningSchedule[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
-
-  @@index([branchId])
 }
 
 model Child {
@@ -143,16 +139,11 @@ model Child {
 }
 
 model Group {
-  id       Int    @id @default(autoincrement())
-  name     String
-  branchId Int
-  branch   Branch @relation(fields: [branchId], references: [id])
+  id   Int    @id @default(autoincrement())
+  name String @unique
 
   children      Child[]
   notifications Notification[]
-
-  @@unique([name, branchId]) // Название группы уникально в филиале
-  @@index([branchId])
 }
 
 model Club {
@@ -278,19 +269,7 @@ model SecurityLog {
   @@index([date, eventType])
 }
 
-model Branch {
-  id      Int    @id @default(autoincrement())
-  name    String
-  address String
 
-  employees         Employee[]
-  groups            Group[]
-  cleaningSchedules CleaningSchedule[]
-  equipment         Equipment[]
-  staffingTables    StaffingTable[]
-
-  @@unique([name])
-}
 
 model ActionLog {
   id        Int      @id @default(autoincrement())
@@ -336,12 +315,8 @@ model EmployeeAttendance {
 
 model StaffingTable {
   id           Int    @id @default(autoincrement())
-  branch       Branch @relation(fields: [branchId], references: [id])
-  branchId     Int
-  position     String // "Воспитатель", "Педагог"
+  position     String @unique // "Воспитатель", "Педагог"
   requiredRate Float // Required staff rate (e.g., 1.5 воспитателя)
-
-  @@index([branchId])
 }
 
 // --- 3. ПИТАНИЕ И ЗАКУПКИ ---
@@ -437,15 +412,11 @@ model ClubRating {
 // --- 5. ХОЗЯЙСТВЕННЫЕ НУЖДЫ ---
 model CleaningSchedule {
   id           Int           @id @default(autoincrement())
-  branchId     Int
-  branch       Branch        @relation(fields: [branchId], references: [id])
   area         String // "Группа 1", "Кухня"
   frequency    String // "Ежедневно", "Раз в неделю"
   assignedTo   Employee?     @relation(fields: [assignedToId], references: [id])
   assignedToId Int?
   logs         CleaningLog[]
-
-  @@index([branchId])
 }
 
 model CleaningLog {
@@ -459,14 +430,12 @@ model CleaningLog {
 
 model Equipment {
   id          Int      @id @default(autoincrement())
-  branchId    Int
-  branch      Branch   @relation(fields: [branchId], references: [id])
   name        String // "Огнетушитель #1"
   location    String?
   lastCheckup DateTime
   nextCheckup DateTime
 
-  @@index([branchId, nextCheckup])
+  @@index([nextCheckup])
 }
 
 // --- 6. ДОКУМЕНТООБОРОТ ---
@@ -540,4 +509,73 @@ model KnowledgeBaseDocument {
   embedding Unsupported("vector(768)")?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// --- 9. РАСПИСАНИЕ УРОКОВ ---
+
+// Предметы (дисциплины)
+model Subject {
+  id          Int             @id @default(autoincrement())
+  name        String          @unique // "Математика", "Русский язык"
+  shortName   String?         // "Мат", "Рус"
+  color       String?         // Цвет для отображения в расписании "#4CAF50"
+  schedules   ScheduleSlot[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+// Учебные кабинеты/помещения
+model Room {
+  id        Int            @id @default(autoincrement())
+  name      String         @unique // "Кабинет 101", "Спортзал"
+  capacity  Int?           // Вместимость
+  schedules ScheduleSlot[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+// Временные слоты (звонки)
+model TimeSlot {
+  id        Int            @id @default(autoincrement())
+  number    Int            // Номер урока (1, 2, 3...)
+  startTime String         // "08:30"
+  endTime   String         // "09:15"
+  schedules ScheduleSlot[]
+
+  @@unique([number])
+}
+
+// Привязка учителя к предмету (кто какие предметы ведёт)
+model TeacherSubject {
+  id         Int     @id @default(autoincrement())
+  employeeId Int
+  subjectId  Int
+  isPrimary  Boolean @default(false) // Основной предмет учителя
+
+  @@unique([employeeId, subjectId])
+  @@index([employeeId])
+  @@index([subjectId])
+}
+
+// Слоты расписания (конкретные уроки)
+model ScheduleSlot {
+  id         Int      @id @default(autoincrement())
+  dayOfWeek  Int      // 1-7 (Пн-Вс)
+  timeSlotId Int
+  timeSlot   TimeSlot @relation(fields: [timeSlotId], references: [id])
+  groupId    Int      // Класс
+  subjectId  Int
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  teacherId  Int      // Учитель (employeeId)
+  roomId     Int?
+  room       Room?    @relation(fields: [roomId], references: [id])
+  isActive   Boolean  @default(true)
+  notes      String?  // Примечания
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([dayOfWeek, timeSlotId, groupId]) // Один урок на слот для класса
+  @@index([teacherId])
+  @@index([groupId])
+  @@index([dayOfWeek])
 }

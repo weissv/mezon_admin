@@ -91,7 +91,7 @@ export default function EmployeesPage() {
     { key: 'firstName', header: 'Имя' },
     { key: 'birthDate', header: 'Дата рождения', render: (row) => row.birthDate ? new Date(row.birthDate).toLocaleDateString('ru-RU') : '—' },
     { key: 'position', header: 'Должность' },
-    { key: 'branch', header: 'Филиал', render: (row) => row.branch.name },
+    { key: 'rate', header: 'Ставка' },
     { key: 'user', header: 'Аккаунт', render: (row) => row.user ? <span className="text-green-600">{row.user.email}</span> : <span className="text-gray-400">Нет</span> },
     {
       key: 'actions',

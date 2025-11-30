@@ -36,7 +36,6 @@ const entityExporters: Record<IntegrationEntity, () => Promise<Record<string, un
           select: {
             id: true,
             name: true,
-            branch: { select: { id: true, name: true } },
           },
         },
       },
@@ -50,13 +49,11 @@ const entityExporters: Record<IntegrationEntity, () => Promise<Record<string, un
       "Birth Date": child.birthDate.toISOString().split("T")[0],
       "Group ID": child.groupId,
       "Group Name": child.group?.name ?? "",
-      "Branch Name": child.group?.branch?.name ?? "",
       Status: child.status,
     }));
   },
   employees: async () => {
     const employees = await prisma.employee.findMany({
-      include: { branch: { select: { id: true, name: true } } },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     });
 
@@ -66,8 +63,6 @@ const entityExporters: Record<IntegrationEntity, () => Promise<Record<string, un
       "Last Name": employee.lastName,
       Position: employee.position,
       Rate: employee.rate,
-      "Branch ID": employee.branchId,
-      "Branch Name": employee.branch?.name ?? "",
       "Hire Date": employee.hireDate.toISOString().split("T")[0],
       "Contract End Date": employee.contractEndDate?.toISOString().split("T")[0] ?? "",
       "Medical Checkup Date": employee.medicalCheckupDate?.toISOString().split("T")[0] ?? "",
@@ -159,9 +154,8 @@ const entityImporters: Record<IntegrationEntity, (rows: ImportRow[]) => Promise<
       const lastName = getString(row, "Last Name", "lastName");
       const position = getString(row, "Position", "position");
       const rate = getNumber(row, "Rate", "rate") ?? 1;
-      const branchId = getInt(row, "Branch ID", "branchId");
       const hireDate = getDate(row, "Hire Date", "hireDate") ?? new Date();
-      if (!firstName || !lastName || !position || !branchId) {
+      if (!firstName || !lastName || !position) {
         stats.skipped += 1;
         continue;
       }
@@ -170,7 +164,6 @@ const entityImporters: Record<IntegrationEntity, (rows: ImportRow[]) => Promise<
         lastName,
         position,
         rate,
-        branchId,
         hireDate,
         contractEndDate: getDate(row, "Contract End Date", "contractEndDate") ?? undefined,
         medicalCheckupDate: getDate(row, "Medical Checkup Date", "medicalCheckupDate") ?? undefined,

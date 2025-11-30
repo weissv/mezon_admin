@@ -19,7 +19,6 @@ import inventoryRoutes from "./routes/inventory.routes";
 import menuRoutes from "./routes/menu.routes";
 import maintenanceRoutes from "./routes/maintenance.routes";
 import securityRoutes from "./routes/security.routes";
-import branchesRoutes from "./routes/branches.routes";
 import actionlogRoutes from "./routes/actionlog.routes";
 import groupsRoutes from "./routes/groups.routes";
 import notificationsRoutes from "./routes/notifications.routes";
@@ -32,6 +31,7 @@ import staffingRoutes from "./routes/staffing.routes";
 import integrationRoutes from "./routes/export.routes";
 import usersRoutes from "./routes/users.routes";
 import aiRoutes from "./routes/ai.routes";
+import scheduleRoutes from "./routes/schedule.routes";
 
 const app = express();
 
@@ -86,7 +86,6 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/security", securityRoutes);
-app.use("/api/branches", branchesRoutes);
 app.use("/api/actionlog", actionlogRoutes);
 app.use("/api/groups", groupsRoutes);
 app.use("/api/notifications", notificationsRoutes);
@@ -99,6 +98,7 @@ app.use("/api/staffing", staffingRoutes);
 app.use("/api/integration", integrationRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/schedule", scheduleRoutes);
 
 // Обработчик ошибок
 app.use(errorHandler);

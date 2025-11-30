@@ -199,13 +199,26 @@ router.post(
 
 /**
  * POST /api/ai/sync-google-drive
- * Синхронизация документов из Google Drive
+ * Синхронизация документов из Google Drive (фоновый режим)
  */
 router.post(
   "/sync-google-drive",
   checkRole(["ADMIN", "DIRECTOR"]),
-  async (_req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
+      const { background } = req.query;
+      
+      // Если запрошен фоновый режим
+      if (background === "true") {
+        const result = AiService.startBackgroundSync();
+        return res.json({
+          success: result.started,
+          message: result.message,
+          data: AiService.getSyncStatus(),
+        });
+      }
+      
+      // Синхронный режим (для небольшого количества файлов)
       const result = await AiService.syncGoogleDriveDocuments();
       
       res.json({
@@ -218,6 +231,30 @@ router.post(
       res.status(500).json({
         success: false,
         message: error instanceof Error ? error.message : "Ошибка синхронизации Google Drive",
+      });
+    }
+  }
+);
+
+/**
+ * GET /api/ai/sync-status
+ * Получение статуса синхронизации (для поллинга)
+ */
+router.get(
+  "/sync-status",
+  checkRole(["ADMIN", "DIRECTOR", "DEPUTY", "TEACHER"]),
+  async (_req: Request, res: Response) => {
+    try {
+      const status = AiService.getSyncStatus();
+      res.json({
+        success: true,
+        data: status,
+      });
+    } catch (error) {
+      console.error("Error getting sync status:", error);
+      res.status(500).json({
+        success: false,
+        message: "Ошибка получения статуса синхронизации",
       });
     }
   }
