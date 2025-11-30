@@ -22,6 +22,7 @@ import ProcurementPage from "../pages/ProcurementPage";
 import RecipesPage from "../pages/RecipesPage";
 import IntegrationPage from "../pages/IntegrationPage";
 import UsersPage from "../pages/UsersPage";
+import AiAssistantPage from "../pages/AiAssistantPage";
 import { useAuth } from "../hooks/useAuth";
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -95,6 +96,10 @@ export default function Router() {
 
           <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
             <Route path="notifications" element={<NotificationsPage />} />
+          </Route>
+
+          <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"]} />}>
+            <Route path="ai-assistant" element={<AiAssistantPage />} />
           </Route>
 
           <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT"]} />}>

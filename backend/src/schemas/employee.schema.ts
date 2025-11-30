@@ -6,6 +6,7 @@ export const createEmployeeSchema = z.object({
     firstName: z.string().min(2, "Имя обязательно"),
     lastName: z.string().min(2, "Фамилия обязательна"),
     middleName: z.string().optional(),
+    birthDate: z.string().datetime().nullable().optional(),
     position: z.string().min(2, "Должность обязательна"),
     rate: z.number().positive("Ставка должна быть > 0"),
     hireDate: z.string().datetime("Неверный формат даты"),

@@ -93,15 +93,37 @@ async function main() {
   });
   console.log("Created users: director, izumi (password: 8p09VhXW)");
 
-  // 4. Создать тестовую группу
-  const group = await prisma.group.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      name: "Средняя группа",
-      branchId: branch.id,
-    },
-  });
+  // 4. Создать 11 классов (1-11)
+  const classNames = [
+    "1 класс", "2 класс", "3 класс", "4 класс", "5 класс",
+    "6 класс", "7 класс", "8 класс", "9 класс", "10 класс", "11 класс"
+  ];
+  
+  for (let i = 0; i < classNames.length; i++) {
+    await prisma.group.upsert({
+      where: { name_branchId: { name: classNames[i], branchId: branch.id } },
+      update: {},
+      create: {
+        name: classNames[i],
+        branchId: branch.id,
+      },
+    });
+  }
+  console.log("Created 11 classes (1-11 класс)");
+
+  // 4.1. Удалить старую "Средняя группа" если она существует и не используется
+  try {
+    const oldGroup = await prisma.group.findFirst({ where: { name: "Средняя группа" } });
+    if (oldGroup) {
+      const childrenInOldGroup = await prisma.child.count({ where: { groupId: oldGroup.id } });
+      if (childrenInOldGroup === 0) {
+        await prisma.group.delete({ where: { id: oldGroup.id } });
+        console.log("Deleted old 'Средняя группа'");
+      }
+    }
+  } catch (e) {
+    // Игнорируем ошибки при удалении
+  }
 
   // 5. Создать тестовые ингредиенты и блюда
   const potato = await prisma.ingredient.upsert({
