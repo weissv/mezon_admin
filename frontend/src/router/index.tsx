@@ -25,6 +25,7 @@ import UsersPage from "../pages/UsersPage";
 import AiAssistantPage from "../pages/AiAssistantPage";
 import GroupsPage from "../pages/GroupsPage";
 import BranchesPage from "../pages/BranchesPage";
+import StaffingPage from "../pages/StaffingPage";
 import { useAuth } from "../hooks/useAuth";
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -96,6 +97,10 @@ export default function Router() {
             <Route path="users" element={<UsersPage />} />
             <Route path="groups" element={<GroupsPage />} />
             <Route path="branches" element={<BranchesPage />} />
+          </Route>
+
+          <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
+            <Route path="staffing" element={<StaffingPage />} />
           </Route>
 
           <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
