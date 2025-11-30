@@ -15,7 +15,10 @@ A comprehensive ERP system for managing school and kindergarten operations inclu
 - **Maintenance Requests**: Track repair and purchase requests
 - **Security Logs**: Record security events and incidents
 - **Action Logging**: Audit trail of all system actions
+- **Staffing Management**: Track staffing requirements vs actual staff with deficit reporting
+- **Groups & Branches**: Manage school classes and branch locations
 - **Notifications**: Automated alerts plus targeted broadcasts for roles/groups
+- **AI Assistant**: RAG-powered methodologist assistant with knowledge base
 - **Data Exchange**: Excel/Google Sheets import & export for core registries
 
 ## 🛠️ Tech Stack
