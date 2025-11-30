@@ -8,6 +8,12 @@ const router = Router();
 // GET /api/groups
 router.get("/", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
   const groups = await prisma.group.findMany({
+    include: {
+      branch: true,
+      _count: {
+        select: { children: true }
+      }
+    },
     orderBy: { name: 'asc' }
   });
   
@@ -19,6 +25,68 @@ router.get("/", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (
   });
   
   return res.json(groups);
+});
+
+// POST /api/groups - создать класс
+router.post("/", checkRole(["ADMIN"]), async (req, res) => {
+  const { name, branchId } = req.body;
+  
+  if (!name || !branchId) {
+    return res.status(400).json({ error: "Название и филиал обязательны" });
+  }
+  
+  const group = await prisma.group.create({
+    data: {
+      name,
+      branchId: Number(branchId)
+    },
+    include: {
+      branch: true
+    }
+  });
+  
+  return res.status(201).json(group);
+});
+
+// PUT /api/groups/:id - обновить класс
+router.put("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const { id } = req.params;
+  const { name, branchId } = req.body;
+  
+  const group = await prisma.group.update({
+    where: { id: Number(id) },
+    data: {
+      ...(name && { name }),
+      ...(branchId && { branchId: Number(branchId) })
+    },
+    include: {
+      branch: true
+    }
+  });
+  
+  return res.json(group);
+});
+
+// DELETE /api/groups/:id - удалить класс
+router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const { id } = req.params;
+  
+  // Проверяем, есть ли дети в этом классе
+  const childrenCount = await prisma.child.count({
+    where: { groupId: Number(id) }
+  });
+  
+  if (childrenCount > 0) {
+    return res.status(400).json({ 
+      error: `В этом классе ${childrenCount} детей. Сначала переведите их в другой класс.` 
+    });
+  }
+  
+  await prisma.group.delete({
+    where: { id: Number(id) }
+  });
+  
+  return res.status(204).send();
 });
 
 export default router;
