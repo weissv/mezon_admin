@@ -68,7 +68,7 @@ export default function ChildrenPage() {
     { key: 'id', header: 'ID' },
     { key: 'lastName', header: 'Фамилия' },
     { key: 'firstName', header: 'Имя' },
-    { key: 'group', header: 'Группа', render: (row) => row.group.name },
+    { key: 'group', header: 'Класс', render: (row) => row.group.name },
     {
       key: 'actions',
       header: 'Действия',

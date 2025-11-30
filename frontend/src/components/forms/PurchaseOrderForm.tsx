@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,13 +11,13 @@ import { PurchaseOrder } from '../../types/procurement';
 import { PlusCircle, Trash2 } from 'lucide-react';
 
 const orderItemSchema = z.object({
-  ingredientId: z.coerce.number().positive('ID ингредиента обязателен'),
+  ingredientId: z.coerce.number().positive('Выберите ингредиент'),
   quantity: z.coerce.number().positive('Количество должно быть > 0'),
   price: z.coerce.number().positive('Цена должна быть > 0'),
 });
 
 const formSchema = z.object({
-  supplierId: z.coerce.number().positive('ID поставщика обязателен'),
+  supplierId: z.coerce.number().positive('Выберите поставщика'),
   orderDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
   deliveryDate: z.string().optional().nullable(),
   status: z.enum(['PENDING', 'APPROVED', 'DELIVERED']),
@@ -30,8 +31,15 @@ type PurchaseOrderFormProps = {
   onCancel: () => void; 
 };
 
+interface Supplier { id: number; name: string; }
+interface Ingredient { id: number; name: string; unit: string; }
+
 export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: PurchaseOrderFormProps) {
   const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { register, handleSubmit, control, formState: { errors, isSubmitting }, watch } = useForm<PurchaseOrderFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,6 +59,20 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: Purchase
     control,
     name: 'items',
   });
+
+  // Загрузка поставщиков и ингредиентов
+  useEffect(() => {
+    setIsLoading(true);
+    Promise.all([
+      api.get('/api/procurement/suppliers').catch(() => []),
+      api.get('/api/recipes/ingredients').catch(() => []),
+    ])
+      .then(([suppliersData, ingredientsData]) => {
+        setSuppliers(Array.isArray(suppliersData) ? suppliersData : []);
+        setIngredients(Array.isArray(ingredientsData) ? ingredientsData : []);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const items = watch('items');
   const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.price || 0), 0);
@@ -80,14 +102,23 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: Purchase
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">ID Поставщика</label>
-        <Input type="number" {...register('supplierId')} placeholder="1" />
+        <label className="block text-sm font-medium mb-1">Поставщик *</label>
+        <select
+          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          {...register('supplierId', { valueAsNumber: true })}
+          disabled={isLoading}
+        >
+          <option value="">{isLoading ? 'Загружаем...' : 'Выберите поставщика'}</option>
+          {suppliers.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
         <FormError message={errors.supplierId?.message} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Дата заказа</label>
+          <label className="block text-sm font-medium mb-1">Дата заказа *</label>
           <Input type="date" {...register('orderDate')} />
           <FormError message={errors.orderDate?.message} />
         </div>
@@ -126,13 +157,19 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: Purchase
         </div>
 
         {fields.map((field, index) => (
-          <div key={field.id} className="flex gap-2 mb-2">
-            <Input 
-              type="number" 
-              placeholder="ID ингредиента" 
-              {...register(`items.${index}.ingredientId`)}
-              className="flex-1"
-            />
+          <div key={field.id} className="flex gap-2 mb-2 items-start">
+            <div className="flex-1">
+              <select
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                {...register(`items.${index}.ingredientId`, { valueAsNumber: true })}
+                disabled={isLoading}
+              >
+                <option value="">{isLoading ? 'Загрузка...' : 'Выберите ингредиент'}</option>
+                {ingredients.map((ing) => (
+                  <option key={ing.id} value={ing.id}>{ing.name} ({ing.unit})</option>
+                ))}
+              </select>
+            </div>
             <Input 
               type="number" 
               step="0.01"
@@ -145,7 +182,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: Purchase
               step="0.01"
               placeholder="Цена" 
               {...register(`items.${index}.price`)}
-              className="w-24"
+              className="w-28"
             />
             <Button 
               type="button" 

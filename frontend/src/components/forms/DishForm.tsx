@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +11,7 @@ import { Dish } from '../../types/recipe';
 import { PlusCircle, Trash2 } from 'lucide-react';
 
 const ingredientSchema = z.object({
-  ingredientId: z.coerce.number().positive('ID ингредиента обязателен'),
+  ingredientId: z.coerce.number().positive('Выберите ингредиент'),
   quantity: z.coerce.number().positive('Количество должно быть > 0'),
 });
 
@@ -28,7 +29,12 @@ type DishFormProps = {
   onCancel: () => void; 
 };
 
+interface Ingredient { id: number; name: string; unit: string; }
+
 export function DishForm({ initialData, onSuccess, onCancel }: DishFormProps) {
+  const [availableIngredients, setAvailableIngredients] = useState<Ingredient[]>([]);
+  const [isLoadingIngredients, setIsLoadingIngredients] = useState(false);
+
   const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<DishFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,6 +53,19 @@ export function DishForm({ initialData, onSuccess, onCancel }: DishFormProps) {
     name: 'ingredients',
   });
 
+  // Загрузка списка ингредиентов
+  useEffect(() => {
+    setIsLoadingIngredients(true);
+    api.get('/api/recipes/ingredients')
+      .then((data) => {
+        setAvailableIngredients(Array.isArray(data) ? data : []);
+      })
+      .catch((error: any) => {
+        toast.error('Не удалось загрузить ингредиенты', { description: error?.message });
+      })
+      .finally(() => setIsLoadingIngredients(false));
+  }, []);
+
   const onSubmit = async (data: DishFormData) => {
     try {
       if (initialData) {
@@ -64,14 +83,14 @@ export function DishForm({ initialData, onSuccess, onCancel }: DishFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Название блюда</label>
+        <label className="block text-sm font-medium mb-1">Название блюда *</label>
         <Input {...register('name')} placeholder="Молочная каша" />
         <FormError message={errors.name?.message} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Категория</label>
+          <label className="block text-sm font-medium mb-1">Категория *</label>
           <select 
             {...register('category')} 
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -106,19 +125,24 @@ export function DishForm({ initialData, onSuccess, onCancel }: DishFormProps) {
         </div>
 
         {fields.map((field, index) => (
-          <div key={field.id} className="flex gap-2 mb-2">
+          <div key={field.id} className="flex gap-2 mb-2 items-start">
             <div className="flex-1">
-              <Input 
-                type="number" 
-                placeholder="ID ингредиента" 
-                {...register(`ingredients.${index}.ingredientId`)}
-              />
+              <select
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                {...register(`ingredients.${index}.ingredientId`, { valueAsNumber: true })}
+                disabled={isLoadingIngredients}
+              >
+                <option value="">{isLoadingIngredients ? 'Загрузка...' : 'Выберите ингредиент'}</option>
+                {availableIngredients.map((ing) => (
+                  <option key={ing.id} value={ing.id}>{ing.name} ({ing.unit})</option>
+                ))}
+              </select>
             </div>
             <div className="w-32">
               <Input 
                 type="number" 
                 step="0.01"
-                placeholder="Количество" 
+                placeholder="Кол-во" 
                 {...register(`ingredients.${index}.quantity`)}
               />
             </div>

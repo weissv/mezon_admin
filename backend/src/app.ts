@@ -30,6 +30,7 @@ import procurementRoutes from "./routes/procurement.routes";
 import recipesRoutes from "./routes/recipes.routes";
 import staffingRoutes from "./routes/staffing.routes";
 import integrationRoutes from "./routes/export.routes";
+import usersRoutes from "./routes/users.routes";
 
 const app = express();
 
@@ -95,6 +96,7 @@ app.use("/api/procurement", procurementRoutes);
 app.use("/api/recipes", recipesRoutes);
 app.use("/api/staffing", staffingRoutes);
 app.use("/api/integration", integrationRoutes);
+app.use("/api/users", usersRoutes);
 
 // Обработчик ошибок
 app.use(errorHandler);

@@ -13,7 +13,7 @@ const formSchema = z.object({
   firstName: z.string().min(2, 'Минимум 2 символа'),
   lastName: z.string().min(2, 'Минимум 2 символа'),
   birthDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
-  groupId: z.coerce.number().positive('Выберите группу'),
+  groupId: z.coerce.number().positive('Выберите класс'),
   healthInfo: z.string().optional(),
 });
 
@@ -44,8 +44,8 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
         setGroups(Array.isArray(data) ? data : []);
       })
       .catch((error: any) => {
-        const msg = error?.message || 'Не удалось загрузить список групп';
-        toast.error('Ошибка загрузки групп', { description: msg });
+        const msg = error?.message || 'Не удалось загрузить список классов';
+        toast.error('Ошибка загрузки классов', { description: msg });
       })
       .finally(() => {
         if (isMounted) setIsLoadingGroups(false);
@@ -93,13 +93,13 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
         <FormError message={errors.birthDate?.message} />
       </div>
       <div>
-        <label>Группа</label>
+        <label>Класс</label>
         <select
           className="w-full rounded-md border border-gray-300 px-3 py-2"
           disabled={isLoadingGroups}
           {...register('groupId', { valueAsNumber: true })}
         >
-          <option value="">{isLoadingGroups ? 'Загружаем...' : 'Выберите группу'}</option>
+          <option value="">{isLoadingGroups ? 'Загружаем...' : 'Выберите класс'}</option>
           {groups.map((group) => (
             <option key={group.id} value={group.id}>
               {group.name}
