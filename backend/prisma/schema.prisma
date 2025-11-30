@@ -98,6 +98,7 @@ model Employee {
   firstName          String
   lastName           String
   middleName         String?
+  birthDate          DateTime?
   position           String
   rate               Float // ставка (можно Decimal, если нужна точность)
   hireDate           DateTime
@@ -529,4 +530,14 @@ model Feedback {
   updatedAt   DateTime  @updatedAt
 
   @@index([status, createdAt])
+}
+
+// --- 8. RAG / AI ASSISTANT ---
+model KnowledgeBaseDocument {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  metadata  Json?    // { title, subject, grade, tags, source }
+  embedding Unsupported("vector(768)")?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -72,8 +72,10 @@ export default function EmployeesPage() {
     { key: 'id', header: 'ID' },
     { key: 'lastName', header: 'Фамилия' },
     { key: 'firstName', header: 'Имя' },
+    { key: 'birthDate', header: 'Дата рождения', render: (row) => row.birthDate ? new Date(row.birthDate).toLocaleDateString('ru-RU') : '—' },
     { key: 'position', header: 'Должность' },
     { key: 'branch', header: 'Филиал', render: (row) => row.branch.name },
+    { key: 'user', header: 'Аккаунт', render: (row) => row.user ? <span className="text-green-600">{row.user.email}</span> : <span className="text-gray-400">Нет</span> },
     {
       key: 'actions',
       header: 'Действия',

@@ -11,6 +11,7 @@ import { FormError } from '../ui/FormError';
 const formSchema = z.object({
   firstName: z.string().min(2, 'Имя обязательно'),
   lastName: z.string().min(2, 'Фамилия обязательна'),
+  birthDate: z.string().optional(),
   position: z.string().min(2, 'Должность обязательна'),
   rate: z.coerce.number().positive('Ставка должна быть > 0'),
   hireDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
@@ -18,7 +19,7 @@ const formSchema = z.object({
 });
 
 type EmployeeFormData = z.infer<typeof formSchema>;
-type Employee = { id: number; firstName: string; lastName: string; position: string; rate: number; hireDate: string, branch: { id: number } };
+type Employee = { id: number; firstName: string; lastName: string; birthDate?: string; position: string; rate: number; hireDate: string, branch: { id: number } };
 type EmployeeFormProps = { initialData?: Employee | null; onSuccess: () => void; onCancel: () => void; };
 
 interface Branch {
@@ -36,6 +37,7 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
         defaultValues: {
             firstName: initialData?.firstName || '',
             lastName: initialData?.lastName || '',
+            birthDate: initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : '',
             position: initialData?.position || '',
             rate: initialData?.rate || 1,
             hireDate: initialData ? new Date(initialData.hireDate).toISOString().split('T')[0] : '',
@@ -65,6 +67,7 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
         try {
             const payload = {
                 ...data,
+                birthDate: data.birthDate ? new Date(data.birthDate).toISOString() : null,
                 hireDate: new Date(data.hireDate).toISOString(),
             };
             if (initialData) {
@@ -90,6 +93,11 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
                 <label className="block text-sm font-medium text-gray-700 mb-1">Фамилия *</label>
                 <Input {...register('lastName')} placeholder="Введите фамилию"/>
                 <FormError message={errors.lastName?.message} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Дата рождения</label>
+                <Input type="date" {...register('birthDate')} />
+                <FormError message={errors.birthDate?.message} />
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Должность *</label>

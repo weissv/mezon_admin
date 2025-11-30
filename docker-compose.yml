@@ -1,8 +1,8 @@
 
 services:
-  # PostgreSQL Database Service
+  # PostgreSQL Database Service with pgvector extension
   postgres:
-    image: postgres:14-alpine
+    image: pgvector/pgvector:pg14
     container_name: mezon_postgres
     env_file:
       - ./.env
@@ -20,7 +20,7 @@ services:
 
   # Ensure application role/database exist even on reused volumes
   postgres-bootstrap:
-    image: postgres:14-alpine
+    image: pgvector/pgvector:pg14
     container_name: mezon_postgres_bootstrap
     env_file:
       - ./.env
@@ -56,6 +56,9 @@ services:
         " | grep CREATE | psql -h postgres -U "${POSTGRES_USER}" -d postgres || true
 
         psql -h postgres -U "${POSTGRES_USER}" -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DB} TO ${POSTGRES_APP_USER};"
+        
+        # Create pgvector extension as superuser
+        psql -h postgres -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "CREATE EXTENSION IF NOT EXISTS vector;"
     restart: "no"
     networks:
       - mezon-network

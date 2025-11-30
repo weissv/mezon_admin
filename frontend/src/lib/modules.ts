@@ -26,6 +26,7 @@ export const MODULE_LINKS: ModuleLink[] = [
   { path: "/integration", label: "Импорт/Экспорт", roles: ["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT"] },
   { path: "/action-log", label: "Журнал действий", roles: ["DIRECTOR", "DEPUTY", "ADMIN"] },
   { path: "/notifications", label: "Уведомления", roles: ["DIRECTOR", "DEPUTY", "ADMIN"] },
+  { path: "/ai-assistant", label: "ИИ-Методист", roles: ["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"] },
 ];
 
 export const getLinksForRole = (role: UserRole) => MODULE_LINKS.filter((link) => link.roles.includes(role));
