@@ -4,9 +4,10 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, Calendar } from 'lucide-react';
+import { PlusCircle, Calendar, Trash2, AlertTriangle } from 'lucide-react';
 import { Event } from '../types/calendar';
 import { EventForm } from '../components/forms/EventForm';
+import { api } from '../lib/api';
 
 export default function CalendarPage() {
   const { data, total, page, setPage, fetchData } = useApi<Event>({
@@ -14,6 +15,8 @@ export default function CalendarPage() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Event | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleCreate = () => {
     setEditingEvent(null);
@@ -29,6 +32,21 @@ export default function CalendarPage() {
     setIsModalOpen(false);
     fetchData();
     toast.success(editingEvent ? 'Событие обновлено' : 'Событие создано');
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+    setIsDeleting(true);
+    try {
+      await api.delete(`/api/calendar/${deleteConfirm.id}`);
+      toast.success('Событие удалено');
+      setDeleteConfirm(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const columns: Column<Event>[] = [
@@ -56,9 +74,19 @@ export default function CalendarPage() {
       key: 'actions',
       header: 'Действия',
       render: (row) => (
-        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-          Редактировать
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            Редактировать
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setDeleteConfirm(row)}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -97,6 +125,36 @@ export default function CalendarPage() {
           onSuccess={handleFormSuccess}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление события">
+        <div className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить это событие?</p>
+              {deleteConfirm && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                  <p className="text-sm font-medium">{deleteConfirm.title}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {new Date(deleteConfirm.date).toLocaleDateString('ru-RU')}
+                  </p>
+                </div>
+              )}
+              <p className="text-sm text-gray-500 mt-2">Это действие нельзя отменить.</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

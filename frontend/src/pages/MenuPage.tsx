@@ -10,7 +10,7 @@ import { Modal } from '../components/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
-import { Calculator, ShoppingCart } from 'lucide-react';
+import { Calculator, ShoppingCart, Trash2, AlertTriangle } from 'lucide-react';
 
 // Схема валидации на основе бэкенд-схемы
 const mealSchema = z.object({
@@ -43,6 +43,8 @@ export default function MenuPage() {
   const [kbzhuData, setKbzhuData] = useState<any>(null);
   const [shoppingList, setShoppingList] = useState<any>(null);
   const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     register,
@@ -143,6 +145,21 @@ export default function MenuPage() {
     }
   };
 
+  const handleDeleteMenu = async () => {
+    if (!deleteConfirm) return;
+    setIsDeleting(true);
+    try {
+      await api.delete(`/api/menu/${deleteConfirm.id}`);
+      toast.success('Меню удалено');
+      setDeleteConfirm(null);
+      fetchMenu(weekStart);
+    } catch (error: any) {
+      toast.error('Ошибка удаления меню', { description: error?.message });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const renderDay = (date: Date) => {
     const menuForDay = menus.find(m => new Date(m.date).toDateString() === date.toDateString());
     return (
@@ -174,6 +191,14 @@ export default function MenuPage() {
                   className="flex-1"
                 >
                   <ShoppingCart className="h-3 w-3 mr-1" /> Список
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setDeleteConfirm(menuForDay)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
             </div>
@@ -312,6 +337,39 @@ export default function MenuPage() {
           </form>
         </Modal>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление меню">
+        <div className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить это меню?</p>
+              {deleteConfirm && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                  <p className="text-sm font-medium">
+                    {new Date(deleteConfirm.date).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Возрастная группа: {deleteConfirm.ageGroup}
+                  </p>
+                </div>
+              )}
+              <p className="text-sm text-gray-500 mt-2">Это действие нельзя отменить.</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteMenu} disabled={isDeleting}>
+              {isDeleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

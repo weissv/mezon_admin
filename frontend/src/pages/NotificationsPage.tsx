@@ -1,10 +1,11 @@
 // src/pages/NotificationsPage.tsx
 import { useEffect, useMemo, useState } from "react";
-import { BellRing, FileText, Megaphone, Trash2 } from "lucide-react";
+import { BellRing, FileText, Megaphone, Trash2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "../lib/api";
 import { Card } from "../components/Card";
 import { Button } from "../components/ui/button";
+import { Modal } from "../components/Modal";
 import { ROLE_LABELS } from "../lib/constants";
 import { useAuth } from "../hooks/useAuth";
 
@@ -54,6 +55,8 @@ export default function NotificationsPage() {
     targetGroupId: "",
   });
   const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<Broadcast | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const loadSystemNotifications = async () => {
@@ -129,14 +132,18 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleDeleteBroadcast = async (id: number) => {
-    if (!window.confirm("Удалить объявление?")) return;
+  const handleDeleteBroadcast = async () => {
+    if (!deleteConfirm) return;
+    setIsDeleting(true);
     try {
-      await api.delete(`/api/notifications/broadcasts/${id}`);
-      setBroadcasts((prev) => prev.filter((item) => item.id !== id));
+      await api.delete(`/api/notifications/broadcasts/${deleteConfirm.id}`);
+      setBroadcasts((prev) => prev.filter((item) => item.id !== deleteConfirm.id));
       toast.success("Объявление удалено");
+      setDeleteConfirm(null);
     } catch (error: any) {
       toast.error("Не удалось удалить", { description: error?.message });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -258,7 +265,7 @@ export default function NotificationsPage() {
                   {canManageBroadcasts && (
                     <button
                       type="button"
-                      onClick={() => handleDeleteBroadcast(broadcast.id)}
+                      onClick={() => setDeleteConfirm(broadcast)}
                       className="text-gray-400 hover:text-red-600"
                       aria-label="Удалить объявление"
                     >
@@ -280,6 +287,36 @@ export default function NotificationsPage() {
           </ul>
         </div>
       </Card>
+
+      <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление объявления">
+        <div className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить это объявление?</p>
+              {deleteConfirm && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                  <p className="text-sm font-medium">{deleteConfirm.title}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {new Date(deleteConfirm.createdAt).toLocaleDateString('ru-RU')}
+                  </p>
+                </div>
+              )}
+              <p className="text-sm text-gray-500 mt-2">Это действие нельзя отменить.</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBroadcast} disabled={isDeleting}>
+              {isDeleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

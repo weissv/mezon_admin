@@ -95,6 +95,17 @@ router.post("/:id/calculate-kbju", checkRole(["DEPUTY", "ADMIN"]), async (req, r
   });
 });
 
+// DELETE /api/menu/:id - удалить меню
+router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const { id } = req.params;
+  
+  await prisma.menu.delete({
+    where: { id: Number(id) },
+  });
+  
+  return res.status(204).send();
+});
+
 // GET /api/menu/:id/shopping-list - список покупок для меню
 router.get("/:id/shopping-list", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
   const { id } = req.params;
