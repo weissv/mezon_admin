@@ -1,7 +1,7 @@
 // src/pages/ChildrenPage.tsx
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { PlusCircle, Search, CalendarX, UploadCloud, Download, Trash2, AlertCircle } from 'lucide-react';
+import { PlusCircle, Search, CalendarX, UploadCloud, Download, Trash2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
@@ -208,6 +208,8 @@ function AbsencesView({ childId }: { childId: number }) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
+  const [deleteAbsenceConfirm, setDeleteAbsenceConfirm] = useState<any>(null);
+  const [isDeletingAbsence, setIsDeletingAbsence] = useState(false);
 
   const loadAbsences = async () => {
     setLoading(true);
@@ -244,14 +246,18 @@ function AbsencesView({ childId }: { childId: number }) {
     }
   };
 
-  const handleDelete = async (absenceId: number) => {
-    if (!confirm('Удалить запись об отсутствии?')) return;
+  const handleDelete = async () => {
+    if (!deleteAbsenceConfirm) return;
+    setIsDeletingAbsence(true);
     try {
-      await api.delete(`/api/children/absences/${absenceId}`);
+      await api.delete(`/api/children/absences/${deleteAbsenceConfirm.id}`);
       toast.success('Отсутствие удалено');
+      setDeleteAbsenceConfirm(null);
       loadAbsences();
     } catch (error: any) {
       toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setIsDeletingAbsence(false);
     }
   };
 
@@ -316,7 +322,7 @@ function AbsencesView({ childId }: { childId: number }) {
               <Button 
                 variant="destructive" 
                 size="sm" 
-                onClick={() => handleDelete(absence.id)}
+                onClick={() => setDeleteAbsenceConfirm(absence)}
               >
                 Удалить
               </Button>
@@ -324,6 +330,36 @@ function AbsencesView({ childId }: { childId: number }) {
           ))
         )}
       </div>
+
+      <Modal isOpen={!!deleteAbsenceConfirm} onClose={() => setDeleteAbsenceConfirm(null)} title="Удаление отсутствия">
+        <div className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить эту запись об отсутствии?</p>
+              {deleteAbsenceConfirm && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                  <p className="text-sm font-medium">
+                    {new Date(deleteAbsenceConfirm.startDate).toLocaleDateString('ru-RU')} - {new Date(deleteAbsenceConfirm.endDate).toLocaleDateString('ru-RU')}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{deleteAbsenceConfirm.reason}</p>
+                </div>
+              )}
+              <p className="text-sm text-gray-500 mt-2">Это действие нельзя отменить.</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="ghost" onClick={() => setDeleteAbsenceConfirm(null)} disabled={isDeletingAbsence}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeletingAbsence}>
+              {isDeletingAbsence ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

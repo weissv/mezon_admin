@@ -1,9 +1,11 @@
 // src/pages/AiAssistantPage.tsx
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, Loader2, Bot, User, Sparkles, FileText, Trash2, Plus, FolderOpen, ExternalLink, RefreshCw } from "lucide-react";
+import { Send, Loader2, Bot, User, Sparkles, FileText, Trash2, Plus, FolderOpen, ExternalLink, RefreshCw, AlertTriangle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../lib/api";
+import { Modal } from "../components/Modal";
+import { Button } from "../components/ui/button";
 
 // Google Drive папка с базой знаний
 const GOOGLE_DRIVE_FOLDER_ID = "1d9_a3NQ2hHioMJsaUJ53NIj-CS1rVeDd";
@@ -80,6 +82,10 @@ export default function AiAssistantPage() {
   const [systemPrompt, setSystemPrompt] = useState("");
   const [isSavingPrompt, setIsSavingPrompt] = useState(false);
   const [expandedThinking, setExpandedThinking] = useState<Record<number, boolean>>({});
+  const [deleteConfirm, setDeleteConfirm] = useState<KnowledgeDocument | null>(null);
+  const [isDeletingDoc, setIsDeletingDoc] = useState(false);
+  const [syncConfirmOpen, setSyncConfirmOpen] = useState(false);
+  const [resetPromptConfirmOpen, setResetPromptConfirmOpen] = useState(false);
 
   // Убрана автопрокрутка - страница не будет скроллиться автоматически
 
@@ -208,24 +214,27 @@ export default function AiAssistantPage() {
     }
   };
 
-  const handleDeleteDocument = async (id: number) => {
-    if (!confirm("Удалить этот документ из базы знаний?")) return;
+  const handleDeleteDocument = async () => {
+    if (!deleteConfirm) return;
+    setIsDeletingDoc(true);
 
     try {
-      const data = await api.delete(`/ai/documents/${id}`);
+      const data = await api.delete(`/ai/documents/${deleteConfirm.id}`);
       if (data.success) {
         loadDocuments();
+        setDeleteConfirm(null);
       } else {
         alert(data.message || "Ошибка удаления");
       }
     } catch (error) {
       console.error("Error deleting document:", error);
+    } finally {
+      setIsDeletingDoc(false);
     }
   };
 
   const handleSyncGoogleDrive = async () => {
-    if (!confirm("Синхронизировать документы из Google Drive? Это может занять некоторое время.")) return;
-    
+    setSyncConfirmOpen(false);
     setIsSyncing(true);
     try {
       const data = await api.post("/ai/sync-google-drive");
@@ -266,8 +275,7 @@ export default function AiAssistantPage() {
   };
 
   const handleResetSystemPrompt = async () => {
-    if (!confirm("Сбросить системный промт к значению по умолчанию?")) return;
-    
+    setResetPromptConfirmOpen(false);
     try {
       const data = await api.post("/ai/system-prompt/reset");
       if (data.success) {
@@ -514,7 +522,7 @@ export default function AiAssistantPage() {
                   />
                   <div className="flex justify-end gap-2">
                     <button
-                      onClick={handleResetSystemPrompt}
+                      onClick={() => setResetPromptConfirmOpen(true)}
                       disabled={isSavingPrompt}
                       className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
                     >
@@ -550,7 +558,7 @@ export default function AiAssistantPage() {
                 <div className="flex items-center gap-2">
                   {canManageDocuments && (
                     <button
-                      onClick={handleSyncGoogleDrive}
+                      onClick={() => setSyncConfirmOpen(true)}
                       disabled={isSyncing}
                       className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
                     >
@@ -655,7 +663,7 @@ export default function AiAssistantPage() {
                         </div>
                         {canManageDocuments && (
                           <button
-                            onClick={() => handleDeleteDocument(doc.id)}
+                            onClick={() => setDeleteConfirm(doc)}
                             className="text-gray-400 hover:text-red-500"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -788,6 +796,87 @@ export default function AiAssistantPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Document Confirmation Modal */}
+      <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление документа">
+        <div className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить этот документ из базы знаний?</p>
+              {deleteConfirm && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                  <p className="text-sm font-medium">{deleteConfirm.metadata?.title || `Документ #${deleteConfirm.id}`}</p>
+                  {deleteConfirm.metadata?.subject && (
+                    <p className="text-xs text-gray-500 mt-1">Предмет: {deleteConfirm.metadata.subject}</p>
+                  )}
+                </div>
+              )}
+              <p className="text-sm text-gray-500 mt-2">Это действие нельзя отменить.</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)} disabled={isDeletingDoc}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteDocument} disabled={isDeletingDoc}>
+              {isDeletingDoc ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Sync Google Drive Confirmation Modal */}
+      <Modal isOpen={syncConfirmOpen} onClose={() => setSyncConfirmOpen(false)} title="Синхронизация с Google Drive">
+        <div className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <RefreshCw className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Синхронизировать документы из Google Drive?</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Это может занять некоторое время в зависимости от количества документов.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setSyncConfirmOpen(false)}>
+              Отмена
+            </Button>
+            <Button onClick={handleSyncGoogleDrive}>
+              Синхронизировать
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Reset System Prompt Confirmation Modal */}
+      <Modal isOpen={resetPromptConfirmOpen} onClose={() => setResetPromptConfirmOpen(false)} title="Сброс системного промта">
+        <div className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Сбросить системный промт к значению по умолчанию?</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Все ваши настройки промта будут потеряны.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setResetPromptConfirmOpen(false)}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleResetSystemPrompt}>
+              Сбросить
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
