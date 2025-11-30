@@ -9,7 +9,7 @@ import { Input } from '../components/ui/input';
 import { ShoppingListModal } from '../components/modals/ShoppingListModal';
 import { Item, ShoppingListItem } from '../types/inventory';
 import { api } from '../lib/api';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, AlertTriangle } from 'lucide-react';
 
 export default function InventoryPage() {
   const { data: items, loading, fetchData } = useApi<Item>({ url: '/api/inventory' });
@@ -24,6 +24,11 @@ export default function InventoryPage() {
   });
   const [saving, setSaving] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[] | null>(null);
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingItem, setDeletingItem] = useState<Item | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const getExpiryClass = (expiryDate?: string) => {
     if (!expiryDate) return '';
@@ -50,14 +55,24 @@ export default function InventoryPage() {
     setIsItemModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Удалить товар?')) return;
+  const openDeleteModal = (item: Item) => {
+    setDeletingItem(item);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingItem) return;
+    setDeleting(true);
     try {
-      await api.delete('/api/inventory/' + id);
+      await api.delete('/api/inventory/' + deletingItem.id);
       toast.success('Товар удален');
+      setDeleteModalOpen(false);
+      setDeletingItem(null);
       fetchData();
     } catch (error: any) {
       toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -127,7 +142,7 @@ export default function InventoryPage() {
                       <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
                         Изменить
                       </Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
+                      <Button variant="destructive" size="sm" onClick={() => openDeleteModal(item)}>
                         Удалить
                       </Button>
                     </div>
@@ -236,6 +251,38 @@ export default function InventoryPage() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить товар со склада. Это действие нельзя отменить.
+              </p>
+            </div>
+          </div>
+          {deletingItem && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Наименование:</strong> {deletingItem.name}</p>
+              <p><strong>Количество:</strong> {deletingItem.quantity} {deletingItem.unit}</p>
+              {deletingItem.expiryDate && (
+                <p><strong>Срок годности:</strong> {new Date(deletingItem.expiryDate).toLocaleDateString()}</p>
+              )}
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

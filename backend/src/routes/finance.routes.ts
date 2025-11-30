@@ -126,6 +126,27 @@ router.put(
   }
 );
 
+// DELETE /api/finance/transactions/:id
+router.delete(
+  "/transactions/:id",
+  checkRole(["ACCOUNTANT", "ADMIN"]),
+  async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+    try {
+      await prisma.financeTransaction.delete({ where: { id } });
+    } catch (error: any) {
+      if (error?.code === "P2025") {
+        return res.status(204).send();
+      }
+      throw error;
+    }
+    return res.status(204).send();
+  }
+);
+
 // GET /api/finance/reports?period=month&category=CLUBS
 router.get(
   "/reports",

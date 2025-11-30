@@ -9,7 +9,7 @@ import { TransactionForm } from "../components/forms/TransactionForm";
 import { Transaction } from "../types/finance";
 import { FINANCE_TYPES, FINANCE_CATEGORIES } from "../lib/constants";
 import { api } from "../lib/api";
-import { Download, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { Download, TrendingUp, TrendingDown, DollarSign, Trash2, AlertTriangle } from "lucide-react";
 
 const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
 
@@ -19,6 +19,9 @@ const TransactionsView = () => {
     initialPageSize: 20,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleFormSuccess = () => {
     setIsModalOpen(false);
@@ -40,12 +43,42 @@ const TransactionsView = () => {
     }
   };
 
+  const openDeleteModal = (transaction: Transaction) => {
+    setDeletingTransaction(transaction);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingTransaction) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/finance/transactions/${deletingTransaction.id}`);
+      toast.success('Транзакция удалена');
+      setDeleteModalOpen(false);
+      setDeletingTransaction(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const columns: Column<Transaction>[] = [
     { key: "date", header: "Дата", render: (row) => new Date(row.date).toLocaleDateString() },
     { key: "type", header: "Тип", render: (row) => FINANCE_TYPES[row.type as keyof typeof FINANCE_TYPES] || row.type },
     { key: "category", header: "Категория", render: (row) => FINANCE_CATEGORIES[row.category as keyof typeof FINANCE_CATEGORIES] || row.category },
     { key: "amount", header: "Сумма", render: (row) => currency.format(row.amount) },
     { key: "description", header: "Описание" },
+    {
+      key: "actions",
+      header: "Действия",
+      render: (row) => (
+        <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      ),
+    },
   ];
 
   return (
@@ -60,6 +93,37 @@ const TransactionsView = () => {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Новая транзакция">
         <TransactionForm onSuccess={handleFormSuccess} onCancel={() => setIsModalOpen(false)} />
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить транзакцию. Это действие нельзя отменить.
+              </p>
+            </div>
+          </div>
+          {deletingTransaction && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Дата:</strong> {new Date(deletingTransaction.date).toLocaleDateString()}</p>
+              <p><strong>Тип:</strong> {FINANCE_TYPES[deletingTransaction.type as keyof typeof FINANCE_TYPES] || deletingTransaction.type}</p>
+              <p><strong>Сумма:</strong> {currency.format(deletingTransaction.amount)}</p>
+              <p><strong>Описание:</strong> {deletingTransaction.description || '—'}</p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

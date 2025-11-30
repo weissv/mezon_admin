@@ -56,6 +56,28 @@ router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateEmployeeSchema
   return res.json(updated);
 });
 
+// DELETE /api/employees/:id - удаление сотрудника
+router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ message: "Invalid employee id" });
+  }
+
+  try {
+    // Сначала удаляем связанного пользователя, если есть
+    await prisma.user.deleteMany({ where: { employeeId: id } });
+    // Затем удаляем сотрудника
+    await prisma.employee.delete({ where: { id } });
+  } catch (error: any) {
+    if (error?.code === "P2025") {
+      return res.status(204).send();
+    }
+    throw error;
+  }
+
+  return res.status(204).send();
+});
+
 // GET /api/employees/reminders - напоминания о медосмотрах и аттестации
 router.get("/reminders", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
   const { days = 30 } = req.query;

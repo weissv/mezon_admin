@@ -5,7 +5,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
 import { Input } from '../components/ui/input';
-import { PlusCircle, MapPin } from 'lucide-react';
+import { PlusCircle, MapPin, Trash2, AlertTriangle } from 'lucide-react';
 import { api } from '../lib/api';
 
 interface Branch {
@@ -20,6 +20,11 @@ export default function BranchesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', address: '', phone: '' });
   const [saving, setSaving] = useState(false);
+  
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingBranch, setDeletingBranch] = useState<Branch | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +42,27 @@ export default function BranchesPage() {
     }
   };
 
+  const openDeleteModal = (branch: Branch) => {
+    setDeletingBranch(branch);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingBranch) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/branches/${deletingBranch.id}`);
+      toast.success('Филиал удален');
+      setDeleteModalOpen(false);
+      setDeletingBranch(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -51,9 +77,19 @@ export default function BranchesPage() {
           <div key={branch.id}>
             <Card>
               <div className="p-4">
-                <div className="flex items-start mb-2">
-                  <MapPin className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
-                  <h2 className="font-bold text-lg">{branch.name}</h2>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start">
+                    <MapPin className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                    <h2 className="font-bold text-lg">{branch.name}</h2>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => openDeleteModal(branch)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
                 <p className="text-sm text-gray-600 ml-7">{branch.address}</p>
                 {branch.phone && (
@@ -121,6 +157,36 @@ export default function BranchesPage() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить филиал. Это действие нельзя отменить.
+              </p>
+            </div>
+          </div>
+          {deletingBranch && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Название:</strong> {deletingBranch.name}</p>
+              <p><strong>Адрес:</strong> {deletingBranch.address}</p>
+              {deletingBranch.phone && <p><strong>Телефон:</strong> {deletingBranch.phone}</p>}
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

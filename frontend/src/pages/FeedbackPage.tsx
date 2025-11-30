@@ -4,7 +4,7 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, MessageCircle, CheckCircle } from 'lucide-react';
+import { PlusCircle, MessageCircle, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Feedback, FeedbackStatus } from '../types/feedback';
 import { FeedbackForm } from '../components/forms/FeedbackForm';
 import { FeedbackResponseForm } from '../components/forms/FeedbackResponseForm';
@@ -17,6 +17,11 @@ export default function FeedbackPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+  
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingFeedback, setDeletingFeedback] = useState<Feedback | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleCreate = () => {
     setIsModalOpen(true);
@@ -25,6 +30,27 @@ export default function FeedbackPage() {
   const handleRespond = (feedback: Feedback) => {
     setSelectedFeedback(feedback);
     setIsResponseModalOpen(true);
+  };
+
+  const openDeleteModal = (feedback: Feedback) => {
+    setDeletingFeedback(feedback);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingFeedback) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/feedback/${deletingFeedback.id}`);
+      toast.success('Обращение удалено');
+      setDeleteModalOpen(false);
+      setDeletingFeedback(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleFormSuccess = () => {
@@ -94,6 +120,9 @@ export default function FeedbackPage() {
               Просмотр
             </Button>
           )}
+          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
+            Удалить
+          </Button>
         </div>
       ),
     },
@@ -146,6 +175,37 @@ export default function FeedbackPage() {
             onCancel={() => setIsResponseModalOpen(false)}
           />
         )}
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить обращение. Это действие нельзя отменить.
+              </p>
+            </div>
+          </div>
+          {deletingFeedback && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Родитель:</strong> {deletingFeedback.parentName}</p>
+              <p><strong>Тип:</strong> {deletingFeedback.type}</p>
+              <p><strong>Статус:</strong> {getStatusBadge(deletingFeedback.status)}</p>
+              <p><strong>Сообщение:</strong> {deletingFeedback.message.substring(0, 100)}...</p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

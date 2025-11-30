@@ -4,10 +4,11 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, FileText } from 'lucide-react';
+import { PlusCircle, FileText, AlertTriangle } from 'lucide-react';
 import { Document, DocumentTemplate } from '../types/document';
 import { DocumentForm } from '../components/forms/DocumentForm';
 import { DocumentTemplateForm } from '../components/forms/DocumentTemplateForm';
+import { api } from '../lib/api';
 
 export default function DocumentsPage() {
   const { data, total, page, setPage, fetchData } = useApi<Document>({
@@ -17,6 +18,11 @@ export default function DocumentsPage() {
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [viewMode, setViewMode] = useState<'documents' | 'templates'>('documents');
+  
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingDocument, setDeletingDocument] = useState<Document | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleCreateDocument = () => {
     setEditingDocument(null);
@@ -26,6 +32,27 @@ export default function DocumentsPage() {
   const handleEditDocument = (doc: Document) => {
     setEditingDocument(doc);
     setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (doc: Document) => {
+    setDeletingDocument(doc);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingDocument) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/documents/${deletingDocument.id}`);
+      toast.success('Документ удален');
+      setDeleteModalOpen(false);
+      setDeletingDocument(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleFormSuccess = () => {
@@ -74,6 +101,9 @@ export default function DocumentsPage() {
           >
             Скачать
           </a>
+          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
+            Удалить
+          </Button>
         </div>
       ),
     },
@@ -125,6 +155,40 @@ export default function DocumentsPage() {
               onCancel={() => setIsModalOpen(false)}
             />
           </Modal>
+          
+          {/* Delete confirmation modal */}
+          <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+            <div className="p-4 space-y-4">
+              <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-red-800">Внимание!</h4>
+                  <p className="text-red-700 text-sm mt-1">
+                    Вы собираетесь удалить документ. Это действие нельзя отменить.
+                  </p>
+                </div>
+              </div>
+              {deletingDocument && (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p><strong>Название:</strong> {deletingDocument.name}</p>
+                  {deletingDocument.employee && (
+                    <p><strong>Сотрудник:</strong> {deletingDocument.employee.firstName} {deletingDocument.employee.lastName}</p>
+                  )}
+                  {deletingDocument.child && (
+                    <p><strong>Ребенок:</strong> {deletingDocument.child.firstName} {deletingDocument.child.lastName}</p>
+                  )}
+                </div>
+              )}
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+                  Отмена
+                </Button>
+                <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? 'Удаление...' : 'Удалить'}
+                </Button>
+              </div>
+            </div>
+          </Modal>
         </>
       ) : (
         <TemplatesView onTemplateCreated={handleFormSuccess} />
@@ -139,6 +203,11 @@ function TemplatesView({ onTemplateCreated }: { onTemplateCreated: () => void })
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<DocumentTemplate | null>(null);
+  
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingTemplate, setDeletingTemplate] = useState<DocumentTemplate | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleCreate = () => {
     setEditingTemplate(null);
@@ -148,6 +217,27 @@ function TemplatesView({ onTemplateCreated }: { onTemplateCreated: () => void })
   const handleEdit = (template: DocumentTemplate) => {
     setEditingTemplate(template);
     setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (template: DocumentTemplate) => {
+    setDeletingTemplate(template);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingTemplate) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/documents/templates/${deletingTemplate.id}`);
+      toast.success('Шаблон удален');
+      setDeleteModalOpen(false);
+      setDeletingTemplate(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleSuccess = () => {
@@ -174,9 +264,14 @@ function TemplatesView({ onTemplateCreated }: { onTemplateCreated: () => void })
       key: 'actions',
       header: 'Действия',
       render: (row) => (
-        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-          Редактировать
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            Редактировать
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
+            Удалить
+          </Button>
+        </div>
       ),
     },
   ];
@@ -206,6 +301,35 @@ function TemplatesView({ onTemplateCreated }: { onTemplateCreated: () => void })
           onSuccess={handleSuccess}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+      
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить шаблон документа. Это действие нельзя отменить.
+                Документы, созданные по этому шаблону, не будут удалены.
+              </p>
+            </div>
+          </div>
+          {deletingTemplate && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Название:</strong> {deletingTemplate.name}</p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </>
   );

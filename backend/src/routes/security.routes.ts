@@ -17,4 +17,21 @@ router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createSecurityLogSchem
   res.status(201).json(created);
 });
 
+// DELETE /api/security/:id
+router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ message: "Invalid id" });
+  }
+  try {
+    await prisma.securityLog.delete({ where: { id } });
+  } catch (error: any) {
+    if (error?.code === "P2025") {
+      return res.status(204).send();
+    }
+    throw error;
+  }
+  return res.status(204).send();
+});
+
 export default router;

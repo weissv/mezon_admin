@@ -4,10 +4,11 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, ShoppingCart, Users } from 'lucide-react';
+import { PlusCircle, ShoppingCart, Users, AlertTriangle } from 'lucide-react';
 import { PurchaseOrder, Supplier } from '../types/procurement';
 import { PurchaseOrderForm } from '../components/forms/PurchaseOrderForm';
 import { SupplierForm } from '../components/forms/SupplierForm';
+import { api } from '../lib/api';
 
 export default function ProcurementPage() {
   const [viewMode, setViewMode] = useState<'orders' | 'suppliers'>('orders');
@@ -47,6 +48,11 @@ function OrdersView() {
   const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<PurchaseOrder | null>(null);
+  
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingOrder, setDeletingOrder] = useState<PurchaseOrder | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleCreate = () => {
     setEditingOrder(null);
@@ -56,6 +62,27 @@ function OrdersView() {
   const handleEdit = (order: PurchaseOrder) => {
     setEditingOrder(order);
     setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (order: PurchaseOrder) => {
+    setDeletingOrder(order);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingOrder) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/procurement/orders/${deletingOrder.id}`);
+      toast.success('Заказ удален');
+      setDeleteModalOpen(false);
+      setDeletingOrder(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleFormSuccess = () => {
@@ -113,9 +140,14 @@ function OrdersView() {
       key: 'actions',
       header: 'Действия',
       render: (row) => (
-        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-          Просмотр
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            Просмотр
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
+            Удалить
+          </Button>
+        </div>
       ),
     },
   ];
@@ -148,6 +180,37 @@ function OrdersView() {
           onCancel={() => setIsModalOpen(false)}
         />
       </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить заказ на закупку. Это действие нельзя отменить.
+              </p>
+            </div>
+          </div>
+          {deletingOrder && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>ID:</strong> {deletingOrder.id}</p>
+              <p><strong>Поставщик:</strong> {deletingOrder.supplier?.name || `ID: ${deletingOrder.supplierId}`}</p>
+              <p><strong>Сумма:</strong> {currency.format(deletingOrder.totalAmount)}</p>
+              <p><strong>Статус:</strong> {getStatusBadge(deletingOrder.status)}</p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }
@@ -158,6 +221,11 @@ function SuppliersView() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleCreate = () => {
     setEditingSupplier(null);
@@ -167,6 +235,27 @@ function SuppliersView() {
   const handleEdit = (supplier: Supplier) => {
     setEditingSupplier(supplier);
     setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (supplier: Supplier) => {
+    setDeletingSupplier(supplier);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingSupplier) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/procurement/suppliers/${deletingSupplier.id}`);
+      toast.success('Поставщик удален');
+      setDeleteModalOpen(false);
+      setDeletingSupplier(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleFormSuccess = () => {
@@ -188,9 +277,14 @@ function SuppliersView() {
       key: 'actions',
       header: 'Действия',
       render: (row) => (
-        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-          Редактировать
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            Редактировать
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
+            Удалить
+          </Button>
+        </div>
       ),
     },
   ];
@@ -222,6 +316,36 @@ function SuppliersView() {
           onSuccess={handleFormSuccess}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить поставщика. Это действие нельзя отменить.
+                Если у поставщика есть связанные заказы, удаление может не сработать.
+              </p>
+            </div>
+          </div>
+          {deletingSupplier && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Название:</strong> {deletingSupplier.name}</p>
+              <p><strong>Контакты:</strong> {deletingSupplier.contactInfo || '—'}</p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </>
   );

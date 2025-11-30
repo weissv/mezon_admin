@@ -30,6 +30,27 @@ router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createClubSchema), asy
   res.status(201).json(club);
 });
 
+// DELETE /api/clubs/:id - удаление кружка
+router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ message: "Invalid id" });
+  }
+  try {
+    // Удаляем связанные записи
+    await prisma.clubEnrollment.deleteMany({ where: { clubId: id } });
+    await prisma.clubRating.deleteMany({ where: { clubId: id } });
+    await prisma.attendance.deleteMany({ where: { clubId: id } });
+    await prisma.club.delete({ where: { id } });
+  } catch (error: any) {
+    if (error?.code === "P2025") {
+      return res.status(204).send();
+    }
+    throw error;
+  }
+  return res.status(204).send();
+});
+
 router.post("/:id/enroll", checkRole(["DEPUTY", "ADMIN"]), validate(enrollClubSchema), async (req, res) => {  const clubId = Number(req.params.id);
   const { childId } = req.body as { childId: number };
   // Валидация вместимости

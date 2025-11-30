@@ -16,4 +16,10 @@ router.post("/", checkRole(["ADMIN"]), validate(createBranchSchema), async (req,
   res.status(201).json(created);
 });
 
+router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+  const { id } = req.params;
+  await prisma.branch.delete({ where: { id: Number(id) } });
+  res.status(204).send();
+});
+
 export default router;

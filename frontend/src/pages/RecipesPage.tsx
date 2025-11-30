@@ -4,7 +4,7 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, ChefHat, Apple } from 'lucide-react';
+import { PlusCircle, ChefHat, Apple, AlertTriangle } from 'lucide-react';
 import { Ingredient, Dish, DishNutrition } from '../types/recipe';
 import { IngredientForm } from '../components/forms/IngredientForm';
 import { DishForm } from '../components/forms/DishForm';
@@ -48,6 +48,11 @@ function DishesView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [nutritionData, setNutritionData] = useState<DishNutrition | null>(null);
+  
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingDish, setDeletingDish] = useState<Dish | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleCreate = () => {
     setEditingDish(null);
@@ -57,6 +62,27 @@ function DishesView() {
   const handleEdit = (dish: Dish) => {
     setEditingDish(dish);
     setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (dish: Dish) => {
+    setDeletingDish(dish);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingDish) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/recipes/dishes/${deletingDish.id}`);
+      toast.success('Блюдо удалено');
+      setDeleteModalOpen(false);
+      setDeletingDish(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleViewNutrition = async (dish: Dish) => {
@@ -98,6 +124,9 @@ function DishesView() {
           </Button>
           <Button variant="ghost" size="sm" onClick={() => handleViewNutrition(row)}>
             КБЖУ
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
+            Удалить
           </Button>
         </div>
       ),
@@ -162,6 +191,36 @@ function DishesView() {
           </div>
         )}
       </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить блюдо. Это действие нельзя отменить.
+              </p>
+            </div>
+          </div>
+          {deletingDish && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Название:</strong> {deletingDish.name}</p>
+              <p><strong>Категория:</strong> {deletingDish.category || '—'}</p>
+              <p><strong>Ингредиентов:</strong> {deletingDish.ingredients?.length || 0}</p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }
@@ -172,6 +231,11 @@ function IngredientsView() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null);
+  
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingIngredient, setDeletingIngredient] = useState<Ingredient | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleCreate = () => {
     setEditingIngredient(null);
@@ -181,6 +245,27 @@ function IngredientsView() {
   const handleEdit = (ingredient: Ingredient) => {
     setEditingIngredient(ingredient);
     setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (ingredient: Ingredient) => {
+    setDeletingIngredient(ingredient);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingIngredient) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/recipes/ingredients/${deletingIngredient.id}`);
+      toast.success('Ингредиент удален');
+      setDeleteModalOpen(false);
+      setDeletingIngredient(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка удаления', { description: error?.message });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleFormSuccess = () => {
@@ -217,9 +302,14 @@ function IngredientsView() {
       key: 'actions',
       header: 'Действия',
       render: (row) => (
-        <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-          Редактировать
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+            Редактировать
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(row)}>
+            Удалить
+          </Button>
+        </div>
       ),
     },
   ];
@@ -251,6 +341,37 @@ function IngredientsView() {
           onSuccess={handleFormSuccess}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
+        <div className="p-4 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-red-800">Внимание!</h4>
+              <p className="text-red-700 text-sm mt-1">
+                Вы собираетесь удалить ингредиент. Это действие нельзя отменить.
+                Если ингредиент используется в блюдах, удаление может не сработать.
+              </p>
+            </div>
+          </div>
+          {deletingIngredient && (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p><strong>Название:</strong> {deletingIngredient.name}</p>
+              <p><strong>Единица:</strong> {deletingIngredient.unit}</p>
+              <p><strong>Калории:</strong> {deletingIngredient.calories} ккал</p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Удаление...' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </>
   );
