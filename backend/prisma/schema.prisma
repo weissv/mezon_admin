@@ -511,6 +511,23 @@ model KnowledgeBaseDocument {
   updatedAt DateTime @updatedAt
 }
 
+// --- 9. СИСТЕМНЫЕ НАСТРОЙКИ ---
+// Персистентное хранение конфигураций (промты, API ключи, флаги)
+model SystemSetting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique  // "ai_system_prompt", "maintenance_mode", etc.
+  value       String   @db.Text // Значение настройки (может быть JSON строкой)
+  description String?           // Описание настройки
+  category    String   @default("general") // "ai", "security", "maintenance", "general"
+  isSecret    Boolean  @default(false)     // Скрывать ли значение в API ответах
+  updatedBy   Int?                         // ID пользователя, изменившего настройку
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([key])
+}
+
 // --- 9. РАСПИСАНИЕ УРОКОВ ---
 
 // Предметы (дисциплины)
