@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import mammoth from "mammoth";
 import { EventEmitter } from "events";
+import { SystemSettingsService } from "./SystemSettingsService";
 
 const prisma = new PrismaClient();
 
@@ -76,49 +77,29 @@ const EMBEDDING_MODEL = "text-embedding-004";
 // Модель для chat (Groq)
 const CHAT_MODEL = "qwen/qwen3-32b";
 
-// Дефолтный системный промт
-const DEFAULT_SYSTEM_PROMPT = `# Роль
-Ты - ассистент школьного учителя, задача которого улучшить свою учебную программу по принципу метапредметности. Ты работаешь на инновационную школу, которая разрабатывает различные подходы, в том числе системно интегрирует темы из разных учебных программ.
-Твоя задача: при разработке учебной программы или темы занятий для заданного предмета связывать разрабатываемый тобой контент с темами других предметов из базы знаний школы. Так ученики смогут закрепить пройденные знания по другим предметам или подготовиться к получению новых знаний из смежных дисциплин.
-
-# КРИТИЧЕСКИ ВАЖНО - Работа только с базой знаний
-- Ты ОБЯЗАН использовать ТОЛЬКО информацию из предоставленного КОНТЕКСТА (база знаний школы)
-- НИКОГДА не придумывай информацию, которой нет в контексте
-- Если в контексте нет нужной информации, ЧЕСТНО скажи: "В базе знаний школы нет информации по этому вопросу"
-- НЕ делай предположений о содержании учебных программ, если их нет в контексте
-- Все метапредметные связи должны основываться ТОЛЬКО на реальных документах из базы знаний
-
-# Инструкция
-- Отвечай на русском языке
-- Если ты разрабатываешь учебную программу для определенного предмета, то связывай ее наполнение только с темами предметов из базы знаний школы. Покажи эти связи пользователю
-- Если ты разрабатываешь темы уроков и занятий и их наполнение, то связывай их только с темами предметов из базы знаний школы. Покажи эти связи пользователю
-- Если ты разрабатываешь учебную программу или план занятий для нового предмета, то связывай их наполнение только с темами предметов из базы знаний школы. Покажи эти связи пользователю
-- На пользовательское сообщение "/start" в ответ поприветствуй его и дай краткое описание своей миссии
-- В ответе обязательно укажи блок метапредметных связей: каким образом предлагаемые тобой темы связаны с темами других дисциплин из базы знаний
-- Если контекст пуст или не содержит релевантной информации, сообщи об этом пользователю и предложи добавить нужные документы в базу знаний`;
-
-// Хранилище текущего системного промта (в реальном приложении лучше хранить в БД)
-let currentSystemPrompt = DEFAULT_SYSTEM_PROMPT;
-
 /**
- * Получает текущий системный промт
+ * Получает текущий системный промт из БД (персистентное хранение)
+ * Использует кэширование для оптимизации производительности
  */
-function getSystemPrompt(): string {
-  return currentSystemPrompt;
+async function getSystemPrompt(): Promise<string> {
+  return await SystemSettingsService.getAiSystemPrompt();
 }
 
 /**
- * Устанавливает новый системный промт
+ * Устанавливает новый системный промт (сохраняет в БД)
+ * @param prompt - новый системный промт
+ * @param updatedBy - ID пользователя, изменившего настройку
  */
-function setSystemPrompt(prompt: string): void {
-  currentSystemPrompt = prompt;
+async function setSystemPrompt(prompt: string, updatedBy?: number): Promise<void> {
+  await SystemSettingsService.setAiSystemPrompt(prompt, updatedBy);
 }
 
 /**
- * Сбрасывает системный промт к дефолтному
+ * Сбрасывает системный промт к дефолтному (сохраняет в БД)
+ * @param updatedBy - ID пользователя, сбросившего настройку
  */
-function resetSystemPrompt(): void {
-  currentSystemPrompt = DEFAULT_SYSTEM_PROMPT;
+async function resetSystemPrompt(updatedBy?: number): Promise<string> {
+  return await SystemSettingsService.resetAiSystemPrompt(updatedBy);
 }
 
 interface DocumentMetadata {
@@ -885,9 +866,12 @@ async function chatWithAssistant(
     // 3. Формируем контекст
     const context = buildContext(relevantDocs);
 
-    // 4. Собираем сообщения для LLM
+    // 4. Получаем системный промт из БД
+    const systemPrompt = await getSystemPrompt();
+
+    // 5. Собираем сообщения для LLM
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: "system", content: getSystemPrompt() },
+      { role: "system", content: systemPrompt },
       {
         role: "system",
         content: `КОНТЕКСТ из базы знаний учебных программ:\n\n${context}`,
