@@ -1,5 +1,5 @@
 // src/pages/InventoryPage.tsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useApi } from '../hooks/useApi';
 import { Card } from '../components/Card';
@@ -9,18 +9,23 @@ import { Input } from '../components/ui/input';
 import { ShoppingListModal } from '../components/modals/ShoppingListModal';
 import { Item, ShoppingListItem } from '../types/inventory';
 import { api } from '../lib/api';
-import { PlusCircle, AlertTriangle } from 'lucide-react';
+import { PlusCircle, AlertTriangle, Apple, Package, Archive } from 'lucide-react';
+
+type InventoryType = 'FOOD' | 'SUPPLIES';
+type FilterType = 'ALL' | InventoryType;
 
 export default function InventoryPage() {
   const { data: items, loading, fetchData } = useApi<Item>({ url: '/api/inventory' });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [filterType, setFilterType] = useState<FilterType>('ALL');
   const [formData, setFormData] = useState({
     name: '',
     quantity: '',
     unit: '',
-    expiryDate: ''
+    expiryDate: '',
+    type: 'FOOD' as InventoryType
   });
   const [saving, setSaving] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[] | null>(null);
@@ -29,6 +34,24 @@ export default function InventoryPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingItem, setDeletingItem] = useState<Item | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Filter items by type
+  const filteredItems = useMemo(() => {
+    if (filterType === 'ALL') return items;
+    return items.filter((item: any) => item.type === filterType);
+  }, [items, filterType]);
+
+  // Stats for filter tabs
+  const stats = useMemo(() => ({
+    all: items.length,
+    food: items.filter((item: any) => item.type === 'FOOD').length,
+    supplies: items.filter((item: any) => item.type === 'SUPPLIES').length,
+  }), [items]);
+
+  const typeLabels: Record<InventoryType, string> = {
+    FOOD: 'Продукты',
+    SUPPLIES: 'Расходники',
+  };
 
   const getExpiryClass = (expiryDate?: string) => {
     if (!expiryDate) return '';
@@ -40,7 +63,7 @@ export default function InventoryPage() {
 
   const handleCreate = () => {
     setEditingItem(null);
-    setFormData({ name: '', quantity: '', unit: '', expiryDate: '' });
+    setFormData({ name: '', quantity: '', unit: '', expiryDate: '', type: 'FOOD' });
     setIsItemModalOpen(true);
   };
 
@@ -50,7 +73,8 @@ export default function InventoryPage() {
       name: item.name,
       quantity: String(item.quantity),
       unit: item.unit,
-      expiryDate: item.expiryDate ? new Date(item.expiryDate).toISOString().split('T')[0] : ''
+      expiryDate: item.expiryDate ? new Date(item.expiryDate).toISOString().split('T')[0] : '',
+      type: (item as any).type || 'FOOD'
     });
     setIsItemModalOpen(true);
   };
@@ -84,7 +108,8 @@ export default function InventoryPage() {
         name: formData.name,
         quantity: parseFloat(formData.quantity),
         unit: formData.unit,
-        expiryDate: formData.expiryDate || null
+        expiryDate: formData.expiryDate || null,
+        type: formData.type
       };
 
       if (editingItem) {
@@ -104,9 +129,12 @@ export default function InventoryPage() {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Складской учет</h1>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Archive className="h-6 w-6" />
+          Складской учет
+        </h1>
         <div className="flex gap-2">
           <Button onClick={handleCreate}>
             <PlusCircle className="mr-2 h-4 w-4" /> Добавить товар
@@ -115,28 +143,76 @@ export default function InventoryPage() {
         </div>
       </div>
 
+      {/* Filter tabs */}
+      <div className="grid grid-cols-3 gap-4">
+        <div
+          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'ALL' ? 'ring-2 ring-blue-500' : ''}`}
+          onClick={() => setFilterType('ALL')}
+        >
+          <div className="flex items-center gap-2">
+            <Archive className="h-5 w-5 text-gray-600" />
+            <span className="text-sm text-gray-500">Все товары</span>
+          </div>
+          <p className="text-2xl font-bold mt-1">{stats.all}</p>
+        </div>
+        <div
+          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'FOOD' ? 'ring-2 ring-green-500' : ''}`}
+          onClick={() => setFilterType('FOOD')}
+        >
+          <div className="flex items-center gap-2">
+            <Apple className="h-5 w-5 text-green-600" />
+            <span className="text-sm text-gray-500">Продукты питания</span>
+          </div>
+          <p className="text-2xl font-bold text-green-600 mt-1">{stats.food}</p>
+        </div>
+        <div
+          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'SUPPLIES' ? 'ring-2 ring-purple-500' : ''}`}
+          onClick={() => setFilterType('SUPPLIES')}
+        >
+          <div className="flex items-center gap-2">
+            <Package className="h-5 w-5 text-purple-600" />
+            <span className="text-sm text-gray-500">Расходные материалы</span>
+          </div>
+          <p className="text-2xl font-bold text-purple-600 mt-1">{stats.supplies}</p>
+        </div>
+      </div>
+
       <Card>
-        <h2 className="text-xl font-semibold p-4">Текущие остатки</h2>
+        <h2 className="text-xl font-semibold p-4 flex items-center gap-2">
+          {filterType === 'FOOD' && <Apple className="h-5 w-5 text-green-600" />}
+          {filterType === 'SUPPLIES' && <Package className="h-5 w-5 text-purple-600" />}
+          {filterType === 'ALL' ? 'Все остатки' : filterType === 'FOOD' ? 'Продукты питания' : 'Расходные материалы'}
+        </h2>
         {loading ? (
           <div className="p-4">Загрузка...</div>
+        ) : filteredItems.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            {filterType === 'ALL' ? 'Нет товаров на складе' : `Нет товаров в категории "${typeLabels[filterType]}"`}
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left p-2">Наименование</th>
+                <th className="text-left p-2">Тип</th>
                 <th className="text-left p-2">Количество</th>
                 <th className="text-left p-2">Срок годности</th>
                 <th className="text-left p-2">Действия</th>
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {filteredItems.map((item: any) => (
                 <tr key={item.id} className={'border-t ' + getExpiryClass(item.expiryDate)}>
                   <td className="p-2">{item.name}</td>
                   <td className="p-2">
+                    <span className={`px-2 py-0.5 rounded text-xs ${item.type === 'FOOD' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}`}>
+                      {item.type === 'FOOD' ? 'Продукт' : 'Расходник'}
+                    </span>
+                  </td>
+                  <td className="p-2">
                     {item.quantity} {item.unit}
                   </td>
-                  <td className="p-2">{item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A'}</td>
+                  <td className="p-2">{item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : '—'}</td>
                   <td className="p-2">
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
@@ -207,6 +283,19 @@ export default function InventoryPage() {
           </div>
 
           <div>
+            <label className="block text-sm font-medium mb-1">Тип товара *</label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as InventoryType })}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="FOOD">Продукт питания</option>
+              <option value="SUPPLIES">Расходный материал</option>
+            </select>
+          </div>
+
+          <div>
             <label className="block text-sm font-medium mb-1">Количество *</label>
             <Input
               type="number"
@@ -235,6 +324,9 @@ export default function InventoryPage() {
               value={formData.expiryDate}
               onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
             />
+            {formData.type === 'SUPPLIES' && (
+              <p className="text-xs text-gray-500 mt-1">Для расходных материалов срок годности обычно не указывается</p>
+            )}
           </div>
 
           <div className="flex gap-2 justify-end pt-4">

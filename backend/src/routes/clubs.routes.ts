@@ -8,7 +8,7 @@ import { createClubSchema, enrollClubSchema } from "../schemas/club.schema";
 const router = Router();
 
 // GET /api/clubs
-router.get("/", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (req, res) => {
+router.get("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (req, res) => {
   const isTeacher = req.user!.role === "TEACHER";
   const where = isTeacher ? { teacherId: req.user!.employeeId } : {};
   const clubs = await prisma.club.findMany({ where, include: { teacher: true } });
@@ -16,7 +16,7 @@ router.get("/", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (
 });
 
 // GET /api/clubs/:id
-router.get("/:id", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (req, res) => {
+router.get("/:id", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (req, res) => {
   const id = Number(req.params.id);
   const club = await prisma.club.findUnique({ where: { id } });
   if (!club) return res.status(404).json({ message: "Not found" });
@@ -25,7 +25,7 @@ router.get("/:id", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), asyn
   }
   return res.json(club);
 });
-router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createClubSchema), async (req, res) => {
+router.post("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), validate(createClubSchema), async (req, res) => {
   const club = await prisma.club.create({ data: req.body });
   res.status(201).json(club);
 });
@@ -51,7 +51,7 @@ router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
   return res.status(204).send();
 });
 
-router.post("/:id/enroll", checkRole(["DEPUTY", "ADMIN"]), validate(enrollClubSchema), async (req, res) => {  const clubId = Number(req.params.id);
+router.post("/:id/enroll", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), validate(enrollClubSchema), async (req, res) => {  const clubId = Number(req.params.id);
   const { childId } = req.body as { childId: number };
   // Валидация вместимости
   const [club, activeCount] = await Promise.all([
@@ -79,7 +79,7 @@ router.post("/:id/enroll", checkRole(["DEPUTY", "ADMIN"]), validate(enrollClubSc
 // --- ClubRating CRUD ---
 
 // GET /api/clubs/:id/ratings - получить оценки кружка
-router.get("/:id/ratings", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
+router.get("/:id/ratings", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
   const { id } = req.params;
   
   const ratings = await prisma.clubRating.findMany({
@@ -103,7 +103,7 @@ router.get("/:id/ratings", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), async (req
 });
 
 // POST /api/clubs/:id/ratings - добавить оценку кружку
-router.post("/:id/ratings", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/:id/ratings", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
   const { id } = req.params;
   const { childId, rating, comment } = req.body;
   
@@ -148,7 +148,7 @@ router.delete("/ratings/:ratingId", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // GET /api/clubs/:id/reports - отчет по кружку (посещаемость + финансы)
-router.get("/:id/reports", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
+router.get("/:id/reports", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
   const { id } = req.params;
   const { startDate, endDate } = req.query;
   
@@ -239,6 +239,15 @@ router.get("/:id/reports", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"
       balance: totalIncome - totalExpense,
     },
   });
+});
+
+// Алиас для совместимости с фронтендом (единственное число)
+router.get("/:id/report", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res, next) => {
+  // Перенаправляем на основной эндпоинт
+  req.url = req.url.replace('/report', '/reports');
+  next();
+}, async (req, res) => {
+  // Основной обработчик уже вызовется через next()
 });
 
 export default router;

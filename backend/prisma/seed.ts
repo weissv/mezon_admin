@@ -59,7 +59,7 @@ async function main() {
       id: 999,
       firstName: "Izumi",
       lastName: "Amano",
-      position: "Администратор",
+      position: "Директор",
       rate: 1.0,
       hireDate: new Date(),
     },
@@ -73,16 +73,16 @@ async function main() {
     update: {
       email: "izumi",
       passwordHash: izumiPasswordHash,
-      role: "ADMIN",
+      role: "DIRECTOR",
     },
     create: {
       email: "izumi",
       passwordHash: izumiPasswordHash,
-      role: "ADMIN",
+      role: "DIRECTOR",
       employeeId: izumiEmployee.id,
     },
   });
-  console.log("Created users: director, izumi (password: 8p09VhXW)");
+  console.log("Created users: director, izumi (password: 8p09VhXW) with DIRECTOR role for izumi");
 
   // 4. Создать 11 классов (1-11)
   const classNames = [

@@ -6,7 +6,7 @@ const router = Router();
 import { validate } from "../middleware/validate";
 import { createMaintenanceSchema, updateMaintenanceSchema } from "../schemas/maintenance.schema";
 
-router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (_req, res) => {
   const items = await prisma.maintenanceRequest.findMany({
     include: { requester: true },
     orderBy: { createdAt: "desc" },
@@ -14,7 +14,7 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
   res.json(items);
 });
 
-router.post("/", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), validate(createMaintenanceSchema), async (req, res) => {
+router.post("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"]), validate(createMaintenanceSchema), async (req, res) => {
   const data = req.body;
   const created = await prisma.maintenanceRequest.create({
     data: { ...data, requesterId: req.user!.employeeId },
@@ -22,14 +22,14 @@ router.post("/", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), validate(createMaint
   res.status(201).json(created);
 });
 
-router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateMaintenanceSchema), async (req, res) => {
+router.put("/:id", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), validate(updateMaintenanceSchema), async (req, res) => {
   const id = Number(req.params.id);
   const updated = await prisma.maintenanceRequest.update({ where: { id }, data: req.body });
   res.json(updated);
 });
 
 // DELETE /api/maintenance/:id - удаление заявки
-router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.delete("/:id", checkRole(["DIRECTOR", "ADMIN"]), async (req, res) => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     return res.status(400).json({ message: "Invalid id" });
@@ -48,7 +48,7 @@ router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
 // --- CleaningSchedule CRUD ---
 
 // GET /api/maintenance/cleaning - список графиков уборки
-router.get("/cleaning", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/cleaning", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (_req, res) => {
   const schedules = await prisma.cleaningSchedule.findMany({
     include: {
       assignedTo: { select: { id: true, firstName: true, lastName: true } },
@@ -64,7 +64,7 @@ router.get("/cleaning", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
 });
 
 // POST /api/maintenance/cleaning - создать график уборки
-router.post("/cleaning", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/cleaning", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
   const { area, frequency, assignedToId } = req.body;
   
   const schedule = await prisma.cleaningSchedule.create({
@@ -82,7 +82,7 @@ router.post("/cleaning", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 });
 
 // PUT /api/maintenance/cleaning/:id - обновить график
-router.put("/cleaning/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.put("/cleaning/:id", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
   const { id } = req.params;
   const { area, frequency, assignedToId } = req.body;
   
@@ -98,14 +98,14 @@ router.put("/cleaning/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => 
 });
 
 // DELETE /api/maintenance/cleaning/:id
-router.delete("/cleaning/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.delete("/cleaning/:id", checkRole(["DIRECTOR", "ADMIN"]), async (req, res) => {
   const { id } = req.params;
   await prisma.cleaningSchedule.delete({ where: { id: Number(id) } });
   return res.status(204).send();
 });
 
 // POST /api/maintenance/cleaning/:id/log - отметить выполнение уборки
-router.post("/cleaning/:id/log", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
+router.post("/cleaning/:id/log", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
   const { id } = req.params;
   
   const log = await prisma.cleaningLog.create({
@@ -120,7 +120,7 @@ router.post("/cleaning/:id/log", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), asyn
 // --- Equipment CRUD ---
 
 // GET /api/maintenance/equipment - список оборудования
-router.get("/equipment", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/equipment", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (_req, res) => {
   const equipment = await prisma.equipment.findMany({
     orderBy: { nextCheckup: "asc" },
   });
@@ -129,7 +129,7 @@ router.get("/equipment", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
 });
 
 // POST /api/maintenance/equipment - добавить оборудование
-router.post("/equipment", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/equipment", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
   const { name, location, lastCheckup, nextCheckup } = req.body;
   
   const equipment = await prisma.equipment.create({
@@ -145,7 +145,7 @@ router.post("/equipment", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 });
 
 // PUT /api/maintenance/equipment/:id - обновить оборудование
-router.put("/equipment/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.put("/equipment/:id", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
   const { id } = req.params;
   const { name, location, lastCheckup, nextCheckup } = req.body;
   
@@ -163,14 +163,14 @@ router.put("/equipment/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) =>
 });
 
 // DELETE /api/maintenance/equipment/:id
-router.delete("/equipment/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.delete("/equipment/:id", checkRole(["DIRECTOR", "ADMIN"]), async (req, res) => {
   const { id } = req.params;
   await prisma.equipment.delete({ where: { id: Number(id) } });
   return res.status(204).send();
 });
 
 // GET /api/maintenance/equipment/reminders - напоминания о проверках
-router.get("/equipment/reminders", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.get("/equipment/reminders", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
   const { days = 30 } = req.query;
   
   const upcomingCheckups = await prisma.equipment.findMany({
