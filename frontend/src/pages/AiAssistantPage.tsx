@@ -123,7 +123,7 @@ export default function AiAssistantPage() {
     try {
       const data = await api.get("/ai/system-prompt");
       if (data.success) {
-        setSystemPrompt(data.data.prompt);
+        setSystemPrompt(data.data.prompt || "");
       }
     } catch (error) {
       console.error("Error loading system prompt:", error);
@@ -135,7 +135,7 @@ export default function AiAssistantPage() {
     try {
       const data = await api.get("/ai/documents");
       if (data.success) {
-        setDocuments(data.data);
+        setDocuments(Array.isArray(data.data) ? data.data : []);
       }
     } catch (error) {
       console.error("Error loading documents:", error);
@@ -572,7 +572,7 @@ export default function AiAssistantPage() {
                     onChange={(e) => setSystemPrompt(e.target.value)}
                     className="w-full rounded-lg border p-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
                     style={{ minHeight: '200px', height: 'auto' }}
-                    rows={Math.max(8, systemPrompt.split('\n').length + 2)}
+                    rows={Math.max(8, (systemPrompt || '').split('\n').length + 2)}
                     placeholder="Введите системный промпт..."
                   />
                   <div className="flex justify-end gap-2">
@@ -706,7 +706,7 @@ export default function AiAssistantPage() {
                                 {doc.metadata.grade}
                               </span>
                             )}
-                            {doc.metadata?.tags?.map((tag, i) => (
+                            {Array.isArray(doc.metadata?.tags) && doc.metadata.tags.map((tag, i) => (
                               <span
                                 key={i}
                                 className="rounded bg-gray-100 px-2 py-0.5 text-gray-600"
