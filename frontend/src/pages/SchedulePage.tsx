@@ -252,6 +252,7 @@ export default function SchedulePage() {
   // ========== TEACHERS FILTER ==========
 
   const teachers = useMemo(() => {
+    if (!Array.isArray(employees)) return [];
     return employees.filter((e) =>
       e.position?.toLowerCase().includes("учитель") ||
       e.position?.toLowerCase().includes("педагог") ||
