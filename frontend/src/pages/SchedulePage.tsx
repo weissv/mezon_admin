@@ -185,15 +185,21 @@ export default function SchedulePage() {
         api.get("/api/employees"),
       ]);
 
-      setSubjects(subjectsData || []);
-      setRooms(roomsData || []);
-      setTimeSlots(timeSlotsData || []);
-      setGroups(groupsData || []);
-      setEmployees(employeesData || []);
+      setSubjects(Array.isArray(subjectsData) ? subjectsData : []);
+      setRooms(Array.isArray(roomsData) ? roomsData : []);
+      setTimeSlots(Array.isArray(timeSlotsData) ? timeSlotsData : []);
+      setGroups(Array.isArray(groupsData) ? groupsData : []);
+      
+      // employees может вернуть {items: [], total: number} или массив
+      const employeesList = Array.isArray(employeesData) 
+        ? employeesData 
+        : (employeesData?.items || []);
+      setEmployees(employeesList);
 
       // Auto-select first group
-      if (groupsData?.length > 0 && !selectedGroupId) {
-        setSelectedGroupId(groupsData[0].id);
+      const groupsList = Array.isArray(groupsData) ? groupsData : [];
+      if (groupsList.length > 0 && !selectedGroupId) {
+        setSelectedGroupId(groupsList[0].id);
       }
     } catch (error: any) {
       toast.error("Ошибка загрузки данных", { description: error?.message });
