@@ -23,7 +23,6 @@ const inventory_routes_1 = __importDefault(require("./routes/inventory.routes"))
 const menu_routes_1 = __importDefault(require("./routes/menu.routes"));
 const maintenance_routes_1 = __importDefault(require("./routes/maintenance.routes"));
 const security_routes_1 = __importDefault(require("./routes/security.routes"));
-const branches_routes_1 = __importDefault(require("./routes/branches.routes"));
 const actionlog_routes_1 = __importDefault(require("./routes/actionlog.routes"));
 const groups_routes_1 = __importDefault(require("./routes/groups.routes"));
 const notifications_routes_1 = __importDefault(require("./routes/notifications.routes"));
@@ -34,9 +33,14 @@ const procurement_routes_1 = __importDefault(require("./routes/procurement.route
 const recipes_routes_1 = __importDefault(require("./routes/recipes.routes"));
 const staffing_routes_1 = __importDefault(require("./routes/staffing.routes"));
 const export_routes_1 = __importDefault(require("./routes/export.routes"));
+const users_routes_1 = __importDefault(require("./routes/users.routes"));
+const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
+const schedule_routes_1 = __importDefault(require("./routes/schedule.routes"));
+const settings_routes_1 = __importDefault(require("./routes/settings.routes"));
+const lms_school_routes_1 = __importDefault(require("./routes/lms-school.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = new Set(config_1.config.corsOrigins);
-const allowPattern = [/\.onrender\.com$/];
+const allowPattern = [/\.onrender\.com$/, /\.mezon\.uz$/];
 const corsOptions = {
     origin(origin, callback) {
         if (!origin) {
@@ -45,12 +49,15 @@ const corsOptions = {
         if (allowedOrigins.has(origin) || allowPattern.some((regex) => regex.test(origin))) {
             return callback(null, true);
         }
+        console.log(`CORS blocked origin: ${origin}`);
         return callback(new Error(`Origin ${origin} is not allowed by CORS`));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
     exposedHeaders: ["Set-Cookie"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
 };
 app.use((0, cors_1.default)(corsOptions));
 app.options("*", (0, cors_1.default)(corsOptions));
@@ -76,7 +83,6 @@ app.use("/api/inventory", inventory_routes_1.default);
 app.use("/api/menu", menu_routes_1.default);
 app.use("/api/maintenance", maintenance_routes_1.default);
 app.use("/api/security", security_routes_1.default);
-app.use("/api/branches", branches_routes_1.default);
 app.use("/api/actionlog", actionlog_routes_1.default);
 app.use("/api/groups", groups_routes_1.default);
 app.use("/api/notifications", notifications_routes_1.default);
@@ -87,6 +93,11 @@ app.use("/api/procurement", procurement_routes_1.default);
 app.use("/api/recipes", recipes_routes_1.default);
 app.use("/api/staffing", staffing_routes_1.default);
 app.use("/api/integration", export_routes_1.default);
+app.use("/api/users", users_routes_1.default);
+app.use("/api/ai", ai_routes_1.default);
+app.use("/api/schedule", schedule_routes_1.default);
+app.use("/api/settings", settings_routes_1.default);
+app.use("/api/lms/school", lms_school_routes_1.default);
 // Обработчик ошибок
 app.use(errorHandler_1.errorHandler);
 exports.default = app;

@@ -33,6 +33,8 @@ import usersRoutes from "./routes/users.routes";
 import aiRoutes from "./routes/ai.routes";
 import scheduleRoutes from "./routes/schedule.routes";
 import settingsRoutes from "./routes/settings.routes";
+import lmsSchoolRoutes from "./routes/lms-school.routes";
+import permissionsRoutes from "./routes/permissions.routes";
 
 const app = express();
 
@@ -101,6 +103,8 @@ app.use("/api/users", usersRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/schedule", scheduleRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/lms/school", lmsSchoolRoutes);
+app.use("/api/permissions", permissionsRoutes);
 
 // Обработчик ошибок
 app.use(errorHandler);

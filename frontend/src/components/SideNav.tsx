@@ -5,18 +5,27 @@ import clsx from "clsx";
 import { Facebook, Instagram, Send, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
-import { getLinksForRole } from "../lib/modules";
+import { usePermissions } from "../contexts/PermissionsContext";
+import { getLinksWithPermissions, FULL_ACCESS_ROLES } from "../lib/modules";
 import type { UserRole } from "../types/auth";
 
 export default function SideNav() {
   const { user, logout } = useAuth();
+  const { permissions, isLoading: permissionsLoading } = usePermissions();
   const loc = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
   const [isLogoSpinning, setIsLogoSpinning] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const role = (user?.role || "TEACHER") as UserRole;
-  const links = getLinksForRole(role, user?.email);
+  
+  // Получаем ссылки на основе прав из БД
+  const links = getLinksWithPermissions(
+    role,
+    permissions?.modules || [],
+    permissions?.isFullAccess || FULL_ACCESS_ROLES.includes(role),
+    user?.email
+  );
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   
@@ -102,6 +111,21 @@ export default function SideNav() {
         <div className="flex flex-col gap-1">
           {links.map((l) => {
             const isActive = loc.pathname === l.path || loc.pathname.startsWith(`${l.path}/`);
+            
+            // Для внешних ссылок (LMS) используем обычный <a> с target
+            if (l.isExternal) {
+              return (
+                <a 
+                  key={l.path} 
+                  href={l.path} 
+                  className={clsx("mezon-nav-link")}
+                  onClick={closeMobileMenu}
+                > 
+                  {l.label}
+                </a>
+              );
+            }
+            
             return (
               <Link 
                 key={l.path} 

@@ -84,20 +84,28 @@ async function main() {
   });
   console.log("Created users: director, izumi (password: 8p09VhXW) with DIRECTOR role for izumi");
 
-  // 4. Создать 11 классов (1-11)
-  const classNames = [
-    "1 класс", "2 класс", "3 класс", "4 класс", "5 класс",
-    "6 класс", "7 класс", "8 класс", "9 класс", "10 класс", "11 класс"
-  ];
+  // 4. Создать 11 классов (1-11) с полными данными
+  const currentYear = new Date().getFullYear();
+  const academicYear = `${currentYear}-${currentYear + 1}`;
   
-  for (let i = 0; i < classNames.length; i++) {
+  for (let grade = 1; grade <= 11; grade++) {
+    const className = `${grade} класс`;
     await prisma.group.upsert({
-      where: { name: classNames[i] },
-      update: {},
-      create: { name: classNames[i] },
+      where: { name: className },
+      update: { 
+        grade,
+        academicYear,
+        capacity: 30
+      },
+      create: { 
+        name: className,
+        grade,
+        academicYear,
+        capacity: 30
+      },
     });
   }
-  console.log("Created 11 classes (1-11 класс)");
+  console.log("Created 11 classes (1-11 класс) with grade and academicYear");
 
   // 4.1. Удалить старую "Средняя группа" если она существует и не используется
   try {

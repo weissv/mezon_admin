@@ -116,11 +116,13 @@ export default function ClubsPage() {
     setIsLoadingTeachers(true);
     api.get('/api/employees?pageSize=200')
       .then((data: any) => {
-        const items = data.items || data || [];
+        // Handle both array and {items, total} formats
+        const items = Array.isArray(data) ? data : (data?.items || []);
         setTeachers(items);
       })
       .catch((error: any) => {
         toast.error('Не удалось загрузить список педагогов', { description: error?.message });
+        setTeachers([]);
       })
       .finally(() => setIsLoadingTeachers(false));
   }, []);

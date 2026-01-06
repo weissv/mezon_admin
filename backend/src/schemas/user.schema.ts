@@ -5,7 +5,7 @@ export const createUserSchema = z.object({
   body: z.object({
     email: z.string().min(3, "Email/логин обязателен"),
     password: z.string().min(6, "Пароль должен быть минимум 6 символов"),
-    role: z.enum(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]),
+    role: z.enum(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT", "ZAVHOZ"]),
     employeeId: z.number().int().positive("ID сотрудника обязателен"),
   }),
 });
@@ -14,7 +14,7 @@ export const updateUserSchema = z.object({
   body: z.object({
     email: z.string().min(3, "Email/логин обязателен").optional(),
     password: z.string().min(6, "Пароль должен быть минимум 6 символов").optional(),
-    role: z.enum(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]).optional(),
+    role: z.enum(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT", "ZAVHOZ"]).optional(),
   }),
   params: z.object({ id: z.string().regex(/^\d+$/) }),
 });

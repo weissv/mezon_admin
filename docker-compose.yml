@@ -59,6 +59,16 @@ services:
         
         # Create pgvector extension as superuser
         psql -h postgres -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+        # Ensure the app role owns data access on reused volumes
+        psql -h postgres -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" <<SQL
+        GRANT USAGE ON SCHEMA public TO ${POSTGRES_APP_USER};
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${POSTGRES_APP_USER};
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${POSTGRES_APP_USER};
+        GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO ${POSTGRES_APP_USER};
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${POSTGRES_APP_USER};
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${POSTGRES_APP_USER};
+        SQL
     restart: "no"
     networks:
       - mezon-network

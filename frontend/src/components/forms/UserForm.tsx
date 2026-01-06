@@ -11,24 +11,26 @@ import { User, AvailableEmployee } from '../../types/user';
 import { Eye, EyeOff } from 'lucide-react';
 
 const ROLES = [
+  { value: 'DEVELOPER', label: 'Разработчик' },
   { value: 'DIRECTOR', label: 'Директор' },
-  { value: 'DEPUTY', label: 'Заместитель' },
+  { value: 'DEPUTY', label: 'Завуч' },
   { value: 'ADMIN', label: 'Администратор' },
   { value: 'TEACHER', label: 'Педагог' },
   { value: 'ACCOUNTANT', label: 'Бухгалтер' },
+  { value: 'ZAVHOZ', label: 'Зав.хоз' },
 ] as const;
 
 const createUserSchema = z.object({
   email: z.string().min(3, 'Логин обязателен (минимум 3 символа)'),
   password: z.string().min(6, 'Пароль должен быть минимум 6 символов'),
-  role: z.enum(['DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT']),
+  role: z.enum(['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT', 'ZAVHOZ']),
   employeeId: z.coerce.number().positive('Выберите сотрудника'),
 });
 
 const updateUserSchema = z.object({
   email: z.string().min(3, 'Логин обязателен (минимум 3 символа)').optional(),
   password: z.string().min(6, 'Пароль должен быть минимум 6 символов').optional().or(z.literal('')),
-  role: z.enum(['DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT']).optional(),
+  role: z.enum(['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT', 'ZAVHOZ']).optional(),
 });
 
 type CreateUserFormData = z.infer<typeof createUserSchema>;

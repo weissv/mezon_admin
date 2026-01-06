@@ -9,6 +9,33 @@ import { validate } from "../middleware/validate";
 import { createChildSchema, updateChildSchema } from "../schemas/child.schema";
 const router = Router();
 
+// Функция для синхронизации ребёнка с LMS
+async function syncChildWithLms(childId: number, groupId: number) {
+  // Проверяем, существует ли уже запись LmsSchoolStudent для этого ребёнка
+  const existingLmsStudent = await prisma.lmsSchoolStudent.findFirst({
+    where: { studentId: childId }
+  });
+
+  if (existingLmsStudent) {
+    // Обновляем класс если он изменился
+    if (existingLmsStudent.classId !== groupId) {
+      await prisma.lmsSchoolStudent.update({
+        where: { id: existingLmsStudent.id },
+        data: { classId: groupId }
+      });
+    }
+  } else {
+    // Создаём новую запись LmsSchoolStudent
+    await prisma.lmsSchoolStudent.create({
+      data: {
+        studentId: childId,
+        classId: groupId,
+        status: "active"
+      }
+    });
+  }
+}
+
 // GET /api/children
 router.get(
   "/",
@@ -36,12 +63,22 @@ router.get(
 
 router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createChildSchema), logAction("CREATE_CHILD", (req) => ({ body: req.body })), async (req, res) => {
   const child = await prisma.child.create({ data: req.body });
+  
+  // Синхронизируем с LMS
+  await syncChildWithLms(child.id, child.groupId);
+  
   return res.status(201).json(child);
 });
 
 router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateChildSchema), logAction("UPDATE_CHILD", (req) => ({ id: req.params.id, body: req.body })), async (req, res) => {
   const id = Number(req.params.id);
   const child = await prisma.child.update({ where: { id }, data: req.body });
+  
+  // Синхронизируем с LMS (если изменился класс)
+  if (req.body.groupId) {
+    await syncChildWithLms(child.id, child.groupId);
+  }
+  
   return res.json(child);
 });
 
@@ -56,6 +93,9 @@ router.delete(
     }
 
     try {
+      // Сначала удаляем связанную запись LmsSchoolStudent
+      await prisma.lmsSchoolStudent.deleteMany({ where: { studentId: id } });
+      
       await prisma.child.delete({ where: { id } });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
