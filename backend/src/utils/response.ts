@@ -121,14 +121,17 @@ export class ApiResponse {
     message: string,
     details?: unknown
   ): Response {
-    return res.status(statusCode).json({
+    const errorBody: ApiErrorResponse = {
       success: false,
       error: {
         code,
         message,
-        ...(details && { details }),
       },
-    } as ApiErrorResponse);
+    };
+    if (details !== undefined) {
+      errorBody.error.details = details;
+    }
+    return res.status(statusCode).json(errorBody);
   }
 
   /**

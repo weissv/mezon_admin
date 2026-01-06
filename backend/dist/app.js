@@ -38,6 +38,7 @@ const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
 const schedule_routes_1 = __importDefault(require("./routes/schedule.routes"));
 const settings_routes_1 = __importDefault(require("./routes/settings.routes"));
 const lms_school_routes_1 = __importDefault(require("./routes/lms-school.routes"));
+const permissions_routes_1 = __importDefault(require("./routes/permissions.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = new Set(config_1.config.corsOrigins);
 const allowPattern = [/\.onrender\.com$/, /\.mezon\.uz$/];
@@ -98,6 +99,7 @@ app.use("/api/ai", ai_routes_1.default);
 app.use("/api/schedule", schedule_routes_1.default);
 app.use("/api/settings", settings_routes_1.default);
 app.use("/api/lms/school", lms_school_routes_1.default);
+app.use("/api/permissions", permissions_routes_1.default);
 // Обработчик ошибок
 app.use(errorHandler_1.errorHandler);
 exports.default = app;

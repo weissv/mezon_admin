@@ -3,6 +3,9 @@
 
 import { Role } from './common';
 
+// Re-export Role for convenience
+export type { Role } from './common';
+
 export type UserRole = Role;
 
 // Права доступа для роли

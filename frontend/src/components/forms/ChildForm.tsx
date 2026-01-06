@@ -8,6 +8,7 @@ import { api } from '../../lib/api';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { FormError } from '../ui/FormError';
+import type { Child } from '../../types/child';
 
 const formSchema = z.object({
   firstName: z.string().min(2, 'Минимум 2 символа'),
@@ -18,8 +19,20 @@ const formSchema = z.object({
 });
 
 type ChildFormData = z.infer<typeof formSchema>;
-type Child = { id: number; firstName: string; lastName: string; birthDate: string; group: {id: number}, healthInfo?: string; };
 type ChildFormProps = { initialData?: Child | null; onSuccess: () => void; onCancel: () => void; };
+
+// Helper to convert HealthInfo object to string for the form
+const getHealthInfoString = (healthInfo: Child['healthInfo']): string => {
+  if (!healthInfo) return '';
+  if (typeof healthInfo === 'string') return healthInfo;
+  // If it's an object, serialize relevant parts
+  const parts: string[] = [];
+  if (healthInfo.allergies?.length) parts.push(`Аллергии: ${healthInfo.allergies.join(', ')}`);
+  if (healthInfo.specialConditions?.length) parts.push(`Особые условия: ${healthInfo.specialConditions.join(', ')}`);
+  if (healthInfo.medications?.length) parts.push(`Медикаменты: ${healthInfo.medications.join(', ')}`);
+  if (healthInfo.notes) parts.push(`Примечания: ${healthInfo.notes}`);
+  return parts.join('; ');
+};
 
 export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) {
   const [groups, setGroups] = useState<Array<{ id: number; name: string }>>([]);
@@ -31,7 +44,7 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
       lastName: initialData?.lastName || '',
       birthDate: initialData ? new Date(initialData.birthDate).toISOString().split('T')[0] : '',
       groupId: initialData?.group?.id || undefined,
-      healthInfo: initialData?.healthInfo || '',
+      healthInfo: getHealthInfoString(initialData?.healthInfo),
     },
   });
 

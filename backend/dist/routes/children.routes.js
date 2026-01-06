@@ -10,6 +10,32 @@ const actionLogger_1 = require("../middleware/actionLogger");
 const validate_1 = require("../middleware/validate");
 const child_schema_1 = require("../schemas/child.schema");
 const router = (0, express_1.Router)();
+// Функция для синхронизации ребёнка с LMS
+async function syncChildWithLms(childId, groupId) {
+    // Проверяем, существует ли уже запись LmsSchoolStudent для этого ребёнка
+    const existingLmsStudent = await prisma_1.prisma.lmsSchoolStudent.findFirst({
+        where: { studentId: childId }
+    });
+    if (existingLmsStudent) {
+        // Обновляем класс если он изменился
+        if (existingLmsStudent.classId !== groupId) {
+            await prisma_1.prisma.lmsSchoolStudent.update({
+                where: { id: existingLmsStudent.id },
+                data: { classId: groupId }
+            });
+        }
+    }
+    else {
+        // Создаём новую запись LmsSchoolStudent
+        await prisma_1.prisma.lmsSchoolStudent.create({
+            data: {
+                studentId: childId,
+                classId: groupId,
+                status: "active"
+            }
+        });
+    }
+}
 // GET /api/children
 router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
     const { skip, take } = (0, query_1.buildPagination)(req.query);
@@ -31,11 +57,17 @@ router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACHER", "ACCOU
 });
 router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(child_schema_1.createChildSchema), (0, actionLogger_1.logAction)("CREATE_CHILD", (req) => ({ body: req.body })), async (req, res) => {
     const child = await prisma_1.prisma.child.create({ data: req.body });
+    // Синхронизируем с LMS
+    await syncChildWithLms(child.id, child.groupId);
     return res.status(201).json(child);
 });
 router.put("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(child_schema_1.updateChildSchema), (0, actionLogger_1.logAction)("UPDATE_CHILD", (req) => ({ id: req.params.id, body: req.body })), async (req, res) => {
     const id = Number(req.params.id);
     const child = await prisma_1.prisma.child.update({ where: { id }, data: req.body });
+    // Синхронизируем с LMS (если изменился класс)
+    if (req.body.groupId) {
+        await syncChildWithLms(child.id, child.groupId);
+    }
     return res.json(child);
 });
 router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), (0, actionLogger_1.logAction)("DELETE_CHILD", (req) => ({ id: req.params.id })), async (req, res) => {
@@ -44,6 +76,8 @@ router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), (0, actionLogger_1.
         return res.status(400).json({ message: "Invalid child id" });
     }
     try {
+        // Сначала удаляем связанную запись LmsSchoolStudent
+        await prisma_1.prisma.lmsSchoolStudent.deleteMany({ where: { studentId: id } });
         await prisma_1.prisma.child.delete({ where: { id } });
     }
     catch (error) {
