@@ -101,10 +101,15 @@ export default function StaffingPage() {
 
   const fetchEmployees = async () => {
     try {
-      const data = await api.get('/api/employees') as Employee[];
-      setEmployees(data.filter(e => !('fireDate' in e) || !(e as any).fireDate));
+      const data = await api.get('/api/employees');
+      // Handle both array and {items, total} formats
+      const employeesList = Array.isArray(data) 
+        ? data 
+        : (data?.items || []);
+      setEmployees(employeesList.filter(e => !('fireDate' in e) || !(e as any).fireDate));
     } catch (error: any) {
       console.error('Error fetching employees:', error);
+      setEmployees([]);
     }
   };
 

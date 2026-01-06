@@ -8,14 +8,14 @@ const validate_1 = require("../middleware/validate");
 const club_schema_1 = require("../schemas/club.schema");
 const router = (0, express_1.Router)();
 // GET /api/clubs
-router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (req, res) => {
+router.get("/", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (req, res) => {
     const isTeacher = req.user.role === "TEACHER";
     const where = isTeacher ? { teacherId: req.user.employeeId } : {};
     const clubs = await prisma_1.prisma.club.findMany({ where, include: { teacher: true } });
     return res.json(clubs);
 });
 // GET /api/clubs/:id
-router.get("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (req, res) => {
+router.get("/:id", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT", "TEACHER"]), async (req, res) => {
     const id = Number(req.params.id);
     const club = await prisma_1.prisma.club.findUnique({ where: { id } });
     if (!club)
@@ -25,11 +25,32 @@ router.get("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ACCOUNTANT", 
     }
     return res.json(club);
 });
-router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(club_schema_1.createClubSchema), async (req, res) => {
+router.post("/", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(club_schema_1.createClubSchema), async (req, res) => {
     const club = await prisma_1.prisma.club.create({ data: req.body });
     res.status(201).json(club);
 });
-router.post("/:id/enroll", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(club_schema_1.enrollClubSchema), async (req, res) => {
+// DELETE /api/clubs/:id - удаление кружка
+router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid id" });
+    }
+    try {
+        // Удаляем связанные записи
+        await prisma_1.prisma.clubEnrollment.deleteMany({ where: { clubId: id } });
+        await prisma_1.prisma.clubRating.deleteMany({ where: { clubId: id } });
+        await prisma_1.prisma.attendance.deleteMany({ where: { clubId: id } });
+        await prisma_1.prisma.club.delete({ where: { id } });
+    }
+    catch (error) {
+        if (error?.code === "P2025") {
+            return res.status(204).send();
+        }
+        throw error;
+    }
+    return res.status(204).send();
+});
+router.post("/:id/enroll", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(club_schema_1.enrollClubSchema), async (req, res) => {
     const clubId = Number(req.params.id);
     const { childId } = req.body;
     // Валидация вместимости
@@ -57,7 +78,7 @@ router.post("/:id/enroll", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, 
 });
 // --- ClubRating CRUD ---
 // GET /api/clubs/:id/ratings - получить оценки кружка
-router.get("/:id/ratings", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
+router.get("/:id/ratings", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
     const { id } = req.params;
     const ratings = await prisma_1.prisma.clubRating.findMany({
         where: { clubId: Number(id) },
@@ -77,7 +98,7 @@ router.get("/:id/ratings", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACH
     });
 });
 // POST /api/clubs/:id/ratings - добавить оценку кружку
-router.post("/:id/ratings", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/:id/ratings", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
     const { id } = req.params;
     const { childId, rating, comment } = req.body;
     // Проверяем, что ребенок записан в кружок
@@ -116,7 +137,7 @@ router.delete("/ratings/:ratingId", (0, checkRole_1.checkRole)(["ADMIN"]), async
     return res.status(204).send();
 });
 // GET /api/clubs/:id/reports - отчет по кружку (посещаемость + финансы)
-router.get("/:id/reports", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
+router.get("/:id/reports", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res) => {
     const { id } = req.params;
     const { startDate, endDate } = req.query;
     const club = await prisma_1.prisma.club.findUnique({
@@ -199,5 +220,13 @@ router.get("/:id/reports", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACH
             balance: totalIncome - totalExpense,
         },
     });
+});
+// Алиас для совместимости с фронтендом (единственное число)
+router.get("/:id/report", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (req, res, next) => {
+    // Перенаправляем на основной эндпоинт
+    req.url = req.url.replace('/report', '/reports');
+    next();
+}, async (req, res) => {
+    // Основной обработчик уже вызовется через next()
 });
 exports.default = router;

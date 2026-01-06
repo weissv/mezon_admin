@@ -50,12 +50,11 @@ router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res
         "position",
         "hireDate",
         "rate",
-        "branchId",
         "createdAt",
     ]);
-    const where = (0, query_1.buildWhere)(req.query, ["branchId", "position", "lastName"]);
+    const where = (0, query_1.buildWhere)(req.query, ["position", "lastName"]);
     const [items, total] = await Promise.all([
-        prisma_1.prisma.employee.findMany({ where, skip, take, orderBy, include: { branch: true, user: true } }),
+        prisma_1.prisma.employee.findMany({ where, skip, take, orderBy, include: { user: true } }),
         prisma_1.prisma.employee.count({ where }),
     ]);
     return res.json({ items, total });
@@ -85,6 +84,26 @@ router.put("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate
     const id = Number(req.params.id);
     const updated = await prisma_1.prisma.employee.update({ where: { id }, data: req.body });
     return res.json(updated);
+});
+// DELETE /api/employees/:id - удаление сотрудника
+router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid employee id" });
+    }
+    try {
+        // Сначала удаляем связанного пользователя, если есть
+        await prisma_1.prisma.user.deleteMany({ where: { employeeId: id } });
+        // Затем удаляем сотрудника
+        await prisma_1.prisma.employee.delete({ where: { id } });
+    }
+    catch (error) {
+        if (error?.code === "P2025") {
+            return res.status(204).send();
+        }
+        throw error;
+    }
+    return res.status(204).send();
 });
 // GET /api/employees/reminders - напоминания о медосмотрах и аттестации
 router.get("/reminders", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {

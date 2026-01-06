@@ -1,7 +1,7 @@
 // src/layouts/MainLayout.tsx
 import { useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { Phone, Mail, Facebook, Instagram, Send, Menu } from "lucide-react";
+import { Phone, Mail, Facebook, Instagram, Send, Menu, GraduationCap } from "lucide-react";
 import SideNav from "../components/SideNav";
 import DoomGame from "../components/DoomGame";
 import { Toaster } from "sonner";
@@ -86,7 +86,13 @@ export default function MainLayout() {
           ))}
         </div>
         <div className="mezon-top-bar__cluster">
-          <span className="mezon-chip mezon-chip--teal">STEAM // семейная школа</span>
+          <Link
+            to="/lms"
+            className="mezon-chip mezon-chip--teal flex items-center gap-2 hover:bg-teal-600 transition-colors cursor-pointer"
+          >
+            <GraduationCap className="h-4 w-4" />
+            Школьная LMS
+          </Link>
           <div className="mezon-top-bar__social">
             {socials.map(({ icon: Icon, href }) => (
               <a key={href} href={href} target="_blank" rel="noreferrer">

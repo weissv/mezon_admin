@@ -90,6 +90,14 @@ router.post("/:id/calculate-kbju", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"
         },
     });
 });
+// DELETE /api/menu/:id - удалить меню
+router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), async (req, res) => {
+    const { id } = req.params;
+    await prisma_1.prisma.menu.delete({
+        where: { id: Number(id) },
+    });
+    return res.status(204).send();
+});
 // GET /api/menu/:id/shopping-list - список покупок для меню
 router.get("/:id/shopping-list", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
     const { id } = req.params;

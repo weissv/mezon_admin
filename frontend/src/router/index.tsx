@@ -2,6 +2,7 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
 import MainLayout from "../layouts/MainLayout";
+import LmsLayout from "../layouts/LmsLayout";
 import LoginPage from "../pages/LoginPage";
 import DashboardPage from "../pages/DashboardPage";
 import ChildrenPage from "../pages/ChildrenPage";
@@ -29,12 +30,38 @@ import SchedulePage from "../pages/SchedulePage";
 import { useAuth } from "../hooks/useAuth";
 import NotFoundPage from "../pages/NotFoundPage";
 
+// LMS Pages
+import LmsSchoolDashboard from "../pages/lms/LmsSchoolDashboard";
+import LmsClassesPage from "../pages/lms/LmsClassesPage";
+import LmsGradebookPage from "../pages/lms/LmsGradebookPage";
+import LmsSchedulePage from "../pages/lms/LmsSchedulePage";
+import LmsAssignmentsPage from "../pages/lms/LmsAssignmentsPage";
+import LmsProgressPage from "../pages/lms/LmsProgressPage";
+import LmsDiaryPage from "../pages/lms/LmsDiaryPage";
+
 function LoadingScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <span className="text-sm text-gray-500">Оно грузится. Терпите....</span>
     </div>
   );
+}
+
+// Редирект учителей на LMS
+function TeacherRedirectToLms() {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+  
+  // Только TEACHER автоматически перенаправляются на LMS
+  // DEVELOPER, DIRECTOR, DEPUTY, ADMIN, ACCOUNTANT остаются в ERP
+  if (user?.role === "TEACHER") {
+    return <Navigate to="/lms/school" replace />;
+  }
+  
+  return <Outlet />;
 }
 
 function PrivateRoute() {
@@ -49,11 +76,19 @@ function PrivateRoute() {
   return <Outlet />;
 }
 
+// Роли с полным доступом
+const FULL_ACCESS_ROLES = ["DEVELOPER", "DIRECTOR"];
+
 function RoleBasedRoute({ roles }: { roles: string[] }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  // DEVELOPER, DIRECTOR, DEPUTY имеют полный доступ ко всему
+  if (user && FULL_ACCESS_ROLES.includes(user.role)) {
+    return <Outlet />;
   }
 
   if (!user || !roles.includes(user.role)) {
@@ -69,6 +104,11 @@ function UserRestrictedRoute({ roles, allowedUsers }: { roles: string[]; allowed
     return <LoadingScreen />;
   }
 
+  // DEVELOPER, DIRECTOR, DEPUTY имеют полный доступ ко всему
+  if (user && FULL_ACCESS_ROLES.includes(user.role)) {
+    return <Outlet />;
+  }
+
   if (!user || !roles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -81,6 +121,20 @@ function UserRestrictedRoute({ roles, allowedUsers }: { roles: string[]; allowed
   return <Outlet />;
 }
 
+function TeacherRoute() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  const allowedRoles = ["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"];
+  if (!user || !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Outlet />;
+}
+
 export default function Router() {
   return (
     <Routes>
@@ -90,51 +144,71 @@ export default function Router() {
       </Route>
 
       <Route element={<PrivateRoute />}>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="children" element={<ChildrenPage />} />
-          <Route path="employees" element={<EmployeesPage />} />
-          <Route path="clubs" element={<ClubsPage />} />
-          <Route path="attendance" element={<AttendancePage />} />
-          <Route path="finance" element={<FinancePage />} />
-          <Route path="inventory" element={<InventoryPage />} />
-          <Route path="menu" element={<MenuPage />} />
-          <Route path="maintenance" element={<MaintenancePage />} />
-          <Route path="security" element={<SecurityPage />} />
-          <Route path="documents" element={<DocumentsPage />} />
-          <Route path="calendar" element={<CalendarPage />} />
-          <Route path="feedback" element={<FeedbackPage />} />
-          <Route path="procurement" element={<ProcurementPage />} />
-          <Route path="recipes" element={<RecipesPage />} />
-          <Route path="schedule" element={<SchedulePage />} />
+        {/* ERP Routes - учителя автоматически перенаправляются на LMS */}
+        <Route element={<TeacherRedirectToLms />}>
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="children" element={<ChildrenPage />} />
+            <Route path="employees" element={<EmployeesPage />} />
+            <Route path="clubs" element={<ClubsPage />} />
+            <Route path="attendance" element={<AttendancePage />} />
+            <Route path="finance" element={<FinancePage />} />
+            <Route path="inventory" element={<InventoryPage />} />
+            <Route path="menu" element={<MenuPage />} />
+            <Route path="maintenance" element={<MaintenancePage />} />
+            <Route path="security" element={<SecurityPage />} />
+            <Route path="documents" element={<DocumentsPage />} />
+            <Route path="calendar" element={<CalendarPage />} />
+            <Route path="feedback" element={<FeedbackPage />} />
+            <Route path="procurement" element={<ProcurementPage />} />
+            <Route path="recipes" element={<RecipesPage />} />
+            <Route path="schedule" element={<SchedulePage />} />
 
-          <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
-            <Route path="action-log" element={<ActionLogPage />} />
+            <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
+              <Route path="action-log" element={<ActionLogPage />} />
+            </Route>
+
+            <Route element={<RoleBasedRoute roles={["ADMIN"]} />}>
+              <Route path="users" element={<UsersPage />} />
+              <Route path="groups" element={<GroupsPage />} />
+            </Route>
+
+            <Route element={<UserRestrictedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} allowedUsers={["izumi"]} />}>
+              <Route path="staffing" element={<StaffingPage />} />
+            </Route>
+
+            <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
+              <Route path="notifications" element={<NotificationsPage />} />
+            </Route>
+
+            <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
+              <Route path="ai-assistant" element={<AiAssistantPage />} />
+            </Route>
+
+            <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT"]} />}>
+              <Route path="integration" element={<IntegrationPage />} />
+            </Route>
+
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
+        </Route>
 
-          <Route element={<RoleBasedRoute roles={["ADMIN"]} />}>
-            <Route path="users" element={<UsersPage />} />
-            <Route path="groups" element={<GroupsPage />} />
-          </Route>
-
-          <Route element={<UserRestrictedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} allowedUsers={["izumi"]} />}>
-            <Route path="staffing" element={<StaffingPage />} />
-          </Route>
-
-          <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN"]} />}>
-            <Route path="notifications" element={<NotificationsPage />} />
-          </Route>
-
-          <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"]} />}>
-            <Route path="ai-assistant" element={<AiAssistantPage />} />
-          </Route>
-
-          <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT"]} />}>
-            <Route path="integration" element={<IntegrationPage />} />
-          </Route>
-
-          <Route path="*" element={<NotFoundPage />} />
+        {/* LMS Routes - School Management System */}
+        <Route path="/lms" element={<LmsLayout />}>
+          <Route index element={<Navigate to="school" replace />} />
+          <Route path="dashboard" element={<Navigate to="school" replace />} />
+          
+          <Route path="school" element={<LmsSchoolDashboard />} />
+          <Route path="school/classes" element={<LmsClassesPage />} />
+          <Route path="school/classes/:classId" element={<LmsClassesPage />} />
+          <Route path="school/gradebook" element={<LmsGradebookPage />} />
+          <Route path="school/schedule" element={<LmsSchedulePage />} />
+          <Route path="school/homework" element={<LmsAssignmentsPage />} />
+          <Route path="school/attendance" element={<LmsProgressPage />} />
+          
+          <Route path="diary" element={<LmsDiaryPage />} />
+          <Route path="ai-assistant" element={<AiAssistantPage />} />
         </Route>
       </Route>
 

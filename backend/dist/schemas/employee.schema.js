@@ -8,6 +8,7 @@ exports.createEmployeeSchema = zod_1.z.object({
         firstName: zod_1.z.string().min(2, "Имя обязательно"),
         lastName: zod_1.z.string().min(2, "Фамилия обязательна"),
         middleName: zod_1.z.string().optional(),
+        birthDate: zod_1.z.string().datetime().nullable().optional(),
         position: zod_1.z.string().min(2, "Должность обязательна"),
         rate: zod_1.z.number().positive("Ставка должна быть > 0"),
         hireDate: zod_1.z.string().datetime("Неверный формат даты"),
@@ -15,7 +16,6 @@ exports.createEmployeeSchema = zod_1.z.object({
         contractEndDate: zod_1.z.string().datetime().nullable().optional(),
         medicalCheckupDate: zod_1.z.string().datetime().nullable().optional(),
         attestationDate: zod_1.z.string().datetime().nullable().optional(),
-        branchId: zod_1.z.number().int().positive(),
         user: zod_1.z
             .object({
             email: zod_1.z.string().email(),

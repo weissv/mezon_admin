@@ -163,9 +163,14 @@ export default function MaintenancePage() {
   const fetchEmployees = async () => {
     try {
       const response = await api.get('/api/employees');
-      setEmployees(response?.data || response || []);
+      // Handle both array and {items, total} formats
+      const employeesList = Array.isArray(response) 
+        ? response 
+        : (response?.items || response?.data || []);
+      setEmployees(employeesList);
     } catch (error) {
       console.error('Failed to fetch employees:', error);
+      setEmployees([]);
     }
   };
 

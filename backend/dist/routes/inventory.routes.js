@@ -8,14 +8,64 @@ const validate_1 = require("../middleware/validate");
 const inventory_schema_1 = require("../schemas/inventory.schema");
 const router = (0, express_1.Router)();
 // GET /api/inventory
-router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN"]), async (_req, res) => {
     const items = await prisma_1.prisma.inventoryItem.findMany({ orderBy: { name: "asc" } });
     // Фронт окрасит строки по срокам годности (<7 дней, просрочено)
     return res.json(items);
 });
+// POST /api/inventory - создание товара
+router.post("/", (0, checkRole_1.checkRole)(["DIRECTOR", "ADMIN"]), (0, validate_1.validate)(inventory_schema_1.createInventorySchema), async (req, res) => {
+    const { name, quantity, unit, expiryDate, type } = req.body;
+    const item = await prisma_1.prisma.inventoryItem.create({
+        data: {
+            name,
+            quantity,
+            unit,
+            expiryDate: expiryDate ? new Date(expiryDate) : null,
+            type: type || "FOOD",
+        },
+    });
+    return res.status(201).json(item);
+});
+// PUT /api/inventory/:id - обновление товара
+router.put("/:id", (0, checkRole_1.checkRole)(["DIRECTOR", "ADMIN"]), (0, validate_1.validate)(inventory_schema_1.updateInventorySchema), async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid id" });
+    }
+    const { name, quantity, unit, expiryDate, type } = req.body;
+    const item = await prisma_1.prisma.inventoryItem.update({
+        where: { id },
+        data: {
+            name,
+            quantity,
+            unit,
+            expiryDate: expiryDate ? new Date(expiryDate) : null,
+            type,
+        },
+    });
+    return res.json(item);
+});
+// DELETE /api/inventory/:id - удаление товара со склада
+router.delete("/:id", (0, checkRole_1.checkRole)(["DIRECTOR", "ADMIN"]), async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid id" });
+    }
+    try {
+        await prisma_1.prisma.inventoryItem.delete({ where: { id } });
+    }
+    catch (error) {
+        if (error?.code === "P2025") {
+            return res.status(204).send();
+        }
+        throw error;
+    }
+    return res.status(204).send();
+});
 // POST /api/inventory/generate-shopping-list
 // TODO: Cron job для проверки сроков годности и создания уведомлений.
-router.post("/generate-shopping-list", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(inventory_schema_1.generateShoppingListSchema), async (req, res) => {
+router.post("/generate-shopping-list", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(inventory_schema_1.generateShoppingListSchema), async (req, res) => {
     // Вход: { startDate, endDate }
     // Бизнес-логика: суммировать блюда из меню через MenuDish -> Dish -> DishIngredient -> Ingredient, сопоставить с остатками
     const { startDate, endDate } = req.body;
