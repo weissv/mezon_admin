@@ -12,3 +12,17 @@ export type Club = {
   cost?: number;
   maxStudents?: number;
 };
+
+export type ClubEnrollment = {
+  id: number;
+  childId: number;
+  clubId: number;
+  status: 'ACTIVE' | 'WAITING_LIST' | 'CANCELLED';
+  enrolledAt: string;
+  child?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  };
+  club?: Club;
+};

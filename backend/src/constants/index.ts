@@ -181,6 +181,21 @@ export const PAGINATION = {
   MAX_PAGE_SIZE: 200,
 } as const;
 
+// Pagination defaults for validation schemas
+export const PAGINATION_DEFAULTS = {
+  PAGE: 1,
+  PAGE_SIZE: 20,
+  MIN_PAGE_SIZE: 1,
+  MAX_PAGE_SIZE: 200,
+} as const;
+
+// Sort orders
+export const SORT_ORDERS = {
+  ASC: 'asc',
+  DESC: 'desc',
+} as const;
+export type SortOrder = typeof SORT_ORDERS[keyof typeof SORT_ORDERS];
+
 // ============================================================================
 // ВРЕМЕННЫЕ КОНСТАНТЫ
 // ============================================================================

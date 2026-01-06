@@ -11,12 +11,20 @@ router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACHER", "ACCOU
         include: {
             _count: {
                 select: { children: true }
+            },
+            teacher: {
+                select: { id: true, firstName: true, lastName: true }
             }
         },
-        orderBy: { name: 'asc' }
+        orderBy: [{ grade: 'asc' }, { name: 'asc' }]
     });
     // Сортировка по номеру класса (1 класс, 2 класс, ... 11 класс)
     groups.sort((a, b) => {
+        // Сначала сортируем по grade, если есть
+        if (a.grade !== null && b.grade !== null) {
+            return a.grade - b.grade;
+        }
+        // Если grade нет, парсим из названия
         const numA = parseInt(a.name.match(/\d+/)?.[0] || '0');
         const numB = parseInt(b.name.match(/\d+/)?.[0] || '0');
         return numA - numB;
@@ -25,22 +33,46 @@ router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACHER", "ACCOU
 });
 // POST /api/groups - создать класс
 router.post("/", (0, checkRole_1.checkRole)(["ADMIN"]), async (req, res) => {
-    const { name } = req.body;
+    const { name, grade, academicYear, teacherId, capacity, description } = req.body;
     if (!name) {
         return res.status(400).json({ error: "Название обязательно" });
     }
     const group = await prisma_1.prisma.group.create({
-        data: { name }
+        data: {
+            name,
+            grade: grade ?? null,
+            academicYear: academicYear ?? null,
+            teacherId: teacherId ?? null,
+            capacity: capacity ?? 30,
+            description: description ?? null
+        },
+        include: {
+            teacher: {
+                select: { id: true, firstName: true, lastName: true }
+            }
+        }
     });
     return res.status(201).json(group);
 });
 // PUT /api/groups/:id - обновить класс
 router.put("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), async (req, res) => {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, grade, academicYear, teacherId, capacity, description } = req.body;
     const group = await prisma_1.prisma.group.update({
         where: { id: Number(id) },
-        data: { ...(name && { name }) }
+        data: {
+            ...(name !== undefined && { name }),
+            ...(grade !== undefined && { grade }),
+            ...(academicYear !== undefined && { academicYear }),
+            ...(teacherId !== undefined && { teacherId }),
+            ...(capacity !== undefined && { capacity }),
+            ...(description !== undefined && { description })
+        },
+        include: {
+            teacher: {
+                select: { id: true, firstName: true, lastName: true }
+            }
+        }
     });
     return res.json(group);
 });
