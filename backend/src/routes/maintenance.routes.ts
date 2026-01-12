@@ -6,25 +6,238 @@ const router = Router();
 import { validate } from "../middleware/validate";
 import { createMaintenanceSchema, updateMaintenanceSchema } from "../schemas/maintenance.schema";
 
-router.get("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
+// GET /api/maintenance - получить заявки с учетом роли
+router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), async (req, res) => {
+  const user = req.user!;
+  const userRole = user.role;
+  
+  let whereClause: any = {};
+  
+  // DEVELOPER видит всё
+  if (userRole === "DEVELOPER") {
+    whereClause = {};
+  }
+  // ZAVHOZ видит только ОДОБРЕННЫЕ заявки
+  else if (userRole === "ZAVHOZ") {
+    whereClause = {
+      status: { in: ["APPROVED", "IN_PROGRESS", "DONE"] }
+    };
+  }
+  // DIRECTOR видит PENDING заявки от НЕ-учителей + все свои заявки
+  else if (userRole === "DIRECTOR") {
+    whereClause = {
+      OR: [
+        {
+          status: "PENDING",
+          requester: {
+            user: {
+              role: { not: "TEACHER" }
+            }
+          }
+        },
+        { requesterId: user.employeeId }
+      ]
+    };
+  }
+  // DEPUTY (Завуч) видит PENDING заявки от учителей + все свои заявки
+  else if (userRole === "DEPUTY") {
+    whereClause = {
+      OR: [
+        {
+          status: "PENDING",
+          requester: {
+            user: {
+              role: "TEACHER"
+            }
+          }
+        },
+        { requesterId: user.employeeId }
+      ]
+    };
+  }
+  // TEACHER видит только свои заявки
+  else if (userRole === "TEACHER") {
+    whereClause = {
+      requesterId: user.employeeId
+    };
+  }
+  // ADMIN видит все (на всякий случай)
+  else if (userRole === "ADMIN") {
+    whereClause = {};
+  }
+  
   const items = await prisma.maintenanceRequest.findMany({
-    include: { requester: true },
+    where: whereClause,
+    include: { 
+      requester: {
+        include: {
+          user: {
+            select: { role: true }
+          }
+        }
+      },
+      approvedBy: {
+        select: { id: true, firstName: true, lastName: true }
+      }
+    },
     orderBy: { createdAt: "desc" },
   });
+  
   res.json(items);
 });
 
-router.post("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), validate(createMaintenanceSchema), async (req, res) => {
+router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), validate(createMaintenanceSchema), async (req, res) => {
   const data = req.body;
   const created = await prisma.maintenanceRequest.create({
-    data: { ...data, requesterId: req.user!.employeeId },
+    data: { 
+      ...data, 
+      requesterId: req.user!.employeeId,
+      status: "PENDING" // Все новые заявки начинаются с PENDING
+    },
+    include: {
+      requester: true
+    }
   });
   res.status(201).json(created);
 });
 
-router.put("/:id", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), validate(updateMaintenanceSchema), async (req, res) => {
+router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ", "TEACHER"]), validate(updateMaintenanceSchema), async (req, res) => {
   const id = Number(req.params.id);
-  const updated = await prisma.maintenanceRequest.update({ where: { id }, data: req.body });
+  const user = req.user!;
+  
+  // Проверяем права на редактирование
+  const request = await prisma.maintenanceRequest.findUnique({
+    where: { id },
+    include: {
+      requester: {
+        include: {
+          user: { select: { role: true } }
+        }
+      }
+    }
+  });
+  
+  if (!request) {
+    return res.status(404).json({ message: "Заявка не найдена" });
+  }
+  
+  // Учитель не может редактировать одобренную заявку
+  if (user.role === "TEACHER" && request.status === "APPROVED") {
+    return res.status(403).json({ message: "Нельзя редактировать одобренную заявку" });
+  }
+  
+  // ZAVHOZ может редактировать только статус (IN_PROGRESS, DONE)
+  if (user.role === "ZAVHOZ" && request.status !== "APPROVED" && request.status !== "IN_PROGRESS") {
+    return res.status(403).json({ message: "Нет прав для редактирования" });
+  }
+  
+  const updated = await prisma.maintenanceRequest.update({ 
+    where: { id }, 
+    data: req.body,
+    include: {
+      requester: true,
+      approvedBy: true
+    }
+  });
+  res.json(updated);
+});
+
+// POST /api/maintenance/:id/approve - одобрить заявку
+router.post("/:id/approve", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req, res) => {
+  const id = Number(req.params.id);
+  const user = req.user!;
+  
+  const request = await prisma.maintenanceRequest.findUnique({
+    where: { id },
+    include: {
+      requester: {
+        include: {
+          user: { select: { role: true } }
+        }
+      }
+    }
+  });
+  
+  if (!request) {
+    return res.status(404).json({ message: "Заявка не найдена" });
+  }
+  
+  // Проверяем права на одобрение
+  const requesterRole = request.requester.user?.role;
+  
+  // Завуч может одобрять только заявки учителей
+  if (user.role === "DEPUTY" && requesterRole !== "TEACHER") {
+    return res.status(403).json({ message: "Вы можете одобрять только заявки учителей" });
+  }
+  
+  // Директор не может одобрять заявки учителей
+  if (user.role === "DIRECTOR" && requesterRole === "TEACHER") {
+    return res.status(403).json({ message: "Заявки учителей одобряет завуч" });
+  }
+  
+  const updated = await prisma.maintenanceRequest.update({
+    where: { id },
+    data: {
+      status: "APPROVED",
+      approvedById: user.employeeId,
+      approvedAt: new Date(),
+      rejectionReason: null
+    },
+    include: {
+      requester: true,
+      approvedBy: true
+    }
+  });
+  
+  res.json(updated);
+});
+
+// POST /api/maintenance/:id/reject - отклонить заявку
+router.post("/:id/reject", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req, res) => {
+  const id = Number(req.params.id);
+  const { reason } = req.body;
+  const user = req.user!;
+  
+  const request = await prisma.maintenanceRequest.findUnique({
+    where: { id },
+    include: {
+      requester: {
+        include: {
+          user: { select: { role: true } }
+        }
+      }
+    }
+  });
+  
+  if (!request) {
+    return res.status(404).json({ message: "Заявка не найдена" });
+  }
+  
+  // Проверяем права на отклонение (аналогично одобрению)
+  const requesterRole = request.requester.user?.role;
+  
+  if (user.role === "DEPUTY" && requesterRole !== "TEACHER") {
+    return res.status(403).json({ message: "Вы можете отклонять только заявки учителей" });
+  }
+  
+  if (user.role === "DIRECTOR" && requesterRole === "TEACHER") {
+    return res.status(403).json({ message: "Заявки учителей обрабатывает завуч" });
+  }
+  
+  const updated = await prisma.maintenanceRequest.update({
+    where: { id },
+    data: {
+      status: "REJECTED",
+      approvedById: user.employeeId,
+      approvedAt: new Date(),
+      rejectionReason: reason || null
+    },
+    include: {
+      requester: true,
+      approvedBy: true
+    }
+  });
+  
   res.json(updated);
 });
 

@@ -11,14 +11,15 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
 import { DataTable, Column } from '../components/DataTable/DataTable';
-import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2 } from 'lucide-react';
+import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2, X, Check } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 // Схема на основе createMaintenanceSchema
 const maintenanceFormSchema = z.object({
   title: z.string().min(3, 'Тема заявки обязательна'),
   description: z.string().optional(),
   type: z.enum(['REPAIR', 'ISSUE']),
-  status: z.enum(['NEW', 'IN_PROGRESS', 'DONE']).optional(),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE']).optional(),
 });
 
 type MaintenanceFormData = z.infer<typeof maintenanceFormSchema>;
@@ -28,9 +29,21 @@ type MaintenanceRequest = {
   title: string;
   description?: string;
   type: 'REPAIR' | 'ISSUE';
-  status: 'NEW' | 'IN_PROGRESS' | 'DONE';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'IN_PROGRESS' | 'DONE';
   createdAt: string;
-  requester?: { id: number; firstName: string; lastName: string };
+  requester?: { 
+    id: number; 
+    firstName: string; 
+    lastName: string;
+    user?: { role: string };
+  };
+  approvedBy?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  } | null;
+  approvedAt?: string | null;
+  rejectionReason?: string | null;
 };
 
 type CleaningSchedule = {
@@ -59,15 +72,19 @@ type Employee = {
 type TabType = 'requests' | 'cleaning' | 'equipment';
 
 const statusMapping: Record<string, string> = {
-  NEW: 'Новая',
+  PENDING: 'Ожидает одобрения',
+  APPROVED: 'Одобрена',
+  REJECTED: 'Отклонена',
   IN_PROGRESS: 'В работе',
   DONE: 'Выполнено',
 };
 
 const statusColors: Record<string, string> = {
-  NEW: 'bg-blue-100 text-blue-800',
-  IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
-  DONE: 'bg-green-100 text-green-800',
+  PENDING: 'bg-yellow-100 text-yellow-800',
+  APPROVED: 'bg-green-100 text-green-800',
+  REJECTED: 'bg-red-100 text-red-800',
+  IN_PROGRESS: 'bg-blue-100 text-blue-800',
+  DONE: 'bg-gray-100 text-gray-800',
 };
 
 const typeMapping: Record<string, string> = {
@@ -81,6 +98,9 @@ const typeColors: Record<string, string> = {
 };
 
 export default function MaintenancePage() {
+  const { user } = useAuth();
+  const userRole = user?.role || 'TEACHER';
+  
   // Tab state
   const [activeTab, setActiveTab] = useState<TabType>('requests');
   
@@ -93,6 +113,13 @@ export default function MaintenancePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterType, setFilterType] = useState<string>('');
+  
+  // Модальное окно для одобрения/отклонения
+  const [approveModalOpen, setApproveModalOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [actionRequest, setActionRequest] = useState<MaintenanceRequest | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Cleaning state
   const [cleaningSchedules, setCleaningSchedules] = useState<CleaningSchedule[]>([]);
@@ -120,7 +147,7 @@ export default function MaintenancePage() {
     resolver: zodResolver(maintenanceFormSchema),
     defaultValues: {
       type: 'REPAIR',
-      status: 'NEW',
+      status: 'PENDING',
     },
   });
 
@@ -190,7 +217,7 @@ export default function MaintenancePage() {
 
   const handleCreate = () => {
     setEditingRequest(null);
-    reset({ title: '', description: '', type: 'REPAIR', status: 'NEW' });
+    reset({ title: '', description: '', type: 'REPAIR', status: 'PENDING' });
     setIsModalOpen(true);
   };
 
@@ -234,6 +261,40 @@ export default function MaintenancePage() {
       toast.error('Ошибка удаления', { description: error?.message });
     } finally {
       setIsDeleting(false);
+    }
+  };
+  
+  // Функции для одобрения/отклонения
+  const handleApprove = async () => {
+    if (!actionRequest) return;
+    setActionLoading(true);
+    try {
+      await api.post(`/api/maintenance/${actionRequest.id}/approve`);
+      toast.success('Заявка одобрена');
+      setApproveModalOpen(false);
+      setActionRequest(null);
+      fetchRequests();
+    } catch (error: any) {
+      toast.error('Ошибка одобрения', { description: error?.message });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+  
+  const handleReject = async () => {
+    if (!actionRequest) return;
+    setActionLoading(true);
+    try {
+      await api.post(`/api/maintenance/${actionRequest.id}/reject`, { reason: rejectionReason });
+      toast.success('Заявка отклонена');
+      setRejectModalOpen(false);
+      setActionRequest(null);
+      setRejectionReason('');
+      fetchRequests();
+    } catch (error: any) {
+      toast.error('Ошибка отклонения', { description: error?.message });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -371,12 +432,19 @@ export default function MaintenancePage() {
   // Статистика
   const stats = {
     total: requests.length,
-    new: requests.filter(r => r.status === 'NEW').length,
+    pending: requests.filter(r => r.status === 'PENDING').length,
+    approved: requests.filter(r => r.status === 'APPROVED').length,
+    rejected: requests.filter(r => r.status === 'REJECTED').length,
     inProgress: requests.filter(r => r.status === 'IN_PROGRESS').length,
     done: requests.filter(r => r.status === 'DONE').length,
     repair: requests.filter(r => r.type === 'REPAIR').length,
     issue: requests.filter(r => r.type === 'ISSUE').length,
   };
+  
+  // Определяем, может ли пользователь одобрять заявки
+  const canApprove = userRole === 'DEVELOPER' || userRole === 'DIRECTOR' || userRole === 'DEPUTY';
+  const canEditAll = userRole === 'DEVELOPER' || userRole === 'ADMIN';
+  const isZavhoz = userRole === 'ZAVHOZ';
 
   const columns: Column<MaintenanceRequest>[] = [
     { key: 'title', header: 'Тема' },
@@ -408,17 +476,60 @@ export default function MaintenancePage() {
       header: 'Дата создания',
       render: (row) => new Date(row.createdAt).toLocaleDateString('ru-RU'),
     },
+    ...(canApprove ? [{
+      key: 'approver' as keyof MaintenanceRequest,
+      header: 'Одобрил',
+      render: (row: MaintenanceRequest) => row.approvedBy ? `${row.approvedBy.lastName} ${row.approvedBy.firstName}` : '—',
+    }] : []),
     {
       key: 'actions',
       header: 'Действия',
       render: (row) => (
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(row)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {/* Кнопки одобрения/отклонения для PENDING заявок */}
+          {canApprove && row.status === 'PENDING' && (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setActionRequest(row);
+                  setApproveModalOpen(true);
+                }}
+                title="Одобрить"
+              >
+                <Check className="h-4 w-4 text-green-600" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setActionRequest(row);
+                  setRejectModalOpen(true);
+                }}
+                title="Отклонить"
+              >
+                <X className="h-4 w-4 text-red-600" />
+              </Button>
+            </>
+          )}
+          
+          {/* Редактирование: DEVELOPER и ADMIN всегда, ZAVHOZ для APPROVED/IN_PROGRESS, учитель для своих не-одобренных */}
+          {(canEditAll || 
+            (isZavhoz && (row.status === 'APPROVED' || row.status === 'IN_PROGRESS')) ||
+            (userRole === 'TEACHER' && row.status !== 'APPROVED' && row.status !== 'IN_PROGRESS' && row.status !== 'DONE')
+          ) && (
+            <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {/* Удаление: только DEVELOPER и ADMIN */}
+          {canEditAll && (
+            <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(row)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -496,27 +607,48 @@ export default function MaintenancePage() {
               <p className="text-sm text-gray-500">Всего</p>
               <p className="text-2xl font-bold">{stats.total}</p>
             </div>
-            <div 
-              className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'NEW' ? 'ring-2 ring-blue-500' : ''}`}
-              onClick={() => { setFilterStatus(filterStatus === 'NEW' ? '' : 'NEW'); setFilterType(''); }}
-            >
-              <p className="text-sm text-gray-500">Новые</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.new}</p>
-            </div>
+            
+            {/* Для Директора/Завуча/Разработчика показываем Ожидают одобрения */}
+            {canApprove && (
+              <div 
+                className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'PENDING' ? 'ring-2 ring-yellow-500' : ''}`}
+                onClick={() => { setFilterStatus(filterStatus === 'PENDING' ? '' : 'PENDING'); setFilterType(''); }}
+              >
+                <p className="text-sm text-gray-500">Ожидают</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+              </div>
+            )}
+            
+            {/* Для Завхоза показываем Одобренные */}
+            {(isZavhoz || canApprove) && (
+              <div 
+                className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'APPROVED' ? 'ring-2 ring-green-500' : ''}`}
+                onClick={() => { setFilterStatus(filterStatus === 'APPROVED' ? '' : 'APPROVED'); setFilterType(''); }}
+              >
+                <p className="text-sm text-gray-500">{isZavhoz ? 'Новые' : 'Одобренные'}</p>
+                <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
+              </div>
+            )}
+            
             <div 
               className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'IN_PROGRESS' ? 'ring-2 ring-blue-500' : ''}`}
               onClick={() => { setFilterStatus(filterStatus === 'IN_PROGRESS' ? '' : 'IN_PROGRESS'); setFilterType(''); }}
             >
               <p className="text-sm text-gray-500">В работе</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.inProgress}</p>
+              <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
             </div>
+            
             <div 
-              className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'DONE' ? 'ring-2 ring-blue-500' : ''}`}
+              className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'DONE' ? 'ring-2 ring-gray-500' : ''}`}
               onClick={() => { setFilterStatus(filterStatus === 'DONE' ? '' : 'DONE'); setFilterType(''); }}
             >
               <p className="text-sm text-gray-500">Выполнено</p>
-              <p className="text-2xl font-bold text-green-600">{stats.done}</p>
+              <p className="text-2xl font-bold text-gray-600">{stats.done}</p>
             </div>
+          </div>
+          
+          {/* Фильтры по типу */}
+          <div className="grid grid-cols-2 gap-4">
             <div 
               className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'REPAIR' ? 'ring-2 ring-blue-500' : ''}`}
               onClick={() => { setFilterType(filterType === 'REPAIR' ? '' : 'REPAIR'); setFilterStatus(''); }}
@@ -713,11 +845,13 @@ export default function MaintenancePage() {
             {errors.type && <FormError message={errors.type.message} />}
           </div>
 
-          {editingRequest && (
+          {editingRequest && (canEditAll || isZavhoz) && (
             <div>
               <label htmlFor="status" className="block mb-1 font-medium">Статус</label>
               <select {...register('status')} id="status" className="w-full p-2 border rounded">
-                <option value="NEW">Новая</option>
+                {canEditAll && <option value="PENDING">Ожидает одобрения</option>}
+                {canEditAll && <option value="APPROVED">Одобрена</option>}
+                {canEditAll && <option value="REJECTED">Отклонена</option>}
                 <option value="IN_PROGRESS">В работе</option>
                 <option value="DONE">Выполнено</option>
               </select>
@@ -730,6 +864,74 @@ export default function MaintenancePage() {
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Сохранение...' : 'Сохранить'}</Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Approve Modal */}
+      <Modal isOpen={approveModalOpen} onClose={() => setApproveModalOpen(false)} title="Одобрение заявки">
+        <div className="p-4">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 bg-green-100 rounded-full">
+              <Check className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Вы уверены, что хотите одобрить эту заявку?</p>
+              {actionRequest && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+                  <p><strong>Тема:</strong> {actionRequest.title}</p>
+                  <p><strong>Тип:</strong> {typeMapping[actionRequest.type]}</p>
+                  <p><strong>Заявитель:</strong> {actionRequest.requester ? `${actionRequest.requester.lastName} ${actionRequest.requester.firstName}` : '—'}</p>
+                  {actionRequest.description && <p className="mt-1"><strong>Описание:</strong> {actionRequest.description}</p>}
+                </div>
+              )}
+              <p className="text-sm text-gray-600 mt-2">После одобрения заявка будет доступна завхозу для обработки.</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setApproveModalOpen(false)} disabled={actionLoading}>Отмена</Button>
+            <Button onClick={handleApprove} disabled={actionLoading} className="bg-green-600 hover:bg-green-700">
+              {actionLoading ? 'Одобрение...' : 'Одобрить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Reject Modal */}
+      <Modal isOpen={rejectModalOpen} onClose={() => setRejectModalOpen(false)} title="Отклонение заявки">
+        <div className="p-4">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 bg-red-100 rounded-full">
+              <X className="h-6 w-6 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Вы уверены, что хотите отклонить эту заявку?</p>
+              {actionRequest && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+                  <p><strong>Тема:</strong> {actionRequest.title}</p>
+                  <p><strong>Тип:</strong> {typeMapping[actionRequest.type]}</p>
+                  <p><strong>Заявитель:</strong> {actionRequest.requester ? `${actionRequest.requester.lastName} ${actionRequest.requester.firstName}` : '—'}</p>
+                  {actionRequest.description && <p className="mt-1"><strong>Описание:</strong> {actionRequest.description}</p>}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="rejectionReason" className="block mb-1 font-medium text-sm">Причина отклонения (необязательно)</label>
+            <textarea 
+              id="rejectionReason"
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              className="w-full p-2 border rounded text-sm" 
+              rows={3} 
+              placeholder="Укажите причину отклонения..."
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setRejectModalOpen(false)} disabled={actionLoading}>Отмена</Button>
+            <Button variant="destructive" onClick={handleReject} disabled={actionLoading}>
+              {actionLoading ? 'Отклонение...' : 'Отклонить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* Delete Confirmation Modal */}
