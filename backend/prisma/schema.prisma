@@ -62,9 +62,11 @@ enum InventoryType {
 }
 
 enum MaintenanceStatus {
-  NEW
-  IN_PROGRESS
-  DONE
+  PENDING      // Ожидает одобрения (показывается Директору/Завучу)
+  APPROVED     // Одобрена (показывается Завхозу)
+  REJECTED     // Отклонена
+  IN_PROGRESS  // В работе (у Завхоза)
+  DONE         // Выполнена
 }
 
 enum MaintenanceType {
@@ -124,19 +126,20 @@ model Employee {
   medicalCheckupDate DateTime?
   attestationDate    DateTime?
 
-  user                User?
-  clubs               Club[]               @relation("TeacherClubs")
-  classGroups         Group[]              @relation("ClassTeacher")
-  maintenanceRequests MaintenanceRequest[]
-  documents           Document[]
-  attendance          EmployeeAttendance[]
-  cleaningSchedules   CleaningSchedule[]
+  user                        User?
+  clubs                       Club[]               @relation("TeacherClubs")
+  classGroups                 Group[]              @relation("ClassTeacher")
+  maintenanceRequests         MaintenanceRequest[] @relation("Requester")
+  approvedMaintenanceRequests MaintenanceRequest[] @relation("Approver")
+  documents                   Document[]
+  attendance                  EmployeeAttendance[]
+  cleaningSchedules           CleaningSchedule[]
   // LMS School relations
-  lmsScheduleItems    LmsScheduleItem[]
-  lmsGrades           LmsGrade[]
-  lmsHomework         LmsHomework[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  lmsScheduleItems            LmsScheduleItem[]
+  lmsGrades                   LmsGrade[]
+  lmsHomework                 LmsHomework[]
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
 }
 
 model Child {
@@ -284,18 +287,25 @@ model Menu {
 }
 
 model MaintenanceRequest {
-  id          Int               @id @default(autoincrement())
-  title       String
-  description String?
-  requesterId Int
-  requester   Employee          @relation(fields: [requesterId], references: [id])
-  status      MaintenanceStatus @default(NEW)
-  type        MaintenanceType
+  id               Int               @id @default(autoincrement())
+  title            String
+  description      String?
+  requesterId      Int
+  requester        Employee          @relation(fields: [requesterId], references: [id], name: "Requester")
+  status           MaintenanceStatus @default(PENDING)
+  type             MaintenanceType
+  
+  // Поля для workflow одобрения
+  approvedById     Int?
+  approvedBy       Employee?         @relation(fields: [approvedById], references: [id], name: "Approver")
+  approvedAt       DateTime?
+  rejectionReason  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([requesterId, status, type])
+  @@index([approvedById])
 }
 
 model SecurityLog {

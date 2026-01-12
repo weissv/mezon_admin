@@ -5,7 +5,6 @@ export const createMaintenanceSchema = z.object({
   body: z.object({
     title: z.string().min(3),
     description: z.string().optional(),
-    status: z.enum(["NEW", "IN_PROGRESS", "DONE"]).optional(),
     type: z.enum(["REPAIR", "ISSUE"]),
   }),
 });
@@ -15,7 +14,7 @@ export const updateMaintenanceSchema = z.object({
   body: z.object({
     title: z.string().min(3).optional(),
     description: z.string().optional(),
-    status: z.enum(["NEW", "IN_PROGRESS", "DONE"]).optional(),
+    status: z.enum(["PENDING", "APPROVED", "REJECTED", "IN_PROGRESS", "DONE"]).optional(),
     type: z.enum(["REPAIR", "ISSUE"]).optional(),
   }),
 });
