@@ -46,7 +46,7 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"]), async (
       orderBy: { role: "asc" },
     });
 
-    // Добавляем информацию о ролях с полным доступом
+    // Все роли системы, включая TEACHER и ZAVHOZ
     const allRoles: Role[] = ["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT", "ZAVHOZ"];
     
     const result = allRoles.map(role => {
@@ -129,7 +129,10 @@ router.put("/:role", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req:
     const role = req.params.role as Role;
     const currentUserRole = req.user?.role;
     
+    console.log(`[Permissions] Updating role: ${role} by user with role: ${currentUserRole}`);
+    
     if (!Object.values(Role).includes(role)) {
+      console.error(`[Permissions] Invalid role: ${role}`);
       return res.status(400).json({ error: "Invalid role" });
     }
 
@@ -137,11 +140,13 @@ router.put("/:role", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req:
     // DIRECTOR и DEPUTY не могут редактировать DEVELOPER и DIRECTOR
     if (currentUserRole !== "DEVELOPER") {
       if (role === "DEVELOPER" || role === "DIRECTOR") {
+        console.warn(`[Permissions] User ${currentUserRole} attempted to modify ${role} permissions`);
         return res.status(403).json({ error: "Cannot modify permissions for this role" });
       }
     }
 
     const { modules, canCreate, canEdit, canDelete, canExport, customPermissions } = req.body;
+    console.log(`[Permissions] Updating ${role} with modules:`, modules);
 
     const permission = await prisma.rolePermission.upsert({
       where: { role },
@@ -162,6 +167,14 @@ router.put("/:role", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req:
         canExport: canExport ?? false,
         customPermissions: customPermissions || {},
       },
+    });
+
+    console.log(`[Permissions] Successfully saved permissions for ${role}:`, {
+      modules: permission.modules.length,
+      canCreate: permission.canCreate,
+      canEdit: permission.canEdit,
+      canDelete: permission.canDelete,
+      canExport: permission.canExport,
     });
 
     res.json({

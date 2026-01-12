@@ -11,11 +11,13 @@ export const FINANCE_CATEGORIES = {
 };
 
 export const ROLE_LABELS = {
+  DEVELOPER: "Разработчик",
   DIRECTOR: "Директор",
-  DEPUTY: "Зам. по ДО",
+  DEPUTY: "Завуч",
   ADMIN: "Администратор",
-  TEACHER: "Педагог кружка",
+  TEACHER: "Учитель",
   ACCOUNTANT: "Бухгалтер",
+  ZAVHOZ: "Завхоз",
 };
 
 export const MAINTENANCE_STATUS_MAPPING = {

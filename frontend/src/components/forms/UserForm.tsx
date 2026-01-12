@@ -15,9 +15,9 @@ const ROLES = [
   { value: 'DIRECTOR', label: 'Директор' },
   { value: 'DEPUTY', label: 'Завуч' },
   { value: 'ADMIN', label: 'Администратор' },
-  { value: 'TEACHER', label: 'Педагог' },
+  { value: 'TEACHER', label: 'Учитель' },
   { value: 'ACCOUNTANT', label: 'Бухгалтер' },
-  { value: 'ZAVHOZ', label: 'Зав.хоз' },
+  { value: 'ZAVHOZ', label: 'Завхоз' },
 ] as const;
 
 const createUserSchema = z.object({

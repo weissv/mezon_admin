@@ -16,9 +16,9 @@ const ROLE_LABELS: Record<string, string> = {
   DIRECTOR: 'Директор',
   DEPUTY: 'Завуч',
   ADMIN: 'Администратор',
-  TEACHER: 'Педагог',
+  TEACHER: 'Учитель',
   ACCOUNTANT: 'Бухгалтер',
-  ZAVHOZ: 'Зав.хоз',
+  ZAVHOZ: 'Завхоз',
 };
 
 const ROLE_COLORS: Record<string, string> = {
