@@ -4,14 +4,17 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, Calendar, Trash2, AlertTriangle } from 'lucide-react';
+import { PlusCircle, Calendar, Trash2, AlertTriangle, Grid, List } from 'lucide-react';
 import { Event } from '../types/calendar';
 import { EventForm } from '../components/forms/EventForm';
 import { api } from '../lib/api';
+import { UkiyoeCalendar } from '../components/UkiyoeCalendar';
 
 export default function CalendarPage() {
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
   const { data, total, page, setPage, fetchData } = useApi<Event>({
     url: '/api/calendar',
+    initialPageSize: 100, // Fetch more items for calendar view
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
@@ -98,6 +101,22 @@ export default function CalendarPage() {
           <Calendar className="h-6 w-6" />
           Календарь событий
         </h1>
+        <div className="flex bg-gray-100 p-1 rounded-lg">
+            <button
+                onClick={() => setViewMode('calendar')}
+                className={`p-2 rounded-md transition-all ${viewMode === 'calendar' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                title="Календарь"
+            >
+                <Grid className="w-5 h-5" />
+            </button>
+            <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                title="Список"
+            >
+                <List className="w-5 h-5" />
+            </button>
+        </div>
       </div>
 
       <div className="mb-4 flex justify-end">
@@ -106,14 +125,24 @@ export default function CalendarPage() {
         </Button>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={data}
-        page={page}
-        pageSize={10}
-        total={total}
-        onPageChange={setPage}
-      />
+      {viewMode === 'list' ? (
+        <DataTable
+          columns={columns}
+          data={data}
+          page={page}
+          pageSize={10}
+          total={total}
+          onPageChange={setPage}
+        />
+      ) : (
+        <div className="mb-8">
+            <UkiyoeCalendar 
+                events={data} 
+                onEdit={handleEdit} 
+                onDelete={(event) => setDeleteConfirm(event)} 
+            />
+        </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}
