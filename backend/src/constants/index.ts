@@ -127,14 +127,15 @@ export type FinanceSource = keyof typeof FINANCE_SOURCE;
 
 export const INVENTORY_TYPE = {
   FOOD: 'FOOD',
-  SUPPLIES: 'SUPPLIES',
+  HOUSEHOLD: 'HOUSEHOLD',
+  STATIONERY: 'STATIONERY',
 } as const;
 
 export type InventoryType = keyof typeof INVENTORY_TYPE;
 
 export const MAINTENANCE_TYPE = {
   REPAIR: 'REPAIR',
-  PURCHASE: 'PURCHASE',
+  ISSUE: 'ISSUE',
 } as const;
 
 export type MaintenanceType = keyof typeof MAINTENANCE_TYPE;
