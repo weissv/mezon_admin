@@ -103,7 +103,7 @@ export const UkiyoeCalendar: React.FC<UkiyoeCalendarProps> = ({ events, onEdit, 
                             key={event.id}
                             onClick={() => onEdit(event)}
                             className="text-xs p-1.5 rounded cursor-pointer border-l-2 shadow-sm hover:shadow-md transition-all font-serif group/event flex justify-between items-center bg-white border-l-[#1d3b56] text-[#2c2c2c] hover:bg-gray-50"
-                            title={event.title}
+                            title={`${event.title}${event.group ? ` (${event.group.name})` : ''}\nОрганизатор: ${event.organizer}${event.performers?.length ? `\nИсполнители: ${event.performers.join(', ')}` : ''}`}
                         >
                             <span className="truncate flex-1">{event.title}</span>
                             <button 

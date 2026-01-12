@@ -200,7 +200,7 @@ const entityImporters: Record<IntegrationEntity, (rows: ImportRow[]) => Promise<
         continue;
       }
       const type =
-        (getEnum(row, Object.values(InventoryType), "Type", "type") as InventoryType | undefined) ?? InventoryType.SUPPLIES;
+        (getEnum(row, Object.values(InventoryType), "Type", "type") as InventoryType | undefined) ?? InventoryType.FOOD;
       const payload = {
         name,
         quantity,
