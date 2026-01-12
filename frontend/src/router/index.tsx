@@ -47,23 +47,6 @@ function LoadingScreen() {
   );
 }
 
-// Редирект учителей на LMS
-function TeacherRedirectToLms() {
-  const { user, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-  
-  // Только TEACHER автоматически перенаправляются на LMS
-  // DEVELOPER, DIRECTOR, DEPUTY, ADMIN, ACCOUNTANT остаются в ERP
-  if (user?.role === "TEACHER") {
-    return <Navigate to="/lms/school" replace />;
-  }
-  
-  return <Outlet />;
-}
-
 function PrivateRoute() {
   const { user, isLoading } = useAuth();
   if (isLoading) {
@@ -144,9 +127,8 @@ export default function Router() {
       </Route>
 
       <Route element={<PrivateRoute />}>
-        {/* ERP Routes - учителя автоматически перенаправляются на LMS */}
-        <Route element={<TeacherRedirectToLms />}>
-          <Route path="/" element={<MainLayout />}>
+        {/* ERP Routes - доступны всем ролям включая учителей */}
+        <Route path="/" element={<MainLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="children" element={<ChildrenPage />} />
@@ -192,7 +174,6 @@ export default function Router() {
 
             <Route path="*" element={<NotFoundPage />} />
           </Route>
-        </Route>
 
         {/* LMS Routes - School Management System */}
         <Route path="/lms" element={<LmsLayout />}>

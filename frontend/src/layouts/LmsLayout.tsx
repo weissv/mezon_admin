@@ -72,16 +72,14 @@ export default function LmsLayout() {
           ))}
         </div>
         <div className="mezon-top-bar__cluster">
-          {/* Показываем кнопку "Вернуться в ERP" только для не-учителей */}
-          {user.role !== "TEACHER" && (
-            <Link
-              to="/dashboard"
-              className="mezon-chip mezon-chip--blue flex items-center gap-2 hover:bg-blue-600 transition-colors cursor-pointer"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Вернуться в ERP
-            </Link>
-          )}
+          {/* Кнопка "Вернуться в ERP" доступна всем ролям включая учителей */}
+          <Link
+            to="/dashboard"
+            className="mezon-chip mezon-chip--blue flex items-center gap-2 hover:bg-blue-600 transition-colors cursor-pointer"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Вернуться в ERP
+          </Link>
           <div className="mezon-top-bar__social">
             {socials.map(({ icon: Icon, href }) => (
               <a key={href} href={href} target="_blank" rel="noreferrer">
