@@ -8,7 +8,7 @@ exports.createMaintenanceSchema = zod_1.z.object({
         title: zod_1.z.string().min(3),
         description: zod_1.z.string().optional(),
         status: zod_1.z.enum(["NEW", "IN_PROGRESS", "DONE"]).optional(),
-        type: zod_1.z.enum(["REPAIR", "PURCHASE"]),
+        type: zod_1.z.enum(["REPAIR", "ISSUE"]),
     }),
 });
 exports.updateMaintenanceSchema = zod_1.z.object({
@@ -17,6 +17,6 @@ exports.updateMaintenanceSchema = zod_1.z.object({
         title: zod_1.z.string().min(3).optional(),
         description: zod_1.z.string().optional(),
         status: zod_1.z.enum(["NEW", "IN_PROGRESS", "DONE"]).optional(),
-        type: zod_1.z.enum(["REPAIR", "PURCHASE"]).optional(),
+        type: zod_1.z.enum(["REPAIR", "ISSUE"]).optional(),
     }),
 });

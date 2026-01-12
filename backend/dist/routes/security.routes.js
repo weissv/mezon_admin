@@ -7,16 +7,16 @@ const checkRole_1 = require("../middleware/checkRole");
 const validate_1 = require("../middleware/validate");
 const security_schema_1 = require("../schemas/security.schema");
 const router = (0, express_1.Router)();
-router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
     const items = await prisma_1.prisma.securityLog.findMany({ orderBy: { date: "desc" } });
     res.json(items);
 });
-router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(security_schema_1.createSecurityLogSchema), async (req, res) => {
+router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ZAVHOZ"]), (0, validate_1.validate)(security_schema_1.createSecurityLogSchema), async (req, res) => {
     const created = await prisma_1.prisma.securityLog.create({ data: req.body });
     res.status(201).json(created);
 });
 // PUT /api/security/:id
-router.put("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.put("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
         return res.status(400).json({ message: "Invalid id" });

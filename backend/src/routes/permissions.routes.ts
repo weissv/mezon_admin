@@ -80,12 +80,23 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"]), async (
 });
 
 // Получить права конкретной роли
-router.get("/:role", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"]), async (req: Request, res: Response) => {
+// Пользователь может получить свои собственные права или права других ролей (если он админ)
+router.get("/:role", async (req: Request, res: Response) => {
   try {
     const role = req.params.role as Role;
+    const currentUserRole = req.user?.role;
     
     if (!Object.values(Role).includes(role)) {
       return res.status(400).json({ error: "Invalid role" });
+    }
+    
+    // Разрешаем пользователю получать СВОИ собственные права
+    // Или если пользователь админ - может смотреть любые права
+    const adminRoles: Role[] = ["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"];
+    const canView = currentUserRole === role || adminRoles.includes(currentUserRole as Role);
+    
+    if (!canView) {
+      return res.status(403).json({ error: "Forbidden" });
     }
 
     const isFullAccess = FULL_ACCESS_ROLES.includes(role);

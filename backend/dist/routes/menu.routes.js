@@ -8,7 +8,7 @@ const validate_1 = require("../middleware/validate");
 const menu_schema_1 = require("../schemas/menu.schema");
 const router = (0, express_1.Router)();
 // GET /api/menu?startDate&endDate
-router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(menu_schema_1.getMenuSchema), async (req, res) => {
+router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ZAVHOZ"]), (0, validate_1.validate)(menu_schema_1.getMenuSchema), async (req, res) => {
     const { startDate, endDate } = req.query;
     const where = {};
     if (startDate || endDate)
@@ -31,7 +31,7 @@ router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.
     return res.json({ data: { items } });
 });
 // POST /api/menu
-router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(menu_schema_1.upsertMenuSchema), async (req, res) => {
+router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ZAVHOZ"]), (0, validate_1.validate)(menu_schema_1.upsertMenuSchema), async (req, res) => {
     // Валидация и расчёт КБЖУ можно делать на фронте и/или бэке
     const created = await prisma_1.prisma.menu.upsert({
         where: { date_ageGroup: { date: new Date(req.body.date), ageGroup: req.body.ageGroup } },
@@ -41,7 +41,7 @@ router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1
     return res.status(201).json(created);
 });
 // POST /api/menu/:id/calculate-kbju - рассчитать КБЖУ для меню
-router.post("/:id/calculate-kbju", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/:id/calculate-kbju", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
     const { id } = req.params;
     const menu = await prisma_1.prisma.menu.findUnique({
         where: { id: Number(id) },
@@ -91,7 +91,7 @@ router.post("/:id/calculate-kbju", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"
     });
 });
 // DELETE /api/menu/:id - удалить меню
-router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), async (req, res) => {
+router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN", "ZAVHOZ"]), async (req, res) => {
     const { id } = req.params;
     await prisma_1.prisma.menu.delete({
         where: { id: Number(id) },
@@ -99,7 +99,7 @@ router.delete("/:id", (0, checkRole_1.checkRole)(["ADMIN"]), async (req, res) =>
     return res.status(204).send();
 });
 // GET /api/menu/:id/shopping-list - список покупок для меню
-router.get("/:id/shopping-list", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.get("/:id/shopping-list", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
     const { id } = req.params;
     const { portions } = req.query; // количество порций
     const menu = await prisma_1.prisma.menu.findUnique({

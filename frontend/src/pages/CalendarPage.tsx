@@ -54,12 +54,7 @@ export default function CalendarPage() {
 
   const columns: Column<Event>[] = [
     { key: 'id', header: 'ID' },
-    { key: 'title', header: 'Название' },
-    { 
-      key: 'description', 
-      header: 'Описание',
-      render: (row) => row.description.substring(0, 60) + (row.description.length > 60 ? '...' : '')
-    },
+    { key: 'title', header: 'Тема' },
     {
       key: 'date',
       header: 'Дата',
@@ -69,9 +64,15 @@ export default function CalendarPage() {
       })
     },
     {
-      key: 'createdAt',
-      header: 'Создано',
-      render: (row) => new Date(row.createdAt).toLocaleDateString('ru-RU')
+      key: 'group',
+      header: 'Класс',
+      render: (row) => row.group?.name || '—'
+    },
+    { key: 'organizer', header: 'Организатор' },
+    {
+      key: 'performers',
+      header: 'Исполнители',
+      render: (row) => row.performers?.length > 0 ? row.performers.join(', ') : '—'
     },
     {
       key: 'actions',

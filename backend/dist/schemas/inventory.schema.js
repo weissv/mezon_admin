@@ -12,7 +12,7 @@ exports.createInventorySchema = zod_1.z.object({
         quantity: zod_1.z.number().min(0, "Количество должно быть >= 0"),
         unit: zod_1.z.string().min(1, "Единица измерения обязательна"),
         expiryDate: zod_1.z.string().nullable().optional(),
-        type: zod_1.z.enum(["FOOD", "SUPPLIES"]).optional().default("FOOD"),
+        type: zod_1.z.enum(["FOOD", "HOUSEHOLD", "STATIONERY"]).optional().default("FOOD"),
     }),
 });
 exports.updateInventorySchema = zod_1.z.object({
@@ -21,7 +21,7 @@ exports.updateInventorySchema = zod_1.z.object({
         quantity: zod_1.z.number().min(0).optional(),
         unit: zod_1.z.string().min(1).optional(),
         expiryDate: zod_1.z.string().nullable().optional(),
-        type: zod_1.z.enum(["FOOD", "SUPPLIES"]).optional(),
+        type: zod_1.z.enum(["FOOD", "HOUSEHOLD", "STATIONERY"]).optional(),
     }),
 });
 exports.generateShoppingListSchema = zod_1.z.object({
