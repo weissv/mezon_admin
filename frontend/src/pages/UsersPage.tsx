@@ -60,6 +60,7 @@ const ALL_MODULES = [
 interface RolePermissionData {
   role: UserRole;
   isFullAccess: boolean;
+  canBeEdited: boolean; // Может ли текущий пользователь редактировать эту роль
   modules: string[];
   canCreate: boolean;
   canEdit: boolean;
@@ -283,7 +284,7 @@ export default function UsersPage() {
 
         <Card className="p-4">
           <p className="text-sm text-gray-600 mb-4">
-            Настройте доступ к модулям системы для каждой роли. Разработчик и Директор имеют полный доступ ко всем функциям.
+            Настройте доступ к модулям системы для каждой роли. Разработчик может редактировать права любой роли без ограничений. Директор имеет полный доступ ко всем функциям.
           </p>
           
           {loadingPermissions ? (
@@ -331,7 +332,7 @@ export default function UsersPage() {
                         {perm.canExport ? <Check className="h-5 w-5 text-green-500 mx-auto" /> : <X className="h-5 w-5 text-red-400 mx-auto" />}
                       </td>
                       <td className="py-3 px-2 text-center">
-                        {perm.isFullAccess ? (
+                        {!perm.canBeEdited ? (
                           <span className="text-xs text-gray-400">Полный доступ</span>
                         ) : (
                           <Button variant="outline" size="sm" onClick={() => setEditingPermission(perm)}>

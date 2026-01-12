@@ -5,8 +5,11 @@ import { checkRole } from "../middleware/checkRole";
 const prisma = new PrismaClient();
 const router = Router();
 
-// Роли с полным доступом - им нельзя изменять права
+// Роли с полным доступом по умолчанию (показываются с замком)
 const FULL_ACCESS_ROLES: Role[] = ["DEVELOPER", "DIRECTOR"];
+
+// Роли, которые НЕ могут редактировать DEVELOPER (только DEVELOPER может всё)
+const PROTECTED_FROM_EDITING: Role[] = ["DIRECTOR"];
 
 // Список всех модулей системы
 const ALL_MODULES = [
@@ -38,6 +41,7 @@ const ALL_MODULES = [
 // Получить все права ролей
 router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"]), async (req: Request, res: Response) => {
   try {
+    const currentUserRole = req.user?.role;
     const permissions = await prisma.rolePermission.findMany({
       orderBy: { role: "asc" },
     });
@@ -49,9 +53,16 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"]), async (
       const existing = permissions.find(p => p.role === role);
       const isFullAccess = FULL_ACCESS_ROLES.includes(role);
       
+      // DEVELOPER может редактировать любую роль
+      // Остальные не могут редактировать DEVELOPER и DIRECTOR
+      const canBeEdited = currentUserRole === "DEVELOPER" 
+        ? true 
+        : !FULL_ACCESS_ROLES.includes(role);
+      
       return {
         role,
         isFullAccess,
+        canBeEdited, // Новое поле для фронтенда
         modules: isFullAccess ? ALL_MODULES : (existing?.modules || []),
         canCreate: isFullAccess ? true : (existing?.canCreate ?? true),
         canEdit: isFullAccess ? true : (existing?.canEdit ?? true),
@@ -116,14 +127,18 @@ router.get("/:role", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"]), as
 router.put("/:role", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req: Request, res: Response) => {
   try {
     const role = req.params.role as Role;
+    const currentUserRole = req.user?.role;
     
     if (!Object.values(Role).includes(role)) {
       return res.status(400).json({ error: "Invalid role" });
     }
 
-    // Нельзя изменять права ролей с полным доступом
-    if (FULL_ACCESS_ROLES.includes(role)) {
-      return res.status(403).json({ error: "Cannot modify permissions for this role" });
+    // DEVELOPER может редактировать права ЛЮБОЙ роли (включая DIRECTOR и себя)
+    // DIRECTOR и DEPUTY не могут редактировать DEVELOPER и DIRECTOR
+    if (currentUserRole !== "DEVELOPER") {
+      if (role === "DEVELOPER" || role === "DIRECTOR") {
+        return res.status(403).json({ error: "Cannot modify permissions for this role" });
+      }
     }
 
     const { modules, canCreate, canEdit, canDelete, canExport, customPermissions } = req.body;

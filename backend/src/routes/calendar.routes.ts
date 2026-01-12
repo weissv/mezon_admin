@@ -6,7 +6,7 @@ import { checkRole } from "../middleware/checkRole";
 const router = Router();
 
 // GET /api/calendar - List all events (filter by date range)
-router.get("/", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT"]), async (req, res) => {
+router.get("/", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "ZAVHOZ"]), async (req, res) => {
   const { startDate, endDate } = req.query;
   
   const events = await prisma.event.findMany({
@@ -22,7 +22,7 @@ router.get("/", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT"]), async (req, res) =
 });
 
 // POST /api/calendar - Create new event
-router.post("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { title, description, date } = req.body;
   
   const event = await prisma.event.create({
@@ -37,7 +37,7 @@ router.post("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 });
 
 // PUT /api/calendar/:id - Update event
-router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.put("/:id", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   const { title, description, date } = req.body;
   

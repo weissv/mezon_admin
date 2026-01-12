@@ -8,7 +8,7 @@ const router = Router();
 // --- Ingredient CRUD ---
 
 // GET /api/recipes/ingredients - List all ingredients
-router.get("/ingredients", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/ingredients", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
   const ingredients = await prisma.ingredient.findMany({
     orderBy: { name: "asc" },
   });
@@ -17,7 +17,7 @@ router.get("/ingredients", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => 
 });
 
 // POST /api/recipes/ingredients - Create new ingredient
-router.post("/ingredients", checkRole(["ADMIN"]), async (req, res) => {
+router.post("/ingredients", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { name, unit, calories, protein, fat, carbs } = req.body;
   
   const ingredient = await prisma.ingredient.create({
@@ -35,7 +35,7 @@ router.post("/ingredients", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // PUT /api/recipes/ingredients/:id - Update ingredient
-router.put("/ingredients/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.put("/ingredients/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   const { name, unit, calories, protein, fat, carbs } = req.body;
   
@@ -55,7 +55,7 @@ router.put("/ingredients/:id", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // DELETE /api/recipes/ingredients/:id - Delete ingredient
-router.delete("/ingredients/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.delete("/ingredients/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   
   await prisma.ingredient.delete({
@@ -68,7 +68,7 @@ router.delete("/ingredients/:id", checkRole(["ADMIN"]), async (req, res) => {
 // --- Dish CRUD ---
 
 // GET /api/recipes/dishes - List all dishes
-router.get("/dishes", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/dishes", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
   const dishes = await prisma.dish.findMany({
     include: {
       ingredients: {
@@ -84,7 +84,7 @@ router.get("/dishes", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
 });
 
 // POST /api/recipes/dishes - Create new dish with ingredients
-router.post("/dishes", checkRole(["ADMIN"]), async (req, res) => {
+router.post("/dishes", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { name, category, preparationTime, ingredients } = req.body;
   
   const dish = await prisma.dish.create({
@@ -112,7 +112,7 @@ router.post("/dishes", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // PUT /api/recipes/dishes/:id - Update dish
-router.put("/dishes/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.put("/dishes/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   const { name, category, preparationTime, ingredients } = req.body;
   
@@ -147,7 +147,7 @@ router.put("/dishes/:id", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // DELETE /api/recipes/dishes/:id - Delete dish
-router.delete("/dishes/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.delete("/dishes/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   
   await prisma.dish.delete({
@@ -158,7 +158,7 @@ router.delete("/dishes/:id", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // GET /api/recipes/dishes/:id/nutrition - Calculate nutrition info for dish
-router.get("/dishes/:id/nutrition", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.get("/dishes/:id/nutrition", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   
   const dish = await prisma.dish.findUnique({

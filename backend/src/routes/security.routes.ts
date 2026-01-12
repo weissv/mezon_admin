@@ -7,18 +7,18 @@ import { createSecurityLogSchema } from "../schemas/security.schema";
 
 const router = Router();
 
-router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
   const items = await prisma.securityLog.findMany({ orderBy: { date: "desc" } });
   res.json(items);
 });
 
-router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createSecurityLogSchema), async (req, res) => {
+router.post("/", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), validate(createSecurityLogSchema), async (req, res) => {
   const created = await prisma.securityLog.create({ data: req.body });
   res.status(201).json(created);
 });
 
 // PUT /api/security/:id
-router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.put("/:id", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     return res.status(400).json({ message: "Invalid id" });

@@ -8,7 +8,7 @@ const router = Router();
 // --- Supplier CRUD ---
 
 // GET /api/procurement/suppliers - List all suppliers
-router.get("/suppliers", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT"]), async (_req, res) => {
+router.get("/suppliers", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "ZAVHOZ"]), async (_req, res) => {
   const suppliers = await prisma.supplier.findMany({
     orderBy: { name: "asc" },
   });
@@ -17,7 +17,7 @@ router.get("/suppliers", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT"]), async (_r
 });
 
 // POST /api/procurement/suppliers - Create new supplier
-router.post("/suppliers", checkRole(["ADMIN"]), async (req, res) => {
+router.post("/suppliers", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { name, contactInfo, pricelist } = req.body;
   
   const supplier = await prisma.supplier.create({
@@ -32,7 +32,7 @@ router.post("/suppliers", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // PUT /api/procurement/suppliers/:id - Update supplier
-router.put("/suppliers/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.put("/suppliers/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   const { name, contactInfo, pricelist } = req.body;
   
@@ -49,7 +49,7 @@ router.put("/suppliers/:id", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // DELETE /api/procurement/suppliers/:id - Delete supplier
-router.delete("/suppliers/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.delete("/suppliers/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   
   await prisma.supplier.delete({
@@ -62,7 +62,7 @@ router.delete("/suppliers/:id", checkRole(["ADMIN"]), async (req, res) => {
 // --- PurchaseOrder CRUD ---
 
 // GET /api/procurement/orders - List all purchase orders
-router.get("/orders", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT"]), async (req, res) => {
+router.get("/orders", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "ZAVHOZ"]), async (req, res) => {
   const { status, supplierId } = req.query;
   
   const orders = await prisma.purchaseOrder.findMany({
@@ -85,7 +85,7 @@ router.get("/orders", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT"]), async (req, 
 });
 
 // POST /api/procurement/orders - Create new purchase order
-router.post("/orders", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/orders", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { supplierId, orderDate, deliveryDate, items } = req.body;
   
   // Calculate total amount from items
@@ -120,7 +120,7 @@ router.post("/orders", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
 });
 
 // PUT /api/procurement/orders/:id - Update purchase order status
-router.put("/orders/:id", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.put("/orders/:id", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   const { status, deliveryDate } = req.body;
   
