@@ -7,14 +7,14 @@ import { listInventorySchema, generateShoppingListSchema, createInventorySchema,
 const router = Router();
 
 // GET /api/inventory
-router.get("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
   const items = await prisma.inventoryItem.findMany({ orderBy: { name: "asc" } });
   // Фронт окрасит строки по срокам годности (<7 дней, просрочено)
   return res.json(items);
 });
 
 // POST /api/inventory - создание товара
-router.post("/", checkRole(["DIRECTOR", "ADMIN"]), validate(createInventorySchema), async (req, res) => {
+router.post("/", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), validate(createInventorySchema), async (req, res) => {
   const { name, quantity, unit, expiryDate, type } = req.body;
   const item = await prisma.inventoryItem.create({
     data: {
@@ -29,7 +29,7 @@ router.post("/", checkRole(["DIRECTOR", "ADMIN"]), validate(createInventorySchem
 });
 
 // PUT /api/inventory/:id - обновление товара
-router.put("/:id", checkRole(["DIRECTOR", "ADMIN"]), validate(updateInventorySchema), async (req, res) => {
+router.put("/:id", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), validate(updateInventorySchema), async (req, res) => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     return res.status(400).json({ message: "Invalid id" });
@@ -49,7 +49,7 @@ router.put("/:id", checkRole(["DIRECTOR", "ADMIN"]), validate(updateInventorySch
 });
 
 // DELETE /api/inventory/:id - удаление товара со склада
-router.delete("/:id", checkRole(["DIRECTOR", "ADMIN"]), async (req, res) => {
+router.delete("/:id", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     return res.status(400).json({ message: "Invalid id" });
@@ -67,7 +67,7 @@ router.delete("/:id", checkRole(["DIRECTOR", "ADMIN"]), async (req, res) => {
 
 // POST /api/inventory/generate-shopping-list
 // TODO: Cron job для проверки сроков годности и создания уведомлений.
-router.post("/generate-shopping-list", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), validate(generateShoppingListSchema), async (req, res) => {
+router.post("/generate-shopping-list", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), validate(generateShoppingListSchema), async (req, res) => {
   // Вход: { startDate, endDate }
   // Бизнес-логика: суммировать блюда из меню через MenuDish -> Dish -> DishIngredient -> Ingredient, сопоставить с остатками
   const { startDate, endDate } = req.body as { startDate: string; endDate: string };

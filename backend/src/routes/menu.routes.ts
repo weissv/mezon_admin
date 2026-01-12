@@ -8,7 +8,7 @@ import { getMenuSchema, upsertMenuSchema } from "../schemas/menu.schema";
 const router = Router();
 
 // GET /api/menu?startDate&endDate
-router.get("/", checkRole(["DEPUTY", "ADMIN"]), validate(getMenuSchema), async (req, res) => {
+router.get("/", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), validate(getMenuSchema), async (req, res) => {
   const { startDate, endDate } = req.query as any;
   const where: any = {};
   if (startDate || endDate) where.date = {};
@@ -29,7 +29,7 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), validate(getMenuSchema), async (
 });
 
 // POST /api/menu
-router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(upsertMenuSchema), async (req, res) => {
+router.post("/", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), validate(upsertMenuSchema), async (req, res) => {
   // Валидация и расчёт КБЖУ можно делать на фронте и/или бэке
   const created = await prisma.menu.upsert({
     where: { date_ageGroup: { date: new Date(req.body.date), ageGroup: req.body.ageGroup } },
@@ -40,7 +40,7 @@ router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(upsertMenuSchema), asy
 });
 
 // POST /api/menu/:id/calculate-kbju - рассчитать КБЖУ для меню
-router.post("/:id/calculate-kbju", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.post("/:id/calculate-kbju", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   
   const menu = await prisma.menu.findUnique({
@@ -96,7 +96,7 @@ router.post("/:id/calculate-kbju", checkRole(["DEPUTY", "ADMIN"]), async (req, r
 });
 
 // DELETE /api/menu/:id - удалить меню
-router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.delete("/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   
   await prisma.menu.delete({
@@ -107,7 +107,7 @@ router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // GET /api/menu/:id/shopping-list - список покупок для меню
-router.get("/:id/shopping-list", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+router.get("/:id/shopping-list", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   const { portions } = req.query; // количество порций
   
