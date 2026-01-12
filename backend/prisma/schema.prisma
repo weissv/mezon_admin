@@ -56,8 +56,9 @@ enum FinanceCategory {
 }
 
 enum InventoryType {
-  FOOD
-  SUPPLIES
+  FOOD       // Продукты питания
+  HOUSEHOLD  // Хоз. товары
+  STATIONERY // Канц. товары
 }
 
 enum MaintenanceStatus {
@@ -67,8 +68,8 @@ enum MaintenanceStatus {
 }
 
 enum MaintenanceType {
-  REPAIR
-  PURCHASE
+  REPAIR // Ремонт
+  ISSUE  // Выдача
 }
 
 enum FinanceSource {

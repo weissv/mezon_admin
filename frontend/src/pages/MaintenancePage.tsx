@@ -11,13 +11,13 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
 import { DataTable, Column } from '../components/DataTable/DataTable';
-import { Trash2, AlertCircle, Edit, Plus, Wrench, ShoppingCart, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2 } from 'lucide-react';
+import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2 } from 'lucide-react';
 
 // Схема на основе createMaintenanceSchema
 const maintenanceFormSchema = z.object({
   title: z.string().min(3, 'Тема заявки обязательна'),
   description: z.string().optional(),
-  type: z.enum(['REPAIR', 'PURCHASE']),
+  type: z.enum(['REPAIR', 'ISSUE']),
   status: z.enum(['NEW', 'IN_PROGRESS', 'DONE']).optional(),
 });
 
@@ -27,7 +27,7 @@ type MaintenanceRequest = {
   id: number;
   title: string;
   description?: string;
-  type: 'REPAIR' | 'PURCHASE';
+  type: 'REPAIR' | 'ISSUE';
   status: 'NEW' | 'IN_PROGRESS' | 'DONE';
   createdAt: string;
   requester?: { id: number; firstName: string; lastName: string };
@@ -72,12 +72,12 @@ const statusColors: Record<string, string> = {
 
 const typeMapping: Record<string, string> = {
   REPAIR: 'Ремонт',
-  PURCHASE: 'Закупка',
+  ISSUE: 'Выдача',
 };
 
 const typeColors: Record<string, string> = {
   REPAIR: 'bg-orange-100 text-orange-800',
-  PURCHASE: 'bg-purple-100 text-purple-800',
+  ISSUE: 'bg-purple-100 text-purple-800',
 };
 
 export default function MaintenancePage() {
@@ -375,7 +375,7 @@ export default function MaintenancePage() {
     inProgress: requests.filter(r => r.status === 'IN_PROGRESS').length,
     done: requests.filter(r => r.status === 'DONE').length,
     repair: requests.filter(r => r.type === 'REPAIR').length,
-    purchase: requests.filter(r => r.type === 'PURCHASE').length,
+    issue: requests.filter(r => r.type === 'ISSUE').length,
   };
 
   const columns: Column<MaintenanceRequest>[] = [
@@ -528,14 +528,14 @@ export default function MaintenancePage() {
               <p className="text-2xl font-bold">{stats.repair}</p>
             </div>
             <div 
-              className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'PURCHASE' ? 'ring-2 ring-blue-500' : ''}`}
-              onClick={() => { setFilterType(filterType === 'PURCHASE' ? '' : 'PURCHASE'); setFilterStatus(''); }}
+              className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'ISSUE' ? 'ring-2 ring-blue-500' : ''}`}
+              onClick={() => { setFilterType(filterType === 'ISSUE' ? '' : 'ISSUE'); setFilterStatus(''); }}
             >
               <div className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4 text-purple-600" />
-                <p className="text-sm text-gray-500">Закупка</p>
+                <Package className="h-4 w-4 text-purple-600" />
+                <p className="text-sm text-gray-500">Выдача</p>
               </div>
-              <p className="text-2xl font-bold">{stats.purchase}</p>
+              <p className="text-2xl font-bold">{stats.issue}</p>
             </div>
           </div>
 
@@ -708,7 +708,7 @@ export default function MaintenancePage() {
             <label htmlFor="type" className="block mb-1 font-medium">Тип заявки</label>
             <select {...register('type')} id="type" className="w-full p-2 border rounded">
               <option value="REPAIR">Ремонт</option>
-              <option value="PURCHASE">Закупка</option>
+              <option value="ISSUE">Выдача</option>
             </select>
             {errors.type && <FormError message={errors.type.message} />}
           </div>

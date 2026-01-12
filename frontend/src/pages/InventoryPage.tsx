@@ -9,9 +9,9 @@ import { Input } from '../components/ui/input';
 import { ShoppingListModal } from '../components/modals/ShoppingListModal';
 import { Item, ShoppingListItem } from '../types/inventory';
 import { api } from '../lib/api';
-import { PlusCircle, AlertTriangle, Apple, Package, Archive } from 'lucide-react';
+import { PlusCircle, AlertTriangle, Apple, Package, Archive, Pencil } from 'lucide-react';
 
-type InventoryType = 'FOOD' | 'SUPPLIES';
+type InventoryType = 'FOOD' | 'HOUSEHOLD' | 'STATIONERY';
 type FilterType = 'ALL' | InventoryType;
 
 export default function InventoryPage() {
@@ -45,12 +45,14 @@ export default function InventoryPage() {
   const stats = useMemo(() => ({
     all: items.length,
     food: items.filter((item: any) => item.type === 'FOOD').length,
-    supplies: items.filter((item: any) => item.type === 'SUPPLIES').length,
+    household: items.filter((item: any) => item.type === 'HOUSEHOLD').length,
+    stationery: items.filter((item: any) => item.type === 'STATIONERY').length,
   }), [items]);
 
   const typeLabels: Record<InventoryType, string> = {
-    FOOD: 'Продукты',
-    SUPPLIES: 'Расходники',
+    FOOD: 'Продукты питания',
+    HOUSEHOLD: 'Хоз. товары',
+    STATIONERY: 'Канц. товары',
   };
 
   const getExpiryClass = (expiryDate?: string) => {
@@ -144,7 +146,7 @@ export default function InventoryPage() {
       </div>
 
       {/* Filter tabs */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <div
           className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'ALL' ? 'ring-2 ring-blue-500' : ''}`}
           onClick={() => setFilterType('ALL')}
@@ -166,22 +168,33 @@ export default function InventoryPage() {
           <p className="text-2xl font-bold text-green-600 mt-1">{stats.food}</p>
         </div>
         <div
-          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'SUPPLIES' ? 'ring-2 ring-purple-500' : ''}`}
-          onClick={() => setFilterType('SUPPLIES')}
+          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'HOUSEHOLD' ? 'ring-2 ring-orange-500' : ''}`}
+          onClick={() => setFilterType('HOUSEHOLD')}
         >
           <div className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-purple-600" />
-            <span className="text-sm text-gray-500">Расходные материалы</span>
+            <Package className="h-5 w-5 text-orange-600" />
+            <span className="text-sm text-gray-500">Хоз. товары</span>
           </div>
-          <p className="text-2xl font-bold text-purple-600 mt-1">{stats.supplies}</p>
+          <p className="text-2xl font-bold text-orange-600 mt-1">{stats.household}</p>
+        </div>
+        <div
+          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'STATIONERY' ? 'ring-2 ring-purple-500' : ''}`}
+          onClick={() => setFilterType('STATIONERY')}
+        >
+          <div className="flex items-center gap-2">
+            <Pencil className="h-5 w-5 text-purple-600" />
+            <span className="text-sm text-gray-500">Канц. товары</span>
+          </div>
+          <p className="text-2xl font-bold text-purple-600 mt-1">{stats.stationery}</p>
         </div>
       </div>
 
       <Card>
         <h2 className="text-xl font-semibold p-4 flex items-center gap-2">
           {filterType === 'FOOD' && <Apple className="h-5 w-5 text-green-600" />}
-          {filterType === 'SUPPLIES' && <Package className="h-5 w-5 text-purple-600" />}
-          {filterType === 'ALL' ? 'Все остатки' : filterType === 'FOOD' ? 'Продукты питания' : 'Расходные материалы'}
+          {filterType === 'HOUSEHOLD' && <Package className="h-5 w-5 text-orange-600" />}
+          {filterType === 'STATIONERY' && <Pencil className="h-5 w-5 text-purple-600" />}
+          {filterType === 'ALL' ? 'Все остатки' : typeLabels[filterType]}
         </h2>
         {loading ? (
           <div className="p-4">Загрузка...</div>
@@ -205,8 +218,12 @@ export default function InventoryPage() {
                 <tr key={item.id} className={'border-t ' + getExpiryClass(item.expiryDate)}>
                   <td className="p-2">{item.name}</td>
                   <td className="p-2">
-                    <span className={`px-2 py-0.5 rounded text-xs ${item.type === 'FOOD' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}`}>
-                      {item.type === 'FOOD' ? 'Продукт' : 'Расходник'}
+                    <span className={`px-2 py-0.5 rounded text-xs ${
+                      item.type === 'FOOD' ? 'bg-green-100 text-green-800' : 
+                      item.type === 'HOUSEHOLD' ? 'bg-orange-100 text-orange-800' : 
+                      'bg-purple-100 text-purple-800'
+                    }`}>
+                      {typeLabels[item.type as InventoryType] || item.type}
                     </span>
                   </td>
                   <td className="p-2">
@@ -290,8 +307,9 @@ export default function InventoryPage() {
               className="w-full p-2 border rounded"
               required
             >
-              <option value="FOOD">Продукт питания</option>
-              <option value="SUPPLIES">Расходный материал</option>
+              <option value="FOOD">Продукты питания</option>
+              <option value="HOUSEHOLD">Хоз. товары</option>
+              <option value="STATIONERY">Канц. товары</option>
             </select>
           </div>
 
@@ -324,8 +342,8 @@ export default function InventoryPage() {
               value={formData.expiryDate}
               onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
             />
-            {formData.type === 'SUPPLIES' && (
-              <p className="text-xs text-gray-500 mt-1">Для расходных материалов срок годности обычно не указывается</p>
+            {formData.type !== 'FOOD' && (
+              <p className="text-xs text-gray-500 mt-1">Для хозяйственных и канцелярских товаров срок годности обычно не указывается</p>
             )}
           </div>
 

@@ -41,13 +41,13 @@ const ALL_MODULES = [
 // Получить все права ролей
 router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"]), async (req: Request, res: Response) => {
   try {
-    const currentUserRole = req.user?.role;
+    const currentUserRole = req.user?.role || "";
     const permissions = await prisma.rolePermission.findMany({
       orderBy: { role: "asc" },
     });
 
-    // Добавляем информацию о ролях с полным доступом (без TEACHER - он только в LMS)
-    const allRoles: Role[] = ["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT", "ZAVHOZ"];
+    // Добавляем информацию о ролях с полным доступом
+    const allRoles: Role[] = ["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT", "ZAVHOZ"];
     
     const result = allRoles.map(role => {
       const existing = permissions.find(p => p.role === role);
@@ -72,10 +72,10 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN"]), async (
       };
     });
 
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     console.error("Error fetching permissions:", error);
-    res.status(500).json({ error: "Failed to fetch permissions" });
+    return res.status(500).json({ error: "Failed to fetch permissions" });
   }
 });
 
