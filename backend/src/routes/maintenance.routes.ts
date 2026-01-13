@@ -78,7 +78,8 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"
       },
       approvedBy: {
         select: { id: true, firstName: true, lastName: true }
-      }
+      },
+      items: true // Включаем позиции заявки
     },
     orderBy: { createdAt: "desc" },
   });
@@ -87,15 +88,25 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"
 });
 
 router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), validate(createMaintenanceSchema), async (req, res) => {
-  const data = req.body;
+  const { items, ...data } = req.body;
   const created = await prisma.maintenanceRequest.create({
     data: { 
       ...data, 
       requesterId: req.user!.employeeId,
-      status: "PENDING" // Все новые заявки начинаются с PENDING
+      status: "PENDING", // Все новые заявки начинаются с PENDING
+      // Nested write для создания позиций
+      items: items && items.length > 0 ? {
+        create: items.map((item: { name: string; quantity: number; unit: string; category: string }) => ({
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: item.category,
+        }))
+      } : undefined
     },
     include: {
-      requester: true
+      requester: true,
+      items: true
     }
   });
   res.status(201).json(created);
@@ -131,12 +142,28 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHO
     return res.status(403).json({ message: "Нет прав для редактирования" });
   }
   
+  const { items, ...updateData } = req.body;
+  
+  // Если items передан, делаем полную замену позиций
   const updated = await prisma.maintenanceRequest.update({ 
     where: { id }, 
-    data: req.body,
+    data: {
+      ...updateData,
+      // Если items передан, удаляем старые и создаем новые
+      items: items ? {
+        deleteMany: {}, // Удаляем все старые позиции
+        create: items.map((item: { name: string; quantity: number; unit: string; category: string }) => ({
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: item.category,
+        }))
+      } : undefined
+    },
     include: {
       requester: true,
-      approvedBy: true
+      approvedBy: true,
+      items: true
     }
   });
   res.json(updated);

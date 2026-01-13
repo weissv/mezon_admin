@@ -302,10 +302,8 @@ model MaintenanceRequest {
   status           MaintenanceStatus @default(PENDING)
   type             MaintenanceType
   
-  // Поля для заявок типа ISSUE (выдача)
-  unit             String?           // Ед.изм (шт, кг, л и т.д.)
-  quantity         Float?            // Кол-во
-  itemCategory     ItemCategory?     // Категория товара: Канц.товары, Хоз.товары, Прочее
+  // Связь с позициями заявки (Master-Detail)
+  items            MaintenanceItem[]
   
   // Поля для workflow одобрения
   approvedById     Int?
@@ -318,6 +316,21 @@ model MaintenanceRequest {
 
   @@index([requesterId, status, type])
   @@index([approvedById])
+}
+
+// Позиции заявки на выдачу (Detail таблица)
+model MaintenanceItem {
+  id         Int                @id @default(autoincrement())
+  requestId  Int
+  request    MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  name       String             // Наименование товара
+  quantity   Float              // Количество
+  unit       String             // Единица измерения (шт, кг, л)
+  category   ItemCategory       // Категория товара
+
+  createdAt  DateTime           @default(now())
+
+  @@index([requestId])
 }
 
 model SecurityLog {

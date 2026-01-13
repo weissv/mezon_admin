@@ -110,7 +110,12 @@ router.post("/generate-shopping-list", checkRole(["DIRECTOR", "DEPUTY", "ADMIN",
   
   const shoppingList = Object.entries(required).map(([key, val]) => {
     const [name, unit] = key.split("|");
-    const stock = inventory.find((i: any) => i.ingredient?.name === name && i.ingredient?.unit === unit);
+    // Находим товар на складе по имени и единице измерения
+    // Проверяем как по связанному ингредиенту, так и по имени самого товара
+    const stock = inventory.find((i) => 
+      (i.ingredient?.name === name && i.ingredient?.unit === unit) || 
+      (i.name === name && i.unit === unit)
+    );
     const remaining = (val.qty - (stock?.quantity || 0));
     return { name, unit, requiredQty: val.qty, inStock: stock?.quantity || 0, toBuy: Math.max(remaining, 0) };
   });
