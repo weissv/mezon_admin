@@ -61,6 +61,13 @@ enum InventoryType {
   STATIONERY // Канц. товары
 }
 
+/// Категория товара для заявок на выдачу
+enum ItemCategory {
+  STATIONERY  // Канц.товары
+  HOUSEHOLD   // Хоз.товары
+  OTHER       // Прочее
+}
+
 enum MaintenanceStatus {
   PENDING      // Ожидает одобрения (показывается Директору/Завучу)
   APPROVED     // Одобрена (показывается Завхозу)
@@ -288,12 +295,17 @@ model Menu {
 
 model MaintenanceRequest {
   id               Int               @id @default(autoincrement())
-  title            String
-  description      String?
+  title            String            // Наименование
+  description      String?           // Описание (необязательно)
   requesterId      Int
   requester        Employee          @relation(fields: [requesterId], references: [id], name: "Requester")
   status           MaintenanceStatus @default(PENDING)
   type             MaintenanceType
+  
+  // Поля для заявок типа ISSUE (выдача)
+  unit             String?           // Ед.изм (шт, кг, л и т.д.)
+  quantity         Float?            // Кол-во
+  itemCategory     ItemCategory?     // Категория товара: Канц.товары, Хоз.товары, Прочее
   
   // Поля для workflow одобрения
   approvedById     Int?
