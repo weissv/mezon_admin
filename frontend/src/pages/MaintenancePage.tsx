@@ -9,6 +9,7 @@ import { Modal } from '../components/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
+import { InventoryAutocomplete } from '../components/ui/InventoryAutocomplete';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2, X, Check, PlusCircle, MinusCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -99,6 +100,7 @@ export default function MaintenancePage() {
     reset,
     watch,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<MaintenanceFormData>({
     resolver: zodResolver(createMaintenanceSchema),
@@ -896,10 +898,14 @@ export default function MaintenancePage() {
                       
                       <div className="grid grid-cols-1 gap-2">
                         <div>
-                          <Input 
-                            {...register(`items.${index}.name`)} 
+                          <InventoryAutocomplete
+                            name={`items.${index}.name`}
+                            control={control}
                             placeholder="Наименование товара"
-                            className="text-sm"
+                            onSelect={(selectedItem) => {
+                              setValue(`items.${index}.name`, selectedItem.name);
+                              setValue(`items.${index}.unit`, selectedItem.unit);
+                            }}
                           />
                           {errors.items?.[index]?.name && (
                             <FormError message={errors.items[index]?.name?.message} />

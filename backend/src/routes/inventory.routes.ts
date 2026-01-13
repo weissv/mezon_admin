@@ -6,6 +6,32 @@ import { validate } from "../middleware/validate";
 import { listInventorySchema, generateShoppingListSchema, createInventorySchema, updateInventorySchema } from "../schemas/inventory.schema";
 const router = Router();
 
+// GET /api/inventory/search - поиск товаров для автозаполнения
+// ВАЖНО: этот маршрут должен быть ДО /:id, чтобы не конфликтовать
+router.get("/search", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ", "TEACHER"]), async (req, res) => {
+  const query = (req.query.q as string) || "";
+  if (!query || query.trim().length < 1) {
+    return res.json([]);
+  }
+  
+  const items = await prisma.inventoryItem.findMany({
+    where: {
+      name: {
+        contains: query.trim(),
+        mode: "insensitive",
+      },
+    },
+    select: {
+      name: true,
+      unit: true,
+    },
+    take: 10,
+    orderBy: { name: "asc" },
+  });
+  
+  return res.json(items);
+});
+
 // GET /api/inventory
 router.get("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
   const items = await prisma.inventoryItem.findMany({ orderBy: { name: "asc" } });
