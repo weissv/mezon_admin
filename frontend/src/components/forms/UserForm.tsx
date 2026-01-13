@@ -8,7 +8,10 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { FormError } from '../ui/FormError';
 import { User, AvailableEmployee } from '../../types/user';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, MessageCircle, ExternalLink } from 'lucide-react';
+
+// Имя бота для Telegram Deep Link (замените на реальное имя вашего бота)
+const TELEGRAM_BOT_NAME = process.env.TELEGRAM_BOT_NAME || 'YOUR_BOT_NAME';
 
 const ROLES = [
   { value: 'DEVELOPER', label: 'Разработчик' },
@@ -189,6 +192,37 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
           <p className="text-sm text-gray-600">
             {initialData.employee.lastName} {initialData.employee.firstName} — {initialData.employee.position}
           </p>
+        </div>
+      )}
+
+      {/* Telegram Connect - for editing */}
+      {isEditing && (
+        <div className="border border-blue-200 bg-blue-50 p-4 rounded-md">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <MessageCircle className="inline-block w-4 h-4 mr-1 text-blue-500" />
+            Telegram уведомления
+          </label>
+          {(initialData as any).telegramChatId ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-green-600 font-medium">✓ Telegram подключён</span>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                Подключите Telegram для получения уведомлений о заявках
+              </p>
+              <a
+                href={`https://t.me/${TELEGRAM_BOT_NAME}?start=${initialData.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Подключить Telegram
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          )}
         </div>
       )}
 

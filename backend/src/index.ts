@@ -2,6 +2,7 @@
 import app from "./app";
 import { config } from "./config";
 import { AiService } from "./services/AiService";
+import { initTelegramBot } from "./services/TelegramService";
 
 // Интервал синхронизации Google Drive (30 минут)
 const SYNC_INTERVAL_MS = 30 * 60 * 1000;
@@ -34,6 +35,9 @@ async function startGoogleDriveSync() {
 
 app.listen(config.port, () => {
   console.log(`API running on http://0.0.0.0:${config.port}`);
+  
+  // Инициализируем Telegram бота
+  initTelegramBot();
   
   // Запускаем синхронизацию Google Drive через 5 секунд после старта
   // чтобы дать время для инициализации базы данных

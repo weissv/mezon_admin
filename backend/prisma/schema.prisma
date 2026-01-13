@@ -107,12 +107,13 @@ enum AgeGroup {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  role         Role
-  employeeId   Int      @unique
-  employee     Employee @relation(fields: [employeeId], references: [id])
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  passwordHash   String
+  role           Role
+  employeeId     Int      @unique
+  employee       Employee @relation(fields: [employeeId], references: [id])
+  telegramChatId String?  @unique // Telegram Chat ID для уведомлений
 
   actionLogs ActionLog[]
   createdAt  DateTime    @default(now())
