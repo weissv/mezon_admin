@@ -7,11 +7,16 @@ import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
 import { Input } from '../components/ui/input';
 import { ShoppingListModal } from '../components/modals/ShoppingListModal';
-import { Item, ShoppingListItem } from '../types/inventory';
+import { 
+  Item, 
+  ShoppingListItem, 
+  InventoryType,
+  inventoryTypeLabels,
+  inventoryTypeColors 
+} from '../types/inventory';
 import { api } from '../lib/api';
 import { PlusCircle, AlertTriangle, Apple, Package, Archive, Pencil } from 'lucide-react';
 
-type InventoryType = 'FOOD' | 'HOUSEHOLD' | 'STATIONERY';
 type FilterType = 'ALL' | InventoryType;
 
 export default function InventoryPage() {
@@ -48,12 +53,6 @@ export default function InventoryPage() {
     household: items.filter((item: any) => item.type === 'HOUSEHOLD').length,
     stationery: items.filter((item: any) => item.type === 'STATIONERY').length,
   }), [items]);
-
-  const typeLabels: Record<InventoryType, string> = {
-    FOOD: 'Продукты питания',
-    HOUSEHOLD: 'Хоз. товары',
-    STATIONERY: 'Канц. товары',
-  };
 
   const getExpiryClass = (expiryDate?: string) => {
     if (!expiryDate) return '';
@@ -194,13 +193,13 @@ export default function InventoryPage() {
           {filterType === 'FOOD' && <Apple className="h-5 w-5 text-green-600" />}
           {filterType === 'HOUSEHOLD' && <Package className="h-5 w-5 text-orange-600" />}
           {filterType === 'STATIONERY' && <Pencil className="h-5 w-5 text-purple-600" />}
-          {filterType === 'ALL' ? 'Все остатки' : typeLabels[filterType]}
+          {filterType === 'ALL' ? 'Все остатки' : inventoryTypeLabels[filterType]}
         </h2>
         {loading ? (
           <div className="p-4">Загрузка...</div>
         ) : filteredItems.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            {filterType === 'ALL' ? 'Нет товаров на складе' : `Нет товаров в категории "${typeLabels[filterType]}"`}
+            {filterType === 'ALL' ? 'Нет товаров на складе' : `Нет товаров в категории "${inventoryTypeLabels[filterType]}"`}
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -223,7 +222,7 @@ export default function InventoryPage() {
                       item.type === 'HOUSEHOLD' ? 'bg-orange-100 text-orange-800' : 
                       'bg-purple-100 text-purple-800'
                     }`}>
-                      {typeLabels[item.type as InventoryType] || item.type}
+                      {inventoryTypeLabels[item.type as InventoryType] || item.type}
                     </span>
                   </td>
                   <td className="p-2">

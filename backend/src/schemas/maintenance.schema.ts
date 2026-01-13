@@ -1,24 +1,30 @@
 // src/schemas/maintenance.schema.ts
 import { z } from "zod";
 
+// Схема для отдельной позиции (товара) в заявке
+const maintenanceItemSchema = z.object({
+  name: z.string().min(1, "Наименование товара обязательно"),
+  quantity: z.number().positive("Количество должно быть положительным"),
+  unit: z.string().min(1, "Единица измерения обязательна"),
+  category: z.enum(["STATIONERY", "HOUSEHOLD", "OTHER"]),
+});
+
 export const createMaintenanceSchema = z.object({
   body: z.object({
     title: z.string().min(3, "Наименование обязательно (минимум 3 символа)"),
     description: z.string().optional(),
     type: z.enum(["REPAIR", "ISSUE"]),
-    // Поля для заявок типа ISSUE (выдача)
-    unit: z.string().optional(),           // Ед.изм
-    quantity: z.number().positive().optional(), // Кол-во
-    itemCategory: z.enum(["STATIONERY", "HOUSEHOLD", "OTHER"]).optional(), // Категория товара
+    // Массив позиций для заявок типа ISSUE (выдача)
+    items: z.array(maintenanceItemSchema).optional(),
   }).refine((data) => {
-    // Если тип ISSUE, то unit, quantity и itemCategory обязательны
+    // Если тип ISSUE, то items должен содержать хотя бы одну позицию
     if (data.type === "ISSUE") {
-      return data.unit && data.quantity && data.itemCategory;
+      return data.items && data.items.length > 0;
     }
     return true;
   }, {
-    message: "Для заявки на выдачу обязательны: Ед.изм, Кол-во и Категория товара",
-    path: ["type"],
+    message: "Для заявки на выдачу необходимо добавить хотя бы одну позицию",
+    path: ["items"],
   }),
 });
 
@@ -29,9 +35,7 @@ export const updateMaintenanceSchema = z.object({
     description: z.string().optional(),
     status: z.enum(["PENDING", "APPROVED", "REJECTED", "IN_PROGRESS", "DONE"]).optional(),
     type: z.enum(["REPAIR", "ISSUE"]).optional(),
-    // Поля для заявок типа ISSUE (выдача)
-    unit: z.string().optional(),
-    quantity: z.number().positive().optional(),
-    itemCategory: z.enum(["STATIONERY", "HOUSEHOLD", "OTHER"]).optional(),
+    // Массив позиций для обновления (полная замена)
+    items: z.array(maintenanceItemSchema).optional(),
   }),
 });

@@ -1,8 +1,7 @@
 // src/pages/MaintenancePage.tsx
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 import { Card } from '../components/Card';
@@ -11,71 +10,23 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
 import { DataTable, Column } from '../components/DataTable/DataTable';
-import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2, X, Check } from 'lucide-react';
+import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2, X, Check, PlusCircle, MinusCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+// Импортируем централизованные типы и схемы
+import {
+  MaintenanceRequest,
+  MaintenanceFormData,
+  createMaintenanceSchema,
+  maintenanceStatusLabels,
+  maintenanceStatusColors,
+  maintenanceTypeLabels,
+  maintenanceTypeColors,
+  itemCategoryLabels,
+  itemCategoryColors,
+  ItemCategory,
+} from '../types/maintenance';
 
-// Схема на основе createMaintenanceSchema
-const maintenanceFormSchema = z.object({
-  title: z.string().min(3, 'Наименование обязательно'),
-  description: z.string().optional(),
-  type: z.enum(['REPAIR', 'ISSUE']),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE']).optional(),
-  // Поля для заявок типа ISSUE (выдача)
-  unit: z.string().optional(),
-  quantity: z.number().positive('Количество должно быть положительным').optional(),
-  itemCategory: z.enum(['STATIONERY', 'HOUSEHOLD', 'OTHER']).optional(),
-}).refine((data) => {
-  // Если тип ISSUE, то unit, quantity и itemCategory обязательны
-  if (data.type === 'ISSUE') {
-    return data.unit && data.quantity && data.itemCategory;
-  }
-  return true;
-}, {
-  message: 'Для заявки на выдачу обязательны: Ед.изм, Кол-во и Категория товара',
-  path: ['type'],
-});
-
-type MaintenanceFormData = z.infer<typeof maintenanceFormSchema>;
-
-// Категории товаров
-const itemCategoryMapping: Record<string, string> = {
-  STATIONERY: 'Канц.товары',
-  HOUSEHOLD: 'Хоз.товары',
-  OTHER: 'Прочее',
-};
-
-const itemCategoryColors: Record<string, string> = {
-  STATIONERY: 'bg-blue-100 text-blue-800',
-  HOUSEHOLD: 'bg-amber-100 text-amber-800',
-  OTHER: 'bg-gray-100 text-gray-800',
-};
-
-type MaintenanceRequest = {
-  id: number;
-  title: string;
-  description?: string;
-  type: 'REPAIR' | 'ISSUE';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'IN_PROGRESS' | 'DONE';
-  // Новые поля для ISSUE
-  unit?: string;
-  quantity?: number;
-  itemCategory?: 'STATIONERY' | 'HOUSEHOLD' | 'OTHER';
-  createdAt: string;
-  requester?: { 
-    id: number; 
-    firstName: string; 
-    lastName: string;
-    user?: { role: string };
-  };
-  approvedBy?: {
-    id: number;
-    firstName: string;
-    lastName: string;
-  } | null;
-  approvedAt?: string | null;
-  rejectionReason?: string | null;
-};
-
+// Дополнительные локальные типы для страницы
 type CleaningSchedule = {
   id: number;
   area: string;
@@ -100,32 +51,6 @@ type Employee = {
 };
 
 type TabType = 'requests' | 'cleaning' | 'equipment';
-
-const statusMapping: Record<string, string> = {
-  PENDING: 'Ожидает одобрения',
-  APPROVED: 'Одобрена',
-  REJECTED: 'Отклонена',
-  IN_PROGRESS: 'В работе',
-  DONE: 'Выполнено',
-};
-
-const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  APPROVED: 'bg-green-100 text-green-800',
-  REJECTED: 'bg-red-100 text-red-800',
-  IN_PROGRESS: 'bg-blue-100 text-blue-800',
-  DONE: 'bg-gray-100 text-gray-800',
-};
-
-const typeMapping: Record<string, string> = {
-  REPAIR: 'Ремонт',
-  ISSUE: 'Выдача',
-};
-
-const typeColors: Record<string, string> = {
-  REPAIR: 'bg-orange-100 text-orange-800',
-  ISSUE: 'bg-purple-100 text-purple-800',
-};
 
 export default function MaintenancePage() {
   const { user } = useAuth();
@@ -173,13 +98,20 @@ export default function MaintenancePage() {
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<MaintenanceFormData>({
-    resolver: zodResolver(maintenanceFormSchema),
+    resolver: zodResolver(createMaintenanceSchema),
     defaultValues: {
-      type: 'REPAIR',
-      status: 'PENDING',
+      type: 'ISSUE',
+      items: [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' }],
     },
+  });
+  
+  // useFieldArray для динамического управления позициями
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'items',
   });
   
   // Отслеживаем тип заявки для условного отображения полей
@@ -255,10 +187,7 @@ export default function MaintenancePage() {
       title: '', 
       description: '', 
       type: 'ISSUE', // По умолчанию выдача
-      status: 'PENDING',
-      unit: '',
-      quantity: undefined,
-      itemCategory: undefined,
+      items: [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' }],
     });
     setIsModalOpen(true);
   };
@@ -269,10 +198,14 @@ export default function MaintenancePage() {
       title: request.title,
       description: request.description || '',
       type: request.type,
-      status: request.status,
-      unit: request.unit || '',
-      quantity: request.quantity,
-      itemCategory: request.itemCategory,
+      items: request.items && request.items.length > 0 
+        ? request.items.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            category: item.category,
+          }))
+        : [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' }],
     });
     setIsModalOpen(true);
   };
@@ -283,9 +216,8 @@ export default function MaintenancePage() {
         await api.put(`/api/maintenance/${editingRequest.id}`, data);
         toast.success('Заявка обновлена');
       } else {
-        // При создании заявки не отправляем status (устанавливается автоматически в PENDING)
-        const { status, ...createData } = data;
-        await api.post('/api/maintenance', createData);
+        // При создании заявки status устанавливается автоматически в PENDING
+        await api.post('/api/maintenance', data);
         toast.success('Заявка создана');
       }
       setIsModalOpen(false);
@@ -504,21 +436,29 @@ export default function MaintenancePage() {
       render: (row) => (
         <div>
           <div className="font-medium">{row.title}</div>
-          {row.type === 'ISSUE' && row.quantity && row.unit && (
-            <div className="text-sm text-gray-500">
-              {row.quantity} {row.unit}
+          {row.type === 'ISSUE' && row.items && row.items.length > 0 && (
+            <div className="text-sm text-gray-500 mt-1">
+              {row.items.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className={`inline-block w-2 h-2 rounded-full ${
+                    item.category === 'STATIONERY' ? 'bg-blue-400' :
+                    item.category === 'HOUSEHOLD' ? 'bg-amber-400' : 'bg-gray-400'
+                  }`}></span>
+                  <span>{item.name} — {item.quantity} {item.unit}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
       ),
     },
-    // Категория товара (только для ISSUE)
+    // Кол-во позиций (только для ISSUE)
     {
-      key: 'itemCategory' as keyof MaintenanceRequest,
-      header: 'Категория',
-      render: (row) => row.itemCategory ? (
-        <span className={`px-2 py-1 rounded text-sm ${itemCategoryColors[row.itemCategory]}`}>
-          {itemCategoryMapping[row.itemCategory]}
+      key: 'itemsCount' as keyof MaintenanceRequest,
+      header: 'Позиции',
+      render: (row) => row.type === 'ISSUE' && row.items ? (
+        <span className="px-2 py-1 rounded text-sm bg-gray-100 text-gray-800">
+          {row.items.length} шт
         </span>
       ) : '—',
     },
@@ -532,8 +472,8 @@ export default function MaintenancePage() {
       key: 'type',
       header: 'Тип',
       render: (row) => (
-        <span className={`px-2 py-1 rounded text-sm ${typeColors[row.type]}`}>
-          {typeMapping[row.type] || row.type}
+        <span className={`px-2 py-1 rounded text-sm ${maintenanceTypeColors[row.type]}`}>
+          {maintenanceTypeLabels[row.type] || row.type}
         </span>
       ),
     },
@@ -541,8 +481,8 @@ export default function MaintenancePage() {
       key: 'status',
       header: 'Статус',
       render: (row) => (
-        <span className={`px-2 py-1 rounded text-sm ${statusColors[row.status]}`}>
-          {statusMapping[row.status] || row.status}
+        <span className={`px-2 py-1 rounded text-sm ${maintenanceStatusColors[row.status]}`}>
+          {maintenanceStatusLabels[row.status] || row.status}
         </span>
       ),
     },
@@ -752,7 +692,7 @@ export default function MaintenancePage() {
             <div className="flex items-center gap-2 text-sm bg-blue-50 text-blue-700 px-3 py-2 rounded-lg">
               <Filter className="h-4 w-4" />
               <span>
-                Фильтр: {filterStatus && statusMapping[filterStatus]} {filterType && typeMapping[filterType]}
+                Фильтр: {filterStatus && maintenanceStatusLabels[filterStatus]} {filterType && maintenanceTypeLabels[filterType]}
               </span>
               <button 
                 onClick={() => { setFilterStatus(''); setFilterType(''); }} 
@@ -910,43 +850,100 @@ export default function MaintenancePage() {
             {errors.type && <FormError message={errors.type.message} />}
           </div>
 
-          {/* Поля для заявки на ВЫДАЧУ */}
+          {/* Поля для заявки на ВЫДАЧУ - динамический список позиций */}
           {watchType === 'ISSUE' && (
             <>
               <div>
-                <label htmlFor="itemCategory" className="block mb-1 font-medium">Категория товара <span className="text-red-500">*</span></label>
-                <select {...register('itemCategory')} id="itemCategory" className="w-full p-2 border rounded">
-                  <option value="">— Выберите категорию —</option>
-                  <option value="STATIONERY">Канц.товары</option>
-                  <option value="HOUSEHOLD">Хоз.товары</option>
-                  <option value="OTHER">Прочее</option>
-                </select>
-                {errors.itemCategory && <FormError message={errors.itemCategory.message} />}
-              </div>
-
-              <div>
-                <label htmlFor="title" className="block mb-1 font-medium">Наименование <span className="text-red-500">*</span></label>
-                <Input {...register('title')} id="title" placeholder="Например: Бумага А4, Карандаши, Мыло..." />
+                <label htmlFor="title" className="block mb-1 font-medium">Название заявки <span className="text-red-500">*</span></label>
+                <Input {...register('title')} id="title" placeholder="Например: Канцтовары для 3А класса" />
                 {errors.title && <FormError message={errors.title.message} />}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="quantity" className="block mb-1 font-medium">Количество <span className="text-red-500">*</span></label>
-                  <Input 
-                    {...register('quantity', { valueAsNumber: true })} 
-                    id="quantity" 
-                    type="number" 
-                    min="0.01"
-                    step="0.01"
-                    placeholder="10" 
-                  />
-                  {errors.quantity && <FormError message={errors.quantity.message} />}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="font-medium">Позиции заявки <span className="text-red-500">*</span></label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => append({ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' })}
+                  >
+                    <PlusCircle className="h-4 w-4 mr-1" /> Добавить позицию
+                  </Button>
                 </div>
-                <div>
-                  <label htmlFor="unit" className="block mb-1 font-medium">Ед. изм. <span className="text-red-500">*</span></label>
-                  <Input {...register('unit')} id="unit" placeholder="шт, кг, л, пач..." />
-                  {errors.unit && <FormError message={errors.unit.message} />}
+                
+                {errors.items && typeof errors.items === 'object' && 'message' in errors.items && (
+                  <FormError message={errors.items.message as string} />
+                )}
+
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="p-3 bg-gray-50 rounded-lg border">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-sm font-medium text-gray-600">Позиция {index + 1}</span>
+                        {fields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => remove(index)}
+                            className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                          >
+                            <MinusCircle className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-1 gap-2">
+                        <div>
+                          <Input 
+                            {...register(`items.${index}.name`)} 
+                            placeholder="Наименование товара"
+                            className="text-sm"
+                          />
+                          {errors.items?.[index]?.name && (
+                            <FormError message={errors.items[index]?.name?.message} />
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <Input 
+                              {...register(`items.${index}.quantity`, { valueAsNumber: true })} 
+                              type="number" 
+                              min="0.01"
+                              step="0.01"
+                              placeholder="Кол-во"
+                              className="text-sm"
+                            />
+                            {errors.items?.[index]?.quantity && (
+                              <FormError message={errors.items[index]?.quantity?.message} />
+                            )}
+                          </div>
+                          <div>
+                            <Input 
+                              {...register(`items.${index}.unit`)} 
+                              placeholder="Ед.изм"
+                              className="text-sm"
+                            />
+                            {errors.items?.[index]?.unit && (
+                              <FormError message={errors.items[index]?.unit?.message} />
+                            )}
+                          </div>
+                          <div>
+                            <select 
+                              {...register(`items.${index}.category`)} 
+                              className="w-full p-2 border rounded text-sm"
+                            >
+                              <option value="STATIONERY">Канц.</option>
+                              <option value="HOUSEHOLD">Хоз.</option>
+                              <option value="OTHER">Прочее</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </>
@@ -966,19 +963,7 @@ export default function MaintenancePage() {
             <textarea {...register('description')} id="description" className="w-full p-2 border rounded" rows={3} placeholder="Подробности..." />
           </div>
 
-          {editingRequest && (canEditAll || isZavhoz) && (
-            <div>
-              <label htmlFor="status" className="block mb-1 font-medium">Статус</label>
-              <select {...register('status')} id="status" className="w-full p-2 border rounded">
-                {canEditAll && <option value="PENDING">Ожидает одобрения</option>}
-                {canEditAll && <option value="APPROVED">Одобрена</option>}
-                {canEditAll && <option value="REJECTED">Отклонена</option>}
-                <option value="IN_PROGRESS">В работе</option>
-                <option value="DONE">Выполнено</option>
-              </select>
-              {errors.status && <FormError message={errors.status.message} />}
-            </div>
-          )}
+          {/* Статус изменяется через workflow кнопки одобрения/отклонения/завершения, не через форму */}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Отмена</Button>
@@ -999,12 +984,21 @@ export default function MaintenancePage() {
               {actionRequest && (
                 <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm space-y-1">
                   <p><strong>Наименование:</strong> {actionRequest.title}</p>
-                  <p><strong>Тип:</strong> {typeMapping[actionRequest.type]}</p>
-                  {actionRequest.type === 'ISSUE' && (
-                    <>
-                      {actionRequest.itemCategory && <p><strong>Категория:</strong> {itemCategoryMapping[actionRequest.itemCategory]}</p>}
-                      {actionRequest.quantity && actionRequest.unit && <p><strong>Кол-во:</strong> {actionRequest.quantity} {actionRequest.unit}</p>}
-                    </>
+                  <p><strong>Тип:</strong> {maintenanceTypeLabels[actionRequest.type]}</p>
+                  {actionRequest.type === 'ISSUE' && actionRequest.items && actionRequest.items.length > 0 && (
+                    <div className="mt-2">
+                      <strong>Позиции:</strong>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        {actionRequest.items.map((item, idx) => (
+                          <li key={idx}>
+                            {item.name} — {item.quantity} {item.unit} 
+                            <span className={`ml-2 px-1.5 py-0.5 rounded text-xs ${itemCategoryColors[item.category]}`}>
+                              {itemCategoryLabels[item.category]}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                   <p><strong>Заявитель:</strong> {actionRequest.requester ? `${actionRequest.requester.lastName} ${actionRequest.requester.firstName}` : '—'}</p>
                   {actionRequest.description && <p><strong>Описание:</strong> {actionRequest.description}</p>}
@@ -1034,12 +1028,21 @@ export default function MaintenancePage() {
               {actionRequest && (
                 <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm space-y-1">
                   <p><strong>Наименование:</strong> {actionRequest.title}</p>
-                  <p><strong>Тип:</strong> {typeMapping[actionRequest.type]}</p>
-                  {actionRequest.type === 'ISSUE' && (
-                    <>
-                      {actionRequest.itemCategory && <p><strong>Категория:</strong> {itemCategoryMapping[actionRequest.itemCategory]}</p>}
-                      {actionRequest.quantity && actionRequest.unit && <p><strong>Кол-во:</strong> {actionRequest.quantity} {actionRequest.unit}</p>}
-                    </>
+                  <p><strong>Тип:</strong> {maintenanceTypeLabels[actionRequest.type]}</p>
+                  {actionRequest.type === 'ISSUE' && actionRequest.items && actionRequest.items.length > 0 && (
+                    <div className="mt-2">
+                      <strong>Позиции:</strong>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        {actionRequest.items.map((item, idx) => (
+                          <li key={idx}>
+                            {item.name} — {item.quantity} {item.unit}
+                            <span className={`ml-2 px-1.5 py-0.5 rounded text-xs ${itemCategoryColors[item.category]}`}>
+                              {itemCategoryLabels[item.category]}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                   <p><strong>Заявитель:</strong> {actionRequest.requester ? `${actionRequest.requester.lastName} ${actionRequest.requester.firstName}` : '—'}</p>
                   {actionRequest.description && <p><strong>Описание:</strong> {actionRequest.description}</p>}
@@ -1079,8 +1082,8 @@ export default function MaintenancePage() {
               {deleteConfirm && (
                 <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
                   <p><strong>Тема:</strong> {deleteConfirm.title}</p>
-                  <p><strong>Тип:</strong> {typeMapping[deleteConfirm.type]}</p>
-                  <p><strong>Статус:</strong> {statusMapping[deleteConfirm.status]}</p>
+                  <p><strong>Тип:</strong> {maintenanceTypeLabels[deleteConfirm.type]}</p>
+                  <p><strong>Статус:</strong> {maintenanceStatusLabels[deleteConfirm.status]}</p>
                   {deleteConfirm.description && <p><strong>Описание:</strong> {deleteConfirm.description}</p>}
                 </div>
               )}
