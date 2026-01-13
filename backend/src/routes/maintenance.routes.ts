@@ -5,6 +5,7 @@ import { checkRole } from "../middleware/checkRole";
 const router = Router();
 import { validate } from "../middleware/validate";
 import { createMaintenanceSchema, updateMaintenanceSchema } from "../schemas/maintenance.schema";
+import { notifyRole, sendTelegramMessage } from "../services/TelegramService";
 
 // GET /api/maintenance - получить заявки с учетом роли
 router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), async (req, res) => {
@@ -89,10 +90,12 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"
 
 router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), validate(createMaintenanceSchema), async (req, res) => {
   const { items, ...data } = req.body;
+  const user = req.user!;
+  
   const created = await prisma.maintenanceRequest.create({
     data: { 
       ...data, 
-      requesterId: req.user!.employeeId,
+      requesterId: user.employeeId,
       status: "PENDING", // Все новые заявки начинаются с PENDING
       // Nested write для создания позиций
       items: items && items.length > 0 ? {
@@ -109,6 +112,33 @@ router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER
       items: true
     }
   });
+
+  // 📱 Telegram уведомление о новой заявке
+  try {
+    const requesterName = `${created.requester.firstName} ${created.requester.lastName}`;
+    const requestTitle = created.title || `Заявка #${created.id}`;
+    
+    if (user.role === 'TEACHER') {
+      // Учитель -> уведомляем Завуча (DEPUTY)
+      await notifyRole('DEPUTY', 
+        `📋 <b>Новая заявка от учителя</b>\n\n` +
+        `👤 От: ${requesterName}\n` +
+        `📝 Тема: ${requestTitle}\n` +
+        `🔢 ID заявки: #${created.id}`
+      );
+    } else {
+      // Не учитель -> уведомляем Директора
+      await notifyRole('DIRECTOR', 
+        `📋 <b>Новая заявка</b>\n\n` +
+        `👤 От: ${requesterName} (${user.role})\n` +
+        `📝 Тема: ${requestTitle}\n` +
+        `🔢 ID заявки: #${created.id}`
+      );
+    }
+  } catch (error) {
+    console.error('Ошибка отправки Telegram уведомления:', error);
+  }
+
   res.status(201).json(created);
 });
 
@@ -143,6 +173,7 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHO
   }
   
   const { items, ...updateData } = req.body;
+  const previousStatus = request.status;
   
   // Если items передан, делаем полную замену позиций
   const updated = await prisma.maintenanceRequest.update({ 
@@ -161,11 +192,34 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHO
       } : undefined
     },
     include: {
-      requester: true,
+      requester: {
+        include: {
+          user: { select: { id: true } }
+        }
+      },
       approvedBy: true,
       items: true
     }
   });
+
+  // 📱 Telegram уведомление заявителю при завершении заявки
+  if (updated.status === 'DONE' && previousStatus !== 'DONE') {
+    try {
+      const requesterId = updated.requester.user?.id;
+      if (requesterId) {
+        const requestTitle = updated.title || `Заявка #${updated.id}`;
+        await sendTelegramMessage(requesterId, 
+          `✅ <b>Заявка выполнена!</b>\n\n` +
+          `🔢 ID заявки: #${updated.id}\n` +
+          `📝 Тема: ${requestTitle}\n\n` +
+          `Ваша заявка была успешно выполнена.`
+        );
+      }
+    } catch (error) {
+      console.error('Ошибка отправки Telegram уведомления:', error);
+    }
+  }
+
   res.json(updated);
 });
 
@@ -215,6 +269,20 @@ router.post("/:id/approve", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), asyn
       approvedBy: true
     }
   });
+
+  // 📱 Telegram уведомление Завхозу об одобренной заявке
+  try {
+    const requestTitle = updated.title || `Заявка #${updated.id}`;
+    await notifyRole('ZAVHOZ', 
+      `✅ <b>Заявка одобрена</b>\n\n` +
+      `🔢 ID заявки: #${updated.id}\n` +
+      `📝 Тема: ${requestTitle}\n` +
+      `👤 От: ${updated.requester.firstName} ${updated.requester.lastName}\n\n` +
+      `⚡ Готова к выполнению`
+    );
+  } catch (error) {
+    console.error('Ошибка отправки Telegram уведомления:', error);
+  }
   
   res.json(updated);
 });
