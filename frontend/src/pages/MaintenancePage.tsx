@@ -238,7 +238,9 @@ export default function MaintenancePage() {
         await api.put(`/api/maintenance/${editingRequest.id}`, data);
         toast.success('Заявка обновлена');
       } else {
-        await api.post('/api/maintenance', data);
+        // При создании заявки не отправляем status (устанавливается автоматически в PENDING)
+        const { status, ...createData } = data;
+        await api.post('/api/maintenance', createData);
         toast.success('Заявка создана');
       }
       setIsModalOpen(false);
