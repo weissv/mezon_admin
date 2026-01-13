@@ -16,13 +16,39 @@ import { useAuth } from '../hooks/useAuth';
 
 // Схема на основе createMaintenanceSchema
 const maintenanceFormSchema = z.object({
-  title: z.string().min(3, 'Тема заявки обязательна'),
+  title: z.string().min(3, 'Наименование обязательно'),
   description: z.string().optional(),
   type: z.enum(['REPAIR', 'ISSUE']),
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE']).optional(),
+  // Поля для заявок типа ISSUE (выдача)
+  unit: z.string().optional(),
+  quantity: z.number().positive('Количество должно быть положительным').optional(),
+  itemCategory: z.enum(['STATIONERY', 'HOUSEHOLD', 'OTHER']).optional(),
+}).refine((data) => {
+  // Если тип ISSUE, то unit, quantity и itemCategory обязательны
+  if (data.type === 'ISSUE') {
+    return data.unit && data.quantity && data.itemCategory;
+  }
+  return true;
+}, {
+  message: 'Для заявки на выдачу обязательны: Ед.изм, Кол-во и Категория товара',
+  path: ['type'],
 });
 
 type MaintenanceFormData = z.infer<typeof maintenanceFormSchema>;
+
+// Категории товаров
+const itemCategoryMapping: Record<string, string> = {
+  STATIONERY: 'Канц.товары',
+  HOUSEHOLD: 'Хоз.товары',
+  OTHER: 'Прочее',
+};
+
+const itemCategoryColors: Record<string, string> = {
+  STATIONERY: 'bg-blue-100 text-blue-800',
+  HOUSEHOLD: 'bg-amber-100 text-amber-800',
+  OTHER: 'bg-gray-100 text-gray-800',
+};
 
 type MaintenanceRequest = {
   id: number;
@@ -30,6 +56,10 @@ type MaintenanceRequest = {
   description?: string;
   type: 'REPAIR' | 'ISSUE';
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'IN_PROGRESS' | 'DONE';
+  // Новые поля для ISSUE
+  unit?: string;
+  quantity?: number;
+  itemCategory?: 'STATIONERY' | 'HOUSEHOLD' | 'OTHER';
   createdAt: string;
   requester?: { 
     id: number; 
@@ -142,6 +172,7 @@ export default function MaintenancePage() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<MaintenanceFormData>({
     resolver: zodResolver(maintenanceFormSchema),
@@ -150,6 +181,9 @@ export default function MaintenancePage() {
       status: 'PENDING',
     },
   });
+  
+  // Отслеживаем тип заявки для условного отображения полей
+  const watchType = watch('type');
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -217,7 +251,15 @@ export default function MaintenancePage() {
 
   const handleCreate = () => {
     setEditingRequest(null);
-    reset({ title: '', description: '', type: 'REPAIR', status: 'PENDING' });
+    reset({ 
+      title: '', 
+      description: '', 
+      type: 'ISSUE', // По умолчанию выдача
+      status: 'PENDING',
+      unit: '',
+      quantity: undefined,
+      itemCategory: undefined,
+    });
     setIsModalOpen(true);
   };
 
@@ -228,6 +270,9 @@ export default function MaintenancePage() {
       description: request.description || '',
       type: request.type,
       status: request.status,
+      unit: request.unit || '',
+      quantity: request.quantity,
+      itemCategory: request.itemCategory,
     });
     setIsModalOpen(true);
   };
@@ -447,14 +492,42 @@ export default function MaintenancePage() {
   const canApprove = userRole === 'DEVELOPER' || userRole === 'DIRECTOR' || userRole === 'DEPUTY';
   const canEditAll = userRole === 'DEVELOPER' || userRole === 'ADMIN';
   const isZavhoz = userRole === 'ZAVHOZ';
+  const isTeacher = userRole === 'TEACHER';
+  // Показывать колонки "Кто создал" и "Кто одобрил" для всех кроме учителей
+  const showCreatorApprover = !isTeacher;
 
   const columns: Column<MaintenanceRequest>[] = [
-    { key: 'title', header: 'Тема' },
-    {
-      key: 'requester',
-      header: 'Заявитель',
-      render: (row) => row.requester ? `${row.requester.lastName} ${row.requester.firstName}` : '—',
+    // Наименование
+    { 
+      key: 'title', 
+      header: 'Наименование',
+      render: (row) => (
+        <div>
+          <div className="font-medium">{row.title}</div>
+          {row.type === 'ISSUE' && row.quantity && row.unit && (
+            <div className="text-sm text-gray-500">
+              {row.quantity} {row.unit}
+            </div>
+          )}
+        </div>
+      ),
     },
+    // Категория товара (только для ISSUE)
+    {
+      key: 'itemCategory' as keyof MaintenanceRequest,
+      header: 'Категория',
+      render: (row) => row.itemCategory ? (
+        <span className={`px-2 py-1 rounded text-sm ${itemCategoryColors[row.itemCategory]}`}>
+          {itemCategoryMapping[row.itemCategory]}
+        </span>
+      ) : '—',
+    },
+    // Кто создал (для всех кроме учителей)
+    ...(showCreatorApprover ? [{
+      key: 'requester' as keyof MaintenanceRequest,
+      header: 'Кто создал',
+      render: (row: MaintenanceRequest) => row.requester ? `${row.requester.lastName} ${row.requester.firstName}` : '—',
+    }] : []),
     {
       key: 'type',
       header: 'Тип',
@@ -475,12 +548,13 @@ export default function MaintenancePage() {
     },
     {
       key: 'createdAt',
-      header: 'Дата создания',
+      header: 'Дата',
       render: (row) => new Date(row.createdAt).toLocaleDateString('ru-RU'),
     },
-    ...(canApprove ? [{
+    // Кто одобрил (для всех кроме учителей)
+    ...(showCreatorApprover ? [{
       key: 'approver' as keyof MaintenanceRequest,
-      header: 'Одобрил',
+      header: 'Кто одобрил',
       render: (row: MaintenanceRequest) => row.approvedBy ? `${row.approvedBy.lastName} ${row.approvedBy.firstName}` : '—',
     }] : []),
     {
@@ -825,26 +899,71 @@ export default function MaintenancePage() {
       )}
 
       {/* Create/Edit Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingRequest ? 'Редактировать заявку' : 'Новая заявка'}>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingRequest ? 'Редактировать заявку' : 'Новая заявка на выдачу'}>
         <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
-          <div>
-            <label htmlFor="title" className="block mb-1 font-medium">Тема</label>
-            <Input {...register('title')} id="title" placeholder="Кратко опишите проблему" />
-            {errors.title && <FormError message={errors.title.message} />}
-          </div>
-
-          <div>
-            <label htmlFor="description" className="block mb-1 font-medium">Описание</label>
-            <textarea {...register('description')} id="description" className="w-full p-2 border rounded" rows={3} placeholder="Подробности..." />
-          </div>
-
           <div>
             <label htmlFor="type" className="block mb-1 font-medium">Тип заявки</label>
             <select {...register('type')} id="type" className="w-full p-2 border rounded">
-              <option value="REPAIR">Ремонт</option>
               <option value="ISSUE">Выдача</option>
+              <option value="REPAIR">Ремонт</option>
             </select>
             {errors.type && <FormError message={errors.type.message} />}
+          </div>
+
+          {/* Поля для заявки на ВЫДАЧУ */}
+          {watchType === 'ISSUE' && (
+            <>
+              <div>
+                <label htmlFor="itemCategory" className="block mb-1 font-medium">Категория товара <span className="text-red-500">*</span></label>
+                <select {...register('itemCategory')} id="itemCategory" className="w-full p-2 border rounded">
+                  <option value="">— Выберите категорию —</option>
+                  <option value="STATIONERY">Канц.товары</option>
+                  <option value="HOUSEHOLD">Хоз.товары</option>
+                  <option value="OTHER">Прочее</option>
+                </select>
+                {errors.itemCategory && <FormError message={errors.itemCategory.message} />}
+              </div>
+
+              <div>
+                <label htmlFor="title" className="block mb-1 font-medium">Наименование <span className="text-red-500">*</span></label>
+                <Input {...register('title')} id="title" placeholder="Например: Бумага А4, Карандаши, Мыло..." />
+                {errors.title && <FormError message={errors.title.message} />}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="quantity" className="block mb-1 font-medium">Количество <span className="text-red-500">*</span></label>
+                  <Input 
+                    {...register('quantity', { valueAsNumber: true })} 
+                    id="quantity" 
+                    type="number" 
+                    min="0.01"
+                    step="0.01"
+                    placeholder="10" 
+                  />
+                  {errors.quantity && <FormError message={errors.quantity.message} />}
+                </div>
+                <div>
+                  <label htmlFor="unit" className="block mb-1 font-medium">Ед. изм. <span className="text-red-500">*</span></label>
+                  <Input {...register('unit')} id="unit" placeholder="шт, кг, л, пач..." />
+                  {errors.unit && <FormError message={errors.unit.message} />}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Поля для заявки на РЕМОНТ */}
+          {watchType === 'REPAIR' && (
+            <div>
+              <label htmlFor="title" className="block mb-1 font-medium">Тема <span className="text-red-500">*</span></label>
+              <Input {...register('title')} id="title" placeholder="Кратко опишите проблему" />
+              {errors.title && <FormError message={errors.title.message} />}
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="description" className="block mb-1 font-medium">Описание {watchType === 'ISSUE' && '(необязательно)'}</label>
+            <textarea {...register('description')} id="description" className="w-full p-2 border rounded" rows={3} placeholder="Подробности..." />
           </div>
 
           {editingRequest && (canEditAll || isZavhoz) && (
@@ -878,11 +997,17 @@ export default function MaintenancePage() {
             <div className="flex-1">
               <p className="font-medium text-gray-900">Вы уверены, что хотите одобрить эту заявку?</p>
               {actionRequest && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
-                  <p><strong>Тема:</strong> {actionRequest.title}</p>
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm space-y-1">
+                  <p><strong>Наименование:</strong> {actionRequest.title}</p>
                   <p><strong>Тип:</strong> {typeMapping[actionRequest.type]}</p>
+                  {actionRequest.type === 'ISSUE' && (
+                    <>
+                      {actionRequest.itemCategory && <p><strong>Категория:</strong> {itemCategoryMapping[actionRequest.itemCategory]}</p>}
+                      {actionRequest.quantity && actionRequest.unit && <p><strong>Кол-во:</strong> {actionRequest.quantity} {actionRequest.unit}</p>}
+                    </>
+                  )}
                   <p><strong>Заявитель:</strong> {actionRequest.requester ? `${actionRequest.requester.lastName} ${actionRequest.requester.firstName}` : '—'}</p>
-                  {actionRequest.description && <p className="mt-1"><strong>Описание:</strong> {actionRequest.description}</p>}
+                  {actionRequest.description && <p><strong>Описание:</strong> {actionRequest.description}</p>}
                 </div>
               )}
               <p className="text-sm text-gray-600 mt-2">После одобрения заявка будет доступна завхозу для обработки.</p>
@@ -907,11 +1032,17 @@ export default function MaintenancePage() {
             <div className="flex-1">
               <p className="font-medium text-gray-900">Вы уверены, что хотите отклонить эту заявку?</p>
               {actionRequest && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
-                  <p><strong>Тема:</strong> {actionRequest.title}</p>
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm space-y-1">
+                  <p><strong>Наименование:</strong> {actionRequest.title}</p>
                   <p><strong>Тип:</strong> {typeMapping[actionRequest.type]}</p>
+                  {actionRequest.type === 'ISSUE' && (
+                    <>
+                      {actionRequest.itemCategory && <p><strong>Категория:</strong> {itemCategoryMapping[actionRequest.itemCategory]}</p>}
+                      {actionRequest.quantity && actionRequest.unit && <p><strong>Кол-во:</strong> {actionRequest.quantity} {actionRequest.unit}</p>}
+                    </>
+                  )}
                   <p><strong>Заявитель:</strong> {actionRequest.requester ? `${actionRequest.requester.lastName} ${actionRequest.requester.firstName}` : '—'}</p>
-                  {actionRequest.description && <p className="mt-1"><strong>Описание:</strong> {actionRequest.description}</p>}
+                  {actionRequest.description && <p><strong>Описание:</strong> {actionRequest.description}</p>}
                 </div>
               )}
             </div>
