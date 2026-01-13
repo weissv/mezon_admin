@@ -39,7 +39,7 @@ import permissionsRoutes from "./routes/permissions.routes";
 const app = express();
 
 const allowedOrigins = new Set(config.corsOrigins);
-const allowPattern = [/\.onrender\.com$/, /\.mezon\.uz$/];
+const allowPattern = [/\.onrender\.com$/, /mezon\.uz$/];
 
 const corsOptions: cors.CorsOptions = {
   origin(origin, callback) {
