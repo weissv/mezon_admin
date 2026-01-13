@@ -43,7 +43,7 @@ router.get(
         _sum: { amount: true },
         where: { date: { gte: new Date(Date.now() - 30 * 24 * 3600 * 1000) } },
       }),
-      prisma.maintenanceRequest.count({ where: { status: { in: ["NEW", "IN_PROGRESS"] } } }),
+      prisma.maintenanceRequest.count({ where: { status: { in: ["PENDING", "IN_PROGRESS"] } } }),
       prisma.purchaseOrder.count({ where: { status: { not: "DELIVERED" } } }),
       prisma.employee.count({
         where: {
@@ -147,7 +147,7 @@ router.get(
       
       // Активные заявки на обслуживание
       prisma.maintenanceRequest.count({
-        where: { status: { in: ["NEW", "IN_PROGRESS"] } },
+        where: { status: { in: ["PENDING", "IN_PROGRESS"] } },
       }),
       
       // Активные закупки

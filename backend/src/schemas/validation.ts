@@ -162,7 +162,7 @@ export const childStatusSchema = z.enum(['ACTIVE', 'LEFT'], {
   invalid_type_error: 'Неверный статус',
 });
 
-export const maintenanceStatusSchema = z.enum(['NEW', 'IN_PROGRESS', 'DONE'], {
+export const maintenanceStatusSchema = z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE'], {
   required_error: 'Статус обязателен',
   invalid_type_error: 'Неверный статус',
 });
@@ -422,7 +422,7 @@ export const createFinanceSchema = z.object({
 export const createMaintenanceSchema = z.object({
   title: requiredString('Название', 3, 255),
   description: optionalString(),
-  status: maintenanceStatusSchema.default('NEW'),
+  status: maintenanceStatusSchema.default('PENDING'),
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
   assignedTo: idSchema.optional(),
   dueDate: optionalDateSchema,

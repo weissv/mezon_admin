@@ -49,7 +49,9 @@ export const CLUB_ENROLLMENT_STATUS = {
 export type ClubEnrollmentStatus = keyof typeof CLUB_ENROLLMENT_STATUS;
 
 export const MAINTENANCE_STATUS = {
-  NEW: 'NEW',
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
   IN_PROGRESS: 'IN_PROGRESS',
   DONE: 'DONE',
 } as const;
