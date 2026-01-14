@@ -117,6 +117,7 @@ export const createMaintenanceSchema = z.object({
   title: z.string().min(3, 'Наименование обязательно (минимум 3 символа)'),
   description: z.string().optional(),
   type: z.enum(['REPAIR', 'ISSUE']),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE']).optional(), // Добавляем статус для завхоза
   // Массив позиций для заявок типа ISSUE
   items: z.array(maintenanceItemFormSchema).optional(),
 }).refine((data) => {
