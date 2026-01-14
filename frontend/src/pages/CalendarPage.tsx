@@ -4,14 +4,15 @@ import { useApi } from '../hooks/useApi';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
 import { Modal } from '../components/Modal';
-import { PlusCircle, Calendar, Trash2, AlertTriangle, Grid, List } from 'lucide-react';
+import { PlusCircle, Calendar, Trash2, AlertTriangle, Grid, List, Share2 } from 'lucide-react';
 import { Event } from '../types/calendar';
 import { EventForm } from '../components/forms/EventForm';
 import { api } from '../lib/api';
 import { UkiyoeCalendar } from '../components/UkiyoeCalendar';
+import { SocialPlanner } from '../components/SocialPlanner';
 
 export default function CalendarPage() {
-  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
+  const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'planner'>('calendar');
   const { data, total, page, setPage, fetchData } = useApi<Event>({
     url: '/api/calendar',
     initialPageSize: 100, // Fetch more items for calendar view
@@ -117,6 +118,13 @@ export default function CalendarPage() {
             >
                 <List className="w-5 h-5" />
             </button>
+            <button
+                onClick={() => setViewMode('planner')}
+                className={`p-2 rounded-md transition-all ${viewMode === 'planner' ? 'bg-white shadow text-pink-500' : 'text-gray-500 hover:text-gray-700'}`}
+                title="Планер для соцсетей"
+            >
+                <Share2 className="w-5 h-5" />
+            </button>
         </div>
       </div>
 
@@ -135,6 +143,13 @@ export default function CalendarPage() {
           total={total}
           onPageChange={setPage}
         />
+      ) : viewMode === 'planner' ? (
+        <div className="mb-8 overflow-x-auto">
+          <SocialPlanner 
+            events={data} 
+            onEdit={handleEdit}
+          />
+        </div>
       ) : (
         <div className="mb-8">
             <UkiyoeCalendar 
