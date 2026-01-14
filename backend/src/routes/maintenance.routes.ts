@@ -24,12 +24,11 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"
       status: { in: ["APPROVED", "IN_PROGRESS", "DONE"] }
     };
   }
-  // DIRECTOR видит PENDING заявки от НЕ-учителей + все свои заявки
+  // DIRECTOR видит все заявки от НЕ-учителей + все свои заявки
   else if (userRole === "DIRECTOR") {
     whereClause = {
       OR: [
         {
-          status: "PENDING",
           requester: {
             user: {
               role: { not: "TEACHER" }
@@ -167,8 +166,8 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHO
     return res.status(403).json({ message: "Нельзя редактировать одобренную заявку" });
   }
   
-  // ZAVHOZ может редактировать только статус (IN_PROGRESS, DONE)
-  if (user.role === "ZAVHOZ" && request.status !== "APPROVED" && request.status !== "IN_PROGRESS") {
+  // ZAVHOZ может редактировать APPROVED/IN_PROGRESS заявки (включая изменение статуса)
+  if (user.role === "ZAVHOZ" && request.status !== "APPROVED" && request.status !== "IN_PROGRESS" && request.status !== "DONE") {
     return res.status(403).json({ message: "Нет прав для редактирования" });
   }
   

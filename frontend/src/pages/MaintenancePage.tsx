@@ -200,6 +200,7 @@ export default function MaintenancePage() {
       title: request.title,
       description: request.description || '',
       type: request.type,
+      status: request.status, // Добавляем текущий статус
       items: request.items && request.items.length > 0 
         ? request.items.map(item => ({
             name: item.name,
@@ -532,9 +533,9 @@ export default function MaintenancePage() {
             </>
           )}
           
-          {/* Редактирование: DEVELOPER и ADMIN всегда, ZAVHOZ для APPROVED/IN_PROGRESS, учитель для своих не-одобренных */}
+          {/* Редактирование: DEVELOPER и ADMIN всегда, ZAVHOZ для APPROVED/IN_PROGRESS/DONE, учитель для своих не-одобренных */}
           {(canEditAll || 
-            (isZavhoz && (row.status === 'APPROVED' || row.status === 'IN_PROGRESS')) ||
+            (isZavhoz && (row.status === 'APPROVED' || row.status === 'IN_PROGRESS' || row.status === 'DONE')) ||
             (userRole === 'TEACHER' && row.status !== 'APPROVED' && row.status !== 'IN_PROGRESS' && row.status !== 'DONE')
           ) && (
             <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
@@ -969,7 +970,18 @@ export default function MaintenancePage() {
             <textarea {...register('description')} id="description" className="w-full p-2 border rounded" rows={3} placeholder="Подробности..." />
           </div>
 
-          {/* Статус изменяется через workflow кнопки одобрения/отклонения/завершения, не через форму */}
+          {/* Завхоз может менять статус APPROVED -> IN_PROGRESS -> DONE */}
+          {userRole === 'ZAVHOZ' && editingRequest && (editingRequest.status === 'APPROVED' || editingRequest.status === 'IN_PROGRESS' || editingRequest.status === 'DONE') && (
+            <div>
+              <label htmlFor="status" className="block mb-1 font-medium">Статус заявки</label>
+              <select {...register('status')} id="status" className="w-full p-2 border rounded">
+                <option value="APPROVED">Одобрено</option>
+                <option value="IN_PROGRESS">В работе</option>
+                <option value="DONE">Выполнено</option>
+              </select>
+              {errors.status && <FormError message={errors.status.message} />}
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Отмена</Button>
