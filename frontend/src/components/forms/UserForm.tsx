@@ -10,8 +10,8 @@ import { FormError } from '../ui/FormError';
 import { User, AvailableEmployee } from '../../types/user';
 import { Eye, EyeOff, MessageCircle, ExternalLink } from 'lucide-react';
 
-// Имя бота для Telegram Deep Link (замените на реальное имя вашего бота)
-const TELEGRAM_BOT_NAME = process.env.TELEGRAM_BOT_NAME || 'YOUR_BOT_NAME';
+// Имя бота для Telegram Deep Link (берём из Vite env, fallback на NODE env и дефолт)
+const TELEGRAM_BOT_NAME = (import.meta.env.VITE_TELEGRAM_BOT_NAME as string) || process.env.TELEGRAM_BOT_NAME || 'YOUR_BOT_NAME';
 
 const ROLES = [
   { value: 'DEVELOPER', label: 'Разработчик' },
