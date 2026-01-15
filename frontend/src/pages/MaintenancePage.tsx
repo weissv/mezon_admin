@@ -105,8 +105,8 @@ export default function MaintenancePage() {
   } = useForm<MaintenanceFormData>({
     resolver: zodResolver(createMaintenanceSchema),
     defaultValues: {
-      type: 'ISSUE',
-      items: [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' }],
+      type: 'REPAIR',
+      items: [],
     },
   });
   
@@ -118,6 +118,19 @@ export default function MaintenancePage() {
   
   // Отслеживаем тип заявки для условного отображения полей
   const watchType = watch('type');
+
+  // Очищаем items при переключении на REPAIR, восстанавливаем при ISSUE
+  useEffect(() => {
+    if (watchType === 'REPAIR') {
+      // Для типа REPAIR убираем все items
+      while (fields.length > 0) {
+        remove(0);
+      }
+    } else if (watchType === 'ISSUE' && fields.length === 0) {
+      // Для типа ISSUE добавляем хотя бы одну позицию, если их нет
+      append({ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' });
+    }
+  }, [watchType, fields.length, remove, append]);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -188,8 +201,8 @@ export default function MaintenancePage() {
     reset({ 
       title: '', 
       description: '', 
-      type: 'ISSUE', // По умолчанию выдача
-      items: [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' }],
+      type: 'REPAIR', // По умолчанию ремонт
+      items: [], // Пустой массив для REPAIR
     });
     setIsModalOpen(true);
   };
@@ -215,10 +228,22 @@ export default function MaintenancePage() {
 
   const onSubmit = async (data: MaintenanceFormData) => {
     try {
-      // Для заявок типа REPAIR не отправляем items
-      const submitData = data.type === 'REPAIR' 
-        ? { title: data.title, description: data.description, type: data.type, status: data.status }
-        : data;
+      // Для заявок типа REPAIR не отправляем items вообще
+      const submitData: any = {
+        title: data.title,
+        description: data.description,
+        type: data.type,
+      };
+      
+      // Добавляем status только если он есть (для завхоза при редактировании)
+      if (data.status) {
+        submitData.status = data.status;
+      }
+      
+      // Добавляем items только для типа ISSUE
+      if (data.type === 'ISSUE' && data.items && data.items.length > 0) {
+        submitData.items = data.items;
+      }
       
       if (editingRequest) {
         await api.put(`/api/maintenance/${editingRequest.id}`, submitData);
@@ -232,7 +257,8 @@ export default function MaintenancePage() {
       fetchRequests();
       reset();
     } catch (error: any) {
-      toast.error('Ошибка сохранения', { description: error?.message });
+      console.error('Error submitting maintenance request:', error);
+      toast.error('Ошибка сохранения', { description: error?.message || 'Произошла ошибка при сохранении заявки' });
     }
   };
 
