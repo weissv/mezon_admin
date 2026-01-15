@@ -215,12 +215,17 @@ export default function MaintenancePage() {
 
   const onSubmit = async (data: MaintenanceFormData) => {
     try {
+      // Для заявок типа REPAIR не отправляем items
+      const submitData = data.type === 'REPAIR' 
+        ? { title: data.title, description: data.description, type: data.type, status: data.status }
+        : data;
+      
       if (editingRequest) {
-        await api.put(`/api/maintenance/${editingRequest.id}`, data);
+        await api.put(`/api/maintenance/${editingRequest.id}`, submitData);
         toast.success('Заявка обновлена');
       } else {
         // При создании заявки status устанавливается автоматически в PENDING
-        await api.post('/api/maintenance', data);
+        await api.post('/api/maintenance', submitData);
         toast.success('Заявка создана');
       }
       setIsModalOpen(false);

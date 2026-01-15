@@ -120,15 +120,27 @@ export const createMaintenanceSchema = z.object({
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE']).optional(), // Добавляем статус для завхоза
   // Массив позиций для заявок типа ISSUE
   items: z.array(maintenanceItemFormSchema).optional(),
-}).refine((data) => {
-  // Если тип ISSUE, то items должен содержать хотя бы одну позицию
+}).superRefine((data, ctx) => {
+  // Если тип ISSUE, то items обязательно должен содержать хотя бы одну позицию
   if (data.type === 'ISSUE') {
-    return data.items && data.items.length > 0;
+    if (!data.items || data.items.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Для заявки на выдачу необходимо добавить хотя бы одну позицию',
+        path: ['items'],
+      });
+    }
   }
-  return true;
-}, {
-  message: 'Для заявки на выдачу необходимо добавить хотя бы одну позицию',
-  path: ['items'],
+  // Для типа REPAIR проверяем, что есть title
+  if (data.type === 'REPAIR') {
+    if (!data.title || data.title.length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Для заявки на ремонт необходимо указать тему (минимум 3 символа)',
+        path: ['title'],
+      });
+    }
+  }
 });
 
 // Схема валидации для обновления заявки
