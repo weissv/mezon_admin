@@ -19,6 +19,7 @@ export const MODULE_LINKS: ModuleLink[] = [
   { path: "/children", label: "Дети", roles: [...FULL_ACCESS_ROLES, "ADMIN"] },
   { path: "/employees", label: "Сотрудники", roles: [...FULL_ACCESS_ROLES, "ADMIN"] },
   { path: "/schedule", label: "Расписание", roles: [...FULL_ACCESS_ROLES, "ADMIN", "TEACHER"] },
+  { path: "/exams", label: "Контрольные", roles: [...FULL_ACCESS_ROLES, "DEPUTY", "ADMIN", "TEACHER"] },
   { path: "/staffing", label: "Штатное расписание", roles: FULL_ACCESS_ROLES },
   { path: "/users", label: "Пользователи", roles: [...FULL_ACCESS_ROLES, "ADMIN"] },
   { path: "/groups", label: "Классы", roles: [...FULL_ACCESS_ROLES, "ADMIN"] },

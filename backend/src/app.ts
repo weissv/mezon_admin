@@ -35,6 +35,8 @@ import scheduleRoutes from "./routes/schedule.routes";
 import settingsRoutes from "./routes/settings.routes";
 import lmsSchoolRoutes from "./routes/lms-school.routes";
 import permissionsRoutes from "./routes/permissions.routes";
+import examsRoutes from "./routes/exams.routes";
+import publicExamsRoutes from "./routes/public-exams.routes";
 
 const app = express();
 
@@ -74,6 +76,7 @@ app.get("/api/health", (_req, res) => {
 
 // Публичные роуты
 app.use("/api/auth", authRoutes);
+app.use("/api/public/exams", publicExamsRoutes); // Публичный доступ к контрольным для студентов
 
 // Защита всех последующих роутов
 app.use(authMiddleware);
@@ -105,6 +108,7 @@ app.use("/api/schedule", scheduleRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/lms/school", lmsSchoolRoutes);
 app.use("/api/permissions", permissionsRoutes);
+app.use("/api/exams", examsRoutes); // Управление контрольными для учителей/админов
 
 // Обработчик ошибок
 app.use(errorHandler);
