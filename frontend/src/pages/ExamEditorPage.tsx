@@ -66,7 +66,7 @@ interface QuestionDraft extends Partial<ExamQuestionFormData> {
 export default function ExamEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isNew = id === "new";
+  const isNew = !id || id === "new";
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);

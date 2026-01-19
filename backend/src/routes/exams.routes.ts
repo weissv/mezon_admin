@@ -436,35 +436,42 @@ router.get("/:id/results", authMiddleware, checkRole(["DIRECTOR", "DEPUTY", "TEA
       return res.status(403).json({ message: "Нет доступа к этой контрольной" });
     }
 
-    // Статистика
-    const stats = {
-      totalSubmissions: exam.submissions.length,
-      averageScore: exam.submissions.length > 0 
-        ? exam.submissions.reduce((sum, s) => sum + (s.percentage || 0), 0) / exam.submissions.length
-        : null,
-      passRate: exam.submissions.length > 0
-        ? (exam.submissions.filter(s => s.passed).length / exam.submissions.length) * 100
-        : null,
-      questionStats: exam.questions.map(q => {
-        const questionAnswers = exam.submissions.flatMap(s => s.answers.filter(a => a.questionId === q.id));
-        const correctCount = questionAnswers.filter(a => a.isCorrect).length;
-        return {
-          questionId: q.id,
-          orderIndex: q.orderIndex,
-          type: q.type,
-          totalAnswers: questionAnswers.length,
-          correctAnswers: correctCount,
-          correctRate: questionAnswers.length > 0 ? (correctCount / questionAnswers.length) * 100 : null,
-          averageScore: questionAnswers.length > 0
-            ? questionAnswers.reduce((sum, a) => sum + (a.score || 0), 0) / questionAnswers.length
-            : null
-        };
-      })
-    };
+    const total = exam.submissions.length;
+    const passed = exam.submissions.filter(s => s.passed).length;
+    const avgScore = total > 0
+      ? exam.submissions.reduce((sum, s) => sum + (s.totalScore || 0), 0) / total
+      : 0;
+    const avgPercentage = total > 0
+      ? exam.submissions.reduce((sum, s) => sum + (s.percentage || 0), 0) / total
+      : 0;
+
+    const questionStats = exam.questions.map(q => {
+      const questionAnswers = exam.submissions.flatMap(s => s.answers.filter(a => a.questionId === q.id));
+      const correctCount = questionAnswers.filter(a => a.isCorrect).length;
+      return {
+        questionId: q.id,
+        orderIndex: q.orderIndex,
+        type: q.type,
+        totalAnswers: questionAnswers.length,
+        correctAnswers: correctCount,
+        correctRate: questionAnswers.length > 0 ? (correctCount / questionAnswers.length) * 100 : null,
+        averageScore: questionAnswers.length > 0
+          ? questionAnswers.reduce((sum, a) => sum + (a.score || 0), 0) / questionAnswers.length
+          : null
+      };
+    });
 
     return res.json({
       exam,
-      stats
+      submissions: exam.submissions,
+      stats: {
+        total,
+        completed: total,
+        passed,
+        avgScore,
+        avgPercentage,
+        questionStats,
+      },
     });
   } catch (error) {
     console.error("Error fetching exam results:", error);
