@@ -7,6 +7,29 @@ const checkRole_1 = require("../middleware/checkRole");
 const validate_1 = require("../middleware/validate");
 const inventory_schema_1 = require("../schemas/inventory.schema");
 const router = (0, express_1.Router)();
+// GET /api/inventory/search - поиск товаров для автозаполнения
+// ВАЖНО: этот маршрут должен быть ДО /:id, чтобы не конфликтовать
+router.get("/search", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ", "TEACHER"]), async (req, res) => {
+    const query = req.query.q || "";
+    if (!query || query.trim().length < 1) {
+        return res.json([]);
+    }
+    const items = await prisma_1.prisma.inventoryItem.findMany({
+        where: {
+            name: {
+                contains: query.trim(),
+                mode: "insensitive",
+            },
+        },
+        select: {
+            name: true,
+            unit: true,
+        },
+        take: 10,
+        orderBy: { name: "asc" },
+    });
+    return res.json(items);
+});
 // GET /api/inventory
 router.get("/", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
     const items = await prisma_1.prisma.inventoryItem.findMany({ orderBy: { name: "asc" } });
@@ -105,7 +128,10 @@ router.post("/generate-shopping-list", (0, checkRole_1.checkRole)(["DIRECTOR", "
     });
     const shoppingList = Object.entries(required).map(([key, val]) => {
         const [name, unit] = key.split("|");
-        const stock = inventory.find((i) => i.ingredient?.name === name && i.ingredient?.unit === unit);
+        // Находим товар на складе по имени и единице измерения
+        // Проверяем как по связанному ингредиенту, так и по имени самого товара
+        const stock = inventory.find((i) => (i.ingredient?.name === name && i.ingredient?.unit === unit) ||
+            (i.name === name && i.unit === unit));
         const remaining = (val.qty - (stock?.quantity || 0));
         return { name, unit, requiredQty: val.qty, inStock: stock?.quantity || 0, toBuy: Math.max(remaining, 0) };
     });

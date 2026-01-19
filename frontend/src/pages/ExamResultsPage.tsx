@@ -78,27 +78,51 @@ export default function ExamResultsPage() {
     }
   };
 
-  const exportResults = () => {
-    if (!exam || !submissions.length) return;
+  const exportResults = async () => {
+    if (!exam) return;
+    
+    try {
+      // Используем серверный endpoint для полного экспорта
+      const response = await fetch(`/api/exams/${id}/export`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) throw new Error('Export failed');
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${exam.title}_результаты_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Результаты экспортированы");
+    } catch (error) {
+      // Fallback: локальный экспорт
+      if (!submissions.length) {
+        toast.error("Нет данных для экспорта");
+        return;
+      }
+      
+      const headers = ["Имя", "Класс", "Дата сдачи", "Баллы", "Процент", "Результат"];
+      const rows = submissions.map((s) => [
+        s.studentName,
+        s.studentClass || "",
+        s.submittedAt ? new Date(s.submittedAt).toLocaleString("ru") : "-",
+        `${s.totalScore || 0}/${s.maxScore}`,
+        `${Math.round(s.percentage || 0)}%`,
+        s.passed ? "Зачёт" : "Незачёт",
+      ]);
 
-    const headers = ["Имя", "Класс", "Дата сдачи", "Баллы", "Процент", "Результат"];
-    const rows = submissions.map((s) => [
-      s.studentName,
-      s.studentClass || "",
-      s.submittedAt ? new Date(s.submittedAt).toLocaleString("ru") : "-",
-      `${s.totalScore || 0}/${s.maxScore}`,
-      `${Math.round(s.percentage || 0)}%`,
-      s.passed ? "Зачёт" : "Незачёт",
-    ]);
-
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${exam.title}_результаты.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const csv = [headers, ...rows].map((r) => r.join(";")).join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${exam.title}_результаты.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   const formatDate = (date?: string | null) => {

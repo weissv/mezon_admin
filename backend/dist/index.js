@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
 const config_1 = require("./config");
 const AiService_1 = require("./services/AiService");
+const TelegramService_1 = require("./services/TelegramService");
 // Интервал синхронизации Google Drive (30 минут)
 const SYNC_INTERVAL_MS = 30 * 60 * 1000;
 /**
@@ -37,6 +38,8 @@ async function startGoogleDriveSync() {
 }
 app_1.default.listen(config_1.config.port, () => {
     console.log(`API running on http://0.0.0.0:${config_1.config.port}`);
+    // Инициализируем Telegram бота
+    (0, TelegramService_1.initTelegramBot)();
     // Запускаем синхронизацию Google Drive через 5 секунд после старта
     // чтобы дать время для инициализации базы данных
     setTimeout(startGoogleDriveSync, 5000);

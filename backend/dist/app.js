@@ -39,9 +39,11 @@ const schedule_routes_1 = __importDefault(require("./routes/schedule.routes"));
 const settings_routes_1 = __importDefault(require("./routes/settings.routes"));
 const lms_school_routes_1 = __importDefault(require("./routes/lms-school.routes"));
 const permissions_routes_1 = __importDefault(require("./routes/permissions.routes"));
+const exams_routes_1 = __importDefault(require("./routes/exams.routes"));
+const public_exams_routes_1 = __importDefault(require("./routes/public-exams.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = new Set(config_1.config.corsOrigins);
-const allowPattern = [/\.onrender\.com$/, /\.mezon\.uz$/];
+const allowPattern = [/\.onrender\.com$/, /mezon\.uz$/];
 const corsOptions = {
     origin(origin, callback) {
         if (!origin) {
@@ -71,6 +73,7 @@ app.get("/api/health", (_req, res) => {
 });
 // Публичные роуты
 app.use("/api/auth", auth_routes_1.default);
+app.use("/api/public/exams", public_exams_routes_1.default); // Публичный доступ к контрольным для студентов
 // Защита всех последующих роутов
 app.use(auth_1.authMiddleware);
 // 3. Эти роуты теперь защищены:
@@ -100,6 +103,7 @@ app.use("/api/schedule", schedule_routes_1.default);
 app.use("/api/settings", settings_routes_1.default);
 app.use("/api/lms/school", lms_school_routes_1.default);
 app.use("/api/permissions", permissions_routes_1.default);
+app.use("/api/exams", exams_routes_1.default); // Управление контрольными для учителей/админов
 // Обработчик ошибок
 app.use(errorHandler_1.errorHandler);
 exports.default = app;

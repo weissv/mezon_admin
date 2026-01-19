@@ -60,29 +60,28 @@ ${studentAnswer || '(ответ не предоставлен)'}
 
 Оцени ответ студента и верни результат в формате JSON.`;
 
-    // Пытаемся использовать OpenAI API если настроен
-    if (config.openaiApiKey) {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Используем Groq API для AI проверки
+    if (config.groqApiKey) {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.openaiApiKey}`
+          'Authorization': `Bearer ${config.groqApiKey}`
         },
         body: JSON.stringify({
-          model: config.openaiModel || 'gpt-4o-mini',
+          model: config.groqModel || 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ],
-          temperature: 0.3,
-          response_format: { type: "json_object" }
+          temperature: 0.3
         })
       });
 
       if (!response.ok) {
         const error = await response.text();
-        console.error("OpenAI API error:", error);
-        throw new Error(`OpenAI API error: ${response.status}`);
+        console.error("Groq API error:", error);
+        throw new Error(`Groq API error: ${response.status}`);
       }
 
       const data = await response.json();

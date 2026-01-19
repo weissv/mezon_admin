@@ -516,4 +516,102 @@ router.post("/answers/:answerId/grade", authMiddleware, checkRole(["DIRECTOR", "
   }
 });
 
+// Экспорт результатов в Excel (CSV)
+router.get("/:id/export", authMiddleware, checkRole(["DIRECTOR", "DEPUTY", "TEACHER", "DEVELOPER"]), async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      include: { employee: true }
+    });
+
+    if (!user || !user.employee) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    const exam = await prisma.exam.findUnique({
+      where: { id: req.params.id },
+      include: {
+        questions: { orderBy: { orderIndex: 'asc' } },
+        submissions: {
+          include: {
+            answers: {
+              include: { question: true }
+            }
+          },
+          orderBy: { submittedAt: 'desc' }
+        }
+      }
+    });
+
+    if (!exam) {
+      return res.status(404).json({ message: "Контрольная не найдена" });
+    }
+
+    // Проверяем доступ
+    if (exam.creatorId !== user.employeeId && !['DIRECTOR', 'DEPUTY', 'DEVELOPER'].includes(user.role)) {
+      return res.status(403).json({ message: "Нет доступа к этой контрольной" });
+    }
+
+    // Формируем CSV
+    const BOM = '\uFEFF'; // Для корректного отображения кириллицы в Excel
+    const delimiter = ';'; // Точка с запятой лучше работает в Excel
+    
+    // Заголовки
+    const questionHeaders = exam.questions.map((q: { points: number }, i: number) => `Вопрос ${i + 1} (${q.points} б.)`);
+    const headers = [
+      'ФИО',
+      'Группа/Класс',
+      'Дата сдачи',
+      'Время (мин)',
+      ...questionHeaders,
+      'Набрано баллов',
+      'Максимум баллов',
+      'Процент',
+      'Результат'
+    ];
+    
+    // Данные
+    const rows = exam.submissions.map((sub: any) => {
+      const duration = sub.startedAt && sub.submittedAt 
+        ? Math.round((new Date(sub.submittedAt).getTime() - new Date(sub.startedAt).getTime()) / 60000)
+        : '-';
+      
+      // Баллы за каждый вопрос
+      const questionScores = exam.questions.map((q: { id: string }) => {
+        const answer = sub.answers.find((a: any) => a.questionId === q.id);
+        return answer ? `${answer.score || 0}` : '0';
+      });
+      
+      return [
+        sub.studentName || 'Аноним',
+        sub.studentClass || '-',
+        sub.submittedAt ? new Date(sub.submittedAt).toLocaleString('ru-RU') : '-',
+        duration.toString(),
+        ...questionScores,
+        (sub.totalScore || 0).toString(),
+        (sub.maxScore || 0).toString(),
+        `${(sub.percentage || 0).toFixed(1)}%`,
+        sub.passed ? 'Сдано' : 'Не сдано'
+      ];
+    });
+
+    // Собираем CSV
+    const csvContent = BOM + [
+      headers.join(delimiter),
+      ...rows.map((row: string[]) => row.map((cell: string) => `"${String(cell).replace(/"/g, '""')}"`).join(delimiter))
+    ].join('\n');
+
+    // Отправляем файл
+    const filename = `results_${exam.title.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+    
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+    
+    return res.send(csvContent);
+  } catch (error) {
+    console.error("Error exporting exam results:", error);
+    return res.status(500).json({ message: "Ошибка при экспорте результатов" });
+  }
+});
+
 export default router;

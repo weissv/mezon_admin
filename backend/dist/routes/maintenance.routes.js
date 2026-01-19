@@ -7,23 +7,293 @@ const checkRole_1 = require("../middleware/checkRole");
 const router = (0, express_1.Router)();
 const validate_1 = require("../middleware/validate");
 const maintenance_schema_1 = require("../schemas/maintenance.schema");
-router.get("/", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
+const TelegramService_1 = require("../services/TelegramService");
+// GET /api/maintenance - получить заявки с учетом роли
+router.get("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), async (req, res) => {
+    const user = req.user;
+    const userRole = user.role;
+    let whereClause = {};
+    // DEVELOPER видит всё
+    if (userRole === "DEVELOPER") {
+        whereClause = {};
+    }
+    // ZAVHOZ видит только ОДОБРЕННЫЕ заявки
+    else if (userRole === "ZAVHOZ") {
+        whereClause = {
+            status: { in: ["APPROVED", "IN_PROGRESS", "DONE"] }
+        };
+    }
+    // DIRECTOR видит все заявки от НЕ-учителей + все свои заявки
+    else if (userRole === "DIRECTOR") {
+        whereClause = {
+            OR: [
+                {
+                    requester: {
+                        user: {
+                            role: { not: "TEACHER" }
+                        }
+                    }
+                },
+                { requesterId: user.employeeId }
+            ]
+        };
+    }
+    // DEPUTY (Завуч) видит PENDING заявки от учителей + все свои заявки
+    else if (userRole === "DEPUTY") {
+        whereClause = {
+            OR: [
+                {
+                    status: "PENDING",
+                    requester: {
+                        user: {
+                            role: "TEACHER"
+                        }
+                    }
+                },
+                { requesterId: user.employeeId }
+            ]
+        };
+    }
+    // TEACHER видит только свои заявки
+    else if (userRole === "TEACHER") {
+        whereClause = {
+            requesterId: user.employeeId
+        };
+    }
+    // ADMIN видит все (на всякий случай)
+    else if (userRole === "ADMIN") {
+        whereClause = {};
+    }
     const items = await prisma_1.prisma.maintenanceRequest.findMany({
-        include: { requester: true },
+        where: whereClause,
+        include: {
+            requester: {
+                include: {
+                    user: {
+                        select: { role: true }
+                    }
+                }
+            },
+            approvedBy: {
+                select: { id: true, firstName: true, lastName: true }
+            },
+            items: true // Включаем позиции заявки
+        },
         orderBy: { createdAt: "desc" },
     });
     res.json(items);
 });
-router.post("/", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), (0, validate_1.validate)(maintenance_schema_1.createMaintenanceSchema), async (req, res) => {
-    const data = req.body;
+router.post("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), (0, validate_1.validate)(maintenance_schema_1.createMaintenanceSchema), async (req, res) => {
+    const { items, ...data } = req.body;
+    const user = req.user;
     const created = await prisma_1.prisma.maintenanceRequest.create({
-        data: { ...data, requesterId: req.user.employeeId },
+        data: {
+            ...data,
+            requesterId: user.employeeId,
+            status: "PENDING", // Все новые заявки начинаются с PENDING
+            // Nested write для создания позиций
+            items: items && items.length > 0 ? {
+                create: items.map((item) => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    category: item.category,
+                }))
+            } : undefined
+        },
+        include: {
+            requester: true,
+            items: true
+        }
     });
+    // 📱 Telegram уведомление о новой заявке
+    try {
+        const requesterName = `${created.requester.firstName} ${created.requester.lastName}`;
+        const requestTitle = created.title || `Заявка #${created.id}`;
+        if (user.role === 'TEACHER') {
+            // Учитель -> уведомляем Завуча (DEPUTY)
+            await (0, TelegramService_1.notifyRole)('DEPUTY', `📋 <b>Новая заявка от учителя</b>\n\n` +
+                `👤 От: ${requesterName}\n` +
+                `📝 Тема: ${requestTitle}\n` +
+                `🔢 ID заявки: #${created.id}`);
+        }
+        else {
+            // Не учитель -> уведомляем Директора
+            await (0, TelegramService_1.notifyRole)('DIRECTOR', `📋 <b>Новая заявка</b>\n\n` +
+                `👤 От: ${requesterName} (${user.role})\n` +
+                `📝 Тема: ${requestTitle}\n` +
+                `🔢 ID заявки: #${created.id}`);
+        }
+    }
+    catch (error) {
+        console.error('Ошибка отправки Telegram уведомления:', error);
+    }
     res.status(201).json(created);
 });
-router.put("/:id", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), (0, validate_1.validate)(maintenance_schema_1.updateMaintenanceSchema), async (req, res) => {
+router.put("/:id", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ", "TEACHER"]), (0, validate_1.validate)(maintenance_schema_1.updateMaintenanceSchema), async (req, res) => {
     const id = Number(req.params.id);
-    const updated = await prisma_1.prisma.maintenanceRequest.update({ where: { id }, data: req.body });
+    const user = req.user;
+    // Проверяем права на редактирование
+    const request = await prisma_1.prisma.maintenanceRequest.findUnique({
+        where: { id },
+        include: {
+            requester: {
+                include: {
+                    user: { select: { role: true } }
+                }
+            }
+        }
+    });
+    if (!request) {
+        return res.status(404).json({ message: "Заявка не найдена" });
+    }
+    // Учитель не может редактировать одобренную заявку
+    if (user.role === "TEACHER" && request.status === "APPROVED") {
+        return res.status(403).json({ message: "Нельзя редактировать одобренную заявку" });
+    }
+    // ZAVHOZ может редактировать APPROVED/IN_PROGRESS заявки (включая изменение статуса)
+    if (user.role === "ZAVHOZ" && request.status !== "APPROVED" && request.status !== "IN_PROGRESS" && request.status !== "DONE") {
+        return res.status(403).json({ message: "Нет прав для редактирования" });
+    }
+    const { items, ...updateData } = req.body;
+    const previousStatus = request.status;
+    // Если items передан, делаем полную замену позиций
+    const updated = await prisma_1.prisma.maintenanceRequest.update({
+        where: { id },
+        data: {
+            ...updateData,
+            // Если items передан, удаляем старые и создаем новые
+            items: items ? {
+                deleteMany: {}, // Удаляем все старые позиции
+                create: items.map((item) => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    category: item.category,
+                }))
+            } : undefined
+        },
+        include: {
+            requester: {
+                include: {
+                    user: { select: { id: true } }
+                }
+            },
+            approvedBy: true,
+            items: true
+        }
+    });
+    // 📱 Telegram уведомление заявителю при завершении заявки
+    if (updated.status === 'DONE' && previousStatus !== 'DONE') {
+        try {
+            const requesterId = updated.requester.user?.id;
+            if (requesterId) {
+                const requestTitle = updated.title || `Заявка #${updated.id}`;
+                await (0, TelegramService_1.sendTelegramMessage)(requesterId, `✅ <b>Заявка выполнена!</b>\n\n` +
+                    `🔢 ID заявки: #${updated.id}\n` +
+                    `📝 Тема: ${requestTitle}\n\n` +
+                    `Ваша заявка была успешно выполнена.`);
+            }
+        }
+        catch (error) {
+            console.error('Ошибка отправки Telegram уведомления:', error);
+        }
+    }
+    res.json(updated);
+});
+// POST /api/maintenance/:id/approve - одобрить заявку
+router.post("/:id/approve", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req, res) => {
+    const id = Number(req.params.id);
+    const user = req.user;
+    const request = await prisma_1.prisma.maintenanceRequest.findUnique({
+        where: { id },
+        include: {
+            requester: {
+                include: {
+                    user: { select: { role: true } }
+                }
+            }
+        }
+    });
+    if (!request) {
+        return res.status(404).json({ message: "Заявка не найдена" });
+    }
+    // Проверяем права на одобрение
+    const requesterRole = request.requester.user?.role;
+    // Завуч может одобрять только заявки учителей
+    if (user.role === "DEPUTY" && requesterRole !== "TEACHER") {
+        return res.status(403).json({ message: "Вы можете одобрять только заявки учителей" });
+    }
+    // Директор не может одобрять заявки учителей
+    if (user.role === "DIRECTOR" && requesterRole === "TEACHER") {
+        return res.status(403).json({ message: "Заявки учителей одобряет завуч" });
+    }
+    const updated = await prisma_1.prisma.maintenanceRequest.update({
+        where: { id },
+        data: {
+            status: "APPROVED",
+            approvedById: user.employeeId,
+            approvedAt: new Date(),
+            rejectionReason: null
+        },
+        include: {
+            requester: true,
+            approvedBy: true
+        }
+    });
+    // 📱 Telegram уведомление Завхозу об одобренной заявке
+    try {
+        const requestTitle = updated.title || `Заявка #${updated.id}`;
+        await (0, TelegramService_1.notifyRole)('ZAVHOZ', `✅ <b>Заявка одобрена</b>\n\n` +
+            `🔢 ID заявки: #${updated.id}\n` +
+            `📝 Тема: ${requestTitle}\n` +
+            `👤 От: ${updated.requester.firstName} ${updated.requester.lastName}\n\n` +
+            `⚡ Готова к выполнению`);
+    }
+    catch (error) {
+        console.error('Ошибка отправки Telegram уведомления:', error);
+    }
+    res.json(updated);
+});
+// POST /api/maintenance/:id/reject - отклонить заявку
+router.post("/:id/reject", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req, res) => {
+    const id = Number(req.params.id);
+    const { reason } = req.body;
+    const user = req.user;
+    const request = await prisma_1.prisma.maintenanceRequest.findUnique({
+        where: { id },
+        include: {
+            requester: {
+                include: {
+                    user: { select: { role: true } }
+                }
+            }
+        }
+    });
+    if (!request) {
+        return res.status(404).json({ message: "Заявка не найдена" });
+    }
+    // Проверяем права на отклонение (аналогично одобрению)
+    const requesterRole = request.requester.user?.role;
+    if (user.role === "DEPUTY" && requesterRole !== "TEACHER") {
+        return res.status(403).json({ message: "Вы можете отклонять только заявки учителей" });
+    }
+    if (user.role === "DIRECTOR" && requesterRole === "TEACHER") {
+        return res.status(403).json({ message: "Заявки учителей обрабатывает завуч" });
+    }
+    const updated = await prisma_1.prisma.maintenanceRequest.update({
+        where: { id },
+        data: {
+            status: "REJECTED",
+            approvedById: user.employeeId,
+            approvedAt: new Date(),
+            rejectionReason: reason || null
+        },
+        include: {
+            requester: true,
+            approvedBy: true
+        }
+    });
     res.json(updated);
 });
 // DELETE /api/maintenance/:id - удаление заявки
