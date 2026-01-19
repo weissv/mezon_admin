@@ -464,7 +464,7 @@ function QuestionEditor({
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       {/* Заголовок вопроса */}
       <div
-        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50"
+        className="flex items-start gap-3 p-4 cursor-pointer hover:bg-gray-50"
         onClick={() => onChange({ expanded: !question.expanded })}
       >
         <GripVertical className="h-5 w-5 text-gray-400" />
@@ -472,35 +472,37 @@ function QuestionEditor({
           {index + 1}
         </span>
         <TypeIcon className="h-5 w-5 text-gray-500" />
-        <span className="flex-1 text-gray-700 truncate">
+        <span className="flex-1 min-w-0 text-gray-700 whitespace-pre-line break-words">
           {question.content || "Новый вопрос"}
         </span>
-        <span className="text-sm text-gray-500">{question.points || 1} б.</span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDuplicate();
-          }}
-          className="p-1.5 text-gray-400 hover:text-gray-600"
-          title="Дублировать"
-        >
-          <Copy className="h-4 w-4" />
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove();
-          }}
-          className="p-1.5 text-gray-400 hover:text-red-500"
-          title="Удалить"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
-        {question.expanded ? (
-          <ChevronUp className="h-5 w-5 text-gray-400" />
-        ) : (
-          <ChevronDown className="h-5 w-5 text-gray-400" />
-        )}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <span className="text-sm text-gray-500">{question.points || 1} б.</span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate();
+            }}
+            className="p-1.5 text-gray-400 hover:text-gray-600"
+            title="Дублировать"
+          >
+            <Copy className="h-4 w-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="p-1.5 text-gray-400 hover:text-red-500"
+            title="Удалить"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          {question.expanded ? (
+            <ChevronUp className="h-5 w-5 text-gray-400" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-gray-400" />
+          )}
+        </div>
       </div>
 
       {/* Содержимое вопроса */}
