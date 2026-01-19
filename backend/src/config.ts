@@ -21,9 +21,9 @@ export const config = {
   jwtExpiresIn: "12h",
   nodeEnv: process.env.NODE_ENV || "development",
   corsOrigins: resolveOrigins(),
-  // OpenAI API для AI проверки контрольных
-  openaiApiKey: process.env.OPENAI_API_KEY || "",
-  openaiModel: process.env.OPENAI_MODEL || "gpt-4o-mini",
+  // Groq API для AI проверки контрольных
+  groqApiKey: process.env.GROQ_API_KEY || "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",
+  groqModel: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
   // Базовый URL для публичных ссылок на контрольные
   publicExamBaseUrl: process.env.PUBLIC_EXAM_BASE_URL || "http://localhost:5173/exam",
 };

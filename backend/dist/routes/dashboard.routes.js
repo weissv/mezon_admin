@@ -29,7 +29,7 @@ router.get("/summary", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN"
             _sum: { amount: true },
             where: { date: { gte: new Date(Date.now() - 30 * 24 * 3600 * 1000) } },
         }),
-        prisma_1.prisma.maintenanceRequest.count({ where: { status: { in: ["NEW", "IN_PROGRESS"] } } }),
+        prisma_1.prisma.maintenanceRequest.count({ where: { status: { in: ["PENDING", "IN_PROGRESS"] } } }),
         prisma_1.prisma.purchaseOrder.count({ where: { status: { not: "DELIVERED" } } }),
         prisma_1.prisma.employee.count({
             where: {
@@ -108,7 +108,7 @@ router.get("/metrics", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "ADMIN"
         }),
         // Активные заявки на обслуживание
         prisma_1.prisma.maintenanceRequest.count({
-            where: { status: { in: ["NEW", "IN_PROGRESS"] } },
+            where: { status: { in: ["PENDING", "IN_PROGRESS"] } },
         }),
         // Активные закупки
         prisma_1.prisma.purchaseOrder.count({
