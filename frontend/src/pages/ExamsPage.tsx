@@ -230,23 +230,22 @@ export default function ExamsPage() {
 
                 {/* Действия */}
                 <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => navigate(`/exams/${exam.id}/edit`)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Редактировать
+                  </button>
+
                   {exam.status === "DRAFT" && (
-                    <>
-                      <button
-                        onClick={() => navigate(`/exams/${exam.id}/edit`)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-                      >
-                        <Edit className="h-4 w-4" />
-                        Редактировать
-                      </button>
-                      <button
-                        onClick={() => handlePublish(exam)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700"
-                      >
-                        <Play className="h-4 w-4" />
-                        Опубликовать
-                      </button>
-                    </>
+                    <button
+                      onClick={() => handlePublish(exam)}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700"
+                    >
+                      <Play className="h-4 w-4" />
+                      Опубликовать
+                    </button>
                   )}
 
                   {exam.status === "PUBLISHED" && (
