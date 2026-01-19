@@ -216,6 +216,19 @@ router.post("/:token/submit", async (req, res) => {
           isCorrect = expectedAnswer === studentAnswer;
           score = isCorrect ? question.points : 0;
         }
+
+        if ((!isCorrect || score === 0) && studentAnswer) {
+          const aiResult = await checkExamAnswerWithAI(
+            question.content,
+            question.expectedAnswer || '',
+            answer.answer || '',
+            (question.keyPoints as string[]) || [],
+            question.points,
+            question.type
+          );
+          score = aiResult.score;
+          isCorrect = aiResult.score >= (question.points * 0.6);
+        }
       } else if (['TEXT_LONG', 'PROBLEM'].includes(question.type)) {
         // Открытые вопросы и задачи - нужна AI проверка
         needsAiReview.push(answer.questionId);
@@ -403,7 +416,8 @@ async function processAiReview(submissionId: string, questionIds: string[]) {
         answer.question.expectedAnswer || '',
         answer.answer || '',
         answer.question.keyPoints as string[] || [],
-        answer.question.points
+        answer.question.points,
+        answer.question.type
       );
 
       await prisma.examAnswer.update({

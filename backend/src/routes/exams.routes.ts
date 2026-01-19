@@ -32,7 +32,8 @@ router.get("/", authMiddleware, checkRole(["DIRECTOR", "DEPUTY", "TEACHER", "DEV
         submissions: {
           select: { id: true, studentName: true, submittedAt: true, percentage: true, passed: true }
         },
-        targetGroups: true
+        targetGroups: true,
+        _count: { select: { questions: true, submissions: true } }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -280,6 +281,46 @@ router.put("/:id", authMiddleware, checkRole(["DIRECTOR", "DEPUTY", "TEACHER", "
     return res.status(500).json({ message: "Ошибка при обновлении контрольной" });
   }
 });
+
+// Получить детали одного прохождения
+router.get(
+  "/:examId/submissions/:submissionId",
+  authMiddleware,
+  checkRole(["DIRECTOR", "DEPUTY", "TEACHER", "DEVELOPER"]),
+  async (req, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: req.user!.id },
+        include: { employee: true }
+      });
+
+      if (!user || !user.employee) {
+        return res.status(404).json({ message: "Пользователь не найден" });
+      }
+
+      const submission = await prisma.examSubmission.findUnique({
+        where: { id: req.params.submissionId },
+        include: {
+          answers: { include: { question: true } },
+          exam: true
+        }
+      });
+
+      if (!submission || submission.examId !== req.params.examId) {
+        return res.status(404).json({ message: "Прохождение не найдено" });
+      }
+
+      if (submission.exam.creatorId !== user.employeeId && !['DIRECTOR', 'DEPUTY', 'DEVELOPER'].includes(user.role)) {
+        return res.status(403).json({ message: "Нет доступа к этой контрольной" });
+      }
+
+      return res.json(submission);
+    } catch (error) {
+      console.error("Error fetching submission details:", error);
+      return res.status(500).json({ message: "Ошибка при получении деталей" });
+    }
+  }
+);
 
 // Удалить контрольную
 router.delete("/:id", authMiddleware, checkRole(["DIRECTOR", "DEPUTY", "TEACHER", "DEVELOPER"]), async (req, res) => {
