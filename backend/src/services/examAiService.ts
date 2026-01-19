@@ -17,7 +17,8 @@ export async function checkExamAnswerWithAI(
   expectedAnswer: string,
   studentAnswer: string,
   keyPoints: string[],
-  maxPoints: number
+  maxPoints: number,
+  questionType?: string
 ): Promise<AiCheckResult> {
   try {
     // Формируем промпт для AI
@@ -60,6 +61,15 @@ ${studentAnswer || '(ответ не предоставлен)'}
 
 Оцени ответ студента и верни результат в формате JSON.`;
 
+    const normalizedType = (questionType || "").toUpperCase();
+    let model = config.groqModel || 'llama-3.3-70b-versatile';
+    if (normalizedType === 'TEXT_SHORT') {
+      model = config.groqBlitzModel || model;
+    }
+    if (normalizedType === 'TEXT_LONG' || normalizedType === 'PROBLEM') {
+      model = config.groqHeavyModel || model;
+    }
+
     // Используем Groq API для AI проверки
     if (config.groqApiKey) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -69,7 +79,7 @@ ${studentAnswer || '(ответ не предоставлен)'}
           'Authorization': `Bearer ${config.groqApiKey}`
         },
         body: JSON.stringify({
-          model: config.groqModel || 'llama-3.3-70b-versatile',
+          model,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
@@ -89,7 +99,8 @@ ${studentAnswer || '(ответ не предоставлен)'}
       
       if (content) {
         try {
-          const result = JSON.parse(content);
+          const jsonText = content.includes('{') ? content.slice(content.indexOf('{'), content.lastIndexOf('}') + 1) : content;
+          const result = JSON.parse(jsonText);
           return {
             score: Math.min(maxPoints, Math.max(0, Number(result.score) || 0)),
             feedback: result.feedback || 'Ответ проверен автоматически.',
@@ -238,5 +249,5 @@ export async function checkMathProblem(
   }
 
   // Если числовая проверка не дала результат, используем AI
-  return checkExamAnswerWithAI(problemContent, expectedAnswer, studentAnswer, [], maxPoints);
+  return checkExamAnswerWithAI(problemContent, expectedAnswer, studentAnswer, [], maxPoints, 'PROBLEM');
 }
