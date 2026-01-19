@@ -833,3 +833,180 @@ model LmsClassAnnouncement {
   @@index([classId])
   @@index([authorId])
 }
+
+// ============================================================================
+// ПЛАТФОРМА ДЛЯ КОНТРОЛЬНЫХ РАБОТ (EXAMS)
+// ============================================================================
+
+// Тип вопроса в контрольной
+enum ExamQuestionType {
+  MULTIPLE_CHOICE    // Выбор из вариантов
+  SINGLE_CHOICE      // Выбор одного варианта
+  TEXT_SHORT         // Короткий текстовый ответ
+  TEXT_LONG          // Развёрнутый ответ (проверяется AI)
+  PROBLEM            // Задача с решением (проверяется AI)
+  TRUE_FALSE         // Верно/Неверно
+}
+
+// Статус контрольной
+enum ExamStatus {
+  DRAFT              // Черновик
+  PUBLISHED          // Опубликована
+  CLOSED             // Закрыта
+  ARCHIVED           // Архивирована
+}
+
+// Контрольная работа
+model Exam {
+  id           String    @id @default(cuid())
+  title        String    // "РУБЕЖНЫЙ КОНТРОЛЬ ПО ЭКОНОМИКЕ №1"
+  description  String?   @db.Text
+  subject      String    // "Экономика", "Математика"
+  
+  // Создатель контрольной (учитель/завуч/директор)
+  creatorId    Int       // Employee id
+  
+  // Уникальный токен для публичной ссылки (для студентов)
+  publicToken  String    @unique @default(cuid())
+  
+  // Настройки
+  timeLimit    Int?      // Лимит времени в минутах (null = без лимита)
+  passingScore Float     @default(60) // Процент для прохождения
+  shuffleQuestions Boolean @default(false)
+  shuffleOptions Boolean @default(false)
+  showResults  Boolean   @default(true) // Показывать результаты студентам
+  
+  // Период доступности
+  startDate    DateTime?
+  endDate      DateTime?
+  
+  status       ExamStatus @default(DRAFT)
+  
+  // Связи
+  questions    ExamQuestion[]
+  submissions  ExamSubmission[]
+  targetGroups ExamTargetGroup[]
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([creatorId])
+  @@index([publicToken])
+  @@index([status])
+}
+
+// Привязка контрольной к классам
+model ExamTargetGroup {
+  id      Int    @id @default(autoincrement())
+  examId  String
+  exam    Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  groupId Int    // Group id
+  
+  @@unique([examId, groupId])
+}
+
+// Вопрос контрольной
+model ExamQuestion {
+  id           String           @id @default(cuid())
+  examId       String
+  exam         Exam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  
+  orderIndex   Int              // Порядковый номер вопроса
+  type         ExamQuestionType
+  
+  // Содержание вопроса
+  content      String           @db.Text // Текст вопроса
+  explanation  String?          @db.Text // Пояснение к правильному ответу (для отображения после)
+  imageUrl     String?          // URL изображения (если нужно)
+  
+  // Для выбора (MULTIPLE_CHOICE, SINGLE_CHOICE)
+  options      Json?            // [{id: "a", text: "вариант А"}, ...]
+  correctAnswer Json?           // "a" или ["a", "c"] для множественного выбора
+  
+  // Для текстовых/задач - ключевые слова для AI проверки
+  keyPoints    Json?            // ["ключевое слово", "важный концепт"]
+  expectedAnswer String?        @db.Text // Ожидаемый ответ/решение для AI
+  
+  // Баллы
+  points       Float            @default(1)
+  partialCredit Boolean         @default(false) // Частичный зачёт
+  
+  answers      ExamAnswer[]
+  
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([examId])
+  @@index([orderIndex])
+}
+
+// Прохождение контрольной студентом
+model ExamSubmission {
+  id           String    @id @default(cuid())
+  examId       String
+  exam         Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  
+  // Студент (может быть не авторизован - только имя и класс)
+  studentName  String
+  studentClass String?   // "11Б"
+  studentEmail String?   // Email для получения результатов
+  
+  // Привязка к LMS студенту (если авторизован)
+  lmsStudentId String?
+  
+  // Время
+  startedAt    DateTime  @default(now())
+  submittedAt  DateTime?
+  
+  // Результаты
+  totalScore   Float?    // Общий балл
+  maxScore     Float?    // Максимально возможный балл
+  percentage   Float?    // Процент
+  passed       Boolean?  // Пройдено или нет
+  
+  // Статус проверки AI
+  aiReviewCompleted Boolean @default(false)
+  
+  answers      ExamAnswer[]
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([examId])
+  @@index([studentName])
+  @@index([lmsStudentId])
+}
+
+// Ответ на вопрос
+model ExamAnswer {
+  id           String         @id @default(cuid())
+  submissionId String
+  submission   ExamSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     ExamQuestion   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  // Ответ студента
+  answer       String?        @db.Text // Текст ответа или JSON выбранных вариантов
+  
+  // Оценка
+  score        Float?         // Полученные баллы
+  maxScore     Float          // Максимальные баллы за вопрос
+  isCorrect    Boolean?       // Верно/неверно (для авто-проверки)
+  
+  // AI проверка для открытых вопросов
+  aiScore      Float?         // Балл от AI (0-100%)
+  aiFeedback   String?        @db.Text // Комментарий AI
+  aiChecked    Boolean        @default(false)
+  
+  // Ручная проверка учителем
+  manualScore  Float?
+  manualFeedback String?      @db.Text
+  manualChecked Boolean       @default(false)
+  
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([submissionId, questionId])
+  @@index([submissionId])
+  @@index([questionId])
+}

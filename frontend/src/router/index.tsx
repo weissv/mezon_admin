@@ -39,6 +39,12 @@ import LmsAssignmentsPage from "../pages/lms/LmsAssignmentsPage";
 import LmsProgressPage from "../pages/lms/LmsProgressPage";
 import LmsDiaryPage from "../pages/lms/LmsDiaryPage";
 
+// Exam Pages
+import ExamsPage from "../pages/ExamsPage";
+import ExamEditorPage from "../pages/ExamEditorPage";
+import ExamResultsPage from "../pages/ExamResultsPage";
+import ExamTakePage from "../pages/ExamTakePage";
+
 function LoadingScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -121,6 +127,9 @@ function TeacherRoute() {
 export default function Router() {
   return (
     <Routes>
+      {/* Публичный роут для прохождения контрольных (без авторизации) */}
+      <Route path="/exam/:token" element={<ExamTakePage />} />
+
       <Route path="/auth" element={<AuthLayout />}>
         <Route index element={<Navigate to="login" replace />} />
         <Route path="login" element={<LoginPage />} />
@@ -170,6 +179,14 @@ export default function Router() {
 
             <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT"]} />}>
               <Route path="integration" element={<IntegrationPage />} />
+            </Route>
+
+            {/* Контрольные работы - для учителей и админов */}
+            <Route element={<TeacherRoute />}>
+              <Route path="exams" element={<ExamsPage />} />
+              <Route path="exams/new" element={<ExamEditorPage />} />
+              <Route path="exams/:id/edit" element={<ExamEditorPage />} />
+              <Route path="exams/:id/results" element={<ExamResultsPage />} />
             </Route>
 
             <Route path="*" element={<NotFoundPage />} />
