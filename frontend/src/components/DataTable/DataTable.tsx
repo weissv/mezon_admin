@@ -11,6 +11,7 @@ export function DataTable<T extends Record<string, any>>({
   pageSize,
   total,
   onPageChange,
+  wrapCells = false,
 }: {
   data: T[];
   columns: Column<T>[];
@@ -18,8 +19,16 @@ export function DataTable<T extends Record<string, any>>({
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
+  wrapCells?: boolean;
 }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
+  const headerCellClassName = wrapCells
+    ? "text-left p-2 whitespace-normal break-words align-top"
+    : "text-left p-2 whitespace-nowrap";
+  const bodyCellClassName = wrapCells
+    ? "p-2 whitespace-normal break-words align-top"
+    : "p-2 whitespace-nowrap";
+  const tableClassName = wrapCells ? "w-full text-sm table-fixed" : "w-full text-sm";
 
   const downloadCsv = () => {
     const rows = data.map((row) =>
@@ -43,11 +52,11 @@ export function DataTable<T extends Record<string, any>>({
         </button>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className={tableClassName}>
           <thead>
             <tr className="bg-gray-50">
               {columns.map((c) => (
-                <th key={c.key} className="text-left p-2 whitespace-nowrap">{c.header}</th>
+                <th key={c.key} className={headerCellClassName}>{c.header}</th>
               ))}
             </tr>
           </thead>
@@ -62,7 +71,7 @@ export function DataTable<T extends Record<string, any>>({
               data.map((row, i) => (
                 <tr key={i} className="border-t hover:bg-gray-50">
                   {columns.map((c) => (
-                    <td key={c.key} className="p-2 whitespace-nowrap">
+                    <td key={c.key} className={bodyCellClassName}>
                       {c.render ? c.render(row) : c.key in row ? String(row[c.key as keyof T] ?? "") : ""}
                     </td>
                   ))}

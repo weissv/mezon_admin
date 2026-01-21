@@ -142,6 +142,7 @@ export default function CalendarPage() {
           pageSize={10}
           total={total}
           onPageChange={setPage}
+          wrapCells
         />
       ) : viewMode === 'planner' ? (
         <div className="mb-8 overflow-x-auto">
