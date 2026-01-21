@@ -221,7 +221,9 @@ export default function MaintenancePage() {
             unit: item.unit,
             category: item.category,
           }))
-        : [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' }],
+        : request.type === 'ISSUE' 
+          ? [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' }]
+          : [], // Для REPAIR items должен быть пустым массивом
     });
     setIsModalOpen(true);
   };
@@ -877,7 +879,12 @@ export default function MaintenancePage() {
         <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
           <div>
             <label htmlFor="type" className="block mb-1 font-medium">Тип заявки</label>
-            <select {...register('type')} id="type" className="w-full p-2 border rounded">
+            <select 
+              {...register('type')} 
+              id="type" 
+              className="w-full p-2 border rounded"
+              disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
+            >
               <option value="ISSUE">Выдача</option>
               <option value="REPAIR">Ремонт</option>
             </select>
