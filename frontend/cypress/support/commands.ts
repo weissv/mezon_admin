@@ -89,12 +89,118 @@ Cypress.Commands.add('logoutViaUI', () => {
   Cypress.env('authUser', null)
 })
 
+/**
+ * Ожидает загрузку страницы
+ */
+Cypress.Commands.add('waitForPageLoad', () => {
+  cy.get('[data-loading="true"], .loading, .spinner', { timeout: 1000 })
+    .should('not.exist')
+  cy.get('body').should('not.have.class', 'loading')
+})
+
+/**
+ * Проверяет наличие toast-уведомления
+ */
+Cypress.Commands.add('checkToast', (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+  cy.get('[data-sonner-toast], .toast, [role="alert"]', { timeout: 10000 })
+    .should('be.visible')
+    .and('contain.text', message)
+})
+
+/**
+ * Заполняет форму из объекта
+ */
+Cypress.Commands.add('fillForm', (formData: Record<string, string | number | boolean>) => {
+  Object.entries(formData).forEach(([name, value]) => {
+    const input = cy.get(`input[name="${name}"], select[name="${name}"], textarea[name="${name}"]`)
+    
+    if (typeof value === 'boolean') {
+      if (value) {
+        input.check({ force: true })
+      } else {
+        input.uncheck({ force: true })
+      }
+    } else {
+      input.clear().type(String(value))
+    }
+  })
+})
+
+/**
+ * Ожидает завершение API запроса
+ */
+Cypress.Commands.add('waitForApi', (alias: string, timeout = 30000) => {
+  cy.wait(`@${alias}`, { timeout }).its('response.statusCode').should('be.oneOf', [200, 201, 204])
+})
+
+/**
+ * Делает скриншот с описанием
+ */
+Cypress.Commands.add('screenshot', (name: string) => {
+  cy.screenshot(name, { capture: 'viewport' })
+})
+
+/**
+ * Проверяет доступность таблицы данных
+ */
+Cypress.Commands.add('checkDataTable', () => {
+  cy.get('table').should('exist')
+  cy.get('thead').should('exist')
+  cy.get('tbody').should('exist')
+})
+
+/**
+ * Пагинация таблицы - следующая страница
+ */
+Cypress.Commands.add('goToNextPage', () => {
+  cy.contains('button', /Вперёд|Next|→/i).click()
+})
+
+/**
+ * Пагинация таблицы - предыдущая страница
+ */
+Cypress.Commands.add('goToPrevPage', () => {
+  cy.contains('button', /Назад|Previous|←/i).click()
+})
+
+/**
+ * Ожидает загрузку данных в таблице
+ */
+Cypress.Commands.add('waitForTableData', () => {
+  cy.get('tbody tr', { timeout: 20000 }).should('have.length.at.least', 1)
+})
+
+/**
+ * Проверяет что модальное окно открыто
+ */
+Cypress.Commands.add('checkModalOpen', () => {
+  cy.get('[role="dialog"], .modal, [data-testid="modal"]').should('be.visible')
+})
+
+/**
+ * Закрывает модальное окно
+ */
+Cypress.Commands.add('closeModal', () => {
+  cy.get('body').type('{esc}')
+  cy.get('[role="dialog"], .modal, [data-testid="modal"]').should('not.exist')
+})
+
 declare global {
   namespace Cypress {
     interface Chainable {
       loginViaUI(username: string, password: string): Chainable<void>
       loginViaAPI(username: string, password: string): Chainable<void>
       logoutViaUI(): Chainable<void>
+      waitForPageLoad(): Chainable<void>
+      checkToast(message: string, type?: 'success' | 'error' | 'info'): Chainable<void>
+      fillForm(formData: Record<string, string | number | boolean>): Chainable<void>
+      waitForApi(alias: string, timeout?: number): Chainable<void>
+      checkDataTable(): Chainable<void>
+      goToNextPage(): Chainable<void>
+      goToPrevPage(): Chainable<void>
+      waitForTableData(): Chainable<void>
+      checkModalOpen(): Chainable<void>
+      closeModal(): Chainable<void>
     }
   }
 }

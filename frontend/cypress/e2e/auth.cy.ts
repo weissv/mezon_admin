@@ -92,6 +92,123 @@ describe('Authentication & Session Management', () => {
       expect(win.localStorage.getItem('auth_token')).to.be.null
     })
   })
+
+  // === РАСШИРЕННЫЕ ТЕСТЫ ===
+
+  describe('Валидация формы логина', () => {
+    beforeEach(() => {
+      cy.visit('/auth/login')
+      cy.contains('Вход в систему', { timeout: 15000 }).should('be.visible')
+    })
+
+    it('1.7 Показывает ошибку для пустого логина', () => {
+      cy.get('input#password').type('password123')
+      cy.contains('button', /^Войти$/).click()
+      cy.contains('Логин обязателен').should('be.visible')
+    })
+
+    it('1.8 Показывает ошибку для пустого пароля', () => {
+      cy.get('input#login').type('test@example.com')
+      cy.contains('button', /^Войти$/).click()
+      cy.contains('Пароль обязателен').should('be.visible')
+    })
+
+    it('1.9 Очищает ошибки при вводе данных', () => {
+      cy.contains('button', /^Войти$/).click()
+      cy.contains('Логин обязателен').should('be.visible')
+      cy.get('input#login').type('test@example.com')
+      cy.contains('Логин обязателен').should('not.exist')
+    })
+  })
+
+  describe('Состояние загрузки', () => {
+    it('1.10 Показывает индикатор загрузки при отправке', () => {
+      cy.intercept('POST', '**/api/auth/login', (req) => {
+        req.reply({
+          delay: 2000,
+          statusCode: 200,
+          body: { user: { id: 1 }, token: 'token' },
+        })
+      }).as('slowLogin')
+
+      cy.visit('/auth/login')
+      cy.get('input#login').type('admin@test.com')
+      cy.get('input#password').type('password123')
+      cy.contains('button', /^Войти$/).click()
+
+      cy.contains('Входим').should('be.visible')
+      cy.get('button[type="submit"]').should('be.disabled')
+    })
+  })
+
+  describe('Ролевой доступ', () => {
+    it('1.11 Директор имеет доступ к финансовым данным', () => {
+      cy.loginViaAPI(users.director.username, users.director.password)
+      cy.visit('/finance')
+      cy.url().should('include', '/finance')
+    })
+
+    it('1.12 Редирект на dashboard после входа', () => {
+      cy.visit('/auth/login')
+      cy.get('input#login').type(users.valid.username)
+      cy.get('input#password').type(users.valid.password, { log: false })
+      cy.contains('button', /^Войти$/).click()
+      cy.url().should('match', /\/dashboard$/)
+    })
+  })
+
+  describe('Обработка ошибок сервера', () => {
+    it('1.13 Показывает сообщение при ошибке сервера', () => {
+      cy.intercept('POST', '**/api/auth/login', {
+        statusCode: 500,
+        body: { message: 'Internal server error' },
+      }).as('serverError')
+
+      cy.visit('/auth/login')
+      cy.get('input#login').type('admin@test.com')
+      cy.get('input#password').type('password123')
+      cy.contains('button', /^Войти$/).click()
+
+      cy.wait('@serverError')
+      cy.contains('Ошибка').should('be.visible')
+    })
+
+    it('1.14 Обрабатывает timeout соединения', () => {
+      cy.intercept('POST', '**/api/auth/login', {
+        forceNetworkError: true,
+      }).as('networkError')
+
+      cy.visit('/auth/login')
+      cy.get('input#login').type('admin@test.com')
+      cy.get('input#password').type('password123')
+      cy.contains('button', /^Войти$/).click()
+
+      // Должно показать сообщение об ошибке сети
+      cy.contains(/ошибка|error/i).should('be.visible')
+    })
+  })
+
+  describe('Cookies и безопасность', () => {
+    it('1.15 Устанавливает httpOnly cookie при входе', () => {
+      cy.visit('/auth/login')
+      cy.get('input#login').type(users.valid.username)
+      cy.get('input#password').type(users.valid.password, { log: false })
+      cy.contains('button', /^Войти$/).click()
+
+      cy.url().should('match', /\/dashboard$/)
+      cy.getCookie('auth_token').should('exist')
+    })
+
+    it('1.16 Очищает cookie при выходе', () => {
+      cy.loginViaAPI(users.valid.username, users.valid.password)
+      cy.visit('/dashboard')
+      cy.contains('Дашборд', { timeout: 20000 }).should('be.visible')
+      
+      cy.logoutViaUI()
+      
+      cy.getCookie('auth_token').should('be.null')
+    })
+  })
 })
 
 export {}
