@@ -537,10 +537,10 @@ router.get(
       prisma.purchaseOrder.findMany({
         where: {
           status: { in: ["PENDING", "APPROVED"] },
-          deliveryDate: { gte: today, lte: endDate },
+          expectedDeliveryDate: { gte: today, lte: endDate },
         },
         select: {
-          deliveryDate: true,
+          expectedDeliveryDate: true,
           totalAmount: true,
         },
       }),
@@ -590,8 +590,8 @@ router.get(
     // Запланированные закупки по датам
     const purchasesByDate: Record<string, number> = {};
     for (const purchase of scheduledPurchases) {
-      if (purchase.deliveryDate) {
-        const dateKey = new Date(purchase.deliveryDate).toISOString().split("T")[0];
+      if (purchase.expectedDeliveryDate) {
+        const dateKey = new Date(purchase.expectedDeliveryDate).toISOString().split("T")[0];
         purchasesByDate[dateKey] = (purchasesByDate[dateKey] || 0) + Number(purchase.totalAmount);
       }
     }

@@ -46,6 +46,7 @@ export const mockEmployee = {
   phone: '+79001234567',
   email: 'ivan@test.com',
   hireDate: new Date('2023-01-15'),
+  medicalCheckupDate: null as Date | null,
   salary: 50000,
   groupId: 1,
   isActive: true,
