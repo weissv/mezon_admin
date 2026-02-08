@@ -350,3 +350,47 @@ export const buildQueryString = (params: Record<string, any>): string => {
   });
   return searchParams.toString();
 };
+
+// ============================================================================
+// KNOWLEDGE BASE (БАЗА ЗНАНИЙ)
+// ============================================================================
+
+import type {
+  KnowledgeBaseArticle,
+  ArticleListResponse,
+  ArticleSearchParams,
+  CreateArticleInput,
+  UpdateArticleInput,
+} from "../types/knowledge-base";
+
+export const knowledgeBaseApi = {
+  /** Поиск / листинг статей */
+  search(params?: ArticleSearchParams): Promise<ArticleListResponse> {
+    return api.get<ArticleListResponse>("knowledge-base", params);
+  },
+
+  /** Получение статьи по slug */
+  getBySlug(slug: string): Promise<KnowledgeBaseArticle> {
+    return api.get<KnowledgeBaseArticle>(`knowledge-base/${slug}`);
+  },
+
+  /** Похожие статьи */
+  getRelated(id: number, limit?: number): Promise<KnowledgeBaseArticle[]> {
+    return api.get<KnowledgeBaseArticle[]>(`knowledge-base/${id}/related`, { limit });
+  },
+
+  /** Создать статью */
+  create(data: CreateArticleInput): Promise<KnowledgeBaseArticle> {
+    return api.post<KnowledgeBaseArticle>("knowledge-base", data);
+  },
+
+  /** Обновить статью */
+  update(id: number, data: UpdateArticleInput): Promise<KnowledgeBaseArticle> {
+    return api.put<KnowledgeBaseArticle>(`knowledge-base/${id}`, data);
+  },
+
+  /** Удалить статью */
+  delete(id: number): Promise<{ message: string }> {
+    return api.delete<{ message: string }>(`knowledge-base/${id}`);
+  },
+};

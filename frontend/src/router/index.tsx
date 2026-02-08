@@ -45,6 +45,10 @@ import ExamEditorPage from "../pages/ExamEditorPage";
 import ExamResultsPage from "../pages/ExamResultsPage";
 import ExamTakePage from "../pages/ExamTakePage";
 
+// Knowledge Base Pages
+import ArticleList from "../pages/KnowledgeBase/ArticleList";
+import ArticleView from "../pages/KnowledgeBase/ArticleView";
+
 function LoadingScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -155,6 +159,8 @@ export default function Router() {
             <Route path="procurement" element={<ProcurementPage />} />
             <Route path="recipes" element={<RecipesPage />} />
             <Route path="schedule" element={<SchedulePage />} />
+            <Route path="knowledge-base" element={<ArticleList />} />
+            <Route path="knowledge-base/:slug" element={<ArticleView />} />
 
             <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
               <Route path="action-log" element={<ActionLogPage />} />

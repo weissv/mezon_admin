@@ -12,6 +12,7 @@ export const createInventorySchema = z.object({
     unit: z.string().min(1, "Единица измерения обязательна"),
     expiryDate: z.string().nullable().optional(),
     type: z.enum(["FOOD", "HOUSEHOLD", "STATIONERY"]).optional().default("FOOD"),
+    minQuantity: z.number().min(0).optional().default(0),
   }),
 });
 
@@ -22,6 +23,7 @@ export const updateInventorySchema = z.object({
     unit: z.string().min(1).optional(),
     expiryDate: z.string().nullable().optional(),
     type: z.enum(["FOOD", "HOUSEHOLD", "STATIONERY"]).optional(),
+    minQuantity: z.number().min(0).optional(),
   }),
 });
 
