@@ -81,6 +81,33 @@ enum MaintenanceType {
   ISSUE  // Выдача
 }
 
+/// Тип складской операции
+enum InventoryTransactionType {
+  IN           // Приход (закупка, поступление)
+  OUT          // Расход (выдача по заявке)
+  ADJUSTMENT   // Корректировка (ручная)
+  WRITE_OFF    // Списание (просрочка и т.п.)
+}
+
+/// Тип закупки
+enum PurchaseOrderType {
+  PLANNED      // Плановая
+  OPERATIONAL  // Оперативная (срочная)
+}
+
+/// Статус закупки
+enum PurchaseOrderStatus {
+  DRAFT           // Черновик
+  PENDING         // На рассмотрении (ожидает одобрения)
+  APPROVED        // Одобрена директором
+  REJECTED        // Отклонена
+  ORDERED         // Заказано у поставщика
+  PARTIALLY_DELIVERED // Частично доставлено
+  DELIVERED       // Полностью доставлено
+  RECEIVED        // Принято на склад
+  CANCELLED       // Отменена
+}
+
 enum FinanceSource {
   BUDGET
   EXTRA_BUDGET
@@ -116,6 +143,7 @@ model User {
   telegramChatId String?  @unique // Telegram Chat ID для уведомлений
 
   actionLogs ActionLog[]
+  knowledgeBaseArticles KnowledgeBaseArticle[] @relation("ArticleAuthor")
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 }
@@ -139,6 +167,10 @@ model Employee {
   classGroups                 Group[]              @relation("ClassTeacher")
   maintenanceRequests         MaintenanceRequest[] @relation("Requester")
   approvedMaintenanceRequests MaintenanceRequest[] @relation("Approver")
+  inventoryTransactions       InventoryTransaction[]
+  createdPurchaseOrders       PurchaseOrder[]       @relation("PurchaseOrderCreator")
+  approvedPurchaseOrders      PurchaseOrder[]       @relation("PurchaseOrderApprover")
+  receivedPurchaseOrders      PurchaseOrder[]       @relation("PurchaseOrderReceiver")
   documents                   Document[]
   attendance                  EmployeeAttendance[]
   cleaningSchedules           CleaningSchedule[]
@@ -272,16 +304,23 @@ model InventoryItem {
   name         String
   quantity     Float
   unit         String // "кг", "шт", "л"
+  minQuantity  Float         @default(0) // Минимальный остаток (для уведомлений)
   expiryDate   DateTime?
   type         InventoryType
   ingredientId Int?
   ingredient   Ingredient?   @relation(fields: [ingredientId], references: [id])
+
+  // Связи
+  transactions      InventoryTransaction[]
+  maintenanceItems  MaintenanceItem[]
+  purchaseOrderItems PurchaseOrderItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([type, expiryDate])
   @@index([ingredientId])
+  @@index([name, unit])
 }
 
 model Menu {
@@ -312,6 +351,9 @@ model MaintenanceRequest {
   approvedAt       DateTime?
   rejectionReason  String?
 
+  // Связь с транзакциями склада
+  inventoryTransactions InventoryTransaction[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -321,17 +363,53 @@ model MaintenanceRequest {
 
 // Позиции заявки на выдачу (Detail таблица)
 model MaintenanceItem {
-  id         Int                @id @default(autoincrement())
-  requestId  Int
-  request    MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  name       String             // Наименование товара
-  quantity   Float              // Количество
-  unit       String             // Единица измерения (шт, кг, л)
-  category   ItemCategory       // Категория товара
+  id              Int                @id @default(autoincrement())
+  requestId       Int
+  request         MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  name            String             // Наименование товара
+  quantity        Float              // Запрашиваемое количество
+  issuedQuantity  Float?             // Фактически выданное количество
+  unit            String             // Единица измерения (шт, кг, л)
+  category        ItemCategory       // Категория товара
+  
+  // Связь с конкретным товаром на складе
+  inventoryItemId Int?
+  inventoryItem   InventoryItem?     @relation(fields: [inventoryItemId], references: [id])
 
   createdAt  DateTime           @default(now())
 
   @@index([requestId])
+  @@index([inventoryItemId])
+}
+
+/// Журнал движений склада
+model InventoryTransaction {
+  id              Int                      @id @default(autoincrement())
+  inventoryItemId Int
+  inventoryItem   InventoryItem            @relation(fields: [inventoryItemId], references: [id])
+  type            InventoryTransactionType
+  quantity        Float                    // Количество (всегда положительное)
+  quantityBefore  Float                    // Остаток до операции
+  quantityAfter   Float                    // Остаток после операции
+  reason          String?                  // Причина / комментарий
+  
+  // Связь с заявкой (если списание по заявке)
+  maintenanceRequestId Int?
+  maintenanceRequest   MaintenanceRequest?  @relation(fields: [maintenanceRequestId], references: [id])
+  
+  // Связь с закупкой (если приход по закупке)
+  purchaseOrderId      Int?
+  purchaseOrder        PurchaseOrder?       @relation(fields: [purchaseOrderId], references: [id])
+  
+  // Кто выполнил операцию
+  performedById   Int?
+  performedBy     Employee?                @relation(fields: [performedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([inventoryItemId, createdAt])
+  @@index([maintenanceRequestId])
+  @@index([type, createdAt])
 }
 
 model SecurityLog {
@@ -441,34 +519,90 @@ model Supplier {
   id          Int             @id @default(autoincrement())
   name        String          @unique
   contactInfo String?
-  pricelist   Json? // { ingredientId: price }
+  phone       String?
+  email       String?
+  address     String?
+  inn         String?          // ИНН поставщика
+  isActive    Boolean         @default(true)
+  pricelist   Json?           // { ingredientId: price }
   orders      PurchaseOrder[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model PurchaseOrder {
-  id           Int                 @id @default(autoincrement())
-  supplier     Supplier            @relation(fields: [supplierId], references: [id])
-  supplierId   Int
-  orderDate    DateTime
-  deliveryDate DateTime?
-  totalAmount  Decimal             @db.Decimal(10, 2)
-  status       String // "PENDING", "APPROVED", "DELIVERED"
-  items        PurchaseOrderItem[]
-  createdAt    DateTime            @default(now())
+  id              Int                 @id @default(autoincrement())
+  orderNumber     String              @unique // Номер заказа (авто-генерация)
+  type            PurchaseOrderType   @default(PLANNED)
+  status          PurchaseOrderStatus @default(DRAFT)
+  
+  // Поставщик
+  supplier        Supplier            @relation(fields: [supplierId], references: [id])
+  supplierId      Int
+  
+  // Описание и даты
+  title           String              // Название/описание закупки
+  description     String?             // Обоснование закупки
+  priority        Int                 @default(0) // 0=обычный, 1=срочный, 2=критический
+  orderDate       DateTime            // Дата создания заказа
+  expectedDeliveryDate DateTime?       // Ожидаемая дата доставки
+  actualDeliveryDate   DateTime?       // Фактическая дата доставки
+  
+  // Финансы
+  totalAmount     Decimal             @db.Decimal(12, 2) @default(0)
+  budgetSource    String?             // Источник финансирования
+  
+  // Workflow: Одобрение директором
+  createdById     Int
+  createdBy       Employee            @relation("PurchaseOrderCreator", fields: [createdById], references: [id])
+  approvedById    Int?
+  approvedBy      Employee?           @relation("PurchaseOrderApprover", fields: [approvedById], references: [id])
+  approvedAt      DateTime?
+  rejectionReason String?             // Причина отклонения
+  
+  // Приёмка на склад
+  receivedById    Int?
+  receivedBy      Employee?           @relation("PurchaseOrderReceiver", fields: [receivedById], references: [id])
+  receivedAt      DateTime?
+  receiveNote     String?             // Примечание при приёмке
+  
+  // Связи
+  items           PurchaseOrderItem[]
+  inventoryTransactions InventoryTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([supplierId])
+  @@index([status, type])
+  @@index([createdById])
+  @@index([approvedById])
+  @@index([orderDate])
 }
 
 model PurchaseOrderItem {
-  id           Int           @id @default(autoincrement())
-  order        PurchaseOrder @relation(fields: [orderId], references: [id])
-  orderId      Int
-  ingredient   Ingredient    @relation(fields: [ingredientId], references: [id])
-  ingredientId Int
-  quantity     Float
-  price        Decimal       @db.Decimal(10, 2)
+  id              Int              @id @default(autoincrement())
+  order           PurchaseOrder    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId         Int
+  
+  // Привязка к ингредиенту (опционально)
+  ingredient      Ingredient?      @relation(fields: [ingredientId], references: [id])
+  ingredientId    Int?
+  
+  // Привязка к складскому товару (для синхронизации)
+  inventoryItem   InventoryItem?   @relation(fields: [inventoryItemId], references: [id])
+  inventoryItemId Int?
+  
+  // Описание позиции
+  name            String           // Наименование товара
+  quantity        Float            // Заказанное количество
+  receivedQuantity Float?          // Фактически принятое количество
+  unit            String           // Единица измерения
+  price           Decimal          @db.Decimal(12, 2) // Цена за единицу
+  totalPrice      Decimal          @db.Decimal(12, 2) @default(0) // quantity * price
 
   @@index([orderId])
+  @@index([inventoryItemId])
 }
 
 // --- 4. КРУЖКИ ---
@@ -588,6 +722,31 @@ model KnowledgeBaseDocument {
   embedding Unsupported("vector(768)")?
   createdAt DateTime                    @default(now())
   updatedAt DateTime                    @updatedAt
+}
+
+// --- 8.1. БАЗА ЗНАНИЙ (СТАТЬИ) ---
+model KnowledgeBaseArticle {
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  content   String   @db.Text // Markdown контент
+  summary   String   // Автогенерируемое краткое описание
+  tags      String[] // Теги для фильтрации
+  roles     Role[]   // Роли, которым доступна статья (пустой = всем)
+
+  // Вектор для семантического поиска (Gemini text-embedding-004 = 768 dims)
+  embedding Unsupported("vector(768)")?
+
+  // Автор
+  authorId  Int
+  author    User     @relation("ArticleAuthor", fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([authorId])
+  @@index([tags])
 }
 
 // --- 9. СИСТЕМНЫЕ НАСТРОЙКИ ---

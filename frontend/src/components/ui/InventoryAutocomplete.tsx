@@ -4,17 +4,21 @@ import { Control, useController } from 'react-hook-form';
 import { api } from '../../lib/api';
 import { Input } from './input';
 
-export interface InventoryItem {
+export interface InventorySearchItem {
+  id: number;
   name: string;
   unit: string;
+  quantity: number;
+  type: string;
 }
 
 interface InventoryAutocompleteProps {
   name: string;
   control: Control<any>;
-  onSelect: (item: InventoryItem) => void;
+  onSelect: (item: InventorySearchItem) => void;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export function InventoryAutocomplete({
@@ -23,8 +27,9 @@ export function InventoryAutocomplete({
   onSelect,
   placeholder = 'Наименование товара',
   className = '',
+  disabled = false,
 }: InventoryAutocompleteProps) {
-  const [suggestions, setSuggestions] = useState<InventoryItem[]>([]);
+  const [suggestions, setSuggestions] = useState<InventorySearchItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -73,7 +78,7 @@ export function InventoryAutocomplete({
   };
 
   // Выбор элемента из списка
-  const handleSelect = (item: InventoryItem) => {
+  const handleSelect = (item: InventorySearchItem) => {
     field.onChange(item.name);
     setSuggestions([]);
     setIsOpen(false);
@@ -111,6 +116,7 @@ export function InventoryAutocomplete({
         placeholder={placeholder}
         className={`text-sm ${className}`}
         autoComplete="off"
+        disabled={disabled}
       />
       
       {/* Индикатор загрузки */}
@@ -125,14 +131,19 @@ export function InventoryAutocomplete({
         <ul className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {suggestions.map((item, index) => (
             <li
-              key={`${item.name}-${index}`}
+              key={`${item.name}-${item.id}`}
               onClick={() => handleSelect(item)}
               className="px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors flex justify-between items-center text-sm"
             >
               <span className="font-medium text-gray-800">{item.name}</span>
-              <span className="text-gray-500 text-xs bg-gray-100 px-2 py-0.5 rounded">
-                {item.unit}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-1.5 py-0.5 rounded ${item.quantity > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {item.quantity} {item.unit}
+                </span>
+                <span className="text-gray-500 text-xs bg-gray-100 px-2 py-0.5 rounded">
+                  {item.unit}
+                </span>
+              </div>
             </li>
           ))}
         </ul>

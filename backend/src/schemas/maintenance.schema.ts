@@ -7,6 +7,7 @@ const maintenanceItemSchema = z.object({
   quantity: z.number().positive("Количество должно быть положительным"),
   unit: z.string().min(1, "Единица измерения обязательна"),
   category: z.enum(["STATIONERY", "HOUSEHOLD", "OTHER"]),
+  inventoryItemId: z.number().int().positive().optional().nullable(), // Связь с товаром на складе
 });
 
 export const createMaintenanceSchema = z.object({

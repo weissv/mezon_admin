@@ -1,5 +1,5 @@
 // src/pages/InventoryPage.tsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useApi } from '../hooks/useApi';
 import { Card } from '../components/Card';
@@ -11,11 +11,15 @@ import {
   Item, 
   ShoppingListItem, 
   InventoryType,
+  InventoryTransaction,
+  InventoryTransactionType,
   inventoryTypeLabels,
-  inventoryTypeColors 
+  inventoryTypeColors,
+  transactionTypeLabels,
+  transactionTypeColors,
 } from '../types/inventory';
 import { api } from '../lib/api';
-import { PlusCircle, AlertTriangle, Apple, Package, Archive, Pencil } from 'lucide-react';
+import { PlusCircle, AlertTriangle, Apple, Package, Archive, Pencil, History, ArrowDownCircle, ArrowUpCircle, Trash2, BarChart3 } from 'lucide-react';
 
 type FilterType = 'ALL' | InventoryType;
 
@@ -30,7 +34,8 @@ export default function InventoryPage() {
     quantity: '',
     unit: '',
     expiryDate: '',
-    type: 'FOOD' as InventoryType
+    type: 'FOOD' as InventoryType,
+    minQuantity: '',
   });
   const [saving, setSaving] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[] | null>(null);
@@ -39,6 +44,29 @@ export default function InventoryPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingItem, setDeletingItem] = useState<Item | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Transaction history modal
+  const [transactionsModalOpen, setTransactionsModalOpen] = useState(false);
+  const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [selectedItemForHistory, setSelectedItemForHistory] = useState<Item | null>(null);
+
+  // Write-off modal
+  const [writeOffModalOpen, setWriteOffModalOpen] = useState(false);
+  const [writeOffItem, setWriteOffItem] = useState<Item | null>(null);
+  const [writeOffData, setWriteOffData] = useState({ quantity: '', reason: '' });
+  const [writingOff, setWritingOff] = useState(false);
+
+  // Receive (incoming) modal
+  const [receiveModalOpen, setReceiveModalOpen] = useState(false);
+  const [receiveItem, setReceiveItem] = useState<Item | null>(null);
+  const [receiveData, setReceiveData] = useState({ quantity: '', reason: '' });
+  const [receiving, setReceiving] = useState(false);
+
+  // All transactions log tab
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const [allTransactions, setAllTransactions] = useState<InventoryTransaction[]>([]);
+  const [allTransactionsLoading, setAllTransactionsLoading] = useState(false);
 
   // Filter items by type
   const filteredItems = useMemo(() => {
@@ -64,7 +92,7 @@ export default function InventoryPage() {
 
   const handleCreate = () => {
     setEditingItem(null);
-    setFormData({ name: '', quantity: '', unit: '', expiryDate: '', type: 'FOOD' });
+    setFormData({ name: '', quantity: '', unit: '', expiryDate: '', type: 'FOOD', minQuantity: '' });
     setIsItemModalOpen(true);
   };
 
@@ -75,7 +103,8 @@ export default function InventoryPage() {
       quantity: String(item.quantity),
       unit: item.unit,
       expiryDate: item.expiryDate ? new Date(item.expiryDate).toISOString().split('T')[0] : '',
-      type: (item as any).type || 'FOOD'
+      type: (item as any).type || 'FOOD',
+      minQuantity: String((item as any).minQuantity || 0),
     });
     setIsItemModalOpen(true);
   };
@@ -101,6 +130,77 @@ export default function InventoryPage() {
     }
   };
 
+  // Загрузить историю конкретного товара
+  const handleShowHistory = async (item: Item) => {
+    setSelectedItemForHistory(item);
+    setTransactionsLoading(true);
+    setTransactionsModalOpen(true);
+    try {
+      const res = await api.get(`/api/inventory/${item.id}/transactions`);
+      setTransactions(res.data);
+    } catch (error: any) {
+      toast.error('Ошибка загрузки истории', { description: error?.message });
+    } finally {
+      setTransactionsLoading(false);
+    }
+  };
+
+  // Загрузить все транзакции
+  const handleShowAllTransactions = async () => {
+    setShowAllTransactions(true);
+    setAllTransactionsLoading(true);
+    try {
+      const res = await api.get('/api/inventory/transactions?limit=200');
+      setAllTransactions(res.data);
+    } catch (error: any) {
+      toast.error('Ошибка загрузки журнала', { description: error?.message });
+    } finally {
+      setAllTransactionsLoading(false);
+    }
+  };
+
+  // Списание
+  const handleWriteOff = async () => {
+    if (!writeOffItem) return;
+    setWritingOff(true);
+    try {
+      await api.post(`/api/inventory/${writeOffItem.id}/write-off`, {
+        quantity: parseFloat(writeOffData.quantity),
+        reason: writeOffData.reason || 'Списание',
+      });
+      toast.success('Товар списан');
+      setWriteOffModalOpen(false);
+      setWriteOffItem(null);
+      setWriteOffData({ quantity: '', reason: '' });
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка списания', { description: error?.response?.data?.message || error?.message });
+    } finally {
+      setWritingOff(false);
+    }
+  };
+
+  // Приёмка
+  const handleReceive = async () => {
+    if (!receiveItem) return;
+    setReceiving(true);
+    try {
+      await api.post(`/api/inventory/${receiveItem.id}/receive`, {
+        quantity: parseFloat(receiveData.quantity),
+        reason: receiveData.reason || 'Приёмка товара',
+      });
+      toast.success('Товар принят');
+      setReceiveModalOpen(false);
+      setReceiveItem(null);
+      setReceiveData({ quantity: '', reason: '' });
+      fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка приёмки', { description: error?.response?.data?.message || error?.message });
+    } finally {
+      setReceiving(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -110,7 +210,8 @@ export default function InventoryPage() {
         quantity: parseFloat(formData.quantity),
         unit: formData.unit,
         expiryDate: formData.expiryDate || null,
-        type: formData.type
+        type: formData.type,
+        minQuantity: formData.minQuantity ? parseFloat(formData.minQuantity) : 0,
       };
 
       if (editingItem) {
@@ -139,6 +240,9 @@ export default function InventoryPage() {
         <div className="flex gap-2">
           <Button onClick={handleCreate}>
             <PlusCircle className="mr-2 h-4 w-4" /> Добавить товар
+          </Button>
+          <Button variant="outline" onClick={handleShowAllTransactions}>
+            <History className="mr-2 h-4 w-4" /> Журнал движений
           </Button>
           <Button onClick={() => setIsModalOpen(true)}>Сформировать список закупок</Button>
         </div>
@@ -230,12 +334,21 @@ export default function InventoryPage() {
                   </td>
                   <td className="p-2">{item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : '—'}</td>
                   <td className="p-2">
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                        Изменить
+                    <div className="flex gap-1 flex-wrap">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(item)} title="Редактировать">
+                        <Pencil className="h-3 w-3" />
                       </Button>
-                      <Button variant="destructive" size="sm" onClick={() => openDeleteModal(item)}>
-                        Удалить
+                      <Button variant="outline" size="sm" onClick={() => { setReceiveItem(item); setReceiveData({ quantity: '', reason: '' }); setReceiveModalOpen(true); }} title="Приёмка">
+                        <ArrowDownCircle className="h-3 w-3 text-green-600" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => { setWriteOffItem(item); setWriteOffData({ quantity: '', reason: '' }); setWriteOffModalOpen(true); }} title="Списание">
+                        <Trash2 className="h-3 w-3 text-red-600" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleShowHistory(item)} title="История движений">
+                        <History className="h-3 w-3 text-blue-600" />
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => openDeleteModal(item)} title="Удалить">
+                        &times;
                       </Button>
                     </div>
                   </td>
@@ -346,6 +459,18 @@ export default function InventoryPage() {
             )}
           </div>
 
+          <div>
+            <label className="block text-sm font-medium mb-1">Мин. остаток (для уведомлений)</label>
+            <Input
+              type="number"
+              value={formData.minQuantity}
+              onChange={(e) => setFormData({ ...formData, minQuantity: e.target.value })}
+              placeholder="0"
+              step="0.01"
+            />
+            <p className="text-xs text-gray-500 mt-1">При снижении остатка ниже этого значения товар будет выделяться</p>
+          </div>
+
           <div className="flex gap-2 justify-end pt-4">
             <Button
               type="button"
@@ -391,6 +516,179 @@ export default function InventoryPage() {
               {deleting ? 'Удаление...' : 'Удалить'}
             </Button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Transaction history modal for specific item */}
+      <Modal isOpen={transactionsModalOpen} onClose={() => setTransactionsModalOpen(false)} title={`История движений: ${selectedItemForHistory?.name || ''}`}>
+        <div className="p-4">
+          {transactionsLoading ? (
+            <div className="text-center py-4">Загрузка...</div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">Нет записей о движениях</div>
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="text-left p-2">Дата</th>
+                    <th className="text-left p-2">Тип</th>
+                    <th className="text-left p-2">Кол-во</th>
+                    <th className="text-left p-2">До → После</th>
+                    <th className="text-left p-2">Причина</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((tx: InventoryTransaction) => (
+                    <tr key={tx.id} className="border-t">
+                      <td className="p-2 whitespace-nowrap">{new Date(tx.createdAt).toLocaleString('ru')}</td>
+                      <td className="p-2">
+                        <span className={`px-2 py-0.5 rounded text-xs ${transactionTypeColors[tx.type]}`}>
+                          {transactionTypeLabels[tx.type]}
+                        </span>
+                      </td>
+                      <td className="p-2 font-mono">
+                        <span className={tx.type === 'IN' ? 'text-green-600' : 'text-red-600'}>
+                          {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
+                        </span>
+                      </td>
+                      <td className="p-2 font-mono text-xs">{tx.quantityBefore} → {tx.quantityAfter}</td>
+                      <td className="p-2 text-xs max-w-[200px] truncate" title={tx.reason || ''}>
+                        {tx.reason || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* Write-off modal */}
+      <Modal isOpen={writeOffModalOpen} onClose={() => setWriteOffModalOpen(false)} title="Списание товара">
+        <div className="p-4 space-y-4">
+          {writeOffItem && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+              <p className="font-medium">{writeOffItem.name}</p>
+              <p className="text-sm text-gray-600">На складе: <strong>{writeOffItem.quantity} {writeOffItem.unit}</strong></p>
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-medium mb-1">Количество для списания *</label>
+            <Input
+              type="number"
+              value={writeOffData.quantity}
+              onChange={(e) => setWriteOffData({ ...writeOffData, quantity: e.target.value })}
+              placeholder="0"
+              step="0.01"
+              max={writeOffItem?.quantity}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Причина списания</label>
+            <Input
+              value={writeOffData.reason}
+              onChange={(e) => setWriteOffData({ ...writeOffData, reason: e.target.value })}
+              placeholder="Просрочка, порча, и т.п."
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setWriteOffModalOpen(false)} disabled={writingOff}>Отмена</Button>
+            <Button variant="destructive" onClick={handleWriteOff} disabled={writingOff || !writeOffData.quantity}>
+              {writingOff ? 'Списание...' : 'Списать'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Receive (incoming) modal */}
+      <Modal isOpen={receiveModalOpen} onClose={() => setReceiveModalOpen(false)} title="Приёмка товара">
+        <div className="p-4 space-y-4">
+          {receiveItem && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="font-medium">{receiveItem.name}</p>
+              <p className="text-sm text-gray-600">Текущий остаток: <strong>{receiveItem.quantity} {receiveItem.unit}</strong></p>
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-medium mb-1">Количество прихода *</label>
+            <Input
+              type="number"
+              value={receiveData.quantity}
+              onChange={(e) => setReceiveData({ ...receiveData, quantity: e.target.value })}
+              placeholder="0"
+              step="0.01"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Комментарий</label>
+            <Input
+              value={receiveData.reason}
+              onChange={(e) => setReceiveData({ ...receiveData, reason: e.target.value })}
+              placeholder="Закупка, поставка и т.п."
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setReceiveModalOpen(false)} disabled={receiving}>Отмена</Button>
+            <Button onClick={handleReceive} disabled={receiving || !receiveData.quantity}>
+              {receiving ? 'Приёмка...' : 'Принять'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* All transactions log modal */}
+      <Modal isOpen={showAllTransactions} onClose={() => setShowAllTransactions(false)} title="Журнал движений склада">
+        <div className="p-4">
+          {allTransactionsLoading ? (
+            <div className="text-center py-4">Загрузка...</div>
+          ) : allTransactions.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">Нет записей о движениях</div>
+          ) : (
+            <div className="max-h-[70vh] overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="text-left p-2">Дата</th>
+                    <th className="text-left p-2">Товар</th>
+                    <th className="text-left p-2">Тип</th>
+                    <th className="text-left p-2">Кол-во</th>
+                    <th className="text-left p-2">До → После</th>
+                    <th className="text-left p-2">Причина</th>
+                    <th className="text-left p-2">Заявка</th>
+                    <th className="text-left p-2">Кто</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allTransactions.map((tx: InventoryTransaction) => (
+                    <tr key={tx.id} className="border-t hover:bg-gray-50">
+                      <td className="p-2 whitespace-nowrap text-xs">{new Date(tx.createdAt).toLocaleString('ru')}</td>
+                      <td className="p-2 font-medium">{tx.inventoryItem?.name || '—'}</td>
+                      <td className="p-2">
+                        <span className={`px-2 py-0.5 rounded text-xs ${transactionTypeColors[tx.type]}`}>
+                          {transactionTypeLabels[tx.type]}
+                        </span>
+                      </td>
+                      <td className="p-2 font-mono">
+                        <span className={tx.type === 'IN' ? 'text-green-600' : 'text-red-600'}>
+                          {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
+                        </span>
+                      </td>
+                      <td className="p-2 font-mono text-xs">{tx.quantityBefore} → {tx.quantityAfter}</td>
+                      <td className="p-2 text-xs max-w-[150px] truncate" title={tx.reason || ''}>{tx.reason || '—'}</td>
+                      <td className="p-2 text-xs">
+                        {tx.maintenanceRequest ? `#${tx.maintenanceRequest.id} ${tx.maintenanceRequest.title}` : '—'}
+                      </td>
+                      <td className="p-2 text-xs">
+                        {tx.performedBy ? `${tx.performedBy.firstName} ${tx.performedBy.lastName}` : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </Modal>
     </div>

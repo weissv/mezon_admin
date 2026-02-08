@@ -128,7 +128,7 @@ export default function MaintenancePage() {
       }
     } else if (watchType === 'ISSUE' && fields.length === 0) {
       // Для типа ISSUE добавляем хотя бы одну позицию, если их нет
-      append({ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' });
+      append({ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY', inventoryItemId: null });
     }
   }, [watchType, fields.length, remove, append]);
 
@@ -220,9 +220,10 @@ export default function MaintenancePage() {
             quantity: item.quantity,
             unit: item.unit,
             category: item.category,
+            inventoryItemId: item.inventoryItemId || null,
           }))
         : request.type === 'ISSUE' 
-          ? [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' }]
+          ? [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' as const, inventoryItemId: null }]
           : [], // Для REPAIR items должен быть пустым массивом
     });
     setIsModalOpen(true);
@@ -248,8 +249,22 @@ export default function MaintenancePage() {
       }
       
       if (editingRequest) {
-        await api.put(`/api/maintenance/${editingRequest.id}`, submitData);
+        const result = await api.put(`/api/maintenance/${editingRequest.id}`, submitData);
         toast.success('Заявка обновлена');
+        
+        // Показываем информацию о складской синхронизации
+        if (result?.stockDeduction) {
+          const sd = result.stockDeduction;
+          if (sd.transactions && sd.transactions.length > 0) {
+            const items = sd.transactions.map((t: any) => `${t.itemName}: -${t.deducted}`).join(', ');
+            toast.info(`Списано со склада: ${items}`, { duration: 5000 });
+          }
+          if (sd.warnings && sd.warnings.length > 0) {
+            for (const w of sd.warnings) {
+              toast.warning(w, { duration: 6000 });
+            }
+          }
+        }
       } else {
         // При создании заявки status устанавливается автоматически в PENDING
         await api.post('/api/maintenance', submitData);
@@ -481,6 +496,16 @@ export default function MaintenancePage() {
                     item.category === 'HOUSEHOLD' ? 'bg-amber-400' : 'bg-gray-400'
                   }`}></span>
                   <span>{item.name} — {item.quantity} {item.unit}</span>
+                  {/* Показываем фактически выданное количество (если есть) */}
+                  {item.issuedQuantity != null && item.issuedQuantity !== item.quantity && (
+                    <span className="text-orange-600 text-xs">(выдано: {item.issuedQuantity})</span>
+                  )}
+                  {/* Показываем остаток на складе */}
+                  {item.inventoryItem && row.status !== 'DONE' && (
+                    <span className={`text-xs ${item.inventoryItem.quantity < item.quantity ? 'text-red-500' : 'text-green-600'}`}>
+                      [на складе: {item.inventoryItem.quantity} {item.inventoryItem.unit}]
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -566,10 +591,11 @@ export default function MaintenancePage() {
             </>
           )}
           
-          {/* Редактирование: DEVELOPER и ADMIN всегда, ZAVHOZ для APPROVED/IN_PROGRESS/DONE, учитель для своих не-одобренных */}
+          {/* Редактирование: DEVELOPER и ADMIN всегда, ZAVHOZ для одобренных, учитель для своих не-одобренных, директор и завуч могут редактировать свои заявки */}
           {(canEditAll || 
             (isZavhoz && (row.status === 'APPROVED' || row.status === 'IN_PROGRESS' || row.status === 'DONE')) ||
-            (userRole === 'TEACHER' && row.status !== 'APPROVED' && row.status !== 'IN_PROGRESS' && row.status !== 'DONE')
+            (userRole === 'TEACHER' && row.status !== 'APPROVED' && row.status !== 'IN_PROGRESS' && row.status !== 'DONE') ||
+            ((userRole === 'DIRECTOR' || userRole === 'DEPUTY') && row.requesterId === user?.employee?.id)
           ) && (
             <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
               <Edit className="h-4 w-4" />
@@ -896,21 +922,23 @@ export default function MaintenancePage() {
             <>
               <div>
                 <label htmlFor="title" className="block mb-1 font-medium">Название заявки <span className="text-red-500">*</span></label>
-                <Input {...register('title')} id="title" placeholder="Например: Канцтовары для 3А класса" />
+                <Input {...register('title')} id="title" placeholder="Например: Канцтовары для 3А класса" disabled={editingRequest !== null && userRole === 'ZAVHOZ'} />
                 {errors.title && <FormError message={errors.title.message} />}
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="font-medium">Позиции заявки <span className="text-red-500">*</span></label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => append({ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' })}
-                  >
-                    <PlusCircle className="h-4 w-4 mr-1" /> Добавить позицию
-                  </Button>
+                  {!(editingRequest !== null && userRole === 'ZAVHOZ') && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => append({ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY', inventoryItemId: null })}
+                    >
+                      <PlusCircle className="h-4 w-4 mr-1" /> Добавить позицию
+                    </Button>
+                  )}
                 </div>
                 
                 {errors.items && typeof errors.items === 'object' && 'message' in errors.items && (
@@ -922,7 +950,7 @@ export default function MaintenancePage() {
                     <div key={field.id} className="p-3 bg-gray-50 rounded-lg border">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-sm font-medium text-gray-600">Позиция {index + 1}</span>
-                        {fields.length > 1 && (
+                        {fields.length > 1 && !(editingRequest !== null && userRole === 'ZAVHOZ') && (
                           <Button
                             type="button"
                             variant="ghost"
@@ -944,7 +972,9 @@ export default function MaintenancePage() {
                             onSelect={(selectedItem) => {
                               setValue(`items.${index}.name`, selectedItem.name);
                               setValue(`items.${index}.unit`, selectedItem.unit);
+                              setValue(`items.${index}.inventoryItemId`, selectedItem.id);
                             }}
+                            disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
                           />
                           {errors.items?.[index]?.name && (
                             <FormError message={errors.items[index]?.name?.message} />
@@ -960,6 +990,7 @@ export default function MaintenancePage() {
                               step="0.01"
                               placeholder="Кол-во"
                               className="text-sm"
+                              disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
                             />
                             {errors.items?.[index]?.quantity && (
                               <FormError message={errors.items[index]?.quantity?.message} />
@@ -970,6 +1001,7 @@ export default function MaintenancePage() {
                               {...register(`items.${index}.unit`)} 
                               placeholder="Ед.изм"
                               className="text-sm"
+                              disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
                             />
                             {errors.items?.[index]?.unit && (
                               <FormError message={errors.items[index]?.unit?.message} />
@@ -979,6 +1011,7 @@ export default function MaintenancePage() {
                             <select 
                               {...register(`items.${index}.category`)} 
                               className="w-full p-2 border rounded text-sm"
+                              disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
                             >
                               <option value="STATIONERY">Канц.</option>
                               <option value="HOUSEHOLD">Хоз.</option>
@@ -998,26 +1031,27 @@ export default function MaintenancePage() {
           {watchType === 'REPAIR' && (
             <div>
               <label htmlFor="title" className="block mb-1 font-medium">Тема <span className="text-red-500">*</span></label>
-              <Input {...register('title')} id="title" placeholder="Кратко опишите проблему" />
+              <Input {...register('title')} id="title" placeholder="Кратко опишите проблему" disabled={editingRequest !== null && userRole === 'ZAVHOZ'} />
               {errors.title && <FormError message={errors.title.message} />}
             </div>
           )}
 
           <div>
             <label htmlFor="description" className="block mb-1 font-medium">Описание {watchType === 'ISSUE' && '(необязательно)'}</label>
-            <textarea {...register('description')} id="description" className="w-full p-2 border rounded" rows={3} placeholder="Подробности..." />
+            <textarea {...register('description')} id="description" className="w-full p-2 border rounded" rows={3} placeholder="Подробности..." disabled={editingRequest !== null && userRole === 'ZAVHOZ'} />
           </div>
 
           {/* Завхоз может менять статус APPROVED -> IN_PROGRESS -> DONE */}
           {userRole === 'ZAVHOZ' && editingRequest && (editingRequest.status === 'APPROVED' || editingRequest.status === 'IN_PROGRESS' || editingRequest.status === 'DONE') && (
             <div>
-              <label htmlFor="status" className="block mb-1 font-medium">Статус заявки</label>
+              <label htmlFor="status" className="block mb-1 font-medium">Статус заявки <span className="text-red-500">*</span></label>
               <select {...register('status')} id="status" className="w-full p-2 border rounded">
                 <option value="APPROVED">Одобрено</option>
                 <option value="IN_PROGRESS">В работе</option>
                 <option value="DONE">Выполнено</option>
               </select>
               {errors.status && <FormError message={errors.status.message} />}
+              <p className="text-sm text-gray-500 mt-1">Вы можете изменять только статус выполнения заявки</p>
             </div>
           )}
 

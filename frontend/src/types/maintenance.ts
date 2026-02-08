@@ -69,8 +69,17 @@ export type MaintenanceItem = {
   requestId: number;
   name: string;
   quantity: number;
+  issuedQuantity?: number | null; // Фактически выданное количество
   unit: string;
   category: ItemCategory;
+  inventoryItemId?: number | null; // Связь с товаром на складе
+  inventoryItem?: {
+    id: number;
+    name: string;
+    quantity: number;
+    unit: string;
+    type?: string;
+  } | null;
   createdAt: string;
 };
 
@@ -110,6 +119,7 @@ const maintenanceItemFormSchema = z.object({
   quantity: z.number().positive('Количество должно быть положительным'),
   unit: z.string().min(1, 'Единица измерения обязательна'),
   category: z.enum(['STATIONERY', 'HOUSEHOLD', 'OTHER']),
+  inventoryItemId: z.number().int().positive().optional().nullable(), // Связь со складом
 });
 
 // Схема валидации для создания заявки
