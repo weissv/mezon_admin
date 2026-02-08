@@ -39,6 +39,7 @@ export const MODULE_LINKS: ModuleLink[] = [
   { path: "/action-log", label: "Журнал действий", roles: [...FULL_ACCESS_ROLES, "ADMIN"] },
   { path: "/notifications", label: "Уведомления", roles: [...FULL_ACCESS_ROLES, "ADMIN"] },
   { path: "/ai-assistant", label: "ИИ-Методист", roles: [...FULL_ACCESS_ROLES, "ADMIN", "TEACHER"] },
+  { path: "/knowledge-base", label: "База знаний", roles: ALL_ROLES },
 ];
 
 // Список всех модулей для управления правами
