@@ -17,5 +17,16 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["vitest/globals", "vite/client"]
   },
-  "include": ["src", "vite.config.js", "vitest.config.ts"]
+  "include": ["src", "vite.config.js", "vitest.config.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/test/**/*",
+    "cypress/**/*"
+  ]
 }
