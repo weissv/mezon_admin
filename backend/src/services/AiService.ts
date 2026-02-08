@@ -46,16 +46,25 @@ let syncStatus: SyncStatus = {
 let geminiClient: GoogleGenerativeAI | null = null;
 let groqClient: OpenAI | null = null;
 
-// Gemini API ключ для embeddings
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyAVj3h-G3QU1mZpS1hdQloAYhuvQMe_B7k";
+// AI API ключи (обязательные)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+if (!GEMINI_API_KEY) {
+  console.warn("⚠️  GEMINI_API_KEY не установлен. Embeddings и семантический поиск не будут работать.");
+}
 
-// Groq API ключ для chat
-const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+if (!GROQ_API_KEY) {
+  console.warn("⚠️  GROQ_API_KEY не установлен. AI-ассистент не будет работать.");
+}
 
-// Google Drive folder ID для базы знаний
-const GOOGLE_DRIVE_FOLDER_ID = "1d9_a3NQ2hHioMJsaUJ53NIj-CS1rVeDd";
+// Google Drive (опционально - для синхронизации документов)
+const GOOGLE_DRIVE_API_KEY = process.env.GOOGLE_DRIVE_API_KEY;
+const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || "";
 
 function getGeminiClient(): GoogleGenerativeAI {
+  if (!GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY не установлен в переменных окружения");
+  }
   if (!geminiClient) {
     geminiClient = new GoogleGenerativeAI(GEMINI_API_KEY);
   }
@@ -63,6 +72,9 @@ function getGeminiClient(): GoogleGenerativeAI {
 }
 
 function getGroqClient(): OpenAI {
+  if (!GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY не установлен в переменных окружения");
+  }
   if (!groqClient) {
     groqClient = new OpenAI({
       apiKey: GROQ_API_KEY,
@@ -134,15 +146,16 @@ interface GoogleDriveFile {
   webViewLink?: string;
 }
 
-// Google Drive API Key (нужно включить Drive API в Google Console)
-// Альтернатива: использовать Service Account
-const GOOGLE_DRIVE_API_KEY = process.env.GOOGLE_DRIVE_API_KEY || "AIzaSyA6wzkCTfiyRxtfSQiF4Ctlnc_oodtQ9dQ";
-
 /**
  * Получает список файлов из Google Drive папки (публичной)
  * Примечание: требуется включить Google Drive API в Google Console
  */
 async function getGoogleDriveFiles(): Promise<GoogleDriveFile[]> {
+  if (!GOOGLE_DRIVE_API_KEY || !GOOGLE_DRIVE_FOLDER_ID) {
+    console.log("ℹ️  Google Drive не настроен (GOOGLE_DRIVE_API_KEY или GOOGLE_DRIVE_FOLDER_ID отсутствуют)");
+    return [];
+  }
+  
   try {
     // Используем Google Drive API v3 для получения файлов из публичной папки
     const url = `https://www.googleapis.com/drive/v3/files?q='${GOOGLE_DRIVE_FOLDER_ID}'+in+parents&key=${GOOGLE_DRIVE_API_KEY}&fields=files(id,name,mimeType,webViewLink)`;

@@ -137,7 +137,14 @@ export default function InventoryPage() {
     setTransactionsModalOpen(true);
     try {
       const res = await api.get(`/api/inventory/${item.id}/transactions`);
-      setTransactions(res.data);
+      const resolved = Array.isArray(res)
+        ? res
+        : Array.isArray((res as any)?.items)
+          ? (res as any).items
+          : Array.isArray((res as any)?.data)
+            ? (res as any).data
+            : [];
+      setTransactions(resolved as InventoryTransaction[]);
     } catch (error: any) {
       toast.error('Ошибка загрузки истории', { description: error?.message });
     } finally {
@@ -151,7 +158,14 @@ export default function InventoryPage() {
     setAllTransactionsLoading(true);
     try {
       const res = await api.get('/api/inventory/transactions?limit=200');
-      setAllTransactions(res.data);
+      const resolved = Array.isArray(res)
+        ? res
+        : Array.isArray((res as any)?.items)
+          ? (res as any).items
+          : Array.isArray((res as any)?.data)
+            ? (res as any).data
+            : [];
+      setAllTransactions(resolved as InventoryTransaction[]);
     } catch (error: any) {
       toast.error('Ошибка загрузки журнала', { description: error?.message });
     } finally {
