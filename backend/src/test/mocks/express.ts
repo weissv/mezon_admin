@@ -23,12 +23,23 @@ export function createMockRequest(overrides: Partial<Request> = {}): Partial<Req
 /**
  * Создаёт мок Response объекта Express
  */
-export function createMockResponse(): Partial<Response> & {
+export type MockResponse = {
   statusCode: number;
   _json: unknown;
   _headers: Record<string, string>;
   _cookies: Record<string, { value: string; options: object }>;
-} {
+  status: (code: number) => MockResponse;
+  json: (data: unknown) => MockResponse;
+  send: (data?: unknown) => MockResponse;
+  setHeader: (name: string, value: string) => MockResponse;
+  header: (name: string, value: string) => MockResponse;
+  cookie: (name: string, value: string, options?: object) => MockResponse;
+  clearCookie: (name: string) => MockResponse;
+  redirect: (url: string) => MockResponse;
+  end: () => MockResponse;
+};
+
+export function createMockResponse(): MockResponse {
   const res: any = {
     statusCode: 200,
     _json: null,
@@ -80,7 +91,7 @@ export function createMockResponse(): Partial<Response> & {
     }),
   };
   
-  return res;
+  return res as MockResponse;
 }
 
 /**
