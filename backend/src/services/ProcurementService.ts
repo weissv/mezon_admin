@@ -111,7 +111,7 @@ export async function getOrderById(id: number) {
 
 export interface CreateOrderInput {
   type: PurchaseOrderType;
-  supplierId: number;
+  supplierId?: number | null;
   title: string;
   description?: string;
   priority?: number;
@@ -139,7 +139,7 @@ export async function createOrder(input: CreateOrderInput, createdById: number) 
       orderNumber,
       type: input.type,
       status: "DRAFT",
-      supplierId: input.supplierId,
+      supplierId: input.supplierId ?? undefined,
       title: input.title,
       description: input.description || null,
       priority: input.priority ?? 0,
