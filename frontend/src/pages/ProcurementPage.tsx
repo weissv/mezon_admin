@@ -7,7 +7,8 @@ import { Modal } from '../components/Modal';
 import { 
   ShoppingCart, Users, PlusCircle, AlertTriangle, Search, 
   Package, Check, X, Truck, ClipboardCheck, ArrowRight,
-  BarChart3, Edit, Trash2, Eye, Send, Ban, RefreshCw
+  BarChart3, Edit, Trash2, Eye, Send, Ban, RefreshCw,
+  TrendingUp, Clock, DollarSign, Archive, Link2, AlertCircle
 } from 'lucide-react';
 import { 
   PurchaseOrder, Supplier, PurchaseOrderStatus,
@@ -24,26 +25,39 @@ export default function ProcurementPage() {
   const [viewMode, setViewMode] = useState<'orders' | 'suppliers'>('orders');
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <ShoppingCart className="h-6 w-6" />
-          Закупки
-        </h1>
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'orders' ? 'default' : 'outline'}
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+            <ShoppingCart className="h-6 w-6 text-blue-600" />
+            Закупки
+          </h1>
+          <p className="text-sm text-gray-500 mt-0.5">Управление заказами и поставщиками</p>
+        </div>
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+          <button
             onClick={() => setViewMode('orders')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'orders'
+                ? 'bg-white text-blue-700 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
           >
-            <Package className="mr-2 h-4 w-4" />
+            <Package className="h-4 w-4" />
             Заказы
-          </Button>
-          <Button
-            variant={viewMode === 'suppliers' ? 'default' : 'outline'}
+          </button>
+          <button
             onClick={() => setViewMode('suppliers')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'suppliers'
+                ? 'bg-white text-blue-700 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
           >
-            <Users className="mr-2 h-4 w-4" /> Поставщики
-          </Button>
+            <Users className="h-4 w-4" />
+            Поставщики
+          </button>
         </div>
       </div>
 
@@ -67,6 +81,9 @@ function OrdersView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<PurchaseOrder | null>(null);
   const [viewOrder, setViewOrder] = useState<PurchaseOrder | null>(null);
+
+  // Статистика
+  const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; totalSpent: number } | null>(null);
 
   // Фильтры
   const [filterStatus, setFilterStatus] = useState<string>('');
@@ -107,7 +124,14 @@ function OrdersView() {
     }
   }, [filterStatus, filterType, searchQuery]);
 
-  useEffect(() => { fetchOrders(); }, [fetchOrders]);
+  const fetchStats = useCallback(async () => {
+    try {
+      const data = await api.get('/api/procurement/orders/stats');
+      setStats(data);
+    } catch { /* stats are optional */ }
+  }, []);
+
+  useEffect(() => { fetchOrders(); fetchStats(); }, [fetchOrders, fetchStats]);
 
   const handleCreate = (type: 'PLANNED' | 'OPERATIONAL') => {
     setEditingOrder({ type } as any);
@@ -118,6 +142,7 @@ function OrdersView() {
     setIsModalOpen(false);
     setEditingOrder(null);
     fetchOrders();
+    fetchStats();
   };
 
   // Workflow actions
@@ -127,6 +152,7 @@ function OrdersView() {
       await api.post(`/api/procurement/orders/${orderId}/${action}`, body || {});
       toast.success('Действие выполнено');
       fetchOrders();
+      fetchStats();
       setRejectModalOpen(false);
       setRejectReason('');
       setActionOrder(null);
@@ -156,6 +182,7 @@ function OrdersView() {
       setReceiveOrderState(null);
       setReceiveNote('');
       fetchOrders();
+      fetchStats();
     } catch (error: any) {
       toast.error(error?.message || 'Ошибка приёмки');
     } finally {
@@ -172,6 +199,7 @@ function OrdersView() {
       setDeleteModalOpen(false);
       setDeletingOrder(null);
       fetchOrders();
+      fetchStats();
     } catch (error: any) {
       toast.error(error?.message || 'Ошибка удаления');
     } finally {
@@ -278,92 +306,173 @@ function OrdersView() {
 
   return (
     <>
-      {/* Фильтры */}
-      <div className="flex flex-wrap gap-3 mb-4 items-end">
-        <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Поиск по номеру, названию..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+      {/* Статистика (мини-дашборд) */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-blue-50">
+              <Package className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-800">{stats.total}</p>
+              <p className="text-xs text-gray-500">Всего заказов</p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-yellow-50">
+              <Clock className="h-5 w-5 text-yellow-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-800">{(stats.byStatus?.['PENDING'] || 0) + (stats.byStatus?.['DRAFT'] || 0)}</p>
+              <p className="text-xs text-gray-500">На рассмотрении</p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-green-50">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-800">{(stats.byStatus?.['ORDERED'] || 0) + (stats.byStatus?.['DELIVERED'] || 0)}</p>
+              <p className="text-xs text-gray-500">В процессе</p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-emerald-50">
+              <DollarSign className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-gray-800">{currency.format(stats.totalSpent || 0)}</p>
+              <p className="text-xs text-gray-500">Общие расходы</p>
+            </div>
           </div>
         </div>
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 border rounded-md text-sm">
-          <option value="">Все статусы</option>
-          {Object.entries(purchaseOrderStatusLabels).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
-        </select>
-        <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="px-3 py-2 border rounded-md text-sm">
-          <option value="">Все типы</option>
-          <option value="PLANNED">Плановая</option>
-          <option value="OPERATIONAL">Оперативная</option>
-        </select>
+      )}
 
-        {canCreate && (
-          <div className="flex gap-2">
-            <Button onClick={() => handleCreate('PLANNED')} className="bg-blue-600 hover:bg-blue-700">
-              <PlusCircle className="mr-2 h-4 w-4" /> Плановая закупка
-            </Button>
-            <Button onClick={() => handleCreate('OPERATIONAL')} className="bg-red-600 hover:bg-red-700">
-              <PlusCircle className="mr-2 h-4 w-4" /> Оперативная
+      {/* Фильтры */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
+        <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[220px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1">Поиск</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Поиск по номеру, названию..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Статус</label>
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Все статусы</option>
+              {Object.entries(purchaseOrderStatusLabels).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Тип</label>
+            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Все типы</option>
+              <option value="PLANNED">Плановая</option>
+              <option value="OPERATIONAL">Оперативная</option>
+            </select>
+          </div>
+          <div>
+            <Button variant="outline" size="sm" onClick={() => { fetchOrders(); fetchStats(); }} className="h-[38px]">
+              <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
-        )}
+
+          {canCreate && (
+            <div className="flex gap-2 ml-auto">
+              <Button onClick={() => handleCreate('PLANNED')} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
+                <PlusCircle className="mr-2 h-4 w-4" /> Плановая закупка
+              </Button>
+              <Button onClick={() => handleCreate('OPERATIONAL')} className="bg-red-600 hover:bg-red-700 shadow-sm">
+                <PlusCircle className="mr-2 h-4 w-4" /> Оперативная
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Таблица заказов */}
       {loading ? (
-        <div className="text-center py-10 text-gray-500">Загрузка...</div>
+        <div className="text-center py-16">
+          <RefreshCw className="h-8 w-8 animate-spin text-blue-400 mx-auto mb-3" />
+          <p className="text-gray-500">Загрузка заказов...</p>
+        </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-10 text-gray-400">Заказов пока нет</div>
+        <div className="text-center py-16 bg-white border border-gray-200 rounded-xl">
+          <Archive className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500 font-medium">Заказов пока нет</p>
+          <p className="text-sm text-gray-400 mt-1">Создайте первый заказ на закупку</p>
+        </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50">
-                <th className="text-left p-3">№</th>
-                <th className="text-left p-3">Тип</th>
-                <th className="text-left p-3">Название</th>
-                <th className="text-left p-3">Поставщик</th>
-                <th className="text-left p-3">Дата</th>
-                <th className="text-right p-3">Сумма</th>
-                <th className="text-left p-3">Приоритет</th>
-                <th className="text-left p-3">Статус</th>
-                <th className="text-left p-3">Создатель</th>
-                <th className="text-left p-3">Действия</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3 font-mono text-xs">{order.orderNumber}</td>
-                  <td className="p-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${purchaseOrderTypeColors[order.type]}`}>
-                      {purchaseOrderTypeLabels[order.type]}
-                    </span>
-                  </td>
-                  <td className="p-3 font-medium max-w-[200px] truncate">{order.title}</td>
-                  <td className="p-3">{order.supplier?.name || '—'}</td>
-                  <td className="p-3 text-xs whitespace-nowrap">{new Date(order.orderDate).toLocaleDateString('ru-RU')}</td>
-                  <td className="p-3 text-right whitespace-nowrap font-medium">{currency.format(order.totalAmount)}</td>
-                  <td className="p-3">
-                    <span className={`px-2 py-0.5 rounded text-xs ${priorityColors[order.priority] || 'bg-gray-100'}`}>
-                      {priorityLabels[order.priority] || 'Обычный'}
-                    </span>
-                  </td>
-                  <td className="p-3">{getStatusBadge(order.status)}</td>
-                  <td className="p-3 text-xs">
-                    {order.createdBy ? `${order.createdBy.firstName} ${order.createdBy.lastName}` : '—'}
-                  </td>
-                  <td className="p-3">{renderActions(order)}</td>
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b bg-gray-50/80">
+                  <th className="text-left p-3 font-semibold text-gray-600">№</th>
+                  <th className="text-left p-3 font-semibold text-gray-600">Тип</th>
+                  <th className="text-left p-3 font-semibold text-gray-600">Название</th>
+                  <th className="text-left p-3 font-semibold text-gray-600">Поставщик</th>
+                  <th className="text-left p-3 font-semibold text-gray-600">Дата</th>
+                  <th className="text-right p-3 font-semibold text-gray-600">Сумма</th>
+                  <th className="text-left p-3 font-semibold text-gray-600">Приоритет</th>
+                  <th className="text-left p-3 font-semibold text-gray-600">Статус</th>
+                  <th className="text-left p-3 font-semibold text-gray-600">Склад</th>
+                  <th className="text-left p-3 font-semibold text-gray-600">Действия</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {orders.map((order) => {
+                  const hasInventoryLinks = order.items?.some(i => i.inventoryItemId);
+                  const allLinked = order.items?.length > 0 && order.items.every(i => i.inventoryItemId);
+                  
+                  return (
+                    <tr key={order.id} className="border-b hover:bg-gray-50/50 transition-colors">
+                      <td className="p-3 font-mono text-xs text-gray-500">{order.orderNumber}</td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${purchaseOrderTypeColors[order.type]}`}>
+                          {purchaseOrderTypeLabels[order.type]}
+                        </span>
+                      </td>
+                      <td className="p-3 font-medium max-w-[200px] truncate text-gray-800">{order.title}</td>
+                      <td className="p-3 text-gray-600">{order.supplier?.name || <span className="text-gray-400 italic">—</span>}</td>
+                      <td className="p-3 text-xs whitespace-nowrap text-gray-500">{new Date(order.orderDate).toLocaleDateString('ru-RU')}</td>
+                      <td className="p-3 text-right whitespace-nowrap font-semibold text-gray-800">{currency.format(order.totalAmount)}</td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${priorityColors[order.priority] || 'bg-gray-100'}`}>
+                          {priorityLabels[order.priority] || 'Обычный'}
+                        </span>
+                      </td>
+                      <td className="p-3">{getStatusBadge(order.status)}</td>
+                      <td className="p-3">
+                        {hasInventoryLinks ? (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${allLinked ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            <Link2 className="h-3 w-3" />
+                            {allLinked ? 'Связан' : 'Частично'}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="p-3">{renderActions(order)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-4 py-3 border-t bg-gray-50/50 text-xs text-gray-500 flex justify-between items-center">
+            <span>Показано {orders.length} заказ(ов)</span>
+            <span>Общая сумма: <strong className="text-gray-700">{currency.format(orders.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0))}</strong></span>
+          </div>
         </div>
       )}
 
@@ -383,44 +492,152 @@ function OrdersView() {
       {/* Модал просмотра деталей */}
       <Modal isOpen={!!viewOrder} onClose={() => setViewOrder(null)} title={viewOrder ? `Заказ ${viewOrder.orderNumber}` : ''}>
         {viewOrder && (
-          <div className="space-y-4 p-2">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><span className="text-gray-500">Тип:</span> <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium ${purchaseOrderTypeColors[viewOrder.type]}`}>{purchaseOrderTypeLabels[viewOrder.type]}</span></div>
-              <div><span className="text-gray-500">Статус:</span> {getStatusBadge(viewOrder.status)}</div>
-              <div><span className="text-gray-500">Приоритет:</span> <span className={`ml-2 px-2 py-0.5 rounded text-xs ${priorityColors[viewOrder.priority]}`}>{priorityLabels[viewOrder.priority]}</span></div>
-              <div><span className="text-gray-500">Сумма:</span> <strong>{currency.format(viewOrder.totalAmount)}</strong></div>
-              <div><span className="text-gray-500">Поставщик:</span> {viewOrder.supplier?.name}</div>
-              <div><span className="text-gray-500">Дата заказа:</span> {new Date(viewOrder.orderDate).toLocaleDateString('ru-RU')}</div>
-              {viewOrder.expectedDeliveryDate && <div><span className="text-gray-500">Ожид. доставка:</span> {new Date(viewOrder.expectedDeliveryDate).toLocaleDateString('ru-RU')}</div>}
-              {viewOrder.actualDeliveryDate && <div><span className="text-gray-500">Факт. доставка:</span> {new Date(viewOrder.actualDeliveryDate).toLocaleDateString('ru-RU')}</div>}
-              {viewOrder.budgetSource && <div><span className="text-gray-500">Источник:</span> {viewOrder.budgetSource}</div>}
-              <div><span className="text-gray-500">Создатель:</span> {viewOrder.createdBy ? `${viewOrder.createdBy.firstName} ${viewOrder.createdBy.lastName}` : '—'}</div>
-              {viewOrder.approvedBy && <div><span className="text-gray-500">Одобрил:</span> {viewOrder.approvedBy.firstName} {viewOrder.approvedBy.lastName} ({viewOrder.approvedAt ? new Date(viewOrder.approvedAt).toLocaleDateString('ru-RU') : ''})</div>}
-              {viewOrder.receivedBy && <div><span className="text-gray-500">Принял:</span> {viewOrder.receivedBy.firstName} {viewOrder.receivedBy.lastName}</div>}
+          <div className="space-y-5 p-2 max-h-[75vh] overflow-y-auto">
+            {/* Шапка с ключевой информацией */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-1">Тип закупки</p>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${purchaseOrderTypeColors[viewOrder.type]}`}>{purchaseOrderTypeLabels[viewOrder.type]}</span>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-1">Статус</p>
+                {getStatusBadge(viewOrder.status)}
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-1">Приоритет</p>
+                <span className={`px-2 py-0.5 rounded text-xs font-medium ${priorityColors[viewOrder.priority]}`}>{priorityLabels[viewOrder.priority]}</span>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-3">
+                <p className="text-xs text-blue-600 mb-1">Итого</p>
+                <p className="text-lg font-bold text-blue-700">{currency.format(viewOrder.totalAmount)}</p>
+              </div>
             </div>
-            {viewOrder.description && <div className="text-sm"><span className="text-gray-500">Обоснование:</span> {viewOrder.description}</div>}
-            {viewOrder.rejectionReason && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700"><strong>Причина отклонения:</strong> {viewOrder.rejectionReason}</div>}
-            {viewOrder.receiveNote && <div className="text-sm"><span className="text-gray-500">Примечание приёмки:</span> {viewOrder.receiveNote}</div>}
+
+            {/* Детали */}
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between py-1.5 border-b border-gray-100">
+                <span className="text-gray-500">Поставщик</span>
+                <span className="font-medium">{viewOrder.supplier?.name || <span className="text-gray-400 italic">Не указан</span>}</span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-gray-100">
+                <span className="text-gray-500">Дата заказа</span>
+                <span>{new Date(viewOrder.orderDate).toLocaleDateString('ru-RU')}</span>
+              </div>
+              {viewOrder.expectedDeliveryDate && (
+                <div className="flex justify-between py-1.5 border-b border-gray-100">
+                  <span className="text-gray-500">Ожид. доставка</span>
+                  <span>{new Date(viewOrder.expectedDeliveryDate).toLocaleDateString('ru-RU')}</span>
+                </div>
+              )}
+              {viewOrder.actualDeliveryDate && (
+                <div className="flex justify-between py-1.5 border-b border-gray-100">
+                  <span className="text-gray-500">Факт. доставка</span>
+                  <span className="text-green-600">{new Date(viewOrder.actualDeliveryDate).toLocaleDateString('ru-RU')}</span>
+                </div>
+              )}
+              {viewOrder.budgetSource && (
+                <div className="flex justify-between py-1.5 border-b border-gray-100">
+                  <span className="text-gray-500">Источник</span>
+                  <span>{viewOrder.budgetSource}</span>
+                </div>
+              )}
+              <div className="flex justify-between py-1.5 border-b border-gray-100">
+                <span className="text-gray-500">Создатель</span>
+                <span>{viewOrder.createdBy ? `${viewOrder.createdBy.firstName} ${viewOrder.createdBy.lastName}` : '—'}</span>
+              </div>
+              {viewOrder.approvedBy && (
+                <div className="flex justify-between py-1.5 border-b border-gray-100">
+                  <span className="text-gray-500">Одобрил</span>
+                  <span>{viewOrder.approvedBy.firstName} {viewOrder.approvedBy.lastName} {viewOrder.approvedAt ? `(${new Date(viewOrder.approvedAt).toLocaleDateString('ru-RU')})` : ''}</span>
+                </div>
+              )}
+              {viewOrder.receivedBy && (
+                <div className="flex justify-between py-1.5 border-b border-gray-100">
+                  <span className="text-gray-500">Принял на склад</span>
+                  <span className="text-green-600">{viewOrder.receivedBy.firstName} {viewOrder.receivedBy.lastName}</span>
+                </div>
+              )}
+            </div>
+
+            {viewOrder.description && (
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-1">Обоснование</p>
+                <p className="text-sm">{viewOrder.description}</p>
+              </div>
+            )}
+
+            {viewOrder.rejectionReason && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                <div className="flex items-center gap-1.5 mb-1 font-medium">
+                  <AlertCircle className="h-4 w-4" />
+                  Причина отклонения
+                </div>
+                {viewOrder.rejectionReason}
+              </div>
+            )}
+
+            {viewOrder.receiveNote && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700">
+                <p className="font-medium mb-0.5">Примечание приёмки</p>
+                {viewOrder.receiveNote}
+              </div>
+            )}
             
             {/* Позиции заказа */}
-            <div className="border-t pt-3">
-              <h4 className="font-medium mb-2">Позиции заказа ({viewOrder.items?.length || 0})</h4>
-              <table className="w-full text-sm border-collapse">
-                <thead><tr className="border-b bg-gray-50"><th className="p-2 text-left">Наименование</th><th className="p-2 text-right">Кол-во</th><th className="p-2 text-right">Принято</th><th className="p-2 text-left">Ед.</th><th className="p-2 text-right">Цена</th><th className="p-2 text-right">Сумма</th></tr></thead>
-                <tbody>
-                  {viewOrder.items?.map((item) => (
-                    <tr key={item.id} className="border-b">
-                      <td className="p-2">{item.name}</td>
-                      <td className="p-2 text-right">{item.quantity}</td>
-                      <td className="p-2 text-right">{item.receivedQuantity != null ? item.receivedQuantity : '—'}</td>
-                      <td className="p-2">{item.unit}</td>
-                      <td className="p-2 text-right">{currency.format(item.price)}</td>
-                      <td className="p-2 text-right font-medium">{currency.format(item.totalPrice)}</td>
+            <div className="border-t pt-4">
+              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Позиции заказа ({viewOrder.items?.length || 0})
+              </h4>
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b">
+                      <th className="p-2.5 text-left text-xs font-semibold text-gray-500">Наименование</th>
+                      <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Заказано</th>
+                      <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Принято</th>
+                      <th className="p-2.5 text-left text-xs font-semibold text-gray-500">Ед.</th>
+                      <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Цена</th>
+                      <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Сумма</th>
+                      <th className="p-2.5 text-center text-xs font-semibold text-gray-500">Склад</th>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot><tr className="border-t-2 font-bold"><td colSpan={5} className="p-2 text-right">Итого:</td><td className="p-2 text-right">{currency.format(viewOrder.totalAmount)}</td></tr></tfoot>
-              </table>
+                  </thead>
+                  <tbody>
+                    {viewOrder.items?.map((item) => (
+                      <tr key={item.id} className="border-b last:border-b-0">
+                        <td className="p-2.5 font-medium">{item.name}</td>
+                        <td className="p-2.5 text-right">{item.quantity}</td>
+                        <td className="p-2.5 text-right">
+                          {item.receivedQuantity != null ? (
+                            <span className={item.receivedQuantity < item.quantity ? 'text-orange-600' : 'text-green-600'}>
+                              {item.receivedQuantity}
+                            </span>
+                          ) : '—'}
+                        </td>
+                        <td className="p-2.5 text-gray-500">{item.unit}</td>
+                        <td className="p-2.5 text-right">{currency.format(item.price)}</td>
+                        <td className="p-2.5 text-right font-medium">{currency.format(item.totalPrice)}</td>
+                        <td className="p-2.5 text-center">
+                          {item.inventoryItemId ? (
+                            <span className="inline-flex items-center gap-0.5 text-green-600" title={`Связан с складским товаром #${item.inventoryItemId}`}>
+                              <Link2 className="h-3.5 w-3.5" />
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 font-bold bg-blue-50/50">
+                      <td colSpan={5} className="p-2.5 text-right text-gray-600">Итого:</td>
+                      <td className="p-2.5 text-right text-blue-700">{currency.format(viewOrder.totalAmount)}</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -450,25 +667,48 @@ function OrdersView() {
       <Modal isOpen={receiveModalOpen} onClose={() => { setReceiveModalOpen(false); setReceiveNote(''); setReceiveOrderState(null); }} title="Приёмка товара на склад">
         {receiveOrder && (
           <div className="space-y-4 p-2">
-            <div className="bg-green-50 border border-green-200 rounded p-3 text-sm">
-              <p className="font-medium text-green-800 mb-2">Заказ {receiveOrder.orderNumber}: {receiveOrder.title}</p>
-              <p className="text-green-700">Следующие товары будут добавлены на склад:</p>
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm">
+              <p className="font-medium text-emerald-800 mb-1 flex items-center gap-2">
+                <ClipboardCheck className="h-4 w-4" />
+                Заказ {receiveOrder.orderNumber}: {receiveOrder.title}
+              </p>
+              <p className="text-emerald-700 text-xs">
+                Следующие товары будут добавлены на склад. Если товар привязан к складской позиции — количество обновится автоматически. Если нет — будет создана новая складская позиция.
+              </p>
             </div>
-            <table className="w-full text-sm border-collapse">
-              <thead><tr className="border-b bg-gray-50"><th className="p-2 text-left">Товар</th><th className="p-2 text-right">Кол-во</th><th className="p-2 text-left">Ед.</th></tr></thead>
-              <tbody>
-                {receiveOrder.items?.map((item) => (
-                  <tr key={item.id} className="border-b">
-                    <td className="p-2">{item.name}</td>
-                    <td className="p-2 text-right font-medium">{item.quantity}</td>
-                    <td className="p-2">{item.unit}</td>
+            <div className="rounded-lg border border-gray-200 overflow-hidden">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 border-b">
+                    <th className="p-2.5 text-left text-xs font-semibold text-gray-500">Товар</th>
+                    <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Кол-во</th>
+                    <th className="p-2.5 text-left text-xs font-semibold text-gray-500">Ед.</th>
+                    <th className="p-2.5 text-center text-xs font-semibold text-gray-500">Склад</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {receiveOrder.items?.map((item) => (
+                    <tr key={item.id} className="border-b last:border-b-0">
+                      <td className="p-2.5 font-medium">{item.name}</td>
+                      <td className="p-2.5 text-right font-semibold text-emerald-700">+{item.quantity}</td>
+                      <td className="p-2.5 text-gray-500">{item.unit}</td>
+                      <td className="p-2.5 text-center">
+                        {item.inventoryItemId ? (
+                          <span className="inline-flex items-center gap-1 text-green-600 text-xs">
+                            <Link2 className="h-3 w-3" /> Обновится
+                          </span>
+                        ) : (
+                          <span className="text-yellow-600 text-xs">Новый товар</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Примечание (необязательно)</label>
-              <textarea className="w-full p-2 border rounded text-sm" rows={2} value={receiveNote} onChange={(e) => setReceiveNote(e.target.value)} placeholder="Примечание при приёмке..." />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Примечание (необязательно)</label>
+              <textarea className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows={2} value={receiveNote} onChange={(e) => setReceiveNote(e.target.value)} placeholder="Примечание при приёмке..." />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setReceiveModalOpen(false)} disabled={actionLoading}>Отмена</Button>
@@ -522,6 +762,7 @@ function SuppliersView() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchSuppliers = useCallback(async () => {
     setLoading(true);
@@ -536,6 +777,12 @@ function SuppliersView() {
   }, []);
 
   useEffect(() => { fetchSuppliers(); }, [fetchSuppliers]);
+
+  const filteredSuppliers = suppliers.filter(s =>
+    !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.contactInfo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.phone?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleDelete = async () => {
     if (!deletingSupplier) return;
@@ -562,63 +809,87 @@ function SuppliersView() {
 
   return (
     <>
-      <div className="mb-4 flex justify-end">
-        {canManage && (
-          <Button onClick={() => { setEditingSupplier(null); setIsModalOpen(true); }}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Добавить поставщика
-          </Button>
-        )}
+      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
+        <div className="flex gap-3 items-end">
+          <div className="flex-1 min-w-[220px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1">Поиск поставщика</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Название, телефон, контакты..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+          {canManage && (
+            <Button onClick={() => { setEditingSupplier(null); setIsModalOpen(true); }} className="shadow-sm">
+              <PlusCircle className="mr-2 h-4 w-4" /> Добавить поставщика
+            </Button>
+          )}
+        </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-gray-500">Загрузка...</div>
-      ) : suppliers.length === 0 ? (
-        <div className="text-center py-10 text-gray-400">Поставщиков пока нет</div>
+        <div className="text-center py-16">
+          <RefreshCw className="h-8 w-8 animate-spin text-blue-400 mx-auto mb-3" />
+          <p className="text-gray-500">Загрузка поставщиков...</p>
+        </div>
+      ) : filteredSuppliers.length === 0 ? (
+        <div className="text-center py-16 bg-white border border-gray-200 rounded-xl">
+          <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500 font-medium">{searchQuery ? 'Поставщики не найдены' : 'Поставщиков пока нет'}</p>
+          <p className="text-sm text-gray-400 mt-1">{searchQuery ? 'Попробуйте изменить поиск' : 'Добавьте первого поставщика'}</p>
+        </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50">
-                <th className="text-left p-3">Название</th>
-                <th className="text-left p-3">Контакты</th>
-                <th className="text-left p-3">Телефон</th>
-                <th className="text-left p-3">Email</th>
-                <th className="text-left p-3">ИНН</th>
-                <th className="text-center p-3">Заказов</th>
-                <th className="text-center p-3">Статус</th>
-                {canManage && <th className="text-left p-3">Действия</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {suppliers.map((s) => (
-                <tr key={s.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3 font-medium">{s.name}</td>
-                  <td className="p-3 text-sm">{s.contactInfo || '—'}</td>
-                  <td className="p-3 text-sm">{s.phone || '—'}</td>
-                  <td className="p-3 text-sm">{s.email || '—'}</td>
-                  <td className="p-3 text-sm font-mono">{s.inn || '—'}</td>
-                  <td className="p-3 text-center">{s._count?.orders ?? 0}</td>
-                  <td className="p-3 text-center">
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${s.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}`}>
-                      {s.isActive ? 'Активен' : 'Неактивен'}
-                    </span>
-                  </td>
-                  {canManage && (
-                    <td className="p-3">
-                      <div className="flex gap-1">
-                        <Button variant="outline" size="sm" onClick={() => { setEditingSupplier(s); setIsModalOpen(true); }}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-red-500" onClick={() => { setDeletingSupplier(s); setDeleteModalOpen(true); }}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {filteredSuppliers.map((s) => (
+            <div key={s.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${s.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  <h3 className="font-semibold text-gray-800">{s.name}</h3>
+                </div>
+                {canManage && (
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => { setEditingSupplier(s); setIsModalOpen(true); }} className="h-8 w-8 p-0">
+                      <Edit className="h-3.5 w-3.5 text-gray-500" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-400 hover:text-red-600" onClick={() => { setDeletingSupplier(s); setDeleteModalOpen(true); }}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1.5 text-sm text-gray-600">
+                {s.phone && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">📞</span> {s.phone}
+                  </div>
+                )}
+                {s.email && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">✉️</span> {s.email}
+                  </div>
+                )}
+                {s.inn && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">🏢</span> <span className="font-mono text-xs">{s.inn}</span>
+                  </div>
+                )}
+                {s.contactInfo && (
+                  <div className="text-xs text-gray-500 mt-1 line-clamp-2">{s.contactInfo}</div>
+                )}
+              </div>
+              <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                  {s.isActive ? 'Активен' : 'Неактивен'}
+                </span>
+                <span className="text-xs text-gray-500">{s._count?.orders ?? 0} заказ(ов)</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

@@ -537,9 +537,9 @@ model PurchaseOrder {
   type            PurchaseOrderType   @default(PLANNED)
   status          PurchaseOrderStatus @default(DRAFT)
   
-  // Поставщик
-  supplier        Supplier            @relation(fields: [supplierId], references: [id])
-  supplierId      Int
+  // Поставщик (опционально)
+  supplier        Supplier?           @relation(fields: [supplierId], references: [id])
+  supplierId      Int?
   
   // Описание и даты
   title           String              // Название/описание закупки

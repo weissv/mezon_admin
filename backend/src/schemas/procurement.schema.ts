@@ -13,7 +13,7 @@ const purchaseOrderItemSchema = z.object({
 export const createOrderSchema = z.object({
   body: z.object({
     type: z.enum(["PLANNED", "OPERATIONAL"]),
-    supplierId: z.number().int().positive("Выберите поставщика"),
+    supplierId: z.number().int().positive("Выберите поставщика").optional().nullable(),
     title: z.string().min(3, "Название обязательно (минимум 3 символа)"),
     description: z.string().optional(),
     priority: z.number().int().min(0).max(2).optional().default(0),

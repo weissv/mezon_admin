@@ -53,8 +53,8 @@ export interface PurchaseOrder {
   orderNumber: string;
   type: PurchaseOrderType;
   status: PurchaseOrderStatus;
-  supplierId: number;
-  supplier?: { id: number; name: string; contactInfo?: string | null };
+  supplierId?: number | null;
+  supplier?: { id: number; name: string; contactInfo?: string | null } | null;
   title: string;
   description?: string | null;
   priority: number;
