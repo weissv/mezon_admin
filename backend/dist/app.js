@@ -33,6 +33,7 @@ const procurement_routes_1 = __importDefault(require("./routes/procurement.route
 const recipes_routes_1 = __importDefault(require("./routes/recipes.routes"));
 const staffing_routes_1 = __importDefault(require("./routes/staffing.routes"));
 const export_routes_1 = __importDefault(require("./routes/export.routes"));
+const integration_routes_1 = __importDefault(require("./routes/integration.routes"));
 const users_routes_1 = __importDefault(require("./routes/users.routes"));
 const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
 const schedule_routes_1 = __importDefault(require("./routes/schedule.routes"));
@@ -41,6 +42,7 @@ const lms_school_routes_1 = __importDefault(require("./routes/lms-school.routes"
 const permissions_routes_1 = __importDefault(require("./routes/permissions.routes"));
 const exams_routes_1 = __importDefault(require("./routes/exams.routes"));
 const public_exams_routes_1 = __importDefault(require("./routes/public-exams.routes"));
+const knowledge_base_routes_1 = __importDefault(require("./routes/knowledge-base.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = new Set(config_1.config.corsOrigins);
 const allowPattern = [/\.onrender\.com$/, /mezon\.uz$/];
@@ -97,6 +99,7 @@ app.use("/api/procurement", procurement_routes_1.default);
 app.use("/api/recipes", recipes_routes_1.default);
 app.use("/api/staffing", staffing_routes_1.default);
 app.use("/api/integration", export_routes_1.default);
+app.use("/api/integrations", integration_routes_1.default);
 app.use("/api/users", users_routes_1.default);
 app.use("/api/ai", ai_routes_1.default);
 app.use("/api/schedule", schedule_routes_1.default);
@@ -104,6 +107,7 @@ app.use("/api/settings", settings_routes_1.default);
 app.use("/api/lms/school", lms_school_routes_1.default);
 app.use("/api/permissions", permissions_routes_1.default);
 app.use("/api/exams", exams_routes_1.default); // Управление контрольными для учителей/админов
+app.use("/api/knowledge-base", knowledge_base_routes_1.default); // База знаний
 // Обработчик ошибок
 app.use(errorHandler_1.errorHandler);
 exports.default = app;

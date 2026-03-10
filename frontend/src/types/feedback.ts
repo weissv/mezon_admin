@@ -1,5 +1,6 @@
 // Feedback types
 export type FeedbackStatus = 'NEW' | 'IN_PROGRESS' | 'RESOLVED';
+export type BugSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export interface Feedback {
   id: number;
@@ -11,4 +12,14 @@ export interface Feedback {
   status: FeedbackStatus;
   createdAt: string;
   resolvedAt: string | null;
+}
+
+export interface CreateBugReportPayload {
+  title: string;
+  severity: BugSeverity;
+  pageUrl?: string;
+  expectedBehavior?: string;
+  actualBehavior: string;
+  stepsToReproduce?: string;
+  browserInfo?: string;
 }

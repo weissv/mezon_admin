@@ -370,10 +370,10 @@ router.get("/cash-forecast", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "
         prisma_1.prisma.purchaseOrder.findMany({
             where: {
                 status: { in: ["PENDING", "APPROVED"] },
-                deliveryDate: { gte: today, lte: endDate },
+                expectedDeliveryDate: { gte: today, lte: endDate },
             },
             select: {
-                deliveryDate: true,
+                expectedDeliveryDate: true,
                 totalAmount: true,
             },
         }),
@@ -418,8 +418,8 @@ router.get("/cash-forecast", (0, checkRole_1.checkRole)(["DIRECTOR", "DEPUTY", "
     // Запланированные закупки по датам
     const purchasesByDate = {};
     for (const purchase of scheduledPurchases) {
-        if (purchase.deliveryDate) {
-            const dateKey = new Date(purchase.deliveryDate).toISOString().split("T")[0];
+        if (purchase.expectedDeliveryDate) {
+            const dateKey = new Date(purchase.expectedDeliveryDate).toISOString().split("T")[0];
             purchasesByDate[dateKey] = (purchasesByDate[dateKey] || 0) + Number(purchase.totalAmount);
         }
     }

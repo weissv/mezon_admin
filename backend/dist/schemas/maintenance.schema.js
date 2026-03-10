@@ -9,6 +9,7 @@ const maintenanceItemSchema = zod_1.z.object({
     quantity: zod_1.z.number().positive("Количество должно быть положительным"),
     unit: zod_1.z.string().min(1, "Единица измерения обязательна"),
     category: zod_1.z.enum(["STATIONERY", "HOUSEHOLD", "OTHER"]),
+    inventoryItemId: zod_1.z.number().int().positive().optional().nullable(), // Связь с товаром на складе
 });
 exports.createMaintenanceSchema = zod_1.z.object({
     body: zod_1.z.object({
