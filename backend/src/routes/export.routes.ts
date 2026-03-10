@@ -39,17 +39,24 @@ const entityExporters: Record<IntegrationEntity, () => Promise<Record<string, un
           },
         },
       },
-      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+      orderBy: [{ group: { name: "asc" } }, { lastName: "asc" }, { firstName: "asc" }],
     });
 
-    return children.map((child) => ({
-      ID: child.id,
-      "First Name": child.firstName,
-      "Last Name": child.lastName,
-      "Birth Date": child.birthDate.toISOString().split("T")[0],
-      "Group ID": child.groupId,
-      "Group Name": child.group?.name ?? "",
-      Status: child.status,
+    return children.map((child, index) => ({
+      "№": index + 1,
+      "Ф.И.О. ребенка": [child.lastName, child.firstName, child.middleName].filter(Boolean).join(" "),
+      "Класс": child.group?.name ?? "",
+      "Адрес проживания": child.address ?? "",
+      "Дата рождения": child.birthDate.toLocaleDateString("ru-RU"),
+      "Национальность": child.nationality ?? "",
+      "Пол": child.gender ?? "",
+      "Номер метрики": child.birthCertificateNumber ?? "",
+      "Ф.И.О. отца": child.fatherName ?? "",
+      "Ф.И.О. матери": child.motherName ?? "",
+      "Телефоны родителей": child.parentPhone ?? "",
+      "№ Договора": child.contractNumber ?? "",
+      "Дата договора": child.contractDate ? child.contractDate.toLocaleDateString("ru-RU") : "",
+      "Статус": child.status,
     }));
   },
   employees: async () => {
@@ -108,28 +115,92 @@ const entityExporters: Record<IntegrationEntity, () => Promise<Record<string, un
 const entityImporters: Record<IntegrationEntity, (rows: ImportRow[]) => Promise<ImportStats>> = {
   children: async (rows) => {
     const stats = defaultStats();
+
+    // Pre-load groups for matching by name
+    const allGroups = await prisma.group.findMany();
+
     for (const row of rows) {
       stats.processed += 1;
-      const firstName = getString(row, "First Name", "firstName", "Имя");
-      const lastName = getString(row, "Last Name", "lastName", "Фамилия");
-      const birthDate = getDate(row, "Birth Date", "birthDate");
-      const groupId = getInt(row, "Group ID", "groupId");
-      if (!firstName || !lastName || !birthDate || !groupId) {
+
+      // Try to parse full name from "Ф.И.О. ребенка" column
+      const fullName = getString(row, "Ф.И.О. ребенка", "ФИО ребенка", "Full Name");
+      let firstName: string | undefined;
+      let lastName: string | undefined;
+      let middleName: string | undefined;
+
+      if (fullName) {
+        const parts = fullName.trim().split(/\s+/);
+        lastName = parts[0];
+        firstName = parts[1];
+        middleName = parts.slice(2).join(" ") || undefined;
+      } else {
+        firstName = getString(row, "First Name", "firstName", "Имя");
+        lastName = getString(row, "Last Name", "lastName", "Фамилия");
+        middleName = getString(row, "Отчество", "middleName") ?? undefined;
+      }
+
+      if (!firstName || !lastName) {
         stats.skipped += 1;
         continue;
       }
-      const status = (getEnum(row, Object.values(ChildStatus), "Status", "status") ?? ChildStatus.ACTIVE) as ChildStatus;
+
+      // Resolve group: try "Класс" column, then "Group ID"
+      let groupId = getInt(row, "Group ID", "groupId");
+      const className = getString(row, "Класс", "Class");
+      if (!groupId && className) {
+        // Normalize class name: remove extra quotes/spaces
+        const normalized = className.replace(/[""«»]/g, '"').trim();
+        const group = allGroups.find((g) => g.name === normalized || g.name === className);
+        if (group) {
+          groupId = group.id;
+        } else {
+          // Auto-create the group
+          const newGroup = await prisma.group.create({ data: { name: className } });
+          allGroups.push(newGroup);
+          groupId = newGroup.id;
+        }
+      }
+
+      if (!groupId) {
+        stats.skipped += 1;
+        continue;
+      }
+
+      // Parse dates
+      const birthDate = parseDateFlexible(row, "Дата рождения", "Birth Date", "birthDate");
+      if (!birthDate) {
+        stats.skipped += 1;
+        continue;
+      }
+
+      const contractDate = parseDateFlexible(row, "дата договора", "Дата договора", "Contract Date", "contractDate") ?? undefined;
+
+      const status = (getEnum(row, Object.values(ChildStatus), "Status", "status", "Статус") ?? ChildStatus.ACTIVE) as ChildStatus;
       const payload = {
         firstName,
         lastName,
+        middleName: middleName ?? null,
         birthDate,
         groupId,
         status,
+        address: getString(row, "Адрес проживания", "Address", "address") ?? null,
+        nationality: getString(row, "Национальность", "Nationality", "nationality") ?? null,
+        gender: getString(row, "Пол", "Gender", "gender") ?? null,
+        birthCertificateNumber: getString(row, "Номер метрики", "Номер метрки", "Birth Certificate", "birthCertificateNumber") ?? null,
+        fatherName: getString(row, "Ф.И.О. отца", "ФИО отца", "Father Name", "fatherName") ?? null,
+        motherName: getString(row, "Ф.И.О. матери", "ФИО матери", "Mother Name", "motherName") ?? null,
+        parentPhone: getString(row, "телефоны родителей", "Телефоны родителей", "Parent Phone", "parentPhone") ?? null,
+        contractNumber: getString(row, "№ Договора", "Contract Number", "contractNumber") ?? null,
+        contractDate: contractDate ?? null,
       };
-      const id = getInt(row, "ID", "id");
+
+      const id = getInt(row, "ID", "id", "№");
       try {
+        // For CSV imports we always create (don't upsert by row number "№")
+        // Only upsert if there's a real ID
+        const realId = getInt(row, "ID", "id");
         await upsertByNumericId(
-          id,
+          realId,
           (numericId) => prisma.child.update({ where: { id: numericId }, data: payload }),
           (numericId) =>
             prisma.child.create({
@@ -313,7 +384,36 @@ router.post(
     if (!firstSheetName) {
       return res.status(400).json({ message: "Не удалось прочитать Excel-файл" });
     }
-    const rows = XLSX.utils.sheet_to_json<ImportRow>(workbook.Sheets[firstSheetName], { defval: "" });
+
+    const sheet = workbook.Sheets[firstSheetName];
+    let rows = XLSX.utils.sheet_to_json<ImportRow>(sheet, { defval: "" });
+
+    // If entity is children and standard headers not found, try to detect header row
+    if (entity === "children" && rows.length > 0) {
+      const firstRow = rows[0];
+      const hasStandardHeaders = Object.keys(firstRow).some(
+        (k) => k.includes("Ф.И.О.") || k.includes("ребенка") || k === "First Name" || k === "Класс"
+      );
+      if (!hasStandardHeaders) {
+        // Find the header row by scanning raw data
+        const range = XLSX.utils.decode_range(sheet["!ref"] || "A1");
+        let headerRowIndex = -1;
+        for (let r = range.s.r; r <= Math.min(range.e.r, 10); r++) {
+          for (let c = range.s.c; c <= range.e.c; c++) {
+            const cell = sheet[XLSX.utils.encode_cell({ r, c })];
+            if (cell && typeof cell.v === "string" && (cell.v.includes("Ф.И.О.") || cell.v.includes("ребенка"))) {
+              headerRowIndex = r;
+              break;
+            }
+          }
+          if (headerRowIndex >= 0) break;
+        }
+        if (headerRowIndex >= 0) {
+          rows = XLSX.utils.sheet_to_json<ImportRow>(sheet, { defval: "", range: headerRowIndex });
+        }
+      }
+    }
+
     const stats = await importer(rows);
     return res.json({ entity, rows: rows.length, ...stats });
   }
@@ -332,7 +432,35 @@ router.post(
 
     const csvUrl = buildGoogleCsvUrl(sheetUrl);
     const csvText = await fetchCsv(csvUrl);
-    const rows = csvTextToRecords<ImportRow>(csvText);
+    let rows = csvTextToRecords<ImportRow>(csvText);
+
+    // For children entity, try to detect header row in CSV with multi-row headers
+    if (entity === "children" && rows.length > 0) {
+      const firstRow = rows[0];
+      const hasStandardHeaders = Object.keys(firstRow).some(
+        (k) => k.includes("Ф.И.О.") || k.includes("ребенка") || k === "First Name" || k === "Класс"
+      );
+      if (!hasStandardHeaders) {
+        // Find the row that contains the actual headers
+        const headerIdx = rows.findIndex((r) =>
+          Object.values(r).some((v) => typeof v === "string" && (v.includes("Ф.И.О.") || v.includes("ребенка")))
+        );
+        if (headerIdx >= 0) {
+          const headerRow = rows[headerIdx];
+          const headers = Object.values(headerRow).map((v) => String(v).trim());
+          const dataRows = rows.slice(headerIdx + 1);
+          rows = dataRows.map((r) => {
+            const values = Object.values(r);
+            const mapped: ImportRow = {};
+            headers.forEach((h, i) => {
+              if (h && values[i] !== undefined) mapped[h] = values[i];
+            });
+            return mapped;
+          });
+        }
+      }
+    }
+
     const stats = await importer(rows);
     return res.json({ entity, source: "google-sheets", rows: rows.length, ...stats });
   }
@@ -388,6 +516,43 @@ function getDate(row: ImportRow, ...keys: string[]): Date | undefined {
     if (!Number.isNaN(date.getTime())) {
       return date;
     }
+  }
+  return undefined;
+}
+
+// Flexible date parser: handles "DD.MM.YYYY", "M/D/YYYY", ISO, and Excel serial numbers
+function parseDateFlexible(row: ImportRow, ...keys: string[]): Date | undefined {
+  for (const key of keys) {
+    const value = row[key];
+    if (value === undefined || value === null || value === "") {
+      continue;
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value;
+    }
+    // Excel serial date number
+    if (typeof value === "number" && value > 10000 && value < 100000) {
+      const excelEpoch = new Date(1899, 11, 30);
+      const date = new Date(excelEpoch.getTime() + value * 86400000);
+      if (!Number.isNaN(date.getTime())) return date;
+    }
+    const str = String(value).trim();
+    if (!str) continue;
+    // DD.MM.YYYY
+    const dotMatch = str.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (dotMatch) {
+      const date = new Date(Number(dotMatch[3]), Number(dotMatch[2]) - 1, Number(dotMatch[1]));
+      if (!Number.isNaN(date.getTime())) return date;
+    }
+    // M/D/YYYY or MM/DD/YYYY
+    const slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) {
+      const date = new Date(Number(slashMatch[3]), Number(slashMatch[1]) - 1, Number(slashMatch[2]));
+      if (!Number.isNaN(date.getTime())) return date;
+    }
+    // Fallback to standard Date parse
+    const date = new Date(str);
+    if (!Number.isNaN(date.getTime())) return date;
   }
   return undefined;
 }

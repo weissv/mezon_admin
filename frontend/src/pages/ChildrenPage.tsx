@@ -82,22 +82,32 @@ export default function ChildrenPage() {
   };
 
   const columns: Column<Child>[] = [
-    { key: 'id', header: 'ID' },
+    { key: 'id', header: '№' },
     { key: 'lastName', header: 'Фамилия' },
     { key: 'firstName', header: 'Имя' },
+    { key: 'middleName', header: 'Отчество', render: (row) => row.middleName || '—' },
     { key: 'group', header: 'Класс', render: (row) => row.group.name },
+    {
+      key: 'birthDate',
+      header: 'Дата рождения',
+      render: (row) => new Date(row.birthDate).toLocaleDateString('ru-RU'),
+    },
+    { key: 'gender', header: 'Пол', render: (row) => row.gender || '—' },
+    { key: 'nationality', header: 'Национальность', render: (row) => row.nationality || '—' },
+    { key: 'parentPhone', header: 'Телефоны родителей', render: (row) => row.parentPhone || '—' },
+    { key: 'contractNumber', header: '№ Договора', render: (row) => row.contractNumber || '—' },
     {
       key: 'actions',
       header: 'Действия',
       render: (row) => (
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+        <div className="flex flex-wrap gap-2 min-w-0">
+          <Button variant="outline" size="sm" className="whitespace-normal h-auto text-left" onClick={() => handleEdit(row)}>
             Редактировать
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => handleViewAbsences(row)}>
+          <Button variant="ghost" size="sm" className="whitespace-normal h-auto text-left" onClick={() => handleViewAbsences(row)}>
             <CalendarX className="h-4 w-4 mr-1" /> Отсутствия
           </Button>
-          <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(row)}>
+          <Button variant="destructive" size="sm" className="shrink-0" onClick={() => setDeleteConfirm(row)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -144,6 +154,7 @@ export default function ChildrenPage() {
         pageSize={10}
         total={total}
         onPageChange={setPage}
+        wrapCells={true}
       />
       <Modal
         isOpen={isModalOpen}

@@ -43,7 +43,7 @@ import knowledgeBaseRoutes from "./routes/knowledge-base.routes";
 const app = express();
 
 const allowedOrigins = new Set(config.corsOrigins);
-const allowPattern = [/\.onrender\.com$/, /mezon\.uz$/];
+const allowPattern = [/\.onrender\.com$/, /mezon\.uz$/, /\.trycloudflare\.com$/, /\.loca\.lt$/];
 
 const corsOptions: cors.CorsOptions = {
   origin(origin, callback) {

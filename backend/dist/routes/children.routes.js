@@ -56,14 +56,24 @@ router.get("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN", "TEACHER", "ACCOU
     return res.json({ items, total });
 });
 router.post("/", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(child_schema_1.createChildSchema), (0, actionLogger_1.logAction)("CREATE_CHILD", (req) => ({ body: req.body })), async (req, res) => {
-    const child = await prisma_1.prisma.child.create({ data: req.body });
+    const { contractDate, ...rest } = req.body;
+    const data = { ...rest };
+    if (contractDate) {
+        data.contractDate = new Date(contractDate);
+    }
+    const child = await prisma_1.prisma.child.create({ data });
     // Синхронизируем с LMS
     await syncChildWithLms(child.id, child.groupId);
     return res.status(201).json(child);
 });
 router.put("/:id", (0, checkRole_1.checkRole)(["DEPUTY", "ADMIN"]), (0, validate_1.validate)(child_schema_1.updateChildSchema), (0, actionLogger_1.logAction)("UPDATE_CHILD", (req) => ({ id: req.params.id, body: req.body })), async (req, res) => {
     const id = Number(req.params.id);
-    const child = await prisma_1.prisma.child.update({ where: { id }, data: req.body });
+    const { contractDate, ...rest } = req.body;
+    const data = { ...rest };
+    if (contractDate) {
+        data.contractDate = new Date(contractDate);
+    }
+    const child = await prisma_1.prisma.child.update({ where: { id }, data });
     // Синхронизируем с LMS (если изменился класс)
     if (req.body.groupId) {
         await syncChildWithLms(child.id, child.groupId);
