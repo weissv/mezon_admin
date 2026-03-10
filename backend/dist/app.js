@@ -45,7 +45,7 @@ const public_exams_routes_1 = __importDefault(require("./routes/public-exams.rou
 const knowledge_base_routes_1 = __importDefault(require("./routes/knowledge-base.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = new Set(config_1.config.corsOrigins);
-const allowPattern = [/\.onrender\.com$/, /mezon\.uz$/];
+const allowPattern = [/\.onrender\.com$/, /mezon\.uz$/, /\.trycloudflare\.com$/, /\.loca\.lt$/];
 const corsOptions = {
     origin(origin, callback) {
         if (!origin) {

@@ -184,14 +184,24 @@ model Employee {
 }
 
 model Child {
-  id         Int         @id @default(autoincrement())
-  firstName  String
-  lastName   String
-  birthDate  DateTime
-  groupId    Int
-  group      Group       @relation(fields: [groupId], references: [id])
-  healthInfo Json? // { allergies: string[], specialConditions: string[] }
-  status     ChildStatus @default(ACTIVE)
+  id                     Int         @id @default(autoincrement())
+  firstName              String
+  lastName               String
+  middleName             String?     // Отчество
+  birthDate              DateTime
+  groupId                Int
+  group                  Group       @relation(fields: [groupId], references: [id])
+  healthInfo             Json?       // { allergies: string[], specialConditions: string[] }
+  status                 ChildStatus @default(ACTIVE)
+  address                String?     // Адрес проживания
+  nationality            String?     // Национальность
+  gender                 String?     // Пол (мужской/женский)
+  birthCertificateNumber String?     // Номер метрики
+  fatherName             String?     // ФИО отца
+  motherName             String?     // ФИО матери
+  parentPhone            String?     // Телефоны родителей
+  contractNumber         String?     // Номер договора
+  contractDate           DateTime?   // Дата договора
 
   enrollments       ClubEnrollment[]
   attendance        Attendance[]

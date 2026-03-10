@@ -16,11 +16,21 @@ export interface Group {
 export interface Child extends BaseEntity {
   firstName: string;
   lastName: string;
+  middleName?: string | null;
   birthDate: string;
   groupId: number;
   group: Group;
   healthInfo?: HealthInfo | null;
   status: ChildStatus;
+  address?: string | null;
+  nationality?: string | null;
+  gender?: string | null;
+  birthCertificateNumber?: string | null;
+  fatherName?: string | null;
+  motherName?: string | null;
+  parentPhone?: string | null;
+  contractNumber?: string | null;
+  contractDate?: string | null;
 }
 
 export interface HealthInfo {
@@ -72,9 +82,19 @@ export interface UpdateTemporaryAbsenceInput extends Partial<CreateTemporaryAbse
 export interface CreateChildInput {
   firstName: string;
   lastName: string;
+  middleName?: string;
   birthDate: string;
   groupId: number;
   healthInfo?: string;
+  address?: string;
+  nationality?: string;
+  gender?: string;
+  birthCertificateNumber?: string;
+  fatherName?: string;
+  motherName?: string;
+  parentPhone?: string;
+  contractNumber?: string;
+  contractDate?: string;
 }
 
 export interface UpdateChildInput extends Partial<CreateChildInput> {}
