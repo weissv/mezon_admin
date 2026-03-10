@@ -8,8 +8,9 @@ const router = (0, express_1.Router)();
 const validate_1 = require("../middleware/validate");
 const maintenance_schema_1 = require("../schemas/maintenance.schema");
 const TelegramService_1 = require("../services/TelegramService");
+const InventorySyncService_1 = require("../services/InventorySyncService");
 // GET /api/maintenance - получить заявки с учетом роли
-router.get("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), async (req, res) => {
+router.get("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ", "ACCOUNTANT"]), async (req, res) => {
     const user = req.user;
     const userRole = user.role;
     let whereClause = {};
@@ -17,11 +18,9 @@ router.get("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "
     if (userRole === "DEVELOPER") {
         whereClause = {};
     }
-    // ZAVHOZ видит только ОДОБРЕННЫЕ заявки
+    // ZAVHOZ видит все заявки (включая PENDING)
     else if (userRole === "ZAVHOZ") {
-        whereClause = {
-            status: { in: ["APPROVED", "IN_PROGRESS", "DONE"] }
-        };
+        whereClause = {};
     }
     // DIRECTOR видит все заявки от НЕ-учителей + все свои заявки
     else if (userRole === "DIRECTOR") {
@@ -64,6 +63,12 @@ router.get("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "
     else if (userRole === "ADMIN") {
         whereClause = {};
     }
+    // Все остальные (включая ACCOUNTANT) видят только свои заявки
+    else {
+        whereClause = {
+            requesterId: user.employeeId
+        };
+    }
     const items = await prisma_1.prisma.maintenanceRequest.findMany({
         where: whereClause,
         include: {
@@ -77,13 +82,19 @@ router.get("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "
             approvedBy: {
                 select: { id: true, firstName: true, lastName: true }
             },
-            items: true // Включаем позиции заявки
+            items: {
+                include: {
+                    inventoryItem: {
+                        select: { id: true, name: true, quantity: true, unit: true, type: true }
+                    }
+                }
+            }
         },
         orderBy: { createdAt: "desc" },
     });
     res.json(items);
 });
-router.post("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), (0, validate_1.validate)(maintenance_schema_1.createMaintenanceSchema), async (req, res) => {
+router.post("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ", "ACCOUNTANT"]), (0, validate_1.validate)(maintenance_schema_1.createMaintenanceSchema), async (req, res) => {
     const { items, ...data } = req.body;
     const user = req.user;
     const created = await prisma_1.prisma.maintenanceRequest.create({
@@ -91,19 +102,26 @@ router.post("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", 
             ...data,
             requesterId: user.employeeId,
             status: "PENDING", // Все новые заявки начинаются с PENDING
-            // Nested write для создания позиций
+            // Nested write для создания позиций с привязкой к складу
             items: items && items.length > 0 ? {
                 create: items.map((item) => ({
                     name: item.name,
                     quantity: item.quantity,
                     unit: item.unit,
                     category: item.category,
+                    inventoryItemId: item.inventoryItemId || null,
                 }))
             } : undefined
         },
         include: {
             requester: true,
-            items: true
+            items: {
+                include: {
+                    inventoryItem: {
+                        select: { id: true, name: true, quantity: true, unit: true }
+                    }
+                }
+            }
         }
     });
     // 📱 Telegram уведомление о новой заявке
@@ -130,7 +148,7 @@ router.post("/", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", 
     }
     res.status(201).json(created);
 });
-router.put("/:id", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ", "TEACHER"]), (0, validate_1.validate)(maintenance_schema_1.updateMaintenanceSchema), async (req, res) => {
+router.put("/:id", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ"]), (0, validate_1.validate)(maintenance_schema_1.updateMaintenanceSchema), async (req, res) => {
     const id = Number(req.params.id);
     const user = req.user;
     // Проверяем права на редактирование
@@ -151,12 +169,37 @@ router.put("/:id", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY"
     if (user.role === "TEACHER" && request.status === "APPROVED") {
         return res.status(403).json({ message: "Нельзя редактировать одобренную заявку" });
     }
-    // ZAVHOZ может редактировать APPROVED/IN_PROGRESS заявки (включая изменение статуса)
-    if (user.role === "ZAVHOZ" && request.status !== "APPROVED" && request.status !== "IN_PROGRESS" && request.status !== "DONE") {
-        return res.status(403).json({ message: "Нет прав для редактирования" });
+    // Завхоз может редактировать только одобренные заявки (APPROVED, IN_PROGRESS, DONE)
+    // и только менять статус, но не содержимое
+    if (user.role === "ZAVHOZ") {
+        if (request.status !== "APPROVED" && request.status !== "IN_PROGRESS" && request.status !== "DONE") {
+            return res.status(403).json({ message: "Вы можете редактировать только одобренные заявки" });
+        }
+        // Завхоз может менять только статус
+        const { status } = req.body;
+        if (!status || (status !== "APPROVED" && status !== "IN_PROGRESS" && status !== "DONE")) {
+            return res.status(403).json({ message: "Вы можете изменять только статус заявки" });
+        }
     }
     const { items, ...updateData } = req.body;
     const previousStatus = request.status;
+    const newStatus = updateData.status;
+    // Проверка: если переход в DONE для ISSUE — проверяем остатки на складе
+    if (newStatus === "DONE" && previousStatus !== "DONE" && request.type === "ISSUE") {
+        const stockCheck = await (0, InventorySyncService_1.checkStockAvailability)(id);
+        if (!stockCheck.available) {
+            const deficits = stockCheck.items
+                .filter(i => i.deficit > 0)
+                .map(i => `${i.name}: запрошено ${i.requested} ${i.unit}, на складе ${i.inStock} ${i.unit}`)
+                .join("; ");
+            // Не блокируем, но предупреждаем (частичная выдача допустима)
+            console.warn(`Недостаточно товаров на складе для заявки #${id}: ${deficits}`);
+        }
+    }
+    // Если заявка была DONE и переводится обратно — возвращаем товары на склад
+    if (previousStatus === "DONE" && newStatus && newStatus !== "DONE" && request.type === "ISSUE") {
+        await (0, InventorySyncService_1.reverseStockForRequest)(id, user.employeeId);
+    }
     // Если items передан, делаем полную замену позиций
     const updated = await prisma_1.prisma.maintenanceRequest.update({
         where: { id },
@@ -170,6 +213,7 @@ router.put("/:id", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY"
                     quantity: item.quantity,
                     unit: item.unit,
                     category: item.category,
+                    inventoryItemId: item.inventoryItemId || null,
                 }))
             } : undefined
         },
@@ -180,26 +224,78 @@ router.put("/:id", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY"
                 }
             },
             approvedBy: true,
-            items: true
+            items: {
+                include: {
+                    inventoryItem: {
+                        select: { id: true, name: true, quantity: true, unit: true }
+                    }
+                }
+            }
         }
     });
+    // 📦 Синхронизация со складом: списание при DONE
+    let stockResult = null;
+    if (newStatus === "DONE" && previousStatus !== "DONE" && request.type === "ISSUE") {
+        stockResult = await (0, InventorySyncService_1.deductStockForRequest)(id, user.employeeId);
+        if (stockResult.warnings.length > 0) {
+            console.warn(`Предупреждения при списании для заявки #${id}:`, stockResult.warnings);
+        }
+    }
     // 📱 Telegram уведомление заявителю при завершении заявки
     if (updated.status === 'DONE' && previousStatus !== 'DONE') {
         try {
             const requesterId = updated.requester.user?.id;
             if (requesterId) {
                 const requestTitle = updated.title || `Заявка #${updated.id}`;
-                await (0, TelegramService_1.sendTelegramMessage)(requesterId, `✅ <b>Заявка выполнена!</b>\n\n` +
+                let message = `✅ <b>Заявка выполнена!</b>\n\n` +
                     `🔢 ID заявки: #${updated.id}\n` +
-                    `📝 Тема: ${requestTitle}\n\n` +
-                    `Ваша заявка была успешно выполнена.`);
+                    `📝 Тема: ${requestTitle}\n\n`;
+                // Добавляем информацию о списании со склада
+                if (stockResult && stockResult.transactions.length > 0) {
+                    message += `📦 <b>Списано со склада:</b>\n`;
+                    for (const tx of stockResult.transactions) {
+                        message += `  • ${tx.itemName}: ${tx.deducted}, остаток: ${tx.remainingStock}\n`;
+                    }
+                    if (stockResult.warnings.length > 0) {
+                        message += `\n⚠️ <b>Предупреждения:</b>\n`;
+                        for (const w of stockResult.warnings) {
+                            message += `  • ${w}\n`;
+                        }
+                    }
+                }
+                message += `\nВаша заявка была успешно выполнена.`;
+                await (0, TelegramService_1.sendTelegramMessage)(requesterId, message);
             }
         }
         catch (error) {
             console.error('Ошибка отправки Telegram уведомления:', error);
         }
     }
-    res.json(updated);
+    // Возвращаем результат с информацией о складских операциях
+    const response = updated;
+    if (stockResult) {
+        response.stockDeduction = stockResult;
+    }
+    res.json(response);
+});
+// GET /api/maintenance/:id/stock-check - проверка наличия товаров на складе для заявки ISSUE
+router.get("/:id/stock-check", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid id" });
+    }
+    const request = await prisma_1.prisma.maintenanceRequest.findUnique({
+        where: { id },
+        select: { type: true },
+    });
+    if (!request) {
+        return res.status(404).json({ message: "Заявка не найдена" });
+    }
+    if (request.type !== "ISSUE") {
+        return res.json({ available: true, items: [], message: "Проверка только для заявок на выдачу" });
+    }
+    const result = await (0, InventorySyncService_1.checkStockAvailability)(id);
+    return res.json(result);
 });
 // POST /api/maintenance/:id/approve - одобрить заявку
 router.post("/:id/approve", (0, checkRole_1.checkRole)(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async (req, res) => {

@@ -1,5 +1,5 @@
-import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Download, UploadCloud, Link2 } from "lucide-react";
+import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { Download, UploadCloud, Link2, RefreshCw, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "../components/Card";
 import { Button } from "../components/ui/button";
@@ -253,6 +253,120 @@ export default function IntegrationPage() {
           </div>
         ))}
       </div>
+
+      {/* 1C: Enterprise Integration */}
+      <OneCIntegrationPanel />
     </div>
+  );
+}
+
+/* ─────────────────────── 1C: Enterprise Panel ─────────────────────── */
+
+interface SyncLogEntry {
+  id: number;
+  syncedCount: number;
+  timestamp: string;
+  status: "success" | "error";
+}
+
+function OneCIntegrationPanel() {
+  const [syncing, setSyncing] = useState(false);
+  const [syncLog, setSyncLog] = useState<SyncLogEntry[]>(() => [
+    { id: 0, syncedCount: 7, timestamp: new Date(Date.now() - 3600_000).toISOString(), status: "success" },
+    { id: -1, syncedCount: 4, timestamp: new Date(Date.now() - 7200_000).toISOString(), status: "success" },
+  ]);
+
+  const handleSync = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const result = await api.post<{ status: string; syncedCount: number; timestamp: string }>(
+        "/api/integrations/1c/sync"
+      );
+      setSyncLog((prev) => [
+        { id: Date.now(), syncedCount: result.syncedCount, timestamp: result.timestamp, status: "success" },
+        ...prev,
+      ]);
+      toast.success(`Синхронизация завершена. Загружено ${result.syncedCount} новых транзакций.`);
+    } catch (error: any) {
+      setSyncLog((prev) => [
+        { id: Date.now(), syncedCount: 0, timestamp: new Date().toISOString(), status: "error" },
+        ...prev,
+      ]);
+      toast.error("Ошибка синхронизации с 1С", { description: error?.message });
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
+
+  return (
+    <Card className="space-y-5">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-xl font-semibold">1C: Enterprise (Бухгалтерия)</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Автоматическая синхронизация финансовых транзакций с 1С: Бухгалтерия
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
+          </span>
+          <span className="text-sm font-medium text-green-700">Connected (Demo Mode)</span>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-3 items-center">
+        <Button onClick={handleSync} disabled={syncing}>
+          <RefreshCw className={clsx("h-4 w-4 mr-2", syncing && "animate-spin")} />
+          {syncing ? "Синхронизация..." : "Принудительная синхронизация"}
+        </Button>
+        <span className="text-xs text-gray-400">
+          Следующая авто-синхронизация — через 15 мин.
+        </span>
+      </div>
+
+      {/* Sync Log */}
+      {syncLog.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Последние синхронизации</h3>
+          <div className="overflow-x-auto rounded-md border border-gray-200">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-2 text-left font-medium text-gray-500">Статус</th>
+                  <th className="px-4 py-2 text-left font-medium text-gray-500">Дата / Время</th>
+                  <th className="px-4 py-2 text-left font-medium text-gray-500">Транзакций</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {syncLog.slice(0, 10).map((entry) => (
+                  <tr key={entry.id}>
+                    <td className="px-4 py-2">
+                      {entry.status === "success" ? (
+                        <span className="inline-flex items-center gap-1 text-green-600">
+                          <CheckCircle2 className="h-4 w-4" /> Успешно
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-red-600">
+                          <AlertCircle className="h-4 w-4" /> Ошибка
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-gray-700">
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5 text-gray-400" />
+                        {new Date(entry.timestamp).toLocaleString("ru-RU")}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 font-medium">{entry.syncedCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
