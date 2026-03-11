@@ -17,7 +17,7 @@ export const createOrderSchema = z.object({
     title: z.string().min(3, "Название обязательно (минимум 3 символа)"),
     description: z.string().optional(),
     priority: z.number().int().min(0).max(2).optional().default(0),
-    orderDate: z.string().refine((val) => !isNaN(Date.parse(val)), "Неверная дата"),
+    orderDate: z.string().refine((val) => !isNaN(Date.parse(val)), "Неверная дата").optional(),
     expectedDeliveryDate: z.string().optional().nullable(),
     budgetSource: z.string().optional(),
     items: z.array(purchaseOrderItemSchema).min(1, "Добавьте хотя бы одну позицию"),
