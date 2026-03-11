@@ -474,7 +474,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: Purchase
                     <label className="block text-xs font-medium text-gray-500 mb-1">Цена за ед.</label>
                     <Input
                       type="number"
-                      step="100"
+                      step="1"
                       min="0"
                       placeholder="0"
                       {...register(`items.${index}.price`, { valueAsNumber: true })}
