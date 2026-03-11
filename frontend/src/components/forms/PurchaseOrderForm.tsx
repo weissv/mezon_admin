@@ -25,7 +25,7 @@ const orderItemSchema = z.object({
 
 const formSchema = z.object({
   type: z.enum(['PLANNED', 'OPERATIONAL']),
-  title: z.string().min(2, 'Название обязательно'),
+  title: z.string().trim().min(3, 'Название обязательно (минимум 3 символа)'),
   description: z.string().optional(),
   supplierId: z.coerce.number().optional().nullable(),
   priority: z.coerce.number().min(0).max(2).default(0),
@@ -214,10 +214,11 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: Purchase
     try {
       const payload = {
         type: data.type,
-        title: data.title,
+        title: data.title.trim(),
         description: data.description || undefined,
         supplierId: data.supplierId || undefined,
         priority: data.priority,
+        orderDate: initialData?.orderDate || new Date().toISOString(),
         expectedDeliveryDate: data.expectedDeliveryDate ? new Date(data.expectedDeliveryDate).toISOString() : undefined,
         budgetSource: data.budgetSource || undefined,
         items: data.items.map(item => ({
@@ -239,7 +240,10 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel }: Purchase
       }
       onSuccess();
     } catch (error: any) {
-      toast.error(error?.message || 'Ошибка сохранения');
+      const validationMessage = Array.isArray(error?.details)
+        ? error.details.map((issue: any) => issue?.message).filter(Boolean).join('\n')
+        : undefined;
+      toast.error(validationMessage || error?.message || 'Ошибка сохранения');
     }
   };
 

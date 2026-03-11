@@ -84,6 +84,7 @@ router.post("/orders", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "Z
   try {
     const user = req.user!;
     const { type, supplierId, title, description, priority, orderDate, expectedDeliveryDate, budgetSource, items } = req.body;
+    const resolvedOrderDate = orderDate ? new Date(orderDate) : new Date();
 
     const order = await createOrder(
       {
@@ -92,7 +93,7 @@ router.post("/orders", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "Z
         title,
         description,
         priority,
-        orderDate: new Date(orderDate),
+        orderDate: resolvedOrderDate,
         expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate) : undefined,
         budgetSource,
         items,
