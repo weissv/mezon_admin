@@ -29,6 +29,7 @@ import StaffingPage from "../pages/StaffingPage";
 import SchedulePage from "../pages/SchedulePage";
 import { useAuth } from "../hooks/useAuth";
 import NotFoundPage from "../pages/NotFoundPage";
+import { FULL_ACCESS_ROLES } from "../types/common";
 
 // LMS Pages
 import LmsSchoolDashboard from "../pages/lms/LmsSchoolDashboard";
@@ -68,9 +69,6 @@ function PrivateRoute() {
   }
   return <Outlet />;
 }
-
-// Роли с полным доступом
-const FULL_ACCESS_ROLES = ["DEVELOPER", "DIRECTOR"];
 
 function RoleBasedRoute({ roles }: { roles: string[] }) {
   const { user, isLoading } = useAuth();

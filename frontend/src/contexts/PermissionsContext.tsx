@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { api } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 import type { UserRole } from "../types/auth";
+import { FULL_ACCESS_ROLES } from "../types/common";
 
 interface RolePermissions {
   role: UserRole;
@@ -35,9 +36,6 @@ const PermissionsContext = createContext<PermissionsContextValue>({
   canExport: false,
   refetch: async () => {},
 });
-
-// Роли с полным доступом
-const FULL_ACCESS_ROLES: UserRole[] = ["DEVELOPER", "DIRECTOR"];
 
 export function PermissionsProvider({ children }: { children: ReactNode }) {
   const { user, isLoading: authLoading } = useAuth();

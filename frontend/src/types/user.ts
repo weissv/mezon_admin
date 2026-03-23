@@ -1,9 +1,13 @@
-// types/user.ts
+import type { Role } from './common';
+
 export interface User {
   id: number;
   email: string;
-  role: 'DIRECTOR' | 'DEPUTY' | 'ADMIN' | 'TEACHER' | 'ACCOUNTANT';
+  role: Role;
   employeeId: number;
+  telegramChatId?: string | null;
+  deletedAt?: string | null;
+  status: 'ACTIVE' | 'INACTIVE';
   createdAt: string;
   updatedAt: string;
   employee?: {
