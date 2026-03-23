@@ -25,14 +25,14 @@ const ROLES = [
 
 const createUserSchema = z.object({
   email: z.string().min(3, 'Логин обязателен (минимум 3 символа)'),
-  password: z.string().min(6, 'Пароль должен быть минимум 6 символов'),
+  password: z.string().min(8, 'Пароль должен быть минимум 8 символов'),
   role: z.enum(['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT', 'ZAVHOZ']),
   employeeId: z.coerce.number().positive('Выберите сотрудника'),
 });
 
 const updateUserSchema = z.object({
   email: z.string().min(3, 'Логин обязателен (минимум 3 символа)').optional(),
-  password: z.string().min(6, 'Пароль должен быть минимум 6 символов').optional().or(z.literal('')),
+  password: z.string().min(8, 'Пароль должен быть минимум 8 символов').optional().or(z.literal('')),
   role: z.enum(['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT', 'ZAVHOZ']).optional(),
 });
 
@@ -129,7 +129,7 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
           <Input
             type={showPassword ? 'text' : 'password'}
             {...register('password')}
-            placeholder={isEditing ? '••••••' : 'Минимум 6 символов'}
+            placeholder={isEditing ? '••••••••' : 'Минимум 8 символов'}
           />
           <button
             type="button"

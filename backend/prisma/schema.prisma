@@ -142,11 +142,14 @@ model User {
   employeeId     Int      @unique
   employee       Employee @relation(fields: [employeeId], references: [id])
   telegramChatId String?  @unique // Telegram Chat ID для уведомлений
+  deletedAt      DateTime?
 
   actionLogs ActionLog[]
   knowledgeBaseArticles KnowledgeBaseArticle[] @relation("ArticleAuthor")
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+
+  @@index([deletedAt])
 }
 
 model Employee {

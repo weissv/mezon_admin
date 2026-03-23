@@ -3,8 +3,8 @@ import { z } from "zod";
 
 export const createUserSchema = z.object({
   body: z.object({
-    email: z.string().min(3, "Email/логин обязателен"),
-    password: z.string().min(6, "Пароль должен быть минимум 6 символов"),
+    email: z.string().trim().min(3, "Логин обязателен").max(128, "Логин слишком длинный"),
+    password: z.string().min(8, "Пароль должен быть минимум 8 символов").max(128, "Пароль слишком длинный"),
     role: z.enum(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT", "ZAVHOZ"]),
     employeeId: z.number().int().positive("ID сотрудника обязателен"),
   }),
@@ -12,10 +12,14 @@ export const createUserSchema = z.object({
 
 export const updateUserSchema = z.object({
   body: z.object({
-    email: z.string().min(3, "Email/логин обязателен").optional(),
-    password: z.string().min(6, "Пароль должен быть минимум 6 символов").optional(),
+    email: z.string().trim().min(3, "Логин обязателен").max(128, "Логин слишком длинный").optional(),
+    password: z.string().min(8, "Пароль должен быть минимум 8 символов").max(128, "Пароль слишком длинный").optional(),
     role: z.enum(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT", "ZAVHOZ"]).optional(),
   }),
+  params: z.object({ id: z.string().regex(/^\d+$/) }),
+});
+
+export const userIdParamsSchema = z.object({
   params: z.object({ id: z.string().regex(/^\d+$/) }),
 });
 

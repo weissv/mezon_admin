@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { config } from "../config";
 import { authMiddleware } from "../middleware/auth"; // Убедись, что импорт есть
+import { JWT } from "../constants";
 
 const router = Router();
 
@@ -12,17 +13,20 @@ const router = Router();
 router.post("/login", async (req, res) => {
   const { email, login, password } = req.body;
   const identifier = login || email;
-  
-  console.log('[AUTH] Login attempt:', { identifier });
-  
+
   if (!identifier || !password) {
-    console.log('[AUTH] Missing credentials');
     return res.status(400).json({ message: "Email/login and password are required" });
   }
 
-  const user = await prisma.user.findUnique({ where: { email: identifier }, include: { employee: true } });
+  const user = await prisma.user.findFirst({
+    where: {
+      email: identifier,
+      deletedAt: null,
+    },
+    include: { employee: true },
+  });
+
   if (!user) {
-    console.log('[AUTH] User not found:', identifier);
     return res.status(401).json({ message: "Invalid credentials" });
   }
 
@@ -34,7 +38,8 @@ router.post("/login", async (req, res) => {
 
   const token = jwt.sign(
     { id: user.id, role: user.role, employeeId: user.employeeId } as object,
-    config.jwtSecret
+    config.jwtSecret,
+    { expiresIn: JWT.EXPIRES_IN }
   );
 
   // Set HttpOnly cookie
@@ -42,13 +47,10 @@ router.post("/login", async (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'none' as const, // Changed from 'lax' to 'none' for cross-origin
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    maxAge: JWT.COOKIE_MAX_AGE,
   };
   
   res.cookie('auth_token', token, cookieOptions);
-  
-
-  console.log('[AUTH] Login successful for:', user.email);
   
   // Remove sensitive data
   const { passwordHash, ...sanitizedUser } = user;
@@ -57,8 +59,11 @@ router.post("/login", async (req, res) => {
 
 // Приватный роут, защищенный своим middleware
 router.get("/me", authMiddleware, async (req, res) => {
-  const me = await prisma.user.findUnique({
-    where: { id: req.user!.id },
+  const me = await prisma.user.findFirst({
+    where: {
+      id: req.user!.id,
+      deletedAt: null,
+    },
     include: { employee: true },
   });
   if (!me) return res.status(404).json({ message: "User not found" });
