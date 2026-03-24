@@ -21,23 +21,23 @@ export default function AttendanceTodayWidget({ data }: { data: AttendanceData |
   const employeeAttendance = data.employeeAttendance ?? {};
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-4">
-        <div className="dashboard-stat-block">
+    <div className="dashboard-attendance">
+      <div className="dashboard-attendance__stats">
+        <div className="dashboard-stat-block dashboard-stat-block--accent">
           <Users className="h-4 w-4 text-[var(--mezon-teal)]" />
-          <span className="text-2xl font-bold">{data.childrenPresent ?? 0}</span>
-          <span className="text-xs text-gray-500">детей</span>
+          <span className="dashboard-stat-block__value">{data.childrenPresent ?? 0}</span>
+          <span className="dashboard-stat-block__label">детей</span>
         </div>
-        <div className="dashboard-stat-block">
+        <div className="dashboard-stat-block dashboard-stat-block--warm">
           <Calendar className="h-4 w-4 text-[#F1AE3D]" />
-          <span className="text-2xl font-bold">{data.childrenOnMeals}</span>
-          <span className="text-xs text-gray-500">на питании</span>
+          <span className="dashboard-stat-block__value">{data.childrenOnMeals}</span>
+          <span className="dashboard-stat-block__label">на питании</span>
         </div>
       </div>
       {Object.keys(employeeAttendance).length > 0 && (
-        <div className="border-t pt-2">
-          <p className="text-xs font-medium text-gray-500 mb-1">Сотрудники</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="dashboard-attendance__footer">
+          <p className="dashboard-attendance__caption">Сотрудники</p>
+          <div className="dashboard-attendance__chips">
             {Object.entries(employeeAttendance).map(([status, count]) => (
               <span key={status} className="dashboard-chip">
                 {STATUS_LABELS[status] || status}: {count}

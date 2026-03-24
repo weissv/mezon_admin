@@ -9,7 +9,12 @@ interface KpiData {
   expense: number;
 }
 
-const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
+function formatCompactCurrency(amount: number) {
+  return new Intl.NumberFormat('ru-RU', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(amount);
+}
 
 function KpiCard({ label, value, icon: Icon, color }: { label: string; value: string | number; icon: React.ElementType; color: string }) {
   return (
@@ -17,7 +22,7 @@ function KpiCard({ label, value, icon: Icon, color }: { label: string; value: st
       <div className="dashboard-kpi-card__icon" style={{ background: color }}>
         <Icon className="h-5 w-5 text-white" />
       </div>
-      <div>
+      <div className="dashboard-kpi-card__content">
         <p className="dashboard-kpi-card__value">{value}</p>
         <p className="dashboard-kpi-card__label">{label}</p>
       </div>
@@ -29,12 +34,12 @@ export default function KpiOverviewWidget({ data }: { data: KpiData | undefined 
   if (!data) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+    <div className="dashboard-kpi-strip">
       <KpiCard label="Детей" value={data.childrenCount} icon={Users} color="var(--mezon-teal)" />
       <KpiCard label="Сотрудников" value={data.employeesCount} icon={Briefcase} color="#F1AE3D" />
       <KpiCard label="Кружков" value={data.activeClubs} icon={School} color="#8F93C0" />
-      <KpiCard label="Доход (30д)" value={currency.format(data.income)} icon={TrendingUp} color="#00A26A" />
-      <KpiCard label="Расход (30д)" value={currency.format(data.expense)} icon={TrendingDown} color="#F75C4C" />
+      <KpiCard label="Доход за 30 дней" value={formatCompactCurrency(data.income)} icon={TrendingUp} color="#00A26A" />
+      <KpiCard label="Расход за 30 дней" value={formatCompactCurrency(data.expense)} icon={TrendingDown} color="#F75C4C" />
     </div>
   );
 }
