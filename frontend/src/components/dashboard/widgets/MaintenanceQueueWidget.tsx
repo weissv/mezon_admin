@@ -31,15 +31,18 @@ const STATUS_ICONS: Record<string, typeof Clock> = {
 export default function MaintenanceQueueWidget({ data }: { data: MaintenanceQueueData | undefined }) {
   if (!data) return null;
 
+  const byStatus = data.byStatus ?? [];
+  const recent = data.recent ?? [];
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <AlertCircle className="h-4 w-4 text-amber-500" />
-        <span className="text-sm font-medium">{data.totalOpen} открытых заявок</span>
+        <span className="text-sm font-medium">{data.totalOpen ?? 0} открытых заявок</span>
       </div>
 
       <div className="flex gap-2">
-        {data.byStatus.map(s => (
+        {byStatus.map(s => (
           <div key={s.status} className="flex-1 text-center p-1.5 bg-gray-50 rounded text-xs">
             <p className="font-bold">{s.count}</p>
             <p className="text-gray-400 capitalize">{s.status.replace('_', ' ')}</p>
@@ -48,7 +51,7 @@ export default function MaintenanceQueueWidget({ data }: { data: MaintenanceQueu
       </div>
 
       <div className="space-y-1.5">
-        {data.recent.slice(0, 4).map(req => {
+        {recent.slice(0, 4).map(req => {
           const Icon = STATUS_ICONS[req.status] ?? Clock;
           return (
             <div key={req.id} className="flex items-center gap-2 text-xs">

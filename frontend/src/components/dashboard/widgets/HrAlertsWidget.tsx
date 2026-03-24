@@ -24,11 +24,13 @@ const ALERT_CONFIG: Record<string, { icon: typeof UserCheck; color: string; labe
 export default function HrAlertsWidget({ data }: { data: HrAlertsData | undefined }) {
   if (!data) return null;
 
+  const alerts = data.alerts ?? [];
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
         <div className="p-2 bg-red-50 rounded-lg text-center">
-          <p className="text-lg font-bold text-red-600">{data.medicalExpiring}</p>
+          <p className="text-lg font-bold text-red-600">{data.medicalExpiring ?? 0}</p>
           <p className="text-xs text-red-500">Мед. осмотры</p>
         </div>
         <div className="p-2 bg-amber-50 rounded-lg text-center">
@@ -38,7 +40,7 @@ export default function HrAlertsWidget({ data }: { data: HrAlertsData | undefine
       </div>
 
       <div className="space-y-1.5">
-        {data.alerts.slice(0, 5).map((alert, i) => {
+        {alerts.slice(0, 5).map((alert, i) => {
           const cfg = ALERT_CONFIG[alert.type] ?? ALERT_CONFIG.document;
           const Icon = cfg.icon;
           return (

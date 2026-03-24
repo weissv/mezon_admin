@@ -30,13 +30,15 @@ const ACTION_LABELS: Record<string, string> = {
 export default function ActivityStreamWidget({ data }: { data: ActivityStreamData | undefined }) {
   if (!data) return null;
 
+  const entries = data.entries ?? [];
+
   return (
     <div className="space-y-1.5">
-      {data.entries.length === 0 && (
+      {entries.length === 0 && (
         <p className="text-sm text-gray-400 text-center py-4">Нет активности</p>
       )}
 
-      {data.entries.slice(0, 8).map(entry => {
+      {entries.slice(0, 8).map(entry => {
         const cfg = ACTION_ICONS[entry.action] ?? ACTION_ICONS.update;
         const Icon = cfg.icon;
         return (

@@ -29,10 +29,13 @@ const fmt = (n: number) =>
 export default function ProcurementStatusWidget({ data }: { data: ProcurementData | undefined }) {
   if (!data) return null;
 
+  const byStatus = data.byStatus ?? [];
+  const recentOrders = data.recentOrders ?? [];
+
   return (
     <div className="space-y-3">
       <div className="flex gap-2 flex-wrap">
-        {data.byStatus.map(s => {
+        {byStatus.map(s => {
           const cfg = STATUS_ICONS[s.status] ?? STATUS_ICONS.pending;
           const Icon = cfg.icon;
           return (
@@ -46,7 +49,7 @@ export default function ProcurementStatusWidget({ data }: { data: ProcurementDat
       </div>
 
       <div className="space-y-1.5">
-        {data.recentOrders.slice(0, 4).map(order => (
+        {recentOrders.slice(0, 4).map(order => (
           <div key={order.id} className="flex items-center justify-between text-xs py-1 border-b border-gray-50 last:border-0">
             <div className="truncate flex-1">
               <p className="font-medium">{order.supplier}</p>

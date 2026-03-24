@@ -19,7 +19,7 @@ interface InventoryRiskData {
 export default function InventoryRiskWidget({ data }: { data: InventoryRiskData | undefined }) {
   if (!data) return null;
 
-  const items = [...data.critical, ...data.warning].slice(0, 6);
+  const items = [...(data.critical ?? []), ...(data.warning ?? [])].slice(0, 6);
 
   return (
     <div className="space-y-2">
