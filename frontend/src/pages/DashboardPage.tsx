@@ -21,6 +21,7 @@ export default function DashboardPage() {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const activeView = preferences?.savedViews.find(view => view.id === preferences.activeView) ?? null;
 
   /* ---- Handlers ---- */
 
@@ -118,13 +119,29 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-root space-y-6">
       {/* ---- Header ---- */}
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <header className="dashboard-page-header">
+        <div className="dashboard-page-header__main">
           <span className="mezon-badge">Mezon ERP</span>
           <h1 className="mezon-section-title text-3xl mt-1">Дашборд</h1>
+          <p className="dashboard-page-header__subtitle">
+            Единая рабочая поверхность для метрик, сигналов и быстрых действий по операционному контуру.
+          </p>
+          <div className="dashboard-page-header__meta">
+            <span className="dashboard-page-header__meta-item">
+              Виджетов: {bootstrap.overview.visibleWidgetCount}
+            </span>
+            <span className="dashboard-page-header__meta-item">
+              Действий: {bootstrap.overview.quickActionCount}
+            </span>
+            {activeView && (
+              <span className="dashboard-page-header__meta-item dashboard-page-header__meta-item--accent">
+                Вид: {activeView.name}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="dashboard-page-header__controls">
           <Button variant="outline" size="sm" onClick={refetch} title="Обновить">
             <RefreshCw className="h-4 w-4" />
           </Button>

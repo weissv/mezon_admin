@@ -2,20 +2,19 @@
 // Верхняя обзорная полоса дашборда: ключевые метрики + алерты
 
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, AlertTriangle, ChevronRight } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Clock3, LayoutGrid, Sparkles, Zap } from 'lucide-react';
 import type { DashboardOverview as OverviewData } from '../../types/dashboard';
-
-const TONE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  primary: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  success: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  warning: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  danger: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-  neutral: { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' },
-};
 
 interface DashboardOverviewProps {
   overview: OverviewData;
 }
+
+const generatedAtFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: '2-digit',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
 
 export default function DashboardOverview({ overview }: DashboardOverviewProps) {
   const navigate = useNavigate();
@@ -23,19 +22,67 @@ export default function DashboardOverview({ overview }: DashboardOverviewProps) 
   if (!overview.metrics.length && !overview.alerts.length) return null;
 
   const activeAlerts = overview.alerts.filter(a => a.value > 0);
+  const summaryItems = [
+    {
+      id: 'widgets',
+      label: 'Виджетов на экране',
+      value: overview.visibleWidgetCount,
+      icon: LayoutGrid,
+    },
+    {
+      id: 'actions',
+      label: 'Быстрых действий',
+      value: overview.quickActionCount,
+      icon: Zap,
+    },
+    {
+      id: 'updated',
+      label: 'Обновлено',
+      value: generatedAtFormatter.format(new Date(overview.generatedAt)),
+      icon: Clock3,
+    },
+  ];
 
   return (
     <div className="dashboard-overview">
-      {/* Metrics strip */}
+      <div className="dashboard-overview__hero">
+        <div className="dashboard-overview__hero-copy">
+          <span className="dashboard-overview__eyebrow">
+            <Sparkles className="h-3.5 w-3.5" />
+            Операционная сводка
+          </span>
+          <h2 className="dashboard-overview__headline">Картина дня по школе и операциям</h2>
+          <p className="dashboard-overview__description">
+            Сверху собраны ключевые метрики, активные сигналы и быстрые переходы по текущему состоянию системы.
+          </p>
+        </div>
+
+        <div className="dashboard-overview__summary">
+          {summaryItems.map(item => {
+            const Icon = item.icon;
+            return (
+              <div key={item.id} className="dashboard-overview__summary-item">
+                <div className="dashboard-overview__summary-icon">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="dashboard-overview__summary-value">{item.value}</div>
+                  <div className="dashboard-overview__summary-label">{item.label}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="dashboard-overview__metrics">
         {overview.metrics.map(metric => {
-          const tone = TONE_STYLES[metric.tone] ?? TONE_STYLES.primary;
           return (
             <div
               key={metric.id}
-              className={`dashboard-overview__metric ${tone.bg} ${tone.border}`}
+              className={`dashboard-overview__metric dashboard-overview__metric--${metric.tone}`}
             >
-              <p className={`dashboard-overview__metric-value ${tone.text}`}>
+              <p className="dashboard-overview__metric-value">
                 {typeof metric.value === 'number'
                   ? metric.value.toLocaleString('ru-RU')
                   : metric.value}
@@ -53,17 +100,16 @@ export default function DashboardOverview({ overview }: DashboardOverviewProps) 
       {activeAlerts.length > 0 && (
         <div className="dashboard-overview__alerts">
           {activeAlerts.map(alert => {
-            const tone = TONE_STYLES[alert.tone] ?? TONE_STYLES.neutral;
             return (
               <button
                 key={alert.id}
-                className={`dashboard-overview__alert ${tone.bg} ${tone.border}`}
+                className={`dashboard-overview__alert dashboard-overview__alert--${alert.tone}`}
                 onClick={() => navigate(alert.path)}
               >
-                <AlertTriangle className={`h-3.5 w-3.5 ${tone.text}`} />
+                <AlertTriangle className="h-3.5 w-3.5 dashboard-overview__alert-icon" />
                 <span className="dashboard-overview__alert-label">{alert.label}</span>
-                <span className={`dashboard-overview__alert-value ${tone.text}`}>{alert.value}</span>
-                <ChevronRight className="h-3 w-3 text-gray-400" />
+                <span className="dashboard-overview__alert-value">{alert.value}</span>
+                <ChevronRight className="h-3 w-3 dashboard-overview__alert-chevron" />
               </button>
             );
           })}

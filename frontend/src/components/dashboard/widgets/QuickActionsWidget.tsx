@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, FileText, UserPlus, ShoppingCart, ClipboardList,
   DollarSign, Package, UtensilsCrossed, Wrench, Calendar, CheckSquare, Bot,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 import type { QuickAction } from '../../../types/dashboard';
@@ -51,7 +52,7 @@ export default function QuickActionsWidget({ data }: { data: { actions: QuickAct
   if (sorted.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="dashboard-quick-actions">
       {sorted.map(action => {
         const Icon = ICON_MAP[action.icon] ?? Plus;
         const accentColor = ACTION_COLORS[action.id] ?? '#6b7280';
@@ -60,17 +61,26 @@ export default function QuickActionsWidget({ data }: { data: { actions: QuickAct
           <button
             key={action.id}
             onClick={() => navigate(action.path)}
-            className={`flex items-center gap-2 p-2.5 rounded-lg border hover:bg-gray-50 transition-colors text-left text-xs group ${
-              isPinned ? 'border-[var(--mezon-accent)] bg-blue-50/30' : 'border-gray-100 hover:border-gray-200'
+            className={`dashboard-quick-actions__item ${
+              isPinned ? 'dashboard-quick-actions__item--pinned' : ''
             }`}
+            title={action.label}
           >
             <div
-              className="p-1.5 rounded-md group-hover:scale-110 transition-transform"
+              className="dashboard-quick-actions__icon"
               style={{ backgroundColor: `${accentColor}15`, color: accentColor }}
             >
               <Icon className="h-4 w-4" />
             </div>
-            <span className="font-medium text-gray-700 leading-tight">{action.label}</span>
+            <div className="dashboard-quick-actions__content">
+              <span className="dashboard-quick-actions__label">{action.label}</span>
+              {isPinned && (
+                <span className="dashboard-quick-actions__badge">
+                  <Sparkles className="h-3 w-3" />
+                  Закреплено
+                </span>
+              )}
+            </div>
           </button>
         );
       })}

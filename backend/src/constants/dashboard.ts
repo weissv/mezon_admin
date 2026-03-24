@@ -132,7 +132,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'kpi',
     description: 'Дети, сотрудники, кружки, доход/расход',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 12, h: 2 },
+    defaultSize: { w: 12, h: 3 },
     minSize: { w: 6, h: 2 },
     canHide: false,
     canResize: true,
@@ -326,8 +326,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'actions',
     description: 'Закреплённые ярлыки и действия',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 12, h: 1 },
-    minSize: { w: 6, h: 1 },
+    defaultSize: { w: 12, h: 2 },
+    minSize: { w: 6, h: 2 },
     canHide: false,
     canResize: false,
     refreshInterval: 0,
@@ -357,46 +357,53 @@ export function getDefaultLayout(role: Role): LayoutItem[] {
   const isFinance = FINANCE_ROLES.includes(role);
   const isOps = OPERATIONS_ROLES.includes(role);
   const isAdmin = ADMIN_ROLES.includes(role);
+  const topSectionBottom = 5;
+  const attendanceBottom = topSectionBottom + 2;
 
   const layout: LayoutItem[] = [
-    { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 1 },
-    { widgetId: 'kpi-overview', x: 0, y: 1, w: 12, h: 2 },
-    { widgetId: 'attendance-today', x: 0, y: 3, w: 4, h: 2 },
+    { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
+    { widgetId: 'kpi-overview', x: 0, y: 2, w: 12, h: 3 },
+    { widgetId: 'attendance-today', x: 0, y: topSectionBottom, w: 4, h: 2 },
   ];
 
-  let y = 3;
+  let nextY = attendanceBottom;
 
   if (isFinance) {
     layout.push(
-      { widgetId: 'finance-overview', x: 4, y, w: 4, h: 3 },
-      { widgetId: 'cash-forecast', x: 8, y, w: 4, h: 3 },
+      { widgetId: 'finance-overview', x: 4, y: topSectionBottom, w: 4, h: 3 },
+      { widgetId: 'cash-forecast', x: 8, y: topSectionBottom, w: 4, h: 3 },
+      { widgetId: 'unit-economics', x: 0, y: topSectionBottom + 3, w: 6, h: 3 },
     );
-    y += 3;
-    layout.push(
-      { widgetId: 'unit-economics', x: 0, y, w: 6, h: 3 },
-    );
+    nextY = topSectionBottom + 6;
   }
+
+  let securityRowY = nextY;
+  let calendarRowY = nextY;
 
   if (isOps) {
     layout.push(
-      { widgetId: 'inventory-risk', x: 0, y: y + 3, w: 4, h: 3 },
-      { widgetId: 'procurement-status', x: 4, y: y + 3, w: 4, h: 3 },
-      { widgetId: 'menu-today', x: 8, y: y + 3, w: 4, h: 3 },
-      { widgetId: 'maintenance-queue', x: 0, y: y + 6, w: 4, h: 3 },
+      { widgetId: 'inventory-risk', x: 0, y: nextY, w: 4, h: 3 },
+      { widgetId: 'procurement-status', x: 4, y: nextY, w: 4, h: 3 },
+      { widgetId: 'menu-today', x: 8, y: nextY, w: 4, h: 3 },
+      { widgetId: 'maintenance-queue', x: 0, y: nextY + 3, w: 4, h: 3 },
     );
+    securityRowY = nextY + 3;
+    calendarRowY = nextY + 3;
+    nextY += 6;
   }
 
   if (isAdmin) {
     layout.push(
-      { widgetId: 'security-summary', x: 4, y: y + 6, w: 4, h: 3 },
-      { widgetId: 'hr-alerts', x: 0, y: y + 9, w: 6, h: 3 },
-      { widgetId: 'activity-stream', x: 6, y: y + 9, w: 6, h: 3 },
+      { widgetId: 'security-summary', x: 4, y: securityRowY, w: 4, h: 3 },
+      { widgetId: 'hr-alerts', x: 0, y: nextY, w: 6, h: 3 },
+      { widgetId: 'activity-stream', x: 6, y: nextY, w: 6, h: 3 },
     );
+    nextY += 3;
   }
 
   layout.push(
-    { widgetId: 'calendar-today', x: 8, y: y + 6, w: 4, h: 3 },
-    { widgetId: 'notifications-feed', x: 0, y: y + 12, w: 4, h: 3 },
+    { widgetId: 'calendar-today', x: 8, y: calendarRowY, w: 4, h: 3 },
+    { widgetId: 'notifications-feed', x: 0, y: nextY, w: 4, h: 3 },
   );
 
   return layout;
