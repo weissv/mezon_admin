@@ -476,6 +476,7 @@
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.625rem;
+  overflow: visible;
 }
 
 .dashboard-quick-actions__item {
@@ -907,13 +908,17 @@
     font-size: 1.1rem;
   }
 
-  .dashboard-kpi-strip,
-  .dashboard-quick-actions {
+  .dashboard-kpi-strip {
     display: flex;
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 0.125rem;
     scrollbar-width: thin;
+  }
+
+  .dashboard-quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
   }
 
   .dashboard-kpi-card {
@@ -937,8 +942,8 @@
   }
 
   .dashboard-quick-actions__item {
-    min-width: 11rem;
-    flex: 0 0 11rem;
+    min-width: 0;
+    flex: initial;
     padding: 0.6875rem 0.75rem;
   }
 

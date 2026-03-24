@@ -326,8 +326,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'actions',
     description: 'Закреплённые ярлыки и действия',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 12, h: 2 },
-    minSize: { w: 6, h: 2 },
+    defaultSize: { w: 12, h: 3 },
+    minSize: { w: 6, h: 3 },
     canHide: false,
     canResize: false,
     refreshInterval: 0,
@@ -361,20 +361,20 @@ export function getDefaultLayout(role: Role): LayoutItem[] {
   const attendanceBottom = topSectionBottom + 2;
 
   const layout: LayoutItem[] = [
-    { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
-    { widgetId: 'kpi-overview', x: 0, y: 2, w: 12, h: 3 },
-    { widgetId: 'attendance-today', x: 0, y: topSectionBottom, w: 4, h: 2 },
+    { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 3 },
+    { widgetId: 'kpi-overview', x: 0, y: 3, w: 12, h: 3 },
+    { widgetId: 'attendance-today', x: 0, y: 6, w: 4, h: 2 },
   ];
 
-  let nextY = attendanceBottom;
+  let nextY = 8;
 
   if (isFinance) {
     layout.push(
-      { widgetId: 'finance-overview', x: 4, y: topSectionBottom, w: 4, h: 3 },
-      { widgetId: 'cash-forecast', x: 8, y: topSectionBottom, w: 4, h: 3 },
-      { widgetId: 'unit-economics', x: 0, y: topSectionBottom + 3, w: 6, h: 3 },
+      { widgetId: 'finance-overview', x: 4, y: 6, w: 4, h: 3 },
+      { widgetId: 'cash-forecast', x: 8, y: 6, w: 4, h: 3 },
+      { widgetId: 'unit-economics', x: 0, y: 9, w: 6, h: 3 },
     );
-    nextY = topSectionBottom + 6;
+    nextY = 12;
   }
 
   let securityRowY = nextY;
