@@ -2,15 +2,12 @@
 // Drag-and-drop grid layout для виджетов
 
 import { useMemo, useCallback } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import RGL from 'react-grid-layout';
+import { Responsive, WidthProvider } from 'react-grid-layout/legacy';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import WidgetRenderer from './WidgetRenderer';
 import type { WidgetDefinition, LayoutItem, DashboardPreferences, QuickAction } from '../../types/dashboard';
 
-// react-grid-layout exports are CJS; re-export via default
-const { Responsive, WidthProvider } = RGL as any;
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 /** Single item in the react-grid-layout */
