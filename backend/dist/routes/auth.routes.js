@@ -9,51 +9,75 @@ const prisma_1 = require("../prisma");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = require("../config");
-const auth_1 = require("../middleware/auth"); // Убедись, что импорт есть
+const constants_1 = require("../constants");
 const router = (0, express_1.Router)();
 // Публичный роут для входа
 router.post("/login", async (req, res) => {
     const { email, login, password } = req.body;
     const identifier = login || email;
-    console.log('[AUTH] Login attempt:', { identifier });
     if (!identifier || !password) {
-        console.log('[AUTH] Missing credentials');
         return res.status(400).json({ message: "Email/login and password are required" });
     }
-    const user = await prisma_1.prisma.user.findUnique({ where: { email: identifier }, include: { employee: true } });
+    const user = await prisma_1.prisma.user.findFirst({
+        where: {
+            email: identifier,
+            deletedAt: null,
+        },
+        include: { employee: true },
+    });
     if (!user) {
-        console.log('[AUTH] User not found:', identifier);
         return res.status(401).json({ message: "Invalid credentials" });
     }
     const isValid = await bcryptjs_1.default.compare(password, user.passwordHash);
     if (!isValid) {
         return res.status(401).json({ message: "Invalid credentials" });
     }
-    const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role, employeeId: user.employeeId }, config_1.config.jwtSecret);
+    const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role, employeeId: user.employeeId }, config_1.config.jwtSecret, { expiresIn: constants_1.JWT.EXPIRES_IN });
     // Set HttpOnly cookie
     const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none', // Changed from 'lax' to 'none' for cross-origin
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        maxAge: constants_1.JWT.COOKIE_MAX_AGE,
     };
     res.cookie('auth_token', token, cookieOptions);
-    console.log('[AUTH] Login successful for:', user.email);
     // Remove sensitive data
     const { passwordHash, ...sanitizedUser } = user;
     return res.json({ user: sanitizedUser, token });
 });
-// Приватный роут, защищенный своим middleware
-router.get("/me", auth_1.authMiddleware, async (req, res) => {
-    const me = await prisma_1.prisma.user.findUnique({
-        where: { id: req.user.id },
-        include: { employee: true },
-    });
-    if (!me)
-        return res.status(404).json({ message: "User not found" });
-    // Remove sensitive data
-    const { passwordHash, ...sanitizedUser } = me;
-    return res.json({ user: sanitizedUser });
+// Session probe route: returns null instead of 401 when user is not authenticated
+router.get("/me", async (req, res) => {
+    let token = req.cookies?.auth_token;
+    if (!token) {
+        const header = req.headers.authorization;
+        if (header && header.startsWith("Bearer ")) {
+            token = header.substring(7);
+        }
+    }
+    if (!token) {
+        return res.json({ user: null });
+    }
+    try {
+        const payload = jsonwebtoken_1.default.verify(token, config_1.config.jwtSecret);
+        if (!payload?.id) {
+            return res.json({ user: null });
+        }
+        const me = await prisma_1.prisma.user.findFirst({
+            where: {
+                id: payload.id,
+                deletedAt: null,
+            },
+            include: { employee: true },
+        });
+        if (!me) {
+            return res.json({ user: null });
+        }
+        const { passwordHash, ...sanitizedUser } = me;
+        return res.json({ user: sanitizedUser });
+    }
+    catch {
+        return res.json({ user: null });
+    }
 });
 // Logout route - clears the cookie
 router.post("/logout", (req, res) => {

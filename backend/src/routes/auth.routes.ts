@@ -4,7 +4,6 @@ import { prisma } from "../prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { config } from "../config";
-import { authMiddleware } from "../middleware/auth"; // Убедись, что импорт есть
 import { JWT } from "../constants";
 
 const router = Router();
@@ -57,20 +56,44 @@ router.post("/login", async (req, res) => {
   return res.json({ user: sanitizedUser, token });
 });
 
-// Приватный роут, защищенный своим middleware
-router.get("/me", authMiddleware, async (req, res) => {
-  const me = await prisma.user.findFirst({
-    where: {
-      id: req.user!.id,
-      deletedAt: null,
-    },
-    include: { employee: true },
-  });
-  if (!me) return res.status(404).json({ message: "User not found" });
-  
-  // Remove sensitive data
-  const { passwordHash, ...sanitizedUser } = me;
-  return res.json({ user: sanitizedUser });
+// Session probe route: returns null instead of 401 when user is not authenticated
+router.get("/me", async (req, res) => {
+  let token = req.cookies?.auth_token;
+
+  if (!token) {
+    const header = req.headers.authorization;
+    if (header && header.startsWith("Bearer ")) {
+      token = header.substring(7);
+    }
+  }
+
+  if (!token) {
+    return res.json({ user: null });
+  }
+
+  try {
+    const payload = jwt.verify(token, config.jwtSecret) as { id?: number };
+    if (!payload?.id) {
+      return res.json({ user: null });
+    }
+
+    const me = await prisma.user.findFirst({
+      where: {
+        id: payload.id,
+        deletedAt: null,
+      },
+      include: { employee: true },
+    });
+
+    if (!me) {
+      return res.json({ user: null });
+    }
+
+    const { passwordHash, ...sanitizedUser } = me;
+    return res.json({ user: sanitizedUser });
+  } catch {
+    return res.json({ user: null });
+  }
 });
 
 // Logout route - clears the cookie
