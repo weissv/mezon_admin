@@ -1,0 +1,61 @@
+// src/components/dashboard/widgets/HrAlertsWidget.tsx
+import { UserCheck, Calendar, AlertTriangle, FileText } from 'lucide-react';
+
+interface HrAlert {
+  type: 'medical' | 'contract' | 'document';
+  employeeName: string;
+  detail: string;
+  dueDate: string;
+  overdue: boolean;
+}
+
+interface HrAlertsData {
+  alerts: HrAlert[];
+  medicalExpiring: number;
+  contractsExpiring: number;
+}
+
+const ALERT_CONFIG: Record<string, { icon: typeof UserCheck; color: string; label: string }> = {
+  medical: { icon: UserCheck, color: 'text-red-500', label: 'Мед. осмотр' },
+  contract: { icon: FileText, color: 'text-amber-500', label: 'Договор' },
+  document: { icon: Calendar, color: 'text-blue-500', label: 'Документ' },
+};
+
+export default function HrAlertsWidget({ data }: { data: HrAlertsData | undefined }) {
+  if (!data) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="p-2 bg-red-50 rounded-lg text-center">
+          <p className="text-lg font-bold text-red-600">{data.medicalExpiring}</p>
+          <p className="text-xs text-red-500">Мед. осмотры</p>
+        </div>
+        <div className="p-2 bg-amber-50 rounded-lg text-center">
+          <p className="text-lg font-bold text-amber-600">{data.contractsExpiring}</p>
+          <p className="text-xs text-amber-500">Договоры</p>
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        {data.alerts.slice(0, 5).map((alert, i) => {
+          const cfg = ALERT_CONFIG[alert.type] ?? ALERT_CONFIG.document;
+          const Icon = cfg.icon;
+          return (
+            <div key={i} className="flex items-center gap-2 text-xs">
+              <Icon className={`h-3 w-3 flex-shrink-0 ${cfg.color}`} />
+              <div className="truncate flex-1">
+                <span className="font-medium">{alert.employeeName}</span>
+                <span className="text-gray-400"> — {alert.detail}</span>
+              </div>
+              <span className={`whitespace-nowrap ${alert.overdue ? 'text-red-500 font-medium' : 'text-gray-400'}`}>
+                {new Date(alert.dueDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+              </span>
+              {alert.overdue && <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

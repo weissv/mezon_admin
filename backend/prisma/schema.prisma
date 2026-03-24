@@ -146,6 +146,7 @@ model User {
 
   actionLogs ActionLog[]
   knowledgeBaseArticles KnowledgeBaseArticle[] @relation("ArticleAuthor")
+  dashboardPreference DashboardPreference?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 
@@ -1182,4 +1183,39 @@ model ExamAnswer {
   @@unique([submissionId, questionId])
   @@index([submissionId])
   @@index([questionId])
+}
+
+// ===================== DASHBOARD CUSTOMIZATION =====================
+
+/// Пользовательские настройки дашборда
+model DashboardPreference {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Макет: массив объектов {widgetId, x, y, w, h}
+  layout Json @default("[]")
+
+  // Список включённых виджетов (по id)
+  enabledWidgets String[] @default([])
+
+  // Свёрнутые секции
+  collapsedSections String[] @default([])
+
+  // Закреплённые быстрые действия
+  pinnedActions String[] @default([])
+
+  // Фильтры и настройки на уровне виджетов {widgetId: {period, ...}}
+  widgetFilters Json @default("{}")
+
+  // Сохранённые представления [{name, layout, enabledWidgets, filters}]
+  savedViews Json @default("[]")
+
+  // Текущий активный preset/view (null = custom)
+  activeView String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
