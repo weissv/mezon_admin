@@ -27,6 +27,8 @@ export interface WidgetDefinition {
   defaultSize: { w: number; h: number };
   /** Минимальный размер */
   minSize: { w: number; h: number };
+  /** Максимальный размер (верхняя граница ресайза) */
+  maxSize: { w: number; h: number };
   /** Можно ли скрыть этот виджет */
   canHide: boolean;
   /** Можно ли менять размер */
@@ -132,8 +134,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'kpi',
     description: 'Дети, сотрудники, кружки, доход/расход',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 12, h: 3 },
-    minSize: { w: 6, h: 2 },
+    defaultSize: { w: 12, h: 2 },
+    minSize: { w: 4, h: 2 },
+    maxSize: { w: 12, h: 4 },
     canHide: false,
     canResize: true,
     refreshInterval: 300_000,
@@ -147,8 +150,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'finance',
     description: 'Доходы и расходы за последний период',
     allowedRoles: FINANCE_ROLES,
-    defaultSize: { w: 6, h: 3 },
-    minSize: { w: 4, h: 2 },
+    defaultSize: { w: 4, h: 2 },
+    minSize: { w: 3, h: 2 },
+    maxSize: { w: 8, h: 4 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -161,7 +165,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     description: 'Прогноз движения денег на 30 дней',
     allowedRoles: FINANCE_ROLES,
     defaultSize: { w: 6, h: 3 },
-    minSize: { w: 4, h: 2 },
+    minSize: { w: 3, h: 2 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 900_000,
@@ -174,7 +179,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     description: 'Структура расходов на одного ребёнка',
     allowedRoles: FINANCE_ROLES,
     defaultSize: { w: 6, h: 3 },
-    minSize: { w: 4, h: 2 },
+    minSize: { w: 3, h: 2 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 900_000,
@@ -190,6 +196,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: OPERATIONS_ROLES,
     defaultSize: { w: 4, h: 3 },
     minSize: { w: 3, h: 2 },
+    maxSize: { w: 8, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 300_000,
@@ -203,6 +210,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: OPERATIONS_ROLES,
     defaultSize: { w: 4, h: 3 },
     minSize: { w: 3, h: 2 },
+    maxSize: { w: 8, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -216,6 +224,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: OPERATIONS_ROLES,
     defaultSize: { w: 4, h: 3 },
     minSize: { w: 3, h: 2 },
+    maxSize: { w: 8, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -231,6 +240,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: OPERATIONS_ROLES,
     defaultSize: { w: 4, h: 3 },
     minSize: { w: 3, h: 2 },
+    maxSize: { w: 8, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 180_000,
@@ -244,6 +254,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: ADMIN_ROLES,
     defaultSize: { w: 4, h: 3 },
     minSize: { w: 3, h: 2 },
+    maxSize: { w: 8, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -258,7 +269,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     description: 'Медосмотры, контракты, аттестации',
     allowedRoles: ADMIN_ROLES,
     defaultSize: { w: 6, h: 3 },
-    minSize: { w: 4, h: 2 },
+    minSize: { w: 3, h: 2 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -274,6 +286,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: ALL_ROLES,
     defaultSize: { w: 4, h: 2 },
     minSize: { w: 3, h: 2 },
+    maxSize: { w: 6, h: 4 },
     canHide: true,
     canResize: true,
     refreshInterval: 300_000,
@@ -287,6 +300,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: ALL_ROLES,
     defaultSize: { w: 4, h: 3 },
     minSize: { w: 3, h: 2 },
+    maxSize: { w: 8, h: 8 },
     canHide: true,
     canResize: true,
     refreshInterval: 300_000,
@@ -300,6 +314,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: ALL_ROLES,
     defaultSize: { w: 4, h: 3 },
     minSize: { w: 3, h: 2 },
+    maxSize: { w: 8, h: 8 },
     canHide: true,
     canResize: true,
     refreshInterval: 120_000,
@@ -312,7 +327,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     description: 'Последние действия в системе',
     allowedRoles: ADMIN_ROLES,
     defaultSize: { w: 6, h: 3 },
-    minSize: { w: 4, h: 2 },
+    minSize: { w: 3, h: 2 },
+    maxSize: { w: 12, h: 8 },
     canHide: true,
     canResize: true,
     refreshInterval: 120_000,
@@ -326,8 +342,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'actions',
     description: 'Закреплённые ярлыки и действия',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 12, h: 3 },
-    minSize: { w: 6, h: 3 },
+    defaultSize: { w: 12, h: 2 },
+    minSize: { w: 6, h: 2 },
+    maxSize: { w: 12, h: 6 },
     canHide: false,
     canResize: false,
     refreshInterval: 0,
@@ -357,24 +374,23 @@ export function getDefaultLayout(role: Role): LayoutItem[] {
   const isFinance = FINANCE_ROLES.includes(role);
   const isOps = OPERATIONS_ROLES.includes(role);
   const isAdmin = ADMIN_ROLES.includes(role);
-  const topSectionBottom = 5;
-  const attendanceBottom = topSectionBottom + 2;
+  const topSectionBottom = 4; // quick-actions(h=2) + kpi-overview(h=2)
 
   const layout: LayoutItem[] = [
-    { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 3 },
-    { widgetId: 'kpi-overview', x: 0, y: 3, w: 12, h: 3 },
-    { widgetId: 'attendance-today', x: 0, y: 6, w: 4, h: 2 },
+    { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
+    { widgetId: 'kpi-overview', x: 0, y: 2, w: 12, h: 2 },
+    { widgetId: 'attendance-today', x: 0, y: topSectionBottom, w: 4, h: 2 },
   ];
 
-  let nextY = 8;
+  let nextY = topSectionBottom + 2;
 
   if (isFinance) {
     layout.push(
-      { widgetId: 'finance-overview', x: 4, y: 6, w: 4, h: 3 },
-      { widgetId: 'cash-forecast', x: 8, y: 6, w: 4, h: 3 },
-      { widgetId: 'unit-economics', x: 0, y: 9, w: 6, h: 3 },
+      { widgetId: 'finance-overview', x: 4, y: topSectionBottom, w: 4, h: 2 },
+      { widgetId: 'cash-forecast', x: 8, y: topSectionBottom, w: 4, h: 3 },
+      { widgetId: 'unit-economics', x: 0, y: topSectionBottom + 2, w: 6, h: 3 },
     );
-    nextY = 12;
+    nextY = topSectionBottom + 5;
   }
 
   let securityRowY = nextY;

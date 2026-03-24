@@ -19,6 +19,8 @@ interface RGLLayout {
   h: number;
   minW?: number;
   minH?: number;
+  maxW?: number;
+  maxH?: number;
   static?: boolean;
   isResizable?: boolean;
 }
@@ -34,7 +36,9 @@ interface DashboardLayoutProps {
 
 function getQuickActionsHeight(actionCount: number, columns: number) {
   const rows = Math.max(1, Math.ceil(actionCount / columns));
-  return Math.max(rows + 1, 3);
+  if (columns >= 5) return Math.max(rows, 2);
+  if (columns >= 3) return Math.max(rows, 3);
+  return Math.max(rows, 4);
 }
 
 /** Конвертирует наш LayoutItem[] в react-grid-layout Layout[] */
@@ -49,6 +53,8 @@ function toGridLayout(items: LayoutItem[], widgets: WidgetDefinition[]): RGLLayo
       h: item.h,
       minW: def?.minSize.w ?? 2,
       minH: def?.minSize.h ?? 1,
+      maxW: def?.maxSize.w ?? 12,
+      maxH: def?.maxSize.h ?? 8,
       static: !def?.canResize && !def?.canHide,
       isResizable: def?.canResize ?? true,
     };
@@ -114,16 +120,16 @@ export default function DashboardLayout({
 
   const layouts: Record<string, RGLLayout[]> = useMemo(() => ({
     lg: gridLayout.map(item => item.i === 'quick-actions'
-      ? { ...item, h: Math.max(item.h, getQuickActionsHeight(quickActionsCount, 5)) }
+      ? { ...item, h: getQuickActionsHeight(quickActionsCount, 5) }
       : item),
     md: gridLayout.map(item => item.i === 'quick-actions'
-      ? { ...item, w: 6, h: Math.max(item.h, getQuickActionsHeight(quickActionsCount, 3)) }
+      ? { ...item, w: 6, h: getQuickActionsHeight(quickActionsCount, 3) }
       : { ...item, w: Math.min(item.w, 6) }),
     sm: gridLayout.map(item => item.i === 'quick-actions'
-      ? { ...item, w: 6, x: 0, h: Math.max(item.h, getQuickActionsHeight(quickActionsCount, 2)) }
+      ? { ...item, w: 6, x: 0, h: getQuickActionsHeight(quickActionsCount, 2) }
       : { ...item, w: 6, x: 0 }),
     xs: gridLayout.map(item => item.i === 'quick-actions'
-      ? { ...item, w: 6, x: 0, h: Math.max(item.h, getQuickActionsHeight(quickActionsCount, 2)) }
+      ? { ...item, w: 6, x: 0, h: getQuickActionsHeight(quickActionsCount, 2) }
       : { ...item, w: 6, x: 0 }),
   }), [gridLayout, quickActionsCount]);
 
