@@ -1,17 +1,50 @@
 // src/types/child.ts
-// Типы для детей
+// Единый источник типов для модуля «Дети»
 
 import { BaseEntity, ChildStatus } from './common';
+
+// ===== Справочники =====
+
+export type Gender = 'MALE' | 'FEMALE';
 
 export interface Group {
   id: number;
   name: string;
   grade?: number | null;
-  academicYear?: string | null;
-  teacherId?: number | null;
   capacity?: number;
-  description?: string | null;
+  academicYear?: string | null;
 }
+
+// ===== Parent =====
+
+export interface Parent {
+  id: number;
+  fullName: string;
+  relation: string;
+  phone?: string | null;
+  email?: string | null;
+  workplace?: string | null;
+}
+
+export interface ParentInput {
+  id?: number;
+  fullName: string;
+  relation: string;
+  phone?: string;
+  email?: string;
+  workplace?: string;
+}
+
+// ===== Health Info =====
+
+export interface HealthInfo {
+  allergies?: string[];
+  specialConditions?: string[];
+  medications?: string[];
+  notes?: string;
+}
+
+// ===== Child — list item =====
 
 export interface Child extends BaseEntity {
   firstName: string;
@@ -24,43 +57,33 @@ export interface Child extends BaseEntity {
   status: ChildStatus;
   address?: string | null;
   nationality?: string | null;
-  gender?: string | null;
+  gender?: Gender | null;
   birthCertificateNumber?: string | null;
+  contractNumber?: string | null;
+  contractDate?: string | null;
+  parents: Parent[];
+  // Legacy fields (backward compat)
   fatherName?: string | null;
   motherName?: string | null;
   parentPhone?: string | null;
-  contractNumber?: string | null;
-  contractDate?: string | null;
 }
 
-export interface HealthInfo {
-  allergies?: string[];
-  specialConditions?: string[];
-  medications?: string[];
-  notes?: string;
-}
-
-export interface ChildWithDetails extends Child {
-  enrollments?: ClubEnrollmentSummary[];
-  attendance?: AttendanceSummary;
-  temporaryAbsences?: TemporaryAbsence[];
-}
+// ===== Child — detail page =====
 
 export interface ClubEnrollmentSummary {
   id: number;
   clubId: number;
-  clubName: string;
   status: string;
+  club: { id: number; name: string };
 }
 
-export interface AttendanceSummary {
-  totalDays: number;
-  presentDays: number;
-  absentDays: number;
-  attendanceRate: number;
+export interface ChildDetail extends Child {
+  temporaryAbsences?: TemporaryAbsence[];
+  enrollments?: ClubEnrollmentSummary[];
 }
 
-// Временные отсутствия
+// ===== Temporary Absences =====
+
 export interface TemporaryAbsence {
   id: number;
   childId: number;
@@ -70,38 +93,43 @@ export interface TemporaryAbsence {
   createdAt: string;
 }
 
-export interface CreateTemporaryAbsenceInput {
+export interface CreateAbsenceInput {
   startDate: string;
   endDate: string;
   reason?: string;
 }
 
-export interface UpdateTemporaryAbsenceInput extends Partial<CreateTemporaryAbsenceInput> {}
+export interface UpdateAbsenceInput extends Partial<CreateAbsenceInput> {}
 
-// Формы
+// ===== Create/Update DTOs =====
+
 export interface CreateChildInput {
   firstName: string;
   lastName: string;
   middleName?: string;
   birthDate: string;
   groupId: number;
-  healthInfo?: string;
+  healthInfo?: HealthInfo;
   address?: string;
   nationality?: string;
-  gender?: string;
+  gender?: Gender;
   birthCertificateNumber?: string;
+  contractNumber?: string;
+  contractDate?: string;
+  parents?: ParentInput[];
+  // Legacy
   fatherName?: string;
   motherName?: string;
   parentPhone?: string;
-  contractNumber?: string;
-  contractDate?: string;
 }
 
 export interface UpdateChildInput extends Partial<CreateChildInput> {}
 
-// Фильтры
+// ===== Filters =====
+
 export interface ChildFilters {
   status?: ChildStatus;
   groupId?: number;
-  lastName?: string;
+  search?: string;
+  gender?: Gender;
 }

@@ -1,29 +1,90 @@
 // src/services/ChildService.ts
-// Сервис для работы с детьми
+// Сервис для работы с детьми — единый источник бизнес-логики
 
-import { Child, Prisma } from '@prisma/client';
+import { Child, Prisma, Gender, ChildStatus } from '@prisma/client';
 import { BaseService, PaginationParams, SortParams, PaginatedResult } from './BaseService';
-import { NotFoundError, ConflictError } from '../utils/errors';
+import { NotFoundError, ValidationError } from '../utils/errors';
+import { ParentService } from './ParentService';
+
+// --- Interfaces ---
 
 export interface ChildFilters {
   status?: string;
   groupId?: number;
-  lastName?: string;
+  search?: string; // multi-field: firstName, lastName, middleName
+  gender?: string;
+}
+
+export interface HealthInfoInput {
+  allergies?: string[];
+  specialConditions?: string[];
+  medications?: string[];
+  notes?: string;
+}
+
+export interface ParentInput {
+  id?: number;
+  fullName: string;
+  relation: string;
+  phone?: string;
+  email?: string;
+  workplace?: string;
 }
 
 export interface CreateChildInput {
   firstName: string;
   lastName: string;
+  middleName?: string;
   birthDate: string | Date;
   groupId: number;
-  healthInfo?: string;
+  healthInfo?: HealthInfoInput;
+  address?: string;
+  nationality?: string;
+  gender?: Gender;
+  birthCertificateNumber?: string;
+  contractNumber?: string;
+  contractDate?: string | Date;
+  parents?: ParentInput[];
+  // Legacy fields (backward compat)
+  fatherName?: string;
+  motherName?: string;
+  parentPhone?: string;
 }
 
 export interface UpdateChildInput extends Partial<CreateChildInput> {}
 
-export interface ChildWithGroup extends Child {
-  group: { id: number; name: string };
-}
+// --- Response types ---
+
+const groupSelect = { id: true, name: true, grade: true } as const;
+
+const parentSelect = {
+  id: true,
+  fullName: true,
+  relation: true,
+  phone: true,
+  email: true,
+  workplace: true,
+} as const;
+
+const childListInclude = {
+  group: { select: groupSelect },
+  parents: { select: parentSelect },
+} as const;
+
+const childDetailInclude = {
+  group: { select: { ...groupSelect, capacity: true, academicYear: true } },
+  parents: { select: parentSelect },
+  temporaryAbsences: { orderBy: { startDate: 'desc' as const }, take: 5 },
+  enrollments: {
+    include: { club: { select: { id: true, name: true } } },
+    where: { status: 'ACTIVE' as const },
+  },
+} as const;
+
+export type ChildListItem = Prisma.ChildGetPayload<{ include: typeof childListInclude }>;
+export type ChildDetail = Prisma.ChildGetPayload<{ include: typeof childDetailInclude }>;
+
+// --- Service ---
 
 class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChildInput> {
   protected get modelName() {
@@ -34,25 +95,32 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     return ['id', 'firstName', 'lastName', 'birthDate', 'status', 'groupId', 'createdAt'];
   }
 
-  /**
-   * Получить список детей с фильтрами и пагинацией
-   */
+  // --- List ---
+
   async findMany(
     params: PaginationParams & SortParams & ChildFilters
-  ): Promise<PaginatedResult<ChildWithGroup>> {
+  ): Promise<PaginatedResult<ChildListItem>> {
     const pagination = this.buildPagination(params);
     const orderBy = this.buildOrderBy(params);
-    
+
     const where: Prisma.ChildWhereInput = {};
-    
+
     if (params.status) {
-      where.status = params.status as any;
+      where.status = params.status as ChildStatus;
     }
     if (params.groupId) {
       where.groupId = params.groupId;
     }
-    if (params.lastName) {
-      where.lastName = { contains: params.lastName, mode: 'insensitive' };
+    if (params.gender) {
+      where.gender = params.gender as Gender;
+    }
+    if (params.search) {
+      const term = params.search.trim();
+      where.OR = [
+        { lastName: { contains: term, mode: 'insensitive' } },
+        { firstName: { contains: term, mode: 'insensitive' } },
+        { middleName: { contains: term, mode: 'insensitive' } },
+      ];
     }
 
     const [items, total] = await Promise.all([
@@ -61,186 +129,205 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
         skip: pagination.skip,
         take: pagination.take,
         orderBy,
-        include: { group: { select: { id: true, name: true } } },
+        include: childListInclude,
       }),
       this.prisma.child.count({ where }),
     ]);
 
-    return this.formatPaginatedResult(items as ChildWithGroup[], total, pagination);
+    return this.formatPaginatedResult(items, total, pagination);
   }
 
-  /**
-   * Получить ребёнка по ID
-   */
-  async findById(id: number): Promise<ChildWithGroup> {
+  // --- Detail ---
+
+  async findById(id: number): Promise<ChildDetail> {
     const numericId = this.validateNumericId(id);
-    
+
     const child = await this.prisma.child.findUnique({
       where: { id: numericId },
-      include: { group: { select: { id: true, name: true } } },
+      include: childDetailInclude,
     });
 
     if (!child) {
       throw new NotFoundError(this.modelName);
     }
 
-    return child as ChildWithGroup;
+    return child;
   }
 
-  /**
-   * Создать ребёнка
-   */
-  async create(data: CreateChildInput): Promise<Child> {
-    // Проверяем существование группы
-    const group = await this.prisma.group.findUnique({
-      where: { id: data.groupId },
-    });
-    
-    if (!group) {
-      throw new NotFoundError('Группа');
-    }
+  // --- Create ---
+
+  async create(data: CreateChildInput): Promise<ChildDetail> {
+    // Validate group
+    const group = await this.prisma.group.findUnique({ where: { id: data.groupId } });
+    if (!group) throw new NotFoundError('Группа');
+
+    const birthDate = this.parseDate(data.birthDate, 'дата рождения');
+    this.validateBirthDate(birthDate);
 
     const child = await this.safeQuery(() =>
       this.prisma.child.create({
         data: {
           firstName: data.firstName,
           lastName: data.lastName,
-          birthDate: this.parseDate(data.birthDate, 'дата рождения'),
+          middleName: data.middleName,
+          birthDate,
           groupId: data.groupId,
-          healthInfo: data.healthInfo ? JSON.parse(data.healthInfo) : undefined,
+          healthInfo: data.healthInfo ? (data.healthInfo as unknown as Prisma.InputJsonValue) : undefined,
+          address: data.address,
+          nationality: data.nationality,
+          gender: data.gender,
+          birthCertificateNumber: data.birthCertificateNumber,
+          contractNumber: data.contractNumber,
+          contractDate: data.contractDate ? this.parseDate(data.contractDate, 'дата договора') : undefined,
+          // Legacy fields
+          fatherName: data.fatherName,
+          motherName: data.motherName,
+          parentPhone: data.parentPhone,
         },
+        include: childDetailInclude,
       })
     );
 
-    // Синхронизируем с LMS
+    // Create parents if provided
+    if (data.parents?.length) {
+      await ParentService.syncForChild(child.id, data.parents);
+    }
+
+    // LMS sync
     await this.syncWithLms(child.id, child.groupId);
 
-    return child;
+    // Re-fetch with parents
+    return this.findById(child.id);
   }
 
-  /**
-   * Обновить данные ребёнка
-   */
-  async update(id: number, data: UpdateChildInput): Promise<Child> {
-    const numericId = this.validateNumericId(id);
-    
-    // Проверяем существование
-    await this.findById(numericId);
+  // --- Update ---
 
-    // Если меняется группа - проверяем её существование
-    if (data.groupId) {
-      const group = await this.prisma.group.findUnique({
-        where: { id: data.groupId },
-      });
-      if (!group) {
-        throw new NotFoundError('Группа');
-      }
+  async update(id: number, data: UpdateChildInput): Promise<ChildDetail> {
+    const numericId = this.validateNumericId(id);
+    const existing = await this.findById(numericId);
+
+    // Validate new group if changing
+    if (data.groupId && data.groupId !== existing.groupId) {
+      const group = await this.prisma.group.findUnique({ where: { id: data.groupId } });
+      if (!group) throw new NotFoundError('Группа');
     }
 
-    const updateData: Prisma.ChildUpdateInput = {
-      ...(data.firstName && { firstName: data.firstName }),
-      ...(data.lastName && { lastName: data.lastName }),
-      ...(data.birthDate && { birthDate: this.parseDate(data.birthDate, 'дата рождения') }),
-      ...(data.groupId && { groupId: data.groupId }),
-      ...(data.healthInfo !== undefined && { 
-        healthInfo: data.healthInfo ? JSON.parse(data.healthInfo) : null 
-      }),
-    };
+    const updateData: Prisma.ChildUpdateInput = {};
 
-    const child = await this.safeQuery(() =>
+    if (data.firstName !== undefined) updateData.firstName = data.firstName;
+    if (data.lastName !== undefined) updateData.lastName = data.lastName;
+    if (data.middleName !== undefined) updateData.middleName = data.middleName || null;
+    if (data.birthDate !== undefined) {
+      const bd = this.parseDate(data.birthDate, 'дата рождения');
+      this.validateBirthDate(bd);
+      updateData.birthDate = bd;
+    }
+    if (data.groupId !== undefined) updateData.group = { connect: { id: data.groupId } };
+    if (data.healthInfo !== undefined) updateData.healthInfo = data.healthInfo as unknown as Prisma.InputJsonValue;
+    if (data.address !== undefined) updateData.address = data.address || null;
+    if (data.nationality !== undefined) updateData.nationality = data.nationality || null;
+    if (data.gender !== undefined) updateData.gender = data.gender || null;
+    if (data.birthCertificateNumber !== undefined) updateData.birthCertificateNumber = data.birthCertificateNumber || null;
+    if (data.contractNumber !== undefined) updateData.contractNumber = data.contractNumber || null;
+    if (data.contractDate !== undefined) {
+      updateData.contractDate = data.contractDate ? this.parseDate(data.contractDate, 'дата договора') : null;
+    }
+    // Legacy fields
+    if (data.fatherName !== undefined) updateData.fatherName = data.fatherName || null;
+    if (data.motherName !== undefined) updateData.motherName = data.motherName || null;
+    if (data.parentPhone !== undefined) updateData.parentPhone = data.parentPhone || null;
+
+    await this.safeQuery(() =>
+      this.prisma.child.update({ where: { id: numericId }, data: updateData })
+    );
+
+    // Sync parents if provided
+    if (data.parents !== undefined) {
+      await ParentService.syncForChild(numericId, data.parents);
+    }
+
+    // LMS sync if group changed
+    if (data.groupId) {
+      await this.syncWithLms(numericId, data.groupId);
+    }
+
+    return this.findById(numericId);
+  }
+
+  // --- Archive (soft delete) ---
+
+  async archive(id: number): Promise<void> {
+    const numericId = this.validateNumericId(id);
+    await this.findById(numericId); // ensure exists
+
+    await this.safeQuery(() =>
       this.prisma.child.update({
         where: { id: numericId },
-        data: updateData,
+        data: { status: 'ARCHIVED' },
       })
     );
 
-    // Синхронизируем с LMS если изменилась группа
-    if (data.groupId) {
-      await this.syncWithLms(child.id, child.groupId);
-    }
-
-    return child;
+    // Update LMS status
+    await this.prisma.lmsSchoolStudent.updateMany({
+      where: { studentId: numericId },
+      data: { status: 'archived' },
+    });
   }
 
-  /**
-   * Удалить ребёнка
-   */
+  // --- Hard delete (admin only) ---
+
   async delete(id: number): Promise<void> {
     const numericId = this.validateNumericId(id);
-    
-    // Удаляем связанную запись LMS
-    await this.prisma.lmsSchoolStudent.deleteMany({
-      where: { studentId: numericId },
-    });
+
+    // Delete LMS records first
+    await this.prisma.lmsSchoolStudent.deleteMany({ where: { studentId: numericId } });
 
     await this.safeQuery(() =>
       this.prisma.child.delete({ where: { id: numericId } })
     );
   }
 
-  /**
-   * Синхронизация с LMS
-   */
-  private async syncWithLms(childId: number, groupId: number): Promise<void> {
-    const existingLmsStudent = await this.prisma.lmsSchoolStudent.findFirst({
-      where: { studentId: childId },
-    });
+  // --- Absence management ---
 
-    if (existingLmsStudent) {
-      if (existingLmsStudent.classId !== groupId) {
-        await this.prisma.lmsSchoolStudent.update({
-          where: { id: existingLmsStudent.id },
-          data: { classId: groupId },
-        });
-      }
-    } else {
-      await this.prisma.lmsSchoolStudent.create({
-        data: {
-          studentId: childId,
-          classId: groupId,
-          status: 'active',
-        },
-      });
-    }
-  }
-
-  /**
-   * Получить временные отсутствия ребёнка
-   */
   async getAbsences(childId: number) {
     const numericId = this.validateNumericId(childId);
-    
     return this.prisma.temporaryAbsence.findMany({
       where: { childId: numericId },
       orderBy: { startDate: 'desc' },
     });
   }
 
-  /**
-   * Добавить временное отсутствие
-   */
   async addAbsence(childId: number, data: { startDate: string; endDate: string; reason?: string }) {
     const numericId = this.validateNumericId(childId);
-    
-    // Проверяем существование ребёнка
     await this.findById(numericId);
 
-    return this.prisma.temporaryAbsence.create({
-      data: {
+    const startDate = this.parseDate(data.startDate, 'дата начала');
+    const endDate = this.parseDate(data.endDate, 'дата окончания');
+
+    if (startDate > endDate) {
+      throw new ValidationError('Дата начала не может быть позже даты окончания');
+    }
+
+    // Check for overlapping absences
+    const overlap = await this.prisma.temporaryAbsence.findFirst({
+      where: {
         childId: numericId,
-        startDate: this.parseDate(data.startDate),
-        endDate: this.parseDate(data.endDate),
-        reason: data.reason,
+        startDate: { lte: endDate },
+        endDate: { gte: startDate },
       },
+    });
+    if (overlap) {
+      throw new ValidationError('Период пересекается с существующим отсутствием');
+    }
+
+    return this.prisma.temporaryAbsence.create({
+      data: { childId: numericId, startDate, endDate, reason: data.reason },
     });
   }
 
-  /**
-   * Обновить отсутствие
-   */
   async updateAbsence(absenceId: number, data: { startDate?: string; endDate?: string; reason?: string }) {
     const numericId = this.validateNumericId(absenceId, 'ID отсутствия');
-    
+
     return this.safeQuery(() =>
       this.prisma.temporaryAbsence.update({
         where: { id: numericId },
@@ -253,15 +340,45 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     );
   }
 
-  /**
-   * Удалить отсутствие
-   */
   async deleteAbsence(absenceId: number): Promise<void> {
     const numericId = this.validateNumericId(absenceId, 'ID отсутствия');
-    
     await this.safeQuery(() =>
       this.prisma.temporaryAbsence.delete({ where: { id: numericId } })
     );
+  }
+
+  // --- LMS Sync (private) ---
+
+  private async syncWithLms(childId: number, groupId: number): Promise<void> {
+    const existing = await this.prisma.lmsSchoolStudent.findFirst({
+      where: { studentId: childId },
+    });
+
+    if (existing) {
+      if (existing.classId !== groupId) {
+        await this.prisma.lmsSchoolStudent.update({
+          where: { id: existing.id },
+          data: { classId: groupId },
+        });
+      }
+    } else {
+      await this.prisma.lmsSchoolStudent.create({
+        data: { studentId: childId, classId: groupId, status: 'active' },
+      });
+    }
+  }
+
+  // --- Helpers ---
+
+  private validateBirthDate(date: Date): void {
+    const now = new Date();
+    if (date > now) {
+      throw new ValidationError('Дата рождения не может быть в будущем');
+    }
+    const minDate = new Date(now.getFullYear() - 25, now.getMonth(), now.getDate());
+    if (date < minDate) {
+      throw new ValidationError('Дата рождения слишком далеко в прошлом');
+    }
   }
 }
 

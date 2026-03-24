@@ -11,6 +11,7 @@ import { config } from "./config";
 import authRoutes from "./routes/auth.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import childrenRoutes from "./routes/children.routes";
+import parentsRoutes from "./routes/parents.routes";
 import employeesRoutes from "./routes/employees.routes";
 import clubsRoutes from "./routes/clubs.routes";
 import attendanceRoutes from "./routes/attendance.routes";
@@ -86,6 +87,7 @@ app.use(authMiddleware);
 // 3. Эти роуты теперь защищены:
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/children", childrenRoutes);
+app.use("/api/parents", parentsRoutes);
 app.use("/api/employees", employeesRoutes);
 app.use("/api/clubs", clubsRoutes);
 app.use("/api/attendance", attendanceRoutes);

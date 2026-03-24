@@ -80,7 +80,7 @@ export const FINANCE_ROLES: readonly Role[] = ['DEVELOPER', 'DIRECTOR', 'DEPUTY'
 // СТАТУСЫ
 // ============================================================================
 
-export type ChildStatus = 'ACTIVE' | 'LEFT';
+export type ChildStatus = 'ACTIVE' | 'LEFT' | 'ARCHIVED';
 export type ClubEnrollmentStatus = 'ACTIVE' | 'WAITING_LIST' | 'CANCELLED';
 export type MaintenanceStatus = 'NEW' | 'IN_PROGRESS' | 'DONE';
 export type EmployeeAttendanceStatus = 'PRESENT' | 'SICK_LEAVE' | 'VACATION' | 'ABSENT';
