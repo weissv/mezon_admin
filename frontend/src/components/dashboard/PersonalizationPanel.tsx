@@ -1,8 +1,8 @@
 // src/components/dashboard/PersonalizationPanel.tsx
 // Панель настройки дашборда: включение/отключение виджетов, presets, сброс
 
-import { useState } from 'react';
-import { Settings, Eye, EyeOff, RotateCcw, Save, Bookmark, X, GripVertical } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Eye, EyeOff, RotateCcw, Save, Bookmark, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import type { WidgetDefinition, DashboardPreferences, SavedView, QuickAction } from '../../types/dashboard';
 
@@ -43,6 +43,17 @@ export default function PersonalizationPanel({
 }: PersonalizationPanelProps) {
   const [newViewName, setNewViewName] = useState('');
   const [activeTab, setActiveTab] = useState<'widgets' | 'views' | 'actions'>('widgets');
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Animate in/out
+  useEffect(() => {
+    if (isOpen) {
+      // Trigger animation on next frame
+      requestAnimationFrame(() => setIsVisible(true));
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -55,8 +66,16 @@ export default function PersonalizationPanel({
   }, {});
 
   return (
-    <div className="personalization-overlay" onClick={onClose}>
-      <div className="personalization-panel" onClick={e => e.stopPropagation()}>
+    <div
+      className="personalization-overlay"
+      style={{ opacity: isVisible ? 1 : 0, pointerEvents: isVisible ? 'auto' : 'none' }}
+      onClick={onClose}
+    >
+      <div
+        className="personalization-panel"
+        style={{ transform: isVisible ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 250ms ease' }}
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="personalization-panel__header">
           <div className="flex items-center gap-2">

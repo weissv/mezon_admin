@@ -35,22 +35,34 @@ const ACTION_COLORS: Record<string, string> = {
   'ai-assistant': '#a21caf',
 };
 
-export default function QuickActionsWidget({ data }: { data: QuickAction[] | undefined }) {
+export default function QuickActionsWidget({ data }: { data: { actions: QuickAction[]; pinnedActions?: string[] } | undefined }) {
   const navigate = useNavigate();
-  const actions = Array.isArray(data) ? data : [];
+  const allActions = Array.isArray(data?.actions) ? data.actions : [];
+  const pinned = data?.pinnedActions ?? [];
 
-  if (actions.length === 0) return null;
+  // Show pinned first, then rest
+  const sorted = pinned.length > 0
+    ? [
+        ...allActions.filter(a => pinned.includes(a.id)),
+        ...allActions.filter(a => !pinned.includes(a.id)),
+      ]
+    : allActions;
+
+  if (sorted.length === 0) return null;
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      {actions.map(action => {
+      {sorted.map(action => {
         const Icon = ICON_MAP[action.icon] ?? Plus;
         const accentColor = ACTION_COLORS[action.id] ?? '#6b7280';
+        const isPinned = pinned.includes(action.id);
         return (
           <button
             key={action.id}
             onClick={() => navigate(action.path)}
-            className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-colors text-left text-xs group"
+            className={`flex items-center gap-2 p-2.5 rounded-lg border hover:bg-gray-50 transition-colors text-left text-xs group ${
+              isPinned ? 'border-[var(--mezon-accent)] bg-blue-50/30' : 'border-gray-100 hover:border-gray-200'
+            }`}
           >
             <div
               className="p-1.5 rounded-md group-hover:scale-110 transition-transform"

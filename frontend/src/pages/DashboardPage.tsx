@@ -3,6 +3,7 @@ import { Settings, Pencil, X, RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useDashboardPreferences } from '../hooks/useDashboardPreferences';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
+import DashboardOverview from '../components/dashboard/DashboardOverview';
 import PersonalizationPanel from '../components/dashboard/PersonalizationPanel';
 import type { LayoutItem, SavedView } from '../types/dashboard';
 
@@ -143,6 +144,11 @@ export default function DashboardPage() {
           </Button>
         </div>
       </header>
+
+      {/* ---- Overview strip ---- */}
+      {bootstrap.overview && (
+        <DashboardOverview overview={bootstrap.overview} />
+      )}
 
       {/* ---- Grid ---- */}
       <DashboardLayout

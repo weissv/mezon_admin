@@ -66,6 +66,8 @@ interface WidgetRendererProps {
   filters?: Record<string, unknown>;
   /** Быстрые действия передаются как data для quick-actions */
   quickActionsData?: any;
+  /** Закреплённые действия */
+  pinnedActions?: string[];
 }
 
 export default function WidgetRenderer({
@@ -74,6 +76,7 @@ export default function WidgetRenderer({
   onToggleCollapse,
   filters,
   quickActionsData,
+  pinnedActions,
 }: WidgetRendererProps) {
   const isQuickActions = definition.id === 'quick-actions';
 
@@ -106,7 +109,7 @@ export default function WidgetRenderer({
       onRefresh={refetch}
       deepLink={WIDGET_DEEP_LINKS[definition.id]}
     >
-      <Component data={isQuickActions ? quickActionsData : data} />
+      <Component data={isQuickActions ? { actions: quickActionsData, pinnedActions } : data} />
     </WidgetChrome>
   );
 }

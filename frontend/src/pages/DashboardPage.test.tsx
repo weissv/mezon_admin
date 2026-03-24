@@ -1,5 +1,5 @@
 // src/pages/DashboardPage.test.tsx
-// Unit тесты для страницы Dashboard
+// Unit тесты для страницы Dashboard (модульный дашборд)
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -7,49 +7,79 @@ import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import DashboardPage from './DashboardPage';
 
-// Мок данных
-const mockSummaryData = {
-  kpi: {
-    childrenCount: 150,
-    employeesCount: 35,
-    activeClubs: 8,
-    financeLast30d: [
-      { type: 'INCOME', _sum: { amount: 5000000 } },
-      { type: 'EXPENSE', _sum: { amount: 3500000 } },
+// Мок bootstrap-ответа
+const mockBootstrap = {
+  preferences: {
+    layout: [
+      { widgetId: 'kpi-overview', x: 0, y: 0, w: 12, h: 2 },
+      { widgetId: 'attendance-today', x: 0, y: 2, w: 4, h: 2 },
+      { widgetId: 'finance-overview', x: 4, y: 2, w: 4, h: 3 },
     ],
+    enabledWidgets: ['kpi-overview', 'attendance-today', 'finance-overview', 'quick-actions'],
+    collapsedSections: [],
+    pinnedActions: [],
+    widgetFilters: {},
+    savedViews: [],
+    activeView: null,
+  },
+  availableWidgets: [
+    { id: 'kpi-overview', title: 'Ключевые показатели', category: 'kpi', description: '', defaultSize: { w: 12, h: 2 }, minSize: { w: 6, h: 2 }, canHide: false, canResize: true, refreshInterval: 300000 },
+    { id: 'attendance-today', title: 'Посещаемость сегодня', category: 'kpi', description: '', defaultSize: { w: 4, h: 2 }, minSize: { w: 3, h: 2 }, canHide: true, canResize: true, refreshInterval: 300000 },
+    { id: 'finance-overview', title: 'Финансовый обзор', category: 'finance', description: '', defaultSize: { w: 6, h: 3 }, minSize: { w: 4, h: 2 }, canHide: true, canResize: true, refreshInterval: 600000 },
+    { id: 'quick-actions', title: 'Быстрые действия', category: 'actions', description: '', defaultSize: { w: 12, h: 1 }, minSize: { w: 6, h: 1 }, canHide: false, canResize: false, refreshInterval: 0 },
+  ],
+  quickActions: [
+    { id: 'add-child', label: 'Добавить ребёнка', icon: 'UserPlus', path: '/children' },
+    { id: 'mark-attendance', label: 'Отметить посещаемость', icon: 'CheckSquare', path: '/attendance' },
+  ],
+  overview: {
+    generatedAt: new Date().toISOString(),
+    metrics: [
+      { id: 'children', label: 'Дети на учёте', value: 150, hint: '145 присутствуют сегодня', tone: 'primary' },
+      { id: 'employees', label: 'Активные сотрудники', value: 35, hint: '30 отметок за день', tone: 'success' },
+    ],
+    alerts: [
+      { id: 'maintenance', label: 'Активные заявки', value: 3, tone: 'warning', path: '/maintenance' },
+    ],
+    visibleWidgetCount: 4,
+    quickActionCount: 2,
   },
 };
 
-const mockMetricsData = {
+const mockKpiData = {
   childrenCount: 150,
   employeesCount: 35,
   activeClubs: 8,
-  lowInventory: [
-    { id: 1, name: 'Карандаши', quantity: 5, unit: 'шт' },
-  ],
-  attendance: { today: 145, date: '2024-10-15' },
-  maintenance: { activeRequests: 3 },
-  employees: { needingMedicalCheckup: 2 },
+  income: 5000000,
+  expense: 3500000,
+};
+
+const mockAttendanceData = {
+  childrenPresent: 145,
+  childrenOnMeals: 140,
+  employeeAttendance: { PRESENT: 30, SICK_LEAVE: 2 },
+  date: '2024-10-15',
+};
+
+const mockFinanceData = {
+  period: 30,
+  income: { total: 5000000, count: 45 },
+  expense: { total: 3500000, count: 30 },
+  balance: 1500000,
 };
 
 // Мок API
 vi.mock('../lib/api', () => ({
   api: {
     get: vi.fn((url: string) => {
-      if (url.includes('summary')) return Promise.resolve(mockSummaryData);
-      if (url.includes('metrics')) return Promise.resolve(mockMetricsData);
-      if (url.includes('unit-economics')) return Promise.resolve({
-        period: { days: 30, workingDays: 22 },
-        children: { total: 150, avgDaily: 140 },
-        totals: { totalCost: 3500000, costPerChild: 23333 },
-      });
-      if (url.includes('cash-forecast')) return Promise.resolve({
-        currentBalance: 50000000,
-        forecast: [],
-        summary: { recommendations: [] },
-      });
+      if (url.includes('bootstrap')) return Promise.resolve(mockBootstrap);
+      if (url.includes('widgets/kpi-overview')) return Promise.resolve(mockKpiData);
+      if (url.includes('widgets/attendance-today')) return Promise.resolve(mockAttendanceData);
+      if (url.includes('widgets/finance-overview')) return Promise.resolve(mockFinanceData);
       return Promise.resolve({});
     }),
+    put: vi.fn(() => Promise.resolve(mockBootstrap.preferences)),
+    post: vi.fn(() => Promise.resolve(mockBootstrap.preferences)),
   },
 }));
 
@@ -83,153 +113,91 @@ describe('DashboardPage', () => {
   });
 
   describe('Рендеринг', () => {
-    it('показывает состояние загрузки', () => {
-      renderDashboard();
-      // Начальное состояние загрузки
-    });
-
-    it('отображает KPI карточки после загрузки', async () => {
+    it('показывает заголовок дашборда после загрузки', async () => {
       renderDashboard();
 
       await waitFor(() => {
+        expect(screen.getByText('Дашборд')).toBeInTheDocument();
+      });
+    });
+
+    it('отображает overview-метрики после загрузки', async () => {
+      renderDashboard();
+
+      await waitFor(() => {
+        expect(screen.getByText('Дети на учёте')).toBeInTheDocument();
         expect(screen.getByText('150')).toBeInTheDocument();
       });
     });
 
-    it('отображает количество детей', async () => {
+    it('отображает overview-алерты', async () => {
       renderDashboard();
 
       await waitFor(() => {
-        expect(screen.getByText(/дети/i)).toBeInTheDocument();
+        expect(screen.getByText('Активные заявки')).toBeInTheDocument();
       });
     });
+  });
 
-    it('отображает количество сотрудников', async () => {
+  describe('Панель управления', () => {
+    it('показывает кнопку редактирования', async () => {
       renderDashboard();
 
       await waitFor(() => {
-        expect(screen.getByText(/сотрудники/i)).toBeInTheDocument();
+        expect(screen.getByText('Редактировать')).toBeInTheDocument();
       });
     });
 
-    it('отображает активные кружки', async () => {
+    it('показывает кнопку настроек', async () => {
       renderDashboard();
 
       await waitFor(() => {
-        expect(screen.getByText(/кружки/i)).toBeInTheDocument();
+        expect(screen.getByText('Настроить')).toBeInTheDocument();
       });
     });
-  });
 
-  describe('Финансовая информация', () => {
-    it('отображает баланс доходов/расходов', async () => {
+    it('переключает режим редактирования', async () => {
       renderDashboard();
 
       await waitFor(() => {
-        // Проверяем что финансовые данные отображаются
-        expect(screen.getByText(/доход/i)).toBeInTheDocument();
+        expect(screen.getByText('Редактировать')).toBeInTheDocument();
       });
+
+      await userEvent.click(screen.getByText('Редактировать'));
+      expect(screen.getByText('Готово')).toBeInTheDocument();
     });
   });
 
-  describe('Предупреждения', () => {
-    it('показывает предупреждения о низком запасе', async () => {
+  describe('Data Fetching', () => {
+    it('загружает bootstrap при монтировании', async () => {
+      const { api } = await import('../lib/api');
       renderDashboard();
 
       await waitFor(() => {
-        // Проверяем наличие секции с предупреждениями
-        expect(screen.getByText(/карандаши/i)).toBeInTheDocument();
+        expect(api.get).toHaveBeenCalledWith('/api/dashboard/bootstrap');
       });
     });
 
-    it('показывает активные заявки на обслуживание', async () => {
+    it('загружает данные виджетов', async () => {
+      const { api } = await import('../lib/api');
       renderDashboard();
 
       await waitFor(() => {
-        expect(screen.getByText(/обслуживание/i)).toBeInTheDocument();
+        expect(api.get).toHaveBeenCalledWith(expect.stringContaining('/api/dashboard/widgets/'));
       });
     });
   });
 
-  describe('Посещаемость', () => {
-    it('отображает статистику посещаемости за сегодня', async () => {
+  describe('Обработка ошибок', () => {
+    it('показывает состояние ошибки при провале bootstrap', async () => {
+      const { api } = await import('../lib/api');
+      vi.mocked(api.get).mockRejectedValueOnce(new Error('API Error'));
+
       renderDashboard();
 
       await waitFor(() => {
-        expect(screen.getByText(/посещаемость/i)).toBeInTheDocument();
+        expect(screen.getByText('Повторить')).toBeInTheDocument();
       });
-    });
-  });
-
-  describe('Интерактивность', () => {
-    it('раскрывает детали юнит-экономики', async () => {
-      renderDashboard();
-
-      await waitFor(async () => {
-        // Ищем кнопку раскрытия деталей
-        const expandButton = screen.queryByText(/показать детали/i) || 
-                            screen.queryByRole('button', { name: /подробнее/i });
-        if (expandButton) {
-          await userEvent.click(expandButton);
-        }
-      });
-    });
-  });
-
-  describe('Адаптивность для ролей', () => {
-    it('показывает финансовый прогноз для директора/админа', async () => {
-      renderDashboard();
-
-      await waitFor(() => {
-        // Для админа должны показываться расширенные данные
-        expect(screen.getByText(/прогноз/i)).toBeInTheDocument();
-      });
-    });
-  });
-});
-
-describe('KPICard Component', () => {
-  it('отображает заголовок и значение', async () => {
-    renderDashboard();
-
-    await waitFor(() => {
-      expect(screen.getByText('150')).toBeInTheDocument();
-      expect(screen.getByText('35')).toBeInTheDocument();
-    });
-  });
-
-  it('применяет правильные стили акцентного цвета', async () => {
-    renderDashboard();
-
-    await waitFor(() => {
-      // KPI карточки должны иметь иконки
-      const icons = screen.getAllByRole('img', { hidden: true });
-      expect(icons.length).toBeGreaterThanOrEqual(0);
-    });
-  });
-});
-
-describe('Dashboard Data Fetching', () => {
-  it('делает параллельные запросы к API', async () => {
-    const { api } = await import('../lib/api');
-    renderDashboard();
-
-    await waitFor(() => {
-      expect(api.get).toHaveBeenCalledWith('/api/dashboard/summary');
-      expect(api.get).toHaveBeenCalledWith('/api/dashboard/metrics');
-    });
-  });
-
-  it('обрабатывает ошибки API', async () => {
-    const { api } = await import('../lib/api');
-    const { toast } = await import('sonner');
-    
-    vi.mocked(api.get).mockRejectedValueOnce(new Error('API Error'));
-    
-    renderDashboard();
-
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalled();
     });
   });
 });

@@ -3,8 +3,16 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../lib/api';
-import type { DashboardBootstrap, DashboardPreferences, LayoutItem } from '../types/dashboard';
+import type { DashboardBootstrap, DashboardPreferences, DashboardOverview, LayoutItem } from '../types/dashboard';
 import { toast } from 'sonner';
+
+const EMPTY_OVERVIEW: DashboardOverview = {
+  generatedAt: '',
+  metrics: [],
+  alerts: [],
+  visibleWidgetCount: 0,
+  quickActionCount: 0,
+};
 
 const normalizePreferences = (input: Partial<DashboardPreferences> | null | undefined): DashboardPreferences => ({
   layout: Array.isArray(input?.layout) ? input.layout : [],
@@ -20,6 +28,7 @@ const normalizeBootstrap = (input: Partial<DashboardBootstrap> | null | undefine
   preferences: normalizePreferences(input?.preferences),
   availableWidgets: Array.isArray(input?.availableWidgets) ? input.availableWidgets : [],
   quickActions: Array.isArray(input?.quickActions) ? input.quickActions : [],
+  overview: input?.overview ?? EMPTY_OVERVIEW,
 });
 
 interface UseDashboardPreferencesReturn {
