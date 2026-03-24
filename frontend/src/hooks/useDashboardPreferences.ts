@@ -6,6 +6,22 @@ import { api } from '../lib/api';
 import type { DashboardBootstrap, DashboardPreferences, LayoutItem } from '../types/dashboard';
 import { toast } from 'sonner';
 
+const normalizePreferences = (input: Partial<DashboardPreferences> | null | undefined): DashboardPreferences => ({
+  layout: Array.isArray(input?.layout) ? input.layout : [],
+  enabledWidgets: Array.isArray(input?.enabledWidgets) ? input.enabledWidgets : [],
+  collapsedSections: Array.isArray(input?.collapsedSections) ? input.collapsedSections : [],
+  pinnedActions: Array.isArray(input?.pinnedActions) ? input.pinnedActions : [],
+  widgetFilters: input?.widgetFilters && typeof input.widgetFilters === 'object' ? input.widgetFilters : {},
+  savedViews: Array.isArray(input?.savedViews) ? input.savedViews : [],
+  activeView: input?.activeView ?? null,
+});
+
+const normalizeBootstrap = (input: Partial<DashboardBootstrap> | null | undefined): DashboardBootstrap => ({
+  preferences: normalizePreferences(input?.preferences),
+  availableWidgets: Array.isArray(input?.availableWidgets) ? input.availableWidgets : [],
+  quickActions: Array.isArray(input?.quickActions) ? input.quickActions : [],
+});
+
 interface UseDashboardPreferencesReturn {
   bootstrap: DashboardBootstrap | null;
   preferences: DashboardPreferences | null;
@@ -33,7 +49,7 @@ export function useDashboardPreferences(): UseDashboardPreferencesReturn {
     try {
       setIsLoading(true);
       setError(null);
-      const data: DashboardBootstrap = await api.get('/api/dashboard/bootstrap');
+      const data = normalizeBootstrap(await api.get<DashboardBootstrap>('/api/dashboard/bootstrap'));
       if (!mountedRef.current) return;
       setBootstrap(data);
       setPreferences(data.preferences);
@@ -55,11 +71,11 @@ export function useDashboardPreferences(): UseDashboardPreferencesReturn {
     if (!preferences) return;
 
     // Оптимистичное обновление
-    const merged = { ...preferences, ...patch };
+    const merged = normalizePreferences({ ...preferences, ...patch });
     setPreferences(merged);
 
     try {
-      const saved: DashboardPreferences = await api.put('/api/dashboard/preferences', patch);
+      const saved = normalizePreferences(await api.put<DashboardPreferences>('/api/dashboard/preferences', patch));
       if (mountedRef.current) setPreferences(saved);
     } catch (err: any) {
       // Откатываем
@@ -72,7 +88,7 @@ export function useDashboardPreferences(): UseDashboardPreferencesReturn {
     if (!preferences) return;
 
     // Оптимистичное обновление
-    setPreferences(prev => prev ? { ...prev, layout } : prev);
+    setPreferences(prev => prev ? normalizePreferences({ ...prev, layout }) : prev);
 
     // Debounce: не сохраняем каждый drag
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -87,7 +103,7 @@ export function useDashboardPreferences(): UseDashboardPreferencesReturn {
 
   const resetPreferences = useCallback(async () => {
     try {
-      const defaults: DashboardPreferences = await api.post('/api/dashboard/preferences/reset', {});
+      const defaults = normalizePreferences(await api.post<DashboardPreferences>('/api/dashboard/preferences/reset', {}));
       if (mountedRef.current) setPreferences(defaults);
       toast.success('Настройки дашборда сброшены');
     } catch (err: any) {
