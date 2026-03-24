@@ -26,20 +26,22 @@ const TYPE_ICONS: Record<string, { icon: typeof Bell; color: string }> = {
 export default function NotificationsFeedWidget({ data }: { data: NotificationsFeedData | undefined }) {
   if (!data) return null;
 
+  const notifications = data.notifications ?? [];
+
   return (
     <div className="space-y-2">
-      {data.unreadCount > 0 && (
+      {(data.unreadCount ?? 0) > 0 && (
         <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
           <Bell className="h-3 w-3" />
           {data.unreadCount} непрочитанных
         </div>
       )}
 
-      {data.notifications.length === 0 && (
+      {notifications.length === 0 && (
         <p className="text-sm text-gray-400 text-center py-4">Нет уведомлений</p>
       )}
 
-      {data.notifications.slice(0, 6).map(n => {
+      {notifications.slice(0, 6).map(n => {
         const cfg = TYPE_ICONS[n.type] ?? TYPE_ICONS.default;
         const Icon = cfg.icon;
         return (

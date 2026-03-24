@@ -25,11 +25,13 @@ const MEAL_ORDER = ['breakfast', 'lunch', 'snack', 'dinner'];
 export default function MenuTodayWidget({ data }: { data: MenuTodayData | undefined }) {
   if (!data) return null;
 
+  const items = data.items ?? [];
+
   const grouped = MEAL_ORDER
     .map(type => ({
       type,
       label: MEAL_LABELS[type] ?? type,
-      items: data.items.filter(i => i.mealType === type),
+      items: items.filter(i => i.mealType === type),
     }))
     .filter(g => g.items.length > 0);
 

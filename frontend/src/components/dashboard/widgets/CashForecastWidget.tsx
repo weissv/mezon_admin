@@ -21,7 +21,8 @@ const fmt = (n: number) =>
 export default function CashForecastWidget({ data }: { data: CashForecastData | undefined }) {
   if (!data) return null;
 
-  const maxAbs = Math.max(...data.days.map(d => Math.abs(d.cumulative)), 1);
+  const days = data.days ?? [];
+  const maxAbs = Math.max(...days.map(d => Math.abs(d.cumulative)), 1);
 
   return (
     <div className="space-y-3">
@@ -34,7 +35,7 @@ export default function CashForecastWidget({ data }: { data: CashForecastData | 
 
       {/* Mini bar chart */}
       <div className="flex items-end gap-px h-16">
-        {data.days.map((d, i) => {
+        {days.map((d, i) => {
           const h = Math.round((Math.abs(d.cumulative) / maxAbs) * 100);
           return (
             <div

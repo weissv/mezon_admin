@@ -26,16 +26,18 @@ const TYPE_COLORS: Record<string, string> = {
 export default function CalendarTodayWidget({ data }: { data: CalendarTodayData | undefined }) {
   if (!data) return null;
 
+  const events = data.events ?? [];
+
   const timeFmt = (iso: string) =>
     new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="space-y-2">
-      {data.events.length === 0 && (
+      {events.length === 0 && (
         <p className="text-sm text-gray-400 text-center py-4">Нет событий на сегодня</p>
       )}
 
-      {data.events.map(ev => (
+      {events.map(ev => (
         <div
           key={ev.id}
           className={`border-l-2 pl-3 py-1.5 ${TYPE_COLORS[ev.type] ?? 'border-l-gray-300'}`}

@@ -16,6 +16,8 @@ const BAR_COLORS = ['bg-pink-500', 'bg-teal-500', 'bg-amber-500', 'bg-indigo-500
 export default function UnitEconomicsWidget({ data }: { data: UnitEcon | undefined }) {
   if (!data) return null;
 
+  const breakdown = data.breakdown ?? [];
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
@@ -23,7 +25,7 @@ export default function UnitEconomicsWidget({ data }: { data: UnitEcon | undefin
           <Calculator className="h-5 w-5 text-pink-600" />
         </div>
         <div>
-          <p className="text-xl font-bold">{fmt(data.costPerChild)}</p>
+          <p className="text-xl font-bold">{fmt(data.costPerChild ?? 0)}</p>
           <p className="text-xs text-gray-500">на 1 ребёнка / мес</p>
         </div>
         <div className="ml-auto text-right text-xs text-gray-400">
@@ -33,7 +35,7 @@ export default function UnitEconomicsWidget({ data }: { data: UnitEcon | undefin
       </div>
 
       <div className="space-y-2">
-        {data.breakdown.map((item, i) => (
+        {breakdown.map((item, i) => (
           <div key={i}>
             <div className="flex justify-between text-xs mb-0.5">
               <span>{item.label}</span>

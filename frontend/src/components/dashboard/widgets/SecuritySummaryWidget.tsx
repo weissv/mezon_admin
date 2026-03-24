@@ -24,17 +24,20 @@ const EVENT_ICONS: Record<string, { icon: typeof Eye; color: string }> = {
 export default function SecuritySummaryWidget({ data }: { data: SecuritySummaryData | undefined }) {
   if (!data) return null;
 
+  const last30Days = data.last30Days ?? [];
+  const recentEvents = data.recentEvents ?? [];
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Shield className="h-4 w-4 text-teal-600" />
-          <span className="text-sm font-medium">Сегодня: {data.todayCount} событий</span>
+          <span className="text-sm font-medium">Сегодня: {data.todayCount ?? 0} событий</span>
         </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
-        {data.last30Days.map(s => (
+        {last30Days.map(s => (
           <div key={s.type} className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded text-xs">
             <span className="capitalize">{s.type}</span>
             <span className="font-bold">{s.count}</span>
@@ -43,7 +46,7 @@ export default function SecuritySummaryWidget({ data }: { data: SecuritySummaryD
       </div>
 
       <div className="space-y-1.5">
-        {data.recentEvents.slice(0, 5).map(ev => {
+        {recentEvents.slice(0, 5).map(ev => {
           const cfg = EVENT_ICONS[ev.type] ?? EVENT_ICONS.entry;
           const Icon = cfg.icon;
           return (

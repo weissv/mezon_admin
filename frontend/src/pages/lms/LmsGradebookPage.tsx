@@ -131,7 +131,7 @@ export default function LmsGradebookPage() {
 
       {selectedClass && selectedSubject ? (
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          {gradebook && gradebook.students.length > 0 ? (
+          {gradebook && gradebook.students?.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -139,7 +139,7 @@ export default function LmsGradebookPage() {
                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 sticky left-0 bg-gray-50 z-10">
                       Ученик
                     </th>
-                    {gradebook.dates.map((date) => (
+                    {(gradebook.dates ?? []).map((date) => (
                       <th key={date} className="px-2 py-3 text-center text-sm font-medium text-gray-700 min-w-[60px]">
                         {new Date(date).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" })}
                       </th>
@@ -155,12 +155,12 @@ export default function LmsGradebookPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {gradebook.students.map(({ student, grades, average }) => (
+                  {(gradebook.students ?? []).map(({ student, grades, average }) => (
                     <tr key={student.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
                         {student.student?.lastName} {student.student?.firstName}
                       </td>
-                      {gradebook.dates.map((date) => {
+                      {(gradebook.dates ?? []).map((date) => {
                         const gradeForDate = grades.find(
                           (g) => new Date(g.date).toISOString().split('T')[0] === date
                         );
