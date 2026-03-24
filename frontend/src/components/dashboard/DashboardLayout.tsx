@@ -32,6 +32,11 @@ interface DashboardLayoutProps {
   onToggleCollapse: (widgetId: string) => void;
 }
 
+function getQuickActionsHeight(actionCount: number, columns: number) {
+  const rows = Math.max(1, Math.ceil(actionCount / columns));
+  return Math.max(rows + 1, 3);
+}
+
 /** Конвертирует наш LayoutItem[] в react-grid-layout Layout[] */
 function toGridLayout(items: LayoutItem[], widgets: WidgetDefinition[]): RGLLayout[] {
   return items.map(item => {
@@ -105,12 +110,22 @@ export default function DashboardLayout({
     [visibleLayout, availableWidgets]
   );
 
+  const quickActionsCount = quickActions.length;
+
   const layouts: Record<string, RGLLayout[]> = useMemo(() => ({
-    lg: gridLayout,
-    md: gridLayout.map(item => ({ ...item, w: Math.min(item.w, 6) })),
-    sm: gridLayout.map(item => ({ ...item, w: 6, x: 0 })),
-    xs: gridLayout.map(item => ({ ...item, w: 6, x: 0 })),
-  }), [gridLayout]);
+    lg: gridLayout.map(item => item.i === 'quick-actions'
+      ? { ...item, h: Math.max(item.h, getQuickActionsHeight(quickActionsCount, 5)) }
+      : item),
+    md: gridLayout.map(item => item.i === 'quick-actions'
+      ? { ...item, w: 6, h: Math.max(item.h, getQuickActionsHeight(quickActionsCount, 3)) }
+      : { ...item, w: Math.min(item.w, 6) }),
+    sm: gridLayout.map(item => item.i === 'quick-actions'
+      ? { ...item, w: 6, x: 0, h: Math.max(item.h, getQuickActionsHeight(quickActionsCount, 2)) }
+      : { ...item, w: 6, x: 0 }),
+    xs: gridLayout.map(item => item.i === 'quick-actions'
+      ? { ...item, w: 6, x: 0, h: Math.max(item.h, getQuickActionsHeight(quickActionsCount, 2)) }
+      : { ...item, w: 6, x: 0 }),
+  }), [gridLayout, quickActionsCount]);
 
   const handleLayoutChange = useCallback(
     (currentLayout: RGLLayout[]) => {
