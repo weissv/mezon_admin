@@ -880,13 +880,15 @@ docker-compose ps
 
 ### Task #10: Расширение существующих страниц ✅
 
-#### 1. DashboardPage - РАСШИРЕНА ✅
-**Добавлено:**
-- Интеграция с `/api/dashboard/metrics`
-- Виджет "Низкие запасы" (топ-5 товаров с quantity < 10)
-- Виджет "Посещаемость сегодня"
-- Виджет "Активные заявки на обслуживание"
-- Виджет "Медосмотры" (сотрудники, требующие медосмотра)
+#### 1. DashboardPage - ПОЛНЫЙ РЕФАКТОРИНГ ✅
+**Архитектура:**
+- Модульный дашборд на основе `react-grid-layout` с drag-and-drop
+- Bootstrap-endpoint `/api/dashboard/bootstrap` для загрузки preferences + availableWidgets + quickActions + overview
+- Индивидуальная загрузка данных виджетов через `/api/dashboard/widgets/:widgetId`
+- 15 виджетов: KPI, посещаемость, финансы, прогноз, закупки, HR, календарь, меню, безопасность и др.
+- Панель персонализации с анимацией slide-in
+- Overview-полоса с ключевыми метриками и алертами
+- Сохраняемые предпочтения пользователя (layout, enabledWidgets, savedViews)
 
 **Статус:** ✅ Полностью реализовано
 
@@ -1240,9 +1242,9 @@ docker-compose.yml
   /* Lines 170-172 omitted */
   - Показывает: ФИО, должность, дней до срока
 
-**5. DashboardPage** (уже было в Task 9)
-- Метрики: Низкий запас товаров, Посещаемость, Заявки на обслуживание
-- GET `/api/dashboard/metrics`
+**5. DashboardPage** (рефакторинг)
+- Модульный дашборд: bootstrap + widget endpoints
+- GET `/api/dashboard/bootstrap`, GET `/api/dashboard/widgets/:widgetId`
 
 ---
 

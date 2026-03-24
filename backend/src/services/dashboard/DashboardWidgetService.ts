@@ -1,8 +1,14 @@
 // src/services/dashboard/DashboardWidgetService.ts
 // Агрегирующий сервис для данных всех dashboard-виджетов
 
-import { prisma } from '../../prisma';
 import { Role } from '@prisma/client';
+import { prisma } from '../../prisma';
+import {
+  DashboardBootstrapPayload,
+  DashboardOverviewPayload,
+  WIDGET_CATALOGUE,
+  getQuickActionsForRole,
+} from '../../constants/dashboard';
 
 // ======================== CACHE ========================
 
@@ -26,6 +32,109 @@ function cached<T>(key: string, ttlMs: number, fn: () => Promise<T>): Promise<T>
 
 // ======================== HELPERS ========================
 
+interface DashboardWidgetContext {
+  role: Role;
+  userId: number;
+  employeeId?: number | null;
+  filters?: Record<string, unknown>;
+}
+
+type WidgetHandler = (context: DashboardWidgetContext) => Promise<unknown>;
+
+function sortObject(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(sortObject);
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.keys(value as Record<string, unknown>)
+      .sort()
+      .reduce<Record<string, unknown>>((acc, key) => {
+        acc[key] = sortObject((value as Record<string, unknown>)[key]);
+        return acc;
+      }, {});
+  }
+
+  return value;
+}
+
+function serializeFilters(filters: Record<string, unknown> = {}) {
+  return JSON.stringify(sortObject(filters));
+}
+
+function parseNumber(value: unknown, fallback: number) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return fallback;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function isoDate(value: Date) {
+  return value.toISOString().split('T')[0];
+}
+
+function normalizeActionVerb(action: string) {
+  const normalized = action.toLowerCase();
+
+  if (normalized.includes('create') || normalized.includes('add')) {
+    return 'create';
+  }
+
+  if (normalized.includes('delete') || normalized.includes('remove')) {
+    return 'delete';
+  }
+
+  if (normalized.includes('setting') || normalized.includes('permission') || normalized.includes('role')) {
+    return 'settings';
+  }
+
+  return 'update';
+}
+
+function toDisplayEntity(details: unknown, fallback: string) {
+  if (!details || typeof details !== 'object') {
+    return { entity: 'system', entityName: fallback };
+  }
+
+  const detailRecord = details as Record<string, unknown>;
+  const entity = typeof detailRecord.entity === 'string'
+    ? detailRecord.entity
+    : typeof detailRecord.module === 'string'
+      ? detailRecord.module
+      : 'system';
+
+  const entityName = typeof detailRecord.name === 'string'
+    ? detailRecord.name
+    : typeof detailRecord.title === 'string'
+      ? detailRecord.title
+      : fallback;
+
+  return { entity, entityName };
+}
+
+function toMaintenancePriority(status: string) {
+  switch (status) {
+    case 'IN_PROGRESS':
+      return 'urgent';
+    case 'PENDING':
+      return 'high';
+    default:
+      return 'medium';
+  }
+}
+
 function startOfDay(d: Date = new Date()) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
@@ -42,15 +151,160 @@ function daysAhead(n: number) {
 // ======================== WIDGET DATA FETCHERS ========================
 
 class DashboardWidgetServiceClass {
+  private widgetHandlers: Record<string, WidgetHandler> = {
+    'kpi-overview': async ({ role, employeeId, filters }) => this.getKpiOverview(role, { ...filters, employeeId }),
+    'attendance-today': async () => this.getAttendanceToday(),
+    'finance-overview': async ({ filters }) => this.getFinanceOverview(filters),
+    'cash-forecast': async ({ filters }) => this.getCashForecast(filters),
+    'unit-economics': async ({ filters }) => this.getUnitEconomics(filters),
+    'inventory-risk': async () => this.getInventoryRisk(),
+    'procurement-status': async () => this.getProcurementStatus(),
+    'menu-today': async () => this.getMenuToday(),
+    'maintenance-queue': async () => this.getMaintenanceQueue(),
+    'security-summary': async () => this.getSecuritySummary(),
+    'hr-alerts': async () => this.getHrAlerts(),
+    'calendar-today': async () => this.getCalendarToday(),
+    'notifications-feed': async ({ role }) => this.getNotificationsFeed(role),
+    'activity-stream': async () => this.getActivityStream(),
+  };
+
+  async getBootstrap(userId: number, role: Role, employeeId?: number | null): Promise<DashboardBootstrapPayload> {
+    const [preferences, overview] = await Promise.all([
+      prisma.dashboardPreference.findUnique({ where: { userId } }),
+      this.getOverview(role, userId, employeeId),
+    ]);
+
+    const availableWidgets = WIDGET_CATALOGUE
+      .filter(widget => widget.allowedRoles.includes(role))
+      .map(({ allowedRoles, dataEndpoint, ...widget }) => widget);
+
+    const quickActions = getQuickActionsForRole(role);
+
+    return {
+      preferences: preferences
+        ? {
+            layout: preferences.layout as any,
+            enabledWidgets: preferences.enabledWidgets,
+            collapsedSections: preferences.collapsedSections,
+            pinnedActions: preferences.pinnedActions,
+            widgetFilters: preferences.widgetFilters as any,
+            savedViews: preferences.savedViews as any,
+            activeView: preferences.activeView,
+          }
+        : {
+            layout: [],
+            enabledWidgets: availableWidgets.map(widget => widget.id),
+            collapsedSections: [],
+            pinnedActions: [],
+            widgetFilters: {},
+            savedViews: [],
+            activeView: null,
+          },
+      availableWidgets,
+      quickActions,
+      overview: {
+        ...overview,
+        visibleWidgetCount: availableWidgets.length,
+        quickActionCount: quickActions.length,
+      },
+    };
+  }
+
+  async getWidgetData(widgetId: string, context: DashboardWidgetContext) {
+    const handler = this.widgetHandlers[widgetId];
+    if (!handler) {
+      throw new Error(`Unsupported dashboard widget: ${widgetId}`);
+    }
+
+    return handler(context);
+  }
+
+  async getOverview(role: Role, userId: number, employeeId?: number | null): Promise<DashboardOverviewPayload> {
+    const [kpi, attendance, maintenance, procurement, hr] = await Promise.all([
+      this.getKpiOverview(role, { employeeId }),
+      this.getAttendanceToday(),
+      this.getMaintenanceQueue(),
+      this.getProcurementStatus(),
+      this.getHrAlerts(),
+    ]);
+
+    return {
+      generatedAt: new Date().toISOString(),
+      visibleWidgetCount: 0,
+      quickActionCount: 0,
+      metrics: [
+        {
+          id: 'children',
+          label: 'Дети на учёте',
+          value: kpi.childrenCount,
+          hint: `${attendance.childrenPresent} присутствуют сегодня`,
+          tone: 'primary',
+        },
+        {
+          id: 'employees',
+          label: 'Активные сотрудники',
+          value: kpi.employeesCount,
+          hint: `${Object.values(attendance.employeeAttendance).reduce((sum, current) => sum + current, 0)} отметок за день`,
+          tone: 'success',
+        },
+        {
+          id: 'clubs',
+          label: 'Работающие кружки',
+          value: kpi.activeClubs,
+          hint: 'Текущий оперативный срез',
+          tone: 'primary',
+        },
+        {
+          id: 'balance',
+          label: 'Баланс 30 дней',
+          value: kpi.income - kpi.expense,
+          hint: `Доход ${Math.round(kpi.income).toLocaleString('ru-RU')} / расход ${Math.round(kpi.expense).toLocaleString('ru-RU')}`,
+          tone: kpi.income >= kpi.expense ? 'success' : 'danger',
+        },
+      ],
+      alerts: [
+        {
+          id: 'maintenance',
+          label: 'Активные заявки',
+          value: maintenance.totalActive,
+          tone: maintenance.totalActive > 10 ? 'danger' : 'warning',
+          path: '/maintenance',
+        },
+        {
+          id: 'procurement',
+          label: 'Открытые закупки',
+          value: procurement.totalActive,
+          tone: procurement.totalActive > 5 ? 'warning' : 'neutral',
+          path: '/procurement',
+        },
+        {
+          id: 'medical',
+          label: 'Медосмотры до 30 дней',
+          value: hr.medicalExpiring,
+          tone: hr.medicalExpiring > 0 ? 'warning' : 'neutral',
+          path: '/employees',
+        },
+        {
+          id: 'contracts',
+          label: 'Контракты на продление',
+          value: hr.contractsExpiring,
+          tone: hr.contractsExpiring > 0 ? 'warning' : 'neutral',
+          path: '/employees',
+        },
+      ],
+    };
+  }
+
   // ─── KPI Overview ───
   async getKpiOverview(role: Role, filters: Record<string, unknown> = {}) {
     const isTeacher = role === 'TEACHER';
+    const employeeId = parseNumber(filters.employeeId, 0) || undefined;
 
-    return cached(`kpi-overview:${role}`, 60_000, async () => {
+    return cached(`kpi-overview:${role}:${employeeId ?? 'all'}`, 60_000, async () => {
       const [childrenCount, employeesCount, activeClubs, financeLast30d] = await Promise.all([
         prisma.child.count({ where: { status: 'ACTIVE' } }),
         prisma.employee.count({ where: { fireDate: null } }),
-        prisma.club.count(isTeacher ? { where: { teacherId: (filters.employeeId as number) || undefined } } : undefined),
+        prisma.club.count(isTeacher ? { where: { teacherId: employeeId } } : undefined),
         prisma.financeTransaction.groupBy({
           by: ['type'],
           _sum: { amount: true },
@@ -100,7 +354,7 @@ class DashboardWidgetServiceClass {
 
   // ─── Finance Overview ───
   async getFinanceOverview(filters: Record<string, unknown> = {}) {
-    const days = (filters.days as number) || 30;
+    const days = clamp(parseNumber(filters.days, 30), 7, 365);
 
     return cached(`finance-overview:${days}`, 120_000, async () => {
       const since = daysAgo(days);
@@ -123,15 +377,11 @@ class DashboardWidgetServiceClass {
     });
   }
 
-  // ─── Cash Forecast (proxy to existing finance endpoint logic) ───
+  // ─── Cash Forecast ───
   async getCashForecast(filters: Record<string, unknown> = {}) {
-    // Возвращает заглушку; основная логика living в finance.routes
-    // Здесь берём данные напрямую из прогнозного расчёта
-    const currentBalance = Number(filters.currentBalance || 50_000_000);
-    const forecastDays = Number(filters.days || 30);
+    const forecastDays = clamp(parseNumber(filters.days, 30), 7, 90);
 
-    return cached(`cash-forecast:${currentBalance}:${forecastDays}`, 300_000, async () => {
-      // Средние дневные поступления/расходы за последние 90 дней
+    return cached(`cash-forecast:${forecastDays}`, 300_000, async () => {
       const since = daysAgo(90);
       const totals = await prisma.financeTransaction.groupBy({
         by: ['type'],
@@ -139,55 +389,46 @@ class DashboardWidgetServiceClass {
         where: { date: { gte: since } },
       });
 
-      const totalIncome = Number(totals.find(t => t.type === 'INCOME')?._sum.amount || 0);
-      const totalExpense = Number(totals.find(t => t.type === 'EXPENSE')?._sum.amount || 0);
-      const avgDailyIncome = totalIncome / 90;
-      const avgDailyExpense = totalExpense / 90;
+      const totalIncome90 = Number(totals.find(t => t.type === 'INCOME')?._sum.amount || 0);
+      const totalExpense90 = Number(totals.find(t => t.type === 'EXPENSE')?._sum.amount || 0);
+      const avgDailyIncome = totalIncome90 / 90;
+      const avgDailyExpense = totalExpense90 / 90;
 
-      const forecast = [];
-      let balance = currentBalance;
-      let daysWithGaps = 0;
-      let minBalance = balance;
+      const days = [];
+      let cumulative = 0;
+      let forecastTotalIncome = 0;
+      let forecastTotalExpense = 0;
 
       for (let i = 1; i <= forecastDays; i++) {
         const date = new Date(Date.now() + i * 86_400_000);
         const dayOfWeek = date.getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        const expectedIncome = isWeekend ? 0 : avgDailyIncome;
-        const expectedExpense = isWeekend ? avgDailyExpense * 0.3 : avgDailyExpense;
-        const netFlow = expectedIncome - expectedExpense;
-        balance += netFlow;
-        const isGap = balance < 0;
-        if (isGap) daysWithGaps++;
-        if (balance < minBalance) minBalance = balance;
+        const income = isWeekend ? 0 : Math.round(avgDailyIncome);
+        const expense = isWeekend ? Math.round(avgDailyExpense * 0.3) : Math.round(avgDailyExpense);
+        cumulative += income - expense;
+        forecastTotalIncome += income;
+        forecastTotalExpense += expense;
 
-        forecast.push({
+        days.push({
           date: date.toISOString().split('T')[0],
-          dayOfWeek,
-          expectedIncome: Math.round(expectedIncome),
-          expectedExpense: Math.round(expectedExpense),
-          netFlow: Math.round(netFlow),
-          runningBalance: Math.round(balance),
-          isGap,
+          income,
+          expense,
+          cumulative,
         });
       }
 
       return {
-        currentBalance,
-        forecast,
-        summary: {
-          avgDailyIncome: Math.round(avgDailyIncome),
-          avgDailyExpense: Math.round(avgDailyExpense),
-          daysWithGaps,
-          minBalance: Math.round(minBalance),
-        },
+        days,
+        totalIncome: forecastTotalIncome,
+        totalExpense: forecastTotalExpense,
+        netChange: forecastTotalIncome - forecastTotalExpense,
       };
     });
   }
 
   // ─── Unit Economics ───
   async getUnitEconomics(filters: Record<string, unknown> = {}) {
-    const months = Number(filters.months || 3);
+    const months = clamp(parseNumber(filters.months, 3), 1, 12);
 
     return cached(`unit-economics:${months}`, 300_000, async () => {
       const since = new Date();
@@ -217,17 +458,21 @@ class DashboardWidgetServiceClass {
         }
       }
 
-      const perChild = childrenCount > 0 ? totalExpense / childrenCount : 0;
-      const days = months * 30;
-      const perChildDaily = childrenCount > 0 ? totalExpense / childrenCount / days : 0;
+      const costPerChild = childrenCount > 0 ? Math.round(totalExpense / childrenCount) : 0;
+
+      const breakdown = Object.entries(costByCategory)
+        .sort(([, a], [, b]) => b - a)
+        .map(([label, amount]) => ({
+          label,
+          amount: Math.round(amount),
+          pct: totalExpense > 0 ? Math.round((amount / totalExpense) * 100) : 0,
+        }));
 
       return {
-        period: { months, days },
-        childrenCount,
-        costs: costByCategory,
-        totals: { totalExpense, totalIncome, perChild: Math.round(perChild), perChildDaily: Math.round(perChildDaily) },
-        margin: totalIncome - totalExpense,
-        marginPercent: totalIncome > 0 ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) : 0,
+        totalCost: Math.round(totalExpense),
+        childCount: childrenCount,
+        costPerChild,
+        breakdown,
       };
     });
   }
@@ -239,12 +484,34 @@ class DashboardWidgetServiceClass {
         where: { quantity: { lt: 10 } },
         orderBy: { quantity: 'asc' },
         take: 10,
-        select: { id: true, name: true, quantity: true, unit: true, type: true },
+        select: { id: true, name: true, quantity: true, unit: true, type: true, minQuantity: true },
       });
 
       const totalLow = await prisma.inventoryItem.count({ where: { quantity: { lt: 10 } } });
 
-      return { items: lowItems, totalLowStock: totalLow };
+      const critical = lowItems
+        .filter(item => item.quantity <= 2)
+        .map(item => ({
+          id: String(item.id),
+          name: item.name,
+          currentQty: item.quantity,
+          minQty: item.minQuantity ?? 10,
+          unit: item.unit,
+          daysLeft: item.quantity <= 0 ? 0 : Math.min(item.quantity, 2),
+        }));
+
+      const warning = lowItems
+        .filter(item => item.quantity > 2)
+        .map(item => ({
+          id: String(item.id),
+          name: item.name,
+          currentQty: item.quantity,
+          minQty: item.minQuantity ?? 10,
+          unit: item.unit,
+          daysLeft: Math.min(item.quantity, 7),
+        }));
+
+      return { critical, warning, totalLow };
     });
   }
 
@@ -264,9 +531,12 @@ class DashboardWidgetServiceClass {
           take: 5,
           select: {
             id: true,
+            title: true,
             status: true,
             totalAmount: true,
             type: true,
+            supplier: { select: { name: true } },
+            orderDate: true,
             createdAt: true,
           },
         }),
@@ -274,10 +544,14 @@ class DashboardWidgetServiceClass {
 
       return {
         totalActive,
-        byStatus: byStatus.map(s => ({ status: s.status, count: s._count })),
+        byStatus: byStatus.map(s => ({ status: s.status.toLowerCase(), count: s._count })),
         recentOrders: recentOrders.map(o => ({
-          ...o,
-          totalAmount: Number(o.totalAmount),
+          id: String(o.id),
+          supplier: o.supplier?.name || o.title,
+          status: o.status.toLowerCase(),
+          total: Number(o.totalAmount),
+          type: o.type,
+          date: (o.orderDate || o.createdAt).toISOString(),
         })),
       };
     });
@@ -289,7 +563,7 @@ class DashboardWidgetServiceClass {
       const today = startOfDay();
       const tomorrow = endOfDay();
 
-      const [todayMenu, childrenOnMeals] = await Promise.all([
+      const [todayMenu, childrenOnMeals, totalChildren] = await Promise.all([
         prisma.menuDish.findMany({
           where: {
             menu: { date: { gte: today, lt: tomorrow } },
@@ -299,12 +573,14 @@ class DashboardWidgetServiceClass {
         prisma.attendance.count({
           where: { date: { gte: today, lt: tomorrow }, isPresent: true, clubId: null },
         }),
+        prisma.child.count({ where: { status: 'ACTIVE' } }),
       ]);
 
       return {
-        date: today.toISOString().split('T')[0],
+        date: isoDate(today),
         items: todayMenu.map(m => ({ name: m.dish.name, mealType: m.mealType })),
         childrenOnMeals,
+        totalChildren,
       };
     });
   }
@@ -324,6 +600,7 @@ class DashboardWidgetServiceClass {
           take: 5,
           select: {
             id: true,
+            title: true,
             description: true,
             status: true,
             type: true,
@@ -337,8 +614,16 @@ class DashboardWidgetServiceClass {
 
       return {
         totalActive,
-        byStatus: byStatus.map(s => ({ status: s.status, count: s._count })),
-        recent,
+        totalOpen: totalActive,
+        byStatus: byStatus.map(s => ({ status: s.status.toLowerCase(), count: s._count })),
+        recent: recent.map(item => ({
+          id: String(item.id),
+          title: item.title,
+          status: item.status.toLowerCase(),
+          priority: toMaintenancePriority(item.status),
+          createdAt: item.createdAt.toISOString(),
+          requesterName: `${item.requester.firstName} ${item.requester.lastName}`.trim(),
+        })),
       };
     });
   }
@@ -347,8 +632,10 @@ class DashboardWidgetServiceClass {
   async getSecuritySummary() {
     return cached('security-summary', 300_000, async () => {
       const thirtyDaysAgo = daysAgo(30);
+      const today = startOfDay();
+      const tomorrow = endOfDay();
 
-      const [recentEvents, byType] = await Promise.all([
+      const [recentEvents, byType, todayCount] = await Promise.all([
         prisma.securityLog.findMany({
           orderBy: { createdAt: 'desc' },
           take: 5,
@@ -364,16 +651,20 @@ class DashboardWidgetServiceClass {
           _count: true,
           where: { createdAt: { gte: thirtyDaysAgo } },
         }),
+        prisma.securityLog.count({
+          where: { createdAt: { gte: today, lt: tomorrow } },
+        }),
       ]);
 
       return {
         recentEvents: recentEvents.map(e => ({
-          id: e.id,
-          type: e.eventType,
+          id: String(e.id),
+          type: e.eventType.toLowerCase(),
           description: e.description,
-          createdAt: e.createdAt,
+          timestamp: e.createdAt.toISOString(),
         })),
-        last30Days: byType.map(t => ({ type: t.eventType, count: t._count })),
+        last30Days: byType.map(t => ({ type: t.eventType.toLowerCase(), count: t._count })),
+        todayCount,
       };
     });
   }
@@ -384,7 +675,7 @@ class DashboardWidgetServiceClass {
     const today = startOfDay();
 
     return cached('hr-alerts', 120_000, async () => {
-      const [medicalExpiring, contractsExpiring] = await Promise.all([
+      const [medicalRows, contractRows] = await Promise.all([
         prisma.employee.findMany({
           where: {
             fireDate: null,
@@ -405,10 +696,27 @@ class DashboardWidgetServiceClass {
         }),
       ]);
 
+      const alerts = [
+        ...medicalRows.map(e => ({
+          type: 'medical' as const,
+          employeeName: `${e.firstName} ${e.lastName}`.trim(),
+          detail: e.position ?? 'Мед. осмотр',
+          dueDate: e.medicalCheckupDate!.toISOString(),
+          overdue: e.medicalCheckupDate! < today,
+        })),
+        ...contractRows.map(e => ({
+          type: 'contract' as const,
+          employeeName: `${e.firstName} ${e.lastName}`.trim(),
+          detail: e.position ?? 'Контракт',
+          dueDate: e.contractEndDate!.toISOString(),
+          overdue: e.contractEndDate! < today,
+        })),
+      ];
+
       return {
-        medicalExpiring,
-        contractsExpiring,
-        totalAlerts: medicalExpiring.length + contractsExpiring.length,
+        alerts,
+        medicalExpiring: medicalRows.length,
+        contractsExpiring: contractRows.length,
       };
     });
   }
@@ -433,25 +741,49 @@ class DashboardWidgetServiceClass {
         },
       });
 
-      return { date: today.toISOString().split('T')[0], events };
+      return {
+        date: today.toISOString().split('T')[0],
+        events: events.map(e => ({
+          id: String(e.id),
+          title: e.title,
+          startTime: e.date.toISOString(),
+          endTime: e.date.toISOString(),
+          organizer: e.organizer,
+          type: 'event',
+        })),
+      };
     });
   }
 
   // ─── Notifications Feed ───
-  async getNotificationsFeed(userId: number) {
-    return cached(`notifications-feed:${userId}`, 30_000, async () => {
+  async getNotificationsFeed(role: Role) {
+    return cached(`notifications-feed:${role}`, 30_000, async () => {
       const notifications = await prisma.notification.findMany({
+        where: {
+          OR: [{ targetRole: null }, { targetRole: role }],
+        },
         orderBy: { createdAt: 'desc' },
         take: 15,
         select: {
           id: true,
           title: true,
           content: true,
+          targetRole: true,
           createdAt: true,
         },
       });
 
-      return { notifications };
+      return {
+        unreadCount: 0,
+        notifications: notifications.map(notification => ({
+          id: String(notification.id),
+          title: notification.title,
+          body: notification.content,
+          type: notification.targetRole ? 'warning' : 'info',
+          read: true,
+          createdAt: notification.createdAt.toISOString(),
+        })),
+      };
     });
   }
 
@@ -470,7 +802,21 @@ class DashboardWidgetServiceClass {
         },
       });
 
-      return { actions };
+      return {
+        entries: actions.map(action => {
+          const verb = normalizeActionVerb(action.action);
+          const { entity, entityName } = toDisplayEntity(action.details, action.action);
+
+          return {
+            id: String(action.id),
+            action: verb,
+            entity,
+            entityName,
+            userName: action.user.email,
+            timestamp: action.timestamp.toISOString(),
+          };
+        }),
+      };
     });
   }
 }

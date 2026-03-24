@@ -74,11 +74,30 @@ export default function DashboardLayout({
     return availableWidgets.filter(w => preferences.enabledWidgets.includes(w.id));
   }, [availableWidgets, preferences.enabledWidgets]);
 
-  // Собираем layout только для видимых виджетов
+  // Собираем layout: для видимых виджетов без layout-записи генерируем позиции
   const visibleLayout = useMemo(() => {
-    return preferences.layout.filter(item =>
+    const existing = preferences.layout.filter(item =>
       visibleWidgets.some(w => w.id === item.widgetId)
     );
+    const existingIds = new Set(existing.map(item => item.widgetId));
+    const maxY = existing.reduce((max, item) => Math.max(max, item.y + item.h), 0);
+
+    let offsetY = maxY;
+    const generated: LayoutItem[] = [];
+    for (const w of visibleWidgets) {
+      if (!existingIds.has(w.id)) {
+        generated.push({
+          widgetId: w.id,
+          x: 0,
+          y: offsetY,
+          w: w.defaultSize.w,
+          h: w.defaultSize.h,
+        });
+        offsetY += w.defaultSize.h;
+      }
+    }
+
+    return [...existing, ...generated];
   }, [preferences.layout, visibleWidgets]);
 
   const gridLayout = useMemo(
@@ -122,6 +141,7 @@ export default function DashboardLayout({
             onToggleCollapse={() => onToggleCollapse(widget.id)}
             filters={(preferences.widgetFilters[widget.id] as Record<string, unknown>) || undefined}
             quickActionsData={widget.id === 'quick-actions' ? quickActions : undefined}
+            pinnedActions={widget.id === 'quick-actions' ? preferences.pinnedActions : undefined}
           />
         </div>
       ))}

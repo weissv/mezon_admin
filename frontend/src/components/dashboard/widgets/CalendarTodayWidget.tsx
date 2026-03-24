@@ -1,12 +1,12 @@
 // src/components/dashboard/widgets/CalendarTodayWidget.tsx
-import { Clock, MapPin } from 'lucide-react';
+import { Clock, User } from 'lucide-react';
 
 interface CalendarEvent {
   id: string;
   title: string;
   startTime: string;
   endTime: string;
-  location?: string;
+  organizer?: string;
   type: string;
 }
 
@@ -46,12 +46,12 @@ export default function CalendarTodayWidget({ data }: { data: CalendarTodayData 
           <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {timeFmt(ev.startTime)} – {timeFmt(ev.endTime)}
+              {timeFmt(ev.startTime)}
             </span>
-            {ev.location && (
+            {ev.organizer && (
               <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {ev.location}
+                <User className="h-3 w-3" />
+                {ev.organizer}
               </span>
             )}
           </div>

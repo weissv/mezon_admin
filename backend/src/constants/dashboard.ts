@@ -74,6 +74,37 @@ export interface DashboardPreferencesPayload {
   activeView: string | null;
 }
 
+export interface DashboardOverviewMetric {
+  id: string;
+  label: string;
+  value: number;
+  hint: string;
+  tone: 'primary' | 'success' | 'warning' | 'danger';
+}
+
+export interface DashboardOverviewAlert {
+  id: string;
+  label: string;
+  value: number;
+  tone: 'neutral' | 'warning' | 'danger';
+  path: string;
+}
+
+export interface DashboardOverviewPayload {
+  generatedAt: string;
+  metrics: DashboardOverviewMetric[];
+  alerts: DashboardOverviewAlert[];
+  visibleWidgetCount: number;
+  quickActionCount: number;
+}
+
+export interface DashboardBootstrapPayload {
+  preferences: DashboardPreferencesPayload;
+  availableWidgets: Omit<WidgetDefinition, 'allowedRoles' | 'dataEndpoint'>[];
+  quickActions: QuickAction[];
+  overview: DashboardOverviewPayload;
+}
+
 // ======================== QUICK ACTIONS ========================
 
 export interface QuickAction {

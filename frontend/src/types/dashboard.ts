@@ -74,12 +74,39 @@ export interface QuickAction {
   path: string;
 }
 
+// ======================== OVERVIEW ========================
+
+export interface OverviewMetric {
+  id: string;
+  label: string;
+  value: number;
+  hint: string;
+  tone: 'primary' | 'success' | 'warning' | 'danger';
+}
+
+export interface OverviewAlert {
+  id: string;
+  label: string;
+  value: number;
+  tone: 'neutral' | 'warning' | 'danger';
+  path: string;
+}
+
+export interface DashboardOverview {
+  generatedAt: string;
+  metrics: OverviewMetric[];
+  alerts: OverviewAlert[];
+  visibleWidgetCount: number;
+  quickActionCount: number;
+}
+
 // ======================== BOOTSTRAP RESPONSE ========================
 
 export interface DashboardBootstrap {
   preferences: DashboardPreferences;
   availableWidgets: WidgetDefinition[];
   quickActions: QuickAction[];
+  overview: DashboardOverview;
 }
 
 // ======================== WIDGET DATA STATE ========================
