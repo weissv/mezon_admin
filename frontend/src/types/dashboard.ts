@@ -21,6 +21,7 @@ export interface WidgetDefinition {
   description: string;
   defaultSize: { w: number; h: number };
   minSize: { w: number; h: number };
+  maxSize: { w: number; h: number };
   canHide: boolean;
   canResize: boolean;
   refreshInterval: number;
