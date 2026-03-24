@@ -1,110 +1,156 @@
 // src/components/forms/ChildForm.tsx
+// Секционная форма создания/редактирования ребёнка
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { FormError } from '../ui/FormError';
-import type { Child } from '../../types/child';
+import { useGroups } from '../../hooks/useChildren';
+import type { Child, Gender, ParentInput, HealthInfo } from '../../types/child';
+
+// ===== Zod Schema =====
+
+const parentSchema = z.object({
+  id: z.number().optional(),
+  fullName: z.string().min(1, 'ФИО обязательно'),
+  relation: z.string().min(1, 'Укажите отношение'),
+  phone: z.string().optional(),
+  email: z.union([z.string().email('Некорректный email'), z.literal('')]).optional(),
+  workplace: z.string().optional(),
+});
 
 const formSchema = z.object({
+  // Основные данные
   lastName: z.string().min(1, 'Фамилия обязательна'),
   firstName: z.string().min(1, 'Имя обязательно'),
   middleName: z.string().optional(),
   birthDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
   groupId: z.coerce.number().positive('Выберите класс'),
-  address: z.string().optional(),
+  gender: z.enum(['MALE', 'FEMALE', '']).optional(),
   nationality: z.string().optional(),
-  gender: z.string().optional(),
   birthCertificateNumber: z.string().optional(),
-  fatherName: z.string().optional(),
-  motherName: z.string().optional(),
-  parentPhone: z.string().optional(),
+  address: z.string().optional(),
+  // Договор
   contractNumber: z.string().optional(),
   contractDate: z.string().optional(),
-  healthInfo: z.string().optional(),
+  // Медицина
+  healthAllergies: z.string().optional(),
+  healthConditions: z.string().optional(),
+  healthMedications: z.string().optional(),
+  healthNotes: z.string().optional(),
+  // Родители
+  parents: z.array(parentSchema).optional(),
 });
 
-type ChildFormData = z.infer<typeof formSchema>;
-type ChildFormProps = { initialData?: Child | null; onSuccess: () => void; onCancel: () => void; };
+type FormData = z.infer<typeof formSchema>;
 
-// Helper to convert HealthInfo object to string for the form
-const getHealthInfoString = (healthInfo: Child['healthInfo']): string => {
-  if (!healthInfo) return '';
-  if (typeof healthInfo === 'string') return healthInfo;
-  // If it's an object, serialize relevant parts
-  const parts: string[] = [];
-  if (healthInfo.allergies?.length) parts.push(`Аллергии: ${healthInfo.allergies.join(', ')}`);
-  if (healthInfo.specialConditions?.length) parts.push(`Особые условия: ${healthInfo.specialConditions.join(', ')}`);
-  if (healthInfo.medications?.length) parts.push(`Медикаменты: ${healthInfo.medications.join(', ')}`);
-  if (healthInfo.notes) parts.push(`Примечания: ${healthInfo.notes}`);
-  return parts.join('; ');
+// ===== Helpers =====
+
+function parseHealthInfo(hi: HealthInfo | string | null | undefined): {
+  healthAllergies: string;
+  healthConditions: string;
+  healthMedications: string;
+  healthNotes: string;
+} {
+  if (!hi) return { healthAllergies: '', healthConditions: '', healthMedications: '', healthNotes: '' };
+  if (typeof hi === 'string') return { healthAllergies: hi, healthConditions: '', healthMedications: '', healthNotes: '' };
+  return {
+    healthAllergies: hi.allergies?.join(', ') ?? '',
+    healthConditions: hi.specialConditions?.join(', ') ?? '',
+    healthMedications: hi.medications?.join(', ') ?? '',
+    healthNotes: hi.notes ?? '',
+  };
+}
+
+function buildHealthInfo(data: FormData): HealthInfo | undefined {
+  const allergies = data.healthAllergies?.split(',').map(s => s.trim()).filter(Boolean) ?? [];
+  const specialConditions = data.healthConditions?.split(',').map(s => s.trim()).filter(Boolean) ?? [];
+  const medications = data.healthMedications?.split(',').map(s => s.trim()).filter(Boolean) ?? [];
+  const notes = data.healthNotes?.trim() || undefined;
+
+  if (!allergies.length && !specialConditions.length && !medications.length && !notes) return undefined;
+  return { allergies, specialConditions, medications, notes };
+}
+
+// ===== Component =====
+
+type ChildFormProps = {
+  initialData?: Child | null;
+  onSuccess: () => void;
+  onCancel: () => void;
 };
 
 export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) {
-  const [groups, setGroups] = useState<Array<{ id: number; name: string }>>([]);
-  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ChildFormData>({
+  const { groups, loading: isLoadingGroups } = useGroups();
+  const healthDefaults = parseHealthInfo(initialData?.healthInfo);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      lastName: initialData?.lastName || '',
-      firstName: initialData?.firstName || '',
-      middleName: initialData?.middleName || '',
+      lastName: initialData?.lastName ?? '',
+      firstName: initialData?.firstName ?? '',
+      middleName: initialData?.middleName ?? '',
       birthDate: initialData ? new Date(initialData.birthDate).toISOString().split('T')[0] : '',
-      groupId: initialData?.group?.id || undefined,
-      address: initialData?.address || '',
-      nationality: initialData?.nationality || '',
-      gender: initialData?.gender || '',
-      birthCertificateNumber: initialData?.birthCertificateNumber || '',
-      fatherName: initialData?.fatherName || '',
-      motherName: initialData?.motherName || '',
-      parentPhone: initialData?.parentPhone || '',
-      contractNumber: initialData?.contractNumber || '',
+      groupId: initialData?.group?.id ?? undefined,
+      gender: (initialData?.gender as '' | 'MALE' | 'FEMALE') ?? '',
+      nationality: initialData?.nationality ?? '',
+      birthCertificateNumber: initialData?.birthCertificateNumber ?? '',
+      address: initialData?.address ?? '',
+      contractNumber: initialData?.contractNumber ?? '',
       contractDate: initialData?.contractDate ? new Date(initialData.contractDate).toISOString().split('T')[0] : '',
-      healthInfo: getHealthInfoString(initialData?.healthInfo),
+      ...healthDefaults,
+      parents: initialData?.parents?.map((p) => ({
+        id: p.id,
+        fullName: p.fullName,
+        relation: p.relation,
+        phone: p.phone ?? '',
+        email: p.email ?? '',
+        workplace: p.workplace ?? '',
+      })) ?? [],
     },
   });
 
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoadingGroups(true);
-    api.get('/api/groups')
-      .then((data) => {
-        if (!isMounted) return;
-        setGroups(Array.isArray(data) ? data : []);
-      })
-      .catch((error: any) => {
-        const msg = error?.message || 'Не удалось загрузить список классов';
-        toast.error('Ошибка загрузки классов', { description: msg });
-      })
-      .finally(() => {
-        if (isMounted) setIsLoadingGroups(false);
-      });
+  const { fields: parentFields, append, remove } = useFieldArray({ control, name: 'parents' });
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const onSubmit = async (data: ChildFormData) => {
+  const onSubmit = async (data: FormData) => {
     try {
-      const payload = {
-        ...data,
-        birthDate: new Date(data.birthDate).toISOString(),
-        contractDate: data.contractDate ? new Date(data.contractDate).toISOString() : undefined,
+      const healthInfo = buildHealthInfo(data);
+      const parents: ParentInput[] | undefined = data.parents?.length
+        ? data.parents.map((p) => ({
+            ...(p.id ? { id: p.id } : {}),
+            fullName: p.fullName,
+            relation: p.relation,
+            phone: p.phone || undefined,
+            email: p.email || undefined,
+            workplace: p.workplace || undefined,
+          }))
+        : undefined;
+
+      const payload: Record<string, any> = {
+        firstName: data.firstName,
+        lastName: data.lastName,
         middleName: data.middleName || undefined,
-        address: data.address || undefined,
-        nationality: data.nationality || undefined,
+        birthDate: new Date(data.birthDate).toISOString(),
+        groupId: data.groupId,
         gender: data.gender || undefined,
+        nationality: data.nationality || undefined,
         birthCertificateNumber: data.birthCertificateNumber || undefined,
-        fatherName: data.fatherName || undefined,
-        motherName: data.motherName || undefined,
-        parentPhone: data.parentPhone || undefined,
+        address: data.address || undefined,
         contractNumber: data.contractNumber || undefined,
-      }
+        contractDate: data.contractDate ? new Date(data.contractDate).toISOString() : undefined,
+        healthInfo,
+        parents,
+      };
 
       if (initialData) {
         await api.put(`/api/children/${initialData.id}`, payload);
@@ -113,119 +159,176 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
       }
       onSuccess();
     } catch (error: any) {
-      const msg = error?.message || error?.issues?.[0]?.message || 'Ошибка сохранения';
+      const msg = error?.message || 'Ошибка сохранения';
       toast.error('Ошибка сохранения', { description: msg });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label>Фамилия *</label>
-          <Input {...register('lastName')} />
-          <FormError message={errors.lastName?.message} />
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
+      {/* ===== Секция 1: Основные данные ===== */}
+      <fieldset>
+        <legend className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1 w-full">Основные данные</legend>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-sm text-gray-600">Фамилия *</label>
+            <Input {...register('lastName')} />
+            <FormError message={errors.lastName?.message} />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Имя *</label>
+            <Input {...register('firstName')} />
+            <FormError message={errors.firstName?.message} />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Отчество</label>
+            <Input {...register('middleName')} />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Класс *</label>
+            <select
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              disabled={isLoadingGroups}
+              {...register('groupId', { valueAsNumber: true })}
+            >
+              <option value="">{isLoadingGroups ? 'Загружаем...' : 'Выберите класс'}</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+            <FormError message={errors.groupId?.message} />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Дата рождения *</label>
+            <Input type="date" {...register('birthDate')} />
+            <FormError message={errors.birthDate?.message} />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Пол</label>
+            <select
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              {...register('gender')}
+            >
+              <option value="">Не указан</option>
+              <option value="MALE">Мужской</option>
+              <option value="FEMALE">Женский</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Национальность</label>
+            <Input {...register('nationality')} placeholder="узбек, русский и т.д." />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Номер метрики</label>
+            <Input {...register('birthCertificateNumber')} placeholder="I-TN № 0000000" />
+          </div>
         </div>
-        <div>
-          <label>Имя *</label>
-          <Input {...register('firstName')} />
-          <FormError message={errors.firstName?.message} />
+        <div className="mt-3">
+          <label className="text-sm text-gray-600">Адрес проживания</label>
+          <Input {...register('address')} placeholder="Район, улица, дом, квартира" />
         </div>
-        <div>
-          <label>Отчество</label>
-          <Input {...register('middleName')} />
-          <FormError message={errors.middleName?.message} />
-        </div>
-        <div>
-          <label>Класс *</label>
-          <select
-            className="w-full rounded-md border border-gray-300 px-3 py-2"
-            disabled={isLoadingGroups}
-            {...register('groupId', { valueAsNumber: true })}
-          >
-            <option value="">{isLoadingGroups ? 'Загружаем...' : 'Выберите класс'}</option>
-            {groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
-              </option>
-            ))}
-          </select>
-          <FormError message={errors.groupId?.message} />
-        </div>
-        <div>
-          <label>Дата рождения *</label>
-          <Input type="date" {...register('birthDate')} />
-          <FormError message={errors.birthDate?.message} />
-        </div>
-        <div>
-          <label>Пол</label>
-          <select
-            className="w-full rounded-md border border-gray-300 px-3 py-2"
-            {...register('gender')}
-          >
-            <option value="">Не указан</option>
-            <option value="мужской">Мужской</option>
-            <option value="женский">Женский</option>
-          </select>
-          <FormError message={errors.gender?.message} />
-        </div>
-        <div>
-          <label>Национальность</label>
-          <Input {...register('nationality')} placeholder="узбек, русский и т.д." />
-          <FormError message={errors.nationality?.message} />
-        </div>
-        <div>
-          <label>Номер метрики</label>
-          <Input {...register('birthCertificateNumber')} placeholder="I-TN № 0000000" />
-          <FormError message={errors.birthCertificateNumber?.message} />
-        </div>
-      </div>
+      </fieldset>
 
-      <div>
-        <label>Адрес проживания</label>
-        <Input {...register('address')} placeholder="Район, улица, дом, квартира" />
-        <FormError message={errors.address?.message} />
-      </div>
+      {/* ===== Секция 2: Родители ===== */}
+      <fieldset>
+        <legend className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1 w-full">Родители / Опекуны</legend>
+        {parentFields.map((field, index) => (
+          <div key={field.id} className="border rounded-md p-3 mb-3 bg-gray-50 relative">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute top-2 right-2 text-red-500 h-7 w-7 p-0"
+              onClick={() => remove(index)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm text-gray-600">ФИО *</label>
+                <Input {...register(`parents.${index}.fullName`)} />
+                <FormError message={errors.parents?.[index]?.fullName?.message} />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Отношение *</label>
+                <select
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  {...register(`parents.${index}.relation`)}
+                >
+                  <option value="">Выберите</option>
+                  <option value="отец">Отец</option>
+                  <option value="мать">Мать</option>
+                  <option value="опекун">Опекун</option>
+                  <option value="другое">Другое</option>
+                </select>
+                <FormError message={errors.parents?.[index]?.relation?.message} />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Телефон</label>
+                <Input {...register(`parents.${index}.phone`)} placeholder="+998 90 000 00 00" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Email</label>
+                <Input type="email" {...register(`parents.${index}.email`)} />
+                <FormError message={errors.parents?.[index]?.email?.message} />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-sm text-gray-600">Место работы</label>
+                <Input {...register(`parents.${index}.workplace`)} />
+              </div>
+            </div>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => append({ fullName: '', relation: '', phone: '', email: '', workplace: '' })}
+        >
+          <PlusCircle className="mr-1 h-4 w-4" /> Добавить родителя
+        </Button>
+      </fieldset>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label>ФИО отца</label>
-          <Input {...register('fatherName')} />
-          <FormError message={errors.fatherName?.message} />
+      {/* ===== Секция 3: Договор ===== */}
+      <fieldset>
+        <legend className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1 w-full">Договор</legend>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-sm text-gray-600">№ Договора</label>
+            <Input {...register('contractNumber')} />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Дата договора</label>
+            <Input type="date" {...register('contractDate')} />
+          </div>
         </div>
-        <div>
-          <label>ФИО матери</label>
-          <Input {...register('motherName')} />
-          <FormError message={errors.motherName?.message} />
-        </div>
-        <div>
-          <label>Телефоны родителей</label>
-          <Input {...register('parentPhone')} placeholder="90 000 00 00" />
-          <FormError message={errors.parentPhone?.message} />
-        </div>
-        <div>
-          <label>№ Договора</label>
-          <Input {...register('contractNumber')} />
-          <FormError message={errors.contractNumber?.message} />
-        </div>
-        <div>
-          <label>Дата договора</label>
-          <Input type="date" {...register('contractDate')} />
-          <FormError message={errors.contractDate?.message} />
-        </div>
-      </div>
+      </fieldset>
 
-      <div>
-        <label>Мед. сведения (опционально)</label>
-        <textarea
-          className="w-full rounded-md border border-gray-300 px-3 py-2"
-          rows={2}
-          placeholder="Аллергии, рекомендации..."
-          {...register('healthInfo')}
-        />
-        <FormError message={errors.healthInfo?.message} />
-      </div>
-      <div className="flex justify-end gap-2">
+      {/* ===== Секция 4: Мед. сведения ===== */}
+      <fieldset>
+        <legend className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1 w-full">Медицинские сведения</legend>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-sm text-gray-600">Аллергии (через запятую)</label>
+            <Input {...register('healthAllergies')} placeholder="молоко, орехи" />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Особые условия</label>
+            <Input {...register('healthConditions')} placeholder="астма, диабет" />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Медикаменты</label>
+            <Input {...register('healthMedications')} placeholder="ингалятор" />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600">Примечания</label>
+            <Input {...register('healthNotes')} />
+          </div>
+        </div>
+      </fieldset>
+
+      {/* ===== Кнопки ===== */}
+      <div className="flex justify-end gap-2 pt-2 border-t">
         <Button type="button" variant="ghost" onClick={onCancel}>Отмена</Button>
         <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Сохранение...' : 'Сохранить'}</Button>
       </div>

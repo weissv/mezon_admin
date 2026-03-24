@@ -1,177 +1,141 @@
 // src/routes/children.routes.ts
+// Thin controller — вся бизнес-логика в ChildService
 import { Router } from "express";
-import { Prisma } from "@prisma/client";
-import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
-import { buildPagination, buildOrderBy, buildWhere } from "../utils/query";
 import { logAction } from "../middleware/actionLogger";
 import { validate } from "../middleware/validate";
-import { createChildSchema, updateChildSchema } from "../schemas/child.schema";
+import {
+  createChildSchema,
+  updateChildSchema,
+  createAbsenceSchema,
+  updateAbsenceSchema,
+  childListQuerySchema,
+} from "../schemas/child.schema";
+import { ChildService } from "../services/ChildService";
+
 const router = Router();
 
-// Функция для синхронизации ребёнка с LMS
-async function syncChildWithLms(childId: number, groupId: number) {
-  // Проверяем, существует ли уже запись LmsSchoolStudent для этого ребёнка
-  const existingLmsStudent = await prisma.lmsSchoolStudent.findFirst({
-    where: { studentId: childId }
-  });
+// ======== Child CRUD ========
 
-  if (existingLmsStudent) {
-    // Обновляем класс если он изменился
-    if (existingLmsStudent.classId !== groupId) {
-      await prisma.lmsSchoolStudent.update({
-        where: { id: existingLmsStudent.id },
-        data: { classId: groupId }
-      });
-    }
-  } else {
-    // Создаём новую запись LmsSchoolStudent
-    await prisma.lmsSchoolStudent.create({
-      data: {
-        studentId: childId,
-        classId: groupId,
-        status: "active"
-      }
-    });
-  }
-}
-
-// GET /api/children
+// GET /api/children — список с фильтрами, поиском, пагинацией
 router.get(
   "/",
   checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]),
+  validate(childListQuerySchema),
   async (req, res) => {
-    const { skip, take } = buildPagination(req.query);
-    const orderBy = buildOrderBy(req.query, [
-      "id",
-      "firstName",
-      "lastName",
-      "birthDate",
-      "status",
-      "groupId",
-      "createdAt",
-    ]);
-    const where = buildWhere<any>(req.query, ["status", "groupId", "lastName"]);
-    const [items, total] = await Promise.all([
-      prisma.child.findMany({ where, skip, take, orderBy, include: { group: true } }),
-      prisma.child.count({ where }),
-    ]);
-    return res.json({ items, total });
+    const { page, pageSize, sortBy, sortOrder, status, groupId, search, gender } = req.query as Record<string, string | undefined>;
+    const result = await ChildService.findMany({
+      page: page ? Number(page) : undefined,
+      pageSize: pageSize ? Number(pageSize) : undefined,
+      sortBy,
+      sortOrder: sortOrder as 'asc' | 'desc' | undefined,
+      status,
+      groupId: groupId ? Number(groupId) : undefined,
+      search,
+      gender,
+    });
+    return res.json(result);
   }
 );
 
-
-router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createChildSchema), logAction("CREATE_CHILD", (req) => ({ body: req.body })), async (req, res) => {
-  const { contractDate, ...rest } = req.body;
-  const data: any = { ...rest };
-  if (contractDate) {
-    data.contractDate = new Date(contractDate);
+// GET /api/children/:id — детальный профиль ребёнка
+router.get(
+  "/:id",
+  checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]),
+  async (req, res) => {
+    const child = await ChildService.findById(Number(req.params.id));
+    return res.json(child);
   }
-  const child = await prisma.child.create({ data });
-  
-  // Синхронизируем с LMS
-  await syncChildWithLms(child.id, child.groupId);
-  
-  return res.status(201).json(child);
-});
+);
 
-router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateChildSchema), logAction("UPDATE_CHILD", (req) => ({ id: req.params.id, body: req.body })), async (req, res) => {
-  const id = Number(req.params.id);
-  const { contractDate, ...rest } = req.body;
-  const data: any = { ...rest };
-  if (contractDate) {
-    data.contractDate = new Date(contractDate);
+// POST /api/children — создать ребёнка
+router.post(
+  "/",
+  checkRole(["DEPUTY", "ADMIN"]),
+  validate(createChildSchema),
+  logAction("CREATE_CHILD", (req) => ({ body: req.body })),
+  async (req, res) => {
+    const child = await ChildService.create(req.body);
+    return res.status(201).json(child);
   }
-  const child = await prisma.child.update({ where: { id }, data });
-  
-  // Синхронизируем с LMS (если изменился класс)
-  if (req.body.groupId) {
-    await syncChildWithLms(child.id, child.groupId);
-  }
-  
-  return res.json(child);
-});
+);
 
+// PUT /api/children/:id — обновить ребёнка
+router.put(
+  "/:id",
+  checkRole(["DEPUTY", "ADMIN"]),
+  validate(updateChildSchema),
+  logAction("UPDATE_CHILD", (req) => ({ id: req.params.id, body: req.body })),
+  async (req, res) => {
+    const child = await ChildService.update(Number(req.params.id), req.body);
+    return res.json(child);
+  }
+);
+
+// PUT /api/children/:id/archive — архивировать (soft-delete)
+router.put(
+  "/:id/archive",
+  checkRole(["DEPUTY", "ADMIN"]),
+  logAction("ARCHIVE_CHILD", (req) => ({ id: req.params.id })),
+  async (req, res) => {
+    await ChildService.archive(Number(req.params.id));
+    return res.status(204).send();
+  }
+);
+
+// DELETE /api/children/:id — полное удаление (только админ)
 router.delete(
   "/:id",
   checkRole(["ADMIN"]),
   logAction("DELETE_CHILD", (req) => ({ id: req.params.id })),
   async (req, res) => {
-    const id = Number(req.params.id);
-    if (Number.isNaN(id)) {
-      return res.status(400).json({ message: "Invalid child id" });
-    }
-
-    try {
-      // Сначала удаляем связанную запись LmsSchoolStudent
-      await prisma.lmsSchoolStudent.deleteMany({ where: { studentId: id } });
-      
-      await prisma.child.delete({ where: { id } });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
-        // Deleting an already-removed child should be idempotent for the client
-        return res.status(204).send();
-      }
-      throw error;
-    }
-
+    await ChildService.delete(Number(req.params.id));
     return res.status(204).send();
   }
 );
 
-// --- TemporaryAbsence CRUD ---
+// ======== TemporaryAbsence CRUD ========
 
-// GET /api/children/:id/absences - список временных отсутствий ребенка
-router.get("/:id/absences", checkRole(["DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
-  const { id } = req.params;
-  
-  const absences = await prisma.temporaryAbsence.findMany({
-    where: { childId: Number(id) },
-    orderBy: { startDate: "desc" },
-  });
-  
-  return res.json(absences);
-});
+// GET /api/children/:id/absences
+router.get(
+  "/:id/absences",
+  checkRole(["DEPUTY", "ADMIN", "TEACHER"]),
+  async (req, res) => {
+    const absences = await ChildService.getAbsences(Number(req.params.id));
+    return res.json(absences);
+  }
+);
 
-// POST /api/children/:id/absences - добавить отсутствие
-router.post("/:id/absences", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { id } = req.params;
-  const { startDate, endDate, reason } = req.body;
-  
-  const absence = await prisma.temporaryAbsence.create({
-    data: {
-      childId: Number(id),
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      reason,
-    },
-  });
-  
-  return res.status(201).json(absence);
-});
+// POST /api/children/:id/absences
+router.post(
+  "/:id/absences",
+  checkRole(["DEPUTY", "ADMIN"]),
+  validate(createAbsenceSchema),
+  async (req, res) => {
+    const absence = await ChildService.addAbsence(Number(req.params.id), req.body);
+    return res.status(201).json(absence);
+  }
+);
 
-// PUT /api/children/absences/:absenceId - обновить отсутствие
-router.put("/absences/:absenceId", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { absenceId } = req.params;
-  const { startDate, endDate, reason } = req.body;
-  
-  const absence = await prisma.temporaryAbsence.update({
-    where: { id: Number(absenceId) },
-    data: {
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
-      reason,
-    },
-  });
-  
-  return res.json(absence);
-});
+// PUT /api/children/absences/:absenceId
+router.put(
+  "/absences/:absenceId",
+  checkRole(["DEPUTY", "ADMIN"]),
+  validate(updateAbsenceSchema),
+  async (req, res) => {
+    const absence = await ChildService.updateAbsence(Number(req.params.absenceId), req.body);
+    return res.json(absence);
+  }
+);
 
 // DELETE /api/children/absences/:absenceId
-router.delete("/absences/:absenceId", checkRole(["ADMIN"]), async (req, res) => {
-  const { absenceId } = req.params;
-  await prisma.temporaryAbsence.delete({ where: { id: Number(absenceId) } });
-  return res.status(204).send();
-});
+router.delete(
+  "/absences/:absenceId",
+  checkRole(["ADMIN"]),
+  async (req, res) => {
+    await ChildService.deleteAbsence(Number(req.params.absenceId));
+    return res.status(204).send();
+  }
+);
 
 export default router;

@@ -6,6 +6,7 @@ import LmsLayout from "../layouts/LmsLayout";
 import LoginPage from "../pages/LoginPage";
 import DashboardPage from "../pages/DashboardPage";
 import ChildrenPage from "../pages/ChildrenPage";
+import ChildDetailPage from "../pages/ChildDetailPage";
 import EmployeesPage from "../pages/EmployeesPage";
 import ClubsPage from "../pages/ClubsPage";
 import AttendancePage from "../pages/AttendancePage";
@@ -143,6 +144,7 @@ export default function Router() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="children" element={<ChildrenPage />} />
+            <Route path="children/:id" element={<ChildDetailPage />} />
             <Route path="employees" element={<EmployeesPage />} />
             <Route path="clubs" element={<ClubsPage />} />
             <Route path="attendance" element={<AttendancePage />} />

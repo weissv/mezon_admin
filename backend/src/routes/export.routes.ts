@@ -38,26 +38,41 @@ const entityExporters: Record<IntegrationEntity, () => Promise<Record<string, un
             name: true,
           },
         },
+        parents: {
+          select: { fullName: true, relation: true, phone: true },
+        },
       },
       orderBy: [{ group: { name: "asc" } }, { lastName: "asc" }, { firstName: "asc" }],
     });
 
-    return children.map((child, index) => ({
-      "№": index + 1,
-      "Ф.И.О. ребенка": [child.lastName, child.firstName, child.middleName].filter(Boolean).join(" "),
-      "Класс": child.group?.name ?? "",
-      "Адрес проживания": child.address ?? "",
-      "Дата рождения": child.birthDate.toLocaleDateString("ru-RU"),
-      "Национальность": child.nationality ?? "",
-      "Пол": child.gender ?? "",
-      "Номер метрики": child.birthCertificateNumber ?? "",
-      "Ф.И.О. отца": child.fatherName ?? "",
-      "Ф.И.О. матери": child.motherName ?? "",
-      "Телефоны родителей": child.parentPhone ?? "",
-      "№ Договора": child.contractNumber ?? "",
-      "Дата договора": child.contractDate ? child.contractDate.toLocaleDateString("ru-RU") : "",
-      "Статус": child.status,
-    }));
+    const genderLabel = (g: string | null) => {
+      if (g === "MALE") return "Мужской";
+      if (g === "FEMALE") return "Женский";
+      return g ?? "";
+    };
+
+    return children.map((child, index) => {
+      const father = child.parents.find((p) => p.relation === "отец");
+      const mother = child.parents.find((p) => p.relation === "мать");
+      const phones = child.parents.map((p) => p.phone).filter(Boolean).join(", ");
+
+      return {
+        "№": index + 1,
+        "Ф.И.О. ребенка": [child.lastName, child.firstName, child.middleName].filter(Boolean).join(" "),
+        "Класс": child.group?.name ?? "",
+        "Адрес проживания": child.address ?? "",
+        "Дата рождения": child.birthDate.toLocaleDateString("ru-RU"),
+        "Национальность": child.nationality ?? "",
+        "Пол": genderLabel(child.gender),
+        "Номер метрики": child.birthCertificateNumber ?? "",
+        "Ф.И.О. отца": father?.fullName ?? child.fatherName ?? "",
+        "Ф.И.О. матери": mother?.fullName ?? child.motherName ?? "",
+        "Телефоны родителей": phones || child.parentPhone || "",
+        "№ Договора": child.contractNumber ?? "",
+        "Дата договора": child.contractDate ? child.contractDate.toLocaleDateString("ru-RU") : "",
+        "Статус": child.status,
+      };
+    });
   },
   employees: async () => {
     const employees = await prisma.employee.findMany({
@@ -185,7 +200,7 @@ const entityImporters: Record<IntegrationEntity, (rows: ImportRow[]) => Promise<
         status,
         address: getString(row, "Адрес проживания", "Address", "address") ?? null,
         nationality: getString(row, "Национальность", "Nationality", "nationality") ?? null,
-        gender: getString(row, "Пол", "Gender", "gender") ?? null,
+        gender: (getString(row, "Пол", "Gender", "gender") as import('@prisma/client').Gender) ?? null,
         birthCertificateNumber: getString(row, "Номер метрики", "Номер метрки", "Birth Certificate", "birthCertificateNumber") ?? null,
         fatherName: getString(row, "Ф.И.О. отца", "ФИО отца", "Father Name", "fatherName") ?? null,
         motherName: getString(row, "Ф.И.О. матери", "ФИО матери", "Mother Name", "motherName") ?? null,

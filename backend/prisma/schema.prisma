@@ -36,6 +36,12 @@ model RolePermission {
 enum ChildStatus {
   ACTIVE
   LEFT
+  ARCHIVED
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }
 
 enum ClubEnrollmentStatus {
@@ -195,18 +201,21 @@ model Child {
   birthDate              DateTime
   groupId                Int
   group                  Group       @relation(fields: [groupId], references: [id])
-  healthInfo             Json?       // { allergies: string[], specialConditions: string[] }
+  healthInfo             Json?       // { allergies: string[], specialConditions: string[], medications: string[], notes: string }
   status                 ChildStatus @default(ACTIVE)
   address                String?     // Адрес проживания
   nationality            String?     // Национальность
-  gender                 String?     // Пол (мужской/женский)
+  gender                 Gender?     // Пол
   birthCertificateNumber String?     // Номер метрики
-  fatherName             String?     // ФИО отца
-  motherName             String?     // ФИО матери
-  parentPhone            String?     // Телефоны родителей
   contractNumber         String?     // Номер договора
   contractDate           DateTime?   // Дата договора
 
+  // Legacy parent fields (kept for backward compat, prefer Parent relation)
+  fatherName             String?     // @deprecated — use parents relation
+  motherName             String?     // @deprecated — use parents relation
+  parentPhone            String?     // @deprecated — use parents relation
+
+  parents           Parent[]
   enrollments       ClubEnrollment[]
   attendance        Attendance[]
   documents         Document[]
@@ -218,6 +227,23 @@ model Child {
   updatedAt         DateTime           @updatedAt
 
   @@index([groupId])
+  @@index([lastName, firstName])
+  @@index([status])
+}
+
+model Parent {
+  id         Int      @id @default(autoincrement())
+  childId    Int
+  child      Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  fullName   String   // ФИО родителя
+  relation   String   // "отец", "мать", "опекун"
+  phone      String?  // Телефон
+  email      String?  // Email
+  workplace  String?  // Место работы
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([childId])
 }
 
 model Group {
