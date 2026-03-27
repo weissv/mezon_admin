@@ -1382,3 +1382,230 @@ model BalanceSnapshot {
   @@index([snapshotDate, balanceType])
   @@index([contractorId])
 }
+
+// ══════════════════════════════════════════════════════════════
+// 1С СИНХРОНИЗАЦИЯ — Справочники
+// ══════════════════════════════════════════════════════════════
+
+/// Catalog_Организации
+model OneCOrganization {
+  id          Int      @id @default(autoincrement())
+  externalId  String   @unique
+  code        String?
+  name        String
+  fullName    String?
+  inn         String?
+  kpp         String?
+  ogrn        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Catalog_Номенклатура
+model OneCNomenclature {
+  id          Int      @id @default(autoincrement())
+  externalId  String   @unique
+  code        String?
+  name        String
+  fullName    String?
+  isFolder    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
+}
+
+/// Catalog_БанковскиеСчета
+model OneCBankAccount {
+  id          Int      @id @default(autoincrement())
+  externalId  String   @unique
+  code        String?
+  name        String
+  accountNumber String?
+  bankName    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Catalog_ДоговорыКонтрагентов
+model OneCContract {
+  id             Int      @id @default(autoincrement())
+  externalId     String   @unique
+  code           String?
+  name           String
+  contractorRefKey String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([contractorRefKey])
+}
+
+/// Catalog_Сотрудники (1С)
+model OneCEmployee {
+  id             Int      @id @default(autoincrement())
+  externalId     String   @unique
+  code           String?
+  name           String
+  personRefKey   String?  // ФизическоеЛицо_Key
+  positionRefKey String?  // Должность_Key
+  orgRefKey      String?  // Организация_Key
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([name])
+}
+
+/// Catalog_Должности
+model OneCPosition {
+  id          Int      @id @default(autoincrement())
+  externalId  String   @unique
+  code        String?
+  name        String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Catalog_ОсновныеСредства
+model OneCFixedAsset {
+  id          Int      @id @default(autoincrement())
+  externalId  String   @unique
+  code        String?
+  name        String
+  fullName    String?
+  isFolder    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Catalog_Склады
+model OneCWarehouse {
+  id          Int      @id @default(autoincrement())
+  externalId  String   @unique
+  code        String?
+  name        String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Catalog_Валюты
+model OneCCurrency {
+  id          Int      @id @default(autoincrement())
+  externalId  String   @unique
+  code        String?
+  name        String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Catalog_ПодразделенияОрганизаций
+model OneCDepartment {
+  id          Int      @id @default(autoincrement())
+  externalId  String   @unique
+  code        String?
+  name        String
+  parentRefKey String?
+  orgRefKey    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ══════════════════════════════════════════════════════════════
+// 1С СИНХРОНИЗАЦИЯ — Документы
+// ══════════════════════════════════════════════════════════════
+
+/// Универсальная модель для документов 1С, которые не имеют отдельной модели
+/// (Счёт-фактуры, Авансовые отчёты, ОперацияБух, КорректировкаДолга,
+///  СписаниеТоваров, Инвентаризация, ТребованиеНакладная и т.д.)
+model OneCDocument {
+  id              Int      @id @default(autoincrement())
+  externalId      String   @unique
+  docType         String                            // "СчетФактураПолученный", "АвансовыйОтчет" и т.д.
+  documentNumber  String?
+  date            DateTime
+  posted          Boolean  @default(false)
+  amount          Decimal? @db.Decimal(14, 2)
+  contractorRefKey String?
+  contractorName  String?
+  personRefKey    String?
+  personName      String?
+  operationType   String?
+  comment         String?
+  meta            Json?                              // Дополнительные поля в JSON
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([docType, date])
+  @@index([docType])
+  @@index([contractorRefKey])
+}
+
+// ══════════════════════════════════════════════════════════════
+// 1С СИНХРОНИЗАЦИЯ — Кадровые документы
+// ══════════════════════════════════════════════════════════════
+
+/// Кадровые документы из 1С (Приём, Увольнение, Перевод, Отпуск, Больничный и т.д.)
+model OneCHRDocument {
+  id              Int      @id @default(autoincrement())
+  externalId      String   @unique
+  docType         String                            // "ПриемНаРаботу", "Увольнение", "Отпуск" и т.д.
+  documentNumber  String?
+  date            DateTime
+  posted          Boolean  @default(false)
+  employeeRefKey  String?
+  employeeName    String?
+  personRefKey    String?
+  personName      String?
+  orgRefKey       String?
+  departmentRefKey String?
+  positionRefKey  String?
+  dateStart       DateTime?
+  dateEnd         DateTime?
+  amount          Decimal? @db.Decimal(14, 2)
+  comment         String?
+  meta            Json?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([docType, date])
+  @@index([docType])
+  @@index([employeeRefKey])
+  @@index([personRefKey])
+}
+
+// ══════════════════════════════════════════════════════════════
+// 1С СИНХРОНИЗАЦИЯ — Зарплата
+// ══════════════════════════════════════════════════════════════
+
+/// Зарплатные документы (Начисление, Ведомости, Удержания)
+model OneCPayrollDocument {
+  id              Int      @id @default(autoincrement())
+  externalId      String   @unique
+  docType         String
+  documentNumber  String?
+  date            DateTime
+  posted          Boolean  @default(false)
+  orgRefKey       String?
+  departmentRefKey String?
+  period          DateTime?
+  amount          Decimal? @db.Decimal(14, 2)
+  comment         String?
+  meta            Json?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([docType, date])
+  @@index([docType])
+}
