@@ -15,6 +15,7 @@ const config_1 = require("./config");
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
 const children_routes_1 = __importDefault(require("./routes/children.routes"));
+const parents_routes_1 = __importDefault(require("./routes/parents.routes"));
 const employees_routes_1 = __importDefault(require("./routes/employees.routes"));
 const clubs_routes_1 = __importDefault(require("./routes/clubs.routes"));
 const attendance_routes_1 = __importDefault(require("./routes/attendance.routes"));
@@ -81,6 +82,7 @@ app.use(auth_1.authMiddleware);
 // 3. Эти роуты теперь защищены:
 app.use("/api/dashboard", dashboard_routes_1.default);
 app.use("/api/children", children_routes_1.default);
+app.use("/api/parents", parents_routes_1.default);
 app.use("/api/employees", employees_routes_1.default);
 app.use("/api/clubs", clubs_routes_1.default);
 app.use("/api/attendance", attendance_routes_1.default);
