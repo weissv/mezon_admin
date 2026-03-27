@@ -17,104 +17,195 @@ const coerceDate = (value) => {
     const parsed = new Date(String(value));
     return isValidDate(parsed) ? parsed : null;
 };
-const appendDateRange = (where, start, end) => {
+const appendDateRange = (where, start, end, field = "date") => {
     const startDate = coerceDate(start);
     const endDate = coerceDate(end);
     if (!startDate && !endDate)
         return;
-    where.date = {};
+    where[field] = {};
     if (startDate)
-        where.date.gte = startDate;
+        where[field].gte = startDate;
     if (endDate)
-        where.date.lte = endDate;
-};
-const normalizeClubId = (value) => {
-    if (typeof value === "number" && !Number.isNaN(value))
-        return value;
-    if (typeof value === "string" && value.trim() !== "") {
-        const parsed = Number(value);
-        if (!Number.isNaN(parsed))
-            return parsed;
-    }
-    return undefined;
+        where[field].lte = endDate;
 };
 // GET /api/finance/transactions
 router.get("/transactions", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.listFinanceSchema), async (req, res) => {
     const query = req.query;
     const { skip, take } = (0, query_1.buildPagination)(query);
-    const orderBy = (0, query_1.buildOrderBy)(query, ["date", "amount", "category", "type", "source", "id"]);
-    const where = (0, query_1.buildWhere)(query, ["type", "category"]);
+    const orderBy = (0, query_1.buildOrderBy)(query, ["date", "amount", "category", "type", "source", "id", "channel"]);
+    const where = (0, query_1.buildWhere)(query, ["type", "category", "channel"]);
     appendDateRange(where, query.startDate, query.endDate);
+    if (query.posted !== undefined) {
+        where.posted = query.posted === "true";
+    }
+    if (query.contractorId) {
+        where.contractorId = Number(query.contractorId);
+    }
+    if (query.personId) {
+        where.personId = Number(query.personId);
+    }
+    if (query.cashFlowArticleId) {
+        where.cashFlowArticleId = Number(query.cashFlowArticleId);
+    }
+    if (query.search) {
+        where.OR = [
+            { description: { contains: query.search, mode: "insensitive" } },
+            { documentNumber: { contains: query.search, mode: "insensitive" } },
+            { purpose: { contains: query.search, mode: "insensitive" } },
+            { contractor: { name: { contains: query.search, mode: "insensitive" } } },
+            { person: { name: { contains: query.search, mode: "insensitive" } } },
+        ];
+    }
     const [items, total] = await Promise.all([
-        prisma_1.prisma.financeTransaction.findMany({ where, skip, take, orderBy }),
+        prisma_1.prisma.financeTransaction.findMany({
+            where,
+            skip,
+            take,
+            orderBy,
+            include: {
+                club: { select: { name: true } },
+                contractor: { select: { id: true, name: true, inn: true } },
+                person: { select: { id: true, name: true } },
+                cashFlowArticle: { select: { id: true, name: true } },
+            },
+        }),
         prisma_1.prisma.financeTransaction.count({ where }),
     ]);
     return res.json({ items, total });
 });
-// POST /api/finance/transactions
-router.post("/transactions", (0, checkRole_1.checkRole)(["ACCOUNTANT", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.createFinanceSchema), async (req, res) => {
-    const payload = req.body;
-    const normalizedDate = coerceDate(payload.date);
-    if (!normalizedDate) {
-        return res.status(400).json({ message: "Invalid transaction date" });
-    }
-    const tx = await prisma_1.prisma.financeTransaction.create({
-        data: {
-            amount: payload.amount,
-            type: payload.type,
-            category: payload.category,
-            description: payload.description,
-            date: normalizedDate,
-            documentUrl: payload.documentUrl,
-            source: payload.source,
-            clubId: normalizeClubId(payload.clubId),
+// GET /api/finance/contractors — справочник контрагентов для фильтрации
+router.get("/contractors", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (_req, res) => {
+    const items = await prisma_1.prisma.contractor.findMany({
+        where: { isActive: true, isFolder: false },
+        select: { id: true, name: true, inn: true },
+        orderBy: { name: "asc" },
+    });
+    return res.json(items);
+});
+// GET /api/finance/persons — справочник физлиц для фильтрации
+router.get("/persons", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (_req, res) => {
+    const items = await prisma_1.prisma.person.findMany({
+        where: { isActive: true },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+    });
+    return res.json(items);
+});
+// GET /api/finance/cash-flow-articles — статьи ДДС для фильтрации
+router.get("/cash-flow-articles", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), async (_req, res) => {
+    const items = await prisma_1.prisma.cashFlowArticle.findMany({
+        where: { isFolder: false },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+    });
+    return res.json(items);
+});
+// =====================================================
+// INVOICES — Товарные документы (Поступление / Реализация)
+// =====================================================
+// GET /api/finance/invoices
+router.get("/invoices", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.listInvoicesSchema), async (req, res) => {
+    const query = req.query;
+    const { skip, take } = (0, query_1.buildPagination)(query);
+    const orderBy = (0, query_1.buildOrderBy)(query, ["date", "totalAmount", "documentNumber", "id"]);
+    const where = {};
+    if (query.direction)
+        where.direction = query.direction;
+    if (query.contractorId)
+        where.contractorId = Number(query.contractorId);
+    if (query.posted !== undefined)
+        where.posted = query.posted === "true";
+    appendDateRange(where, query.startDate, query.endDate);
+    const [items, total] = await Promise.all([
+        prisma_1.prisma.invoice.findMany({
+            where,
+            skip,
+            take,
+            orderBy,
+            include: {
+                contractor: { select: { id: true, name: true, inn: true } },
+            },
+        }),
+        prisma_1.prisma.invoice.count({ where }),
+    ]);
+    return res.json({ items, total });
+});
+// =====================================================
+// BALANCES — Агрегированные остатки
+// =====================================================
+// GET /api/finance/balances
+router.get("/balances", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.listBalancesSchema), async (req, res) => {
+    const query = req.query;
+    // Получаем последние снимки по каждому типу
+    const latestDate = query.snapshotDate
+        ? new Date(query.snapshotDate)
+        : await prisma_1.prisma.balanceSnapshot
+            .findFirst({ orderBy: { snapshotDate: "desc" }, select: { snapshotDate: true } })
+            .then((r) => r?.snapshotDate ?? new Date());
+    const snapshots = await prisma_1.prisma.balanceSnapshot.findMany({
+        where: { snapshotDate: latestDate, balanceType: { in: ["CASH", "BANK"] } },
+        select: {
+            id: true,
+            balanceType: true,
+            amount: true,
+            label: true,
+            snapshotDate: true,
         },
     });
-    return res.status(201).json(tx);
-});
-// PUT /api/finance/transactions/:id
-router.put("/transactions/:id", (0, checkRole_1.checkRole)(["ACCOUNTANT", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.updateFinanceSchema), async (req, res) => {
-    const payload = req.body;
-    const normalizedDate = coerceDate(payload.date);
-    if (!normalizedDate) {
-        return res.status(400).json({ message: "Invalid transaction date" });
-    }
-    const id = Number(req.params.id);
-    const tx = await prisma_1.prisma.financeTransaction.update({
-        where: { id },
-        data: {
-            amount: payload.amount,
-            type: payload.type,
-            category: payload.category,
-            description: payload.description,
-            date: normalizedDate,
-            documentUrl: payload.documentUrl,
-            source: payload.source,
-            clubId: normalizeClubId(payload.clubId),
-        },
+    return res.json({
+        snapshotDate: latestDate,
+        balances: snapshots.map((s) => ({
+            type: s.balanceType,
+            amount: Number(s.amount),
+            label: s.label,
+        })),
     });
-    return res.json(tx);
 });
-// DELETE /api/finance/transactions/:id
-router.delete("/transactions/:id", (0, checkRole_1.checkRole)(["ACCOUNTANT", "ADMIN"]), async (req, res) => {
-    const id = Number(req.params.id);
-    if (Number.isNaN(id)) {
-        return res.status(400).json({ message: "Invalid id" });
+// =====================================================
+// DEBTORS — Топ-дебиторы (сальдо с контрагентами)
+// =====================================================
+// GET /api/finance/debtors
+router.get("/debtors", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.listDebtorsSchema), async (req, res) => {
+    const query = req.query;
+    const { skip, take } = (0, query_1.buildPagination)(query);
+    // Последняя дата снимка
+    const latestDate = await prisma_1.prisma.balanceSnapshot
+        .findFirst({
+        where: { balanceType: "CONTRACTOR_DEBT" },
+        orderBy: { snapshotDate: "desc" },
+        select: { snapshotDate: true },
+    })
+        .then((r) => r?.snapshotDate ?? null);
+    if (!latestDate) {
+        return res.json({ snapshotDate: null, items: [], total: 0 });
     }
-    try {
-        await prisma_1.prisma.financeTransaction.delete({ where: { id } });
-    }
-    catch (error) {
-        if (error?.code === "P2025") {
-            return res.status(204).send();
-        }
-        throw error;
-    }
-    return res.status(204).send();
+    const where = { snapshotDate: latestDate, balanceType: "CONTRACTOR_DEBT" };
+    const [items, total] = await Promise.all([
+        prisma_1.prisma.balanceSnapshot.findMany({
+            where,
+            skip,
+            take,
+            orderBy: { amount: "desc" },
+            include: {
+                contractor: { select: { id: true, name: true, inn: true } },
+            },
+        }),
+        prisma_1.prisma.balanceSnapshot.count({ where }),
+    ]);
+    return res.json({
+        snapshotDate: latestDate,
+        items: items.map((s) => ({
+            contractorId: s.contractorId,
+            contractorName: s.contractor?.name ?? s.label,
+            contractorInn: s.contractor?.inn,
+            amount: Number(s.amount),
+        })),
+        total,
+    });
 });
-// GET /api/finance/reports?period=month&category=CLUBS
+// GET /api/finance/reports?period=month&category=CLUBS&channel=CASH
 router.get("/reports", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.reportFinanceSchema), async (req, res) => {
-    const { period = "month", category } = req.query;
+    const { period = "month", category, channel } = req.query;
     const now = new Date();
     const start = period === "month"
         ? new Date(now.getFullYear(), now.getMonth(), 1)
@@ -122,6 +213,8 @@ router.get("/reports", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMI
     const where = { date: { gte: start } };
     if (category)
         where.category = String(category);
+    if (channel)
+        where.channel = String(channel);
     const grouped = await prisma_1.prisma.financeTransaction.groupBy({
         by: ["type", "category"],
         _sum: { amount: true },
@@ -131,11 +224,13 @@ router.get("/reports", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMI
 });
 // GET /api/finance/reports/summary - сводный отчет с группировкой
 router.get("/reports/summary", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.summaryFinanceSchema), async (req, res) => {
-    const { startDate, endDate, groupBy = "month" } = req.query;
+    const { startDate, endDate, groupBy = "month", channel } = req.query;
     const where = {};
     appendDateRange(where, startDate, endDate);
-    // Группировка по категории, типу, источнику
-    const [byCategory, byType, bySource] = await Promise.all([
+    if (channel)
+        where.channel = String(channel);
+    // Группировка по категории, типу, источнику, каналу
+    const [byCategory, byType, bySource, byChannel] = await Promise.all([
         prisma_1.prisma.financeTransaction.groupBy({
             by: ["category"],
             _sum: { amount: true },
@@ -150,6 +245,12 @@ router.get("/reports/summary", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY
         }),
         prisma_1.prisma.financeTransaction.groupBy({
             by: ["source"],
+            _sum: { amount: true },
+            _count: { id: true },
+            where,
+        }),
+        prisma_1.prisma.financeTransaction.groupBy({
+            by: ["channel"],
             _sum: { amount: true },
             _count: { id: true },
             where,
@@ -170,6 +271,7 @@ router.get("/reports/summary", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY
         byCategory,
         byType,
         bySource,
+        byChannel,
     });
 });
 // GET /api/finance/export - экспорт в CSV
@@ -182,14 +284,20 @@ router.get("/export", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN
         orderBy: { date: "desc" },
         include: {
             club: { select: { name: true } },
+            contractor: { select: { name: true } },
+            person: { select: { name: true } },
+            cashFlowArticle: { select: { name: true } },
         },
     });
     // Формируем CSV
-    const header = "ID,Дата,Тип,Категория,Источник,Сумма,Описание,Кружок\n";
+    const header = "ID,Дата,Тип,Категория,Канал,Источник,Номер документа,Сумма,Описание,Контрагент,Физлицо,Статья ДДС,Кружок\n";
     const rows = transactions.map((t) => {
         const date = new Date(t.date).toISOString().split("T")[0];
         const club = t.club?.name || "";
-        return `${t.id},${date},${t.type},${t.category},${t.source || ""},${t.amount},"${t.description || ""}","${club}"`;
+        const contractor = t.contractor?.name || "";
+        const person = t.person?.name || "";
+        const article = t.cashFlowArticle?.name || "";
+        return `${t.id},${date},${t.type},${t.category},${t.channel || ""},${t.source || ""},${t.documentNumber || ""},${t.amount},"${t.description || ""}","${contractor}","${person}","${article}","${club}"`;
     }).join("\n");
     const csv = header + rows;
     res.setHeader("Content-Type", "text/csv; charset=utf-8");

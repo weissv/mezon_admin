@@ -10,7 +10,7 @@ import ChildDetailPage from "../pages/ChildDetailPage";
 import EmployeesPage from "../pages/EmployeesPage";
 import ClubsPage from "../pages/ClubsPage";
 import AttendancePage from "../pages/AttendancePage";
-import FinancePage from "../pages/FinancePage";
+import FinancePage from "../pages/Finance";
 import InventoryPage from "../pages/InventoryPage";
 import MenuPage from "../pages/MenuPage";
 import MaintenancePage from "../pages/MaintenancePage";

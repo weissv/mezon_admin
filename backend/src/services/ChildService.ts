@@ -279,12 +279,19 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
   async delete(id: number): Promise<void> {
     const numericId = this.validateNumericId(id);
 
-    // Delete LMS records first
-    await this.prisma.lmsSchoolStudent.deleteMany({ where: { studentId: numericId } });
-
-    await this.safeQuery(() =>
-      this.prisma.child.delete({ where: { id: numericId } })
-    );
+    // Delete all related records to avoid foreign key constraint errors
+    await this.safeQuery(async () => {
+      await this.prisma.$transaction([
+        this.prisma.lmsSchoolStudent.deleteMany({ where: { studentId: numericId } }),
+        this.prisma.clubEnrollment.deleteMany({ where: { childId: numericId } }),
+        this.prisma.attendance.deleteMany({ where: { childId: numericId } }),
+        this.prisma.document.deleteMany({ where: { childId: numericId } }),
+        this.prisma.temporaryAbsence.deleteMany({ where: { childId: numericId } }),
+        this.prisma.clubRating.deleteMany({ where: { childId: numericId } }),
+        this.prisma.parent.deleteMany({ where: { childId: numericId } })
+      ]);
+      await this.prisma.child.delete({ where: { id: numericId } });
+    });
   }
 
   // --- Absence management ---
