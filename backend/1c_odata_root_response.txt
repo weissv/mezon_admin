@@ -1,0 +1,5609 @@
+{
+"odata.metadata": "http://100.66.251.128/mezon_db/odata/standard.odata",
+"value": [
+{
+"name": "InformationRegister_ПлановыеАвансы",
+"url": "InformationRegister_ПлановыеАвансы"
+},
+{
+"name": "InformationRegister_ПлановыеАвансы_RecordType",
+"url": "InformationRegister_ПлановыеАвансы_RecordType"
+},
+{
+"name": "AccumulationRegister_РеализацияУслуг",
+"url": "AccumulationRegister_РеализацияУслуг"
+},
+{
+"name": "AccumulationRegister_РеализацияУслуг_RecordType",
+"url": "AccumulationRegister_РеализацияУслуг_RecordType"
+},
+{
+"name": "AccumulationRegister_ИмущественныеВычетыНДФЛ",
+"url": "AccumulationRegister_ИмущественныеВычетыНДФЛ"
+},
+{
+"name": "AccumulationRegister_ИмущественныеВычетыНДФЛ_RecordType",
+"url": "AccumulationRegister_ИмущественныеВычетыНДФЛ_RecordType"
+},
+{
+"name": "AccumulationRegister_ДанныеОперативногоУчетаРабочегоВремениСотрудников",
+"url": "AccumulationRegister_ДанныеОперативногоУчетаРабочегоВремениСотрудников"
+},
+{
+"name": "AccumulationRegister_ДанныеОперативногоУчетаРабочегоВремениСотрудников_RecordType",
+"url": "AccumulationRegister_ДанныеОперативногоУчетаРабочегоВремениСотрудников_RecordType"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументы",
+"url": "AccumulationRegister_ПроездныеДокументы"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументы_RecordType",
+"url": "AccumulationRegister_ПроездныеДокументы_RecordType"
+},
+{
+"name": "InformationRegister_ФинансовыйИнструментПервоначальныеСведения",
+"url": "InformationRegister_ФинансовыйИнструментПервоначальныеСведения"
+},
+{
+"name": "InformationRegister_ФинансовыйИнструментПервоначальныеСведения_RecordType",
+"url": "InformationRegister_ФинансовыйИнструментПервоначальныеСведения_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСсАвансов",
+"url": "AccumulationRegister_НДСсАвансов"
+},
+{
+"name": "AccumulationRegister_НДСсАвансов_RecordType",
+"url": "AccumulationRegister_НДСсАвансов_RecordType"
+},
+{
+"name": "AccumulationRegister_ОтработанноеВремяПоСотрудникам",
+"url": "AccumulationRegister_ОтработанноеВремяПоСотрудникам"
+},
+{
+"name": "AccumulationRegister_ОтработанноеВремяПоСотрудникам_RecordType",
+"url": "AccumulationRegister_ОтработанноеВремяПоСотрудникам_RecordType"
+},
+{
+"name": "InformationRegister_РасчетПереоценкиВалютныхСредств",
+"url": "InformationRegister_РасчетПереоценкиВалютныхСредств"
+},
+{
+"name": "InformationRegister_РасчетПереоценкиВалютныхСредств_RecordType",
+"url": "InformationRegister_РасчетПереоценкиВалютныхСредств_RecordType"
+},
+{
+"name": "AccumulationRegister_УНДСПрочиеДоходы",
+"url": "AccumulationRegister_УНДСПрочиеДоходы"
+},
+{
+"name": "AccumulationRegister_УНДСПрочиеДоходы_RecordType",
+"url": "AccumulationRegister_УНДСПрочиеДоходы_RecordType"
+},
+{
+"name": "InformationRegister_СостоянияНМАОрганизаций",
+"url": "InformationRegister_СостоянияНМАОрганизаций"
+},
+{
+"name": "InformationRegister_СостоянияНМАОрганизаций_RecordType",
+"url": "InformationRegister_СостоянияНМАОрганизаций_RecordType"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументыКОтражению",
+"url": "AccumulationRegister_ПроездныеДокументыКОтражению"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументыКОтражению_RecordType",
+"url": "AccumulationRegister_ПроездныеДокументыКОтражению_RecordType"
+},
+{
+"name": "InformationRegister_ПлановыеНачисления",
+"url": "InformationRegister_ПлановыеНачисления"
+},
+{
+"name": "InformationRegister_ПлановыеНачисления_RecordType",
+"url": "InformationRegister_ПлановыеНачисления_RecordType"
+},
+{
+"name": "InformationRegister_РасчетРаспределенияКосвенныхРасходов",
+"url": "InformationRegister_РасчетРаспределенияКосвенныхРасходов"
+},
+{
+"name": "InformationRegister_РасчетРаспределенияКосвенныхРасходов_RecordType",
+"url": "InformationRegister_РасчетРаспределенияКосвенныхРасходов_RecordType"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументыОплаты",
+"url": "AccumulationRegister_ПроездныеДокументыОплаты"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументыОплаты_RecordType",
+"url": "AccumulationRegister_ПроездныеДокументыОплаты_RecordType"
+},
+{
+"name": "InformationRegister_СпособыОтраженияРасходовПоАмортизацииОСБухгалтерскийУчет",
+"url": "InformationRegister_СпособыОтраженияРасходовПоАмортизацииОСБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_СпособыОтраженияРасходовПоАмортизацииОСБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_СпособыОтраженияРасходовПоАмортизацииОСБухгалтерскийУчет_RecordType"
+},
+{
+"name": "InformationRegister_ПервоначальныеСведенияОСНалоговыйУчет",
+"url": "InformationRegister_ПервоначальныеСведенияОСНалоговыйУчет"
+},
+{
+"name": "InformationRegister_ПервоначальныеСведенияОСНалоговыйУчет_RecordType",
+"url": "InformationRegister_ПервоначальныеСведенияОСНалоговыйУчет_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСКосвенныеРасходы",
+"url": "AccumulationRegister_НДСКосвенныеРасходы"
+},
+{
+"name": "AccumulationRegister_НДСКосвенныеРасходы_RecordType",
+"url": "AccumulationRegister_НДСКосвенныеРасходы_RecordType"
+},
+{
+"name": "AccumulationRegister_СведенияОНачисленияПоДивидендам",
+"url": "AccumulationRegister_СведенияОНачисленияПоДивидендам"
+},
+{
+"name": "AccumulationRegister_СведенияОНачисленияПоДивидендам_RecordType",
+"url": "AccumulationRegister_СведенияОНачисленияПоДивидендам_RecordType"
+},
+{
+"name": "InformationRegister_ФинансовыйИнструментГрафикРасчета",
+"url": "InformationRegister_ФинансовыйИнструментГрафикРасчета"
+},
+{
+"name": "InformationRegister_ФинансовыйИнструментГрафикРасчета_RecordType",
+"url": "InformationRegister_ФинансовыйИнструментГрафикРасчета_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьЕСНСведенияОДоходах",
+"url": "AccumulationRegister_УдалитьЕСНСведенияОДоходах"
+},
+{
+"name": "AccumulationRegister_УдалитьЕСНСведенияОДоходах_RecordType",
+"url": "AccumulationRegister_УдалитьЕСНСведенияОДоходах_RecordType"
+},
+{
+"name": "AccumulationRegister_РасчетыНалоговыхАгентовСБюджетомПоНДФЛ",
+"url": "AccumulationRegister_РасчетыНалоговыхАгентовСБюджетомПоНДФЛ"
+},
+{
+"name": "AccumulationRegister_РасчетыНалоговыхАгентовСБюджетомПоНДФЛ_RecordType",
+"url": "AccumulationRegister_РасчетыНалоговыхАгентовСБюджетомПоНДФЛ_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛИмущественныеВычетыФизлиц",
+"url": "AccumulationRegister_УдалитьНДФЛИмущественныеВычетыФизлиц"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛИмущественныеВычетыФизлиц_RecordType",
+"url": "AccumulationRegister_УдалитьНДФЛИмущественныеВычетыФизлиц_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьРасчетыПоСтраховымВзносам",
+"url": "AccumulationRegister_УдалитьРасчетыПоСтраховымВзносам"
+},
+{
+"name": "AccumulationRegister_УдалитьРасчетыПоСтраховымВзносам_RecordType",
+"url": "AccumulationRegister_УдалитьРасчетыПоСтраховымВзносам_RecordType"
+},
+{
+"name": "AccumulationRegister_РасходыУменьшающиеНалогПоОтдельнымРежимам",
+"url": "AccumulationRegister_РасходыУменьшающиеНалогПоОтдельнымРежимам"
+},
+{
+"name": "AccumulationRegister_РасходыУменьшающиеНалогПоОтдельнымРежимам_RecordType",
+"url": "AccumulationRegister_РасходыУменьшающиеНалогПоОтдельнымРежимам_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСРеестрИсходящихСчетовФактур",
+"url": "AccumulationRegister_НДСРеестрИсходящихСчетовФактур"
+},
+{
+"name": "AccumulationRegister_НДСРеестрИсходящихСчетовФактур_RecordType",
+"url": "AccumulationRegister_НДСРеестрИсходящихСчетовФактур_RecordType"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументыСборы",
+"url": "AccumulationRegister_ПроездныеДокументыСборы"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументыСборы_RecordType",
+"url": "AccumulationRegister_ПроездныеДокументыСборы_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьПособияПоУходуЗаРебенкомДоПолутораЛет",
+"url": "AccumulationRegister_УдалитьПособияПоУходуЗаРебенкомДоПолутораЛет"
+},
+{
+"name": "AccumulationRegister_УдалитьПособияПоУходуЗаРебенкомДоПолутораЛет_RecordType",
+"url": "AccumulationRegister_УдалитьПособияПоУходуЗаРебенкомДоПолутораЛет_RecordType"
+},
+{
+"name": "InformationRegister_РасчетТранспортногоНалога",
+"url": "InformationRegister_РасчетТранспортногоНалога"
+},
+{
+"name": "InformationRegister_РасчетТранспортногоНалога_RecordType",
+"url": "InformationRegister_РасчетТранспортногоНалога_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСсНерезидентов",
+"url": "AccumulationRegister_НДСсНерезидентов"
+},
+{
+"name": "AccumulationRegister_НДСсНерезидентов_RecordType",
+"url": "AccumulationRegister_НДСсНерезидентов_RecordType"
+},
+{
+"name": "InformationRegister_НачислениеАмортизацииОСНалоговыйУчет",
+"url": "InformationRegister_НачислениеАмортизацииОСНалоговыйУчет"
+},
+{
+"name": "InformationRegister_НачислениеАмортизацииОСНалоговыйУчет_RecordType",
+"url": "InformationRegister_НачислениеАмортизацииОСНалоговыйУчет_RecordType"
+},
+{
+"name": "InformationRegister_РасчетСебестоимостиПродукции",
+"url": "InformationRegister_РасчетСебестоимостиПродукции"
+},
+{
+"name": "InformationRegister_РасчетСебестоимостиПродукции_RecordType",
+"url": "InformationRegister_РасчетСебестоимостиПродукции_RecordType"
+},
+{
+"name": "AccumulationRegister_ПеренесенныеНачисленияПоСдельнымНачислениям",
+"url": "AccumulationRegister_ПеренесенныеНачисленияПоСдельнымНачислениям"
+},
+{
+"name": "AccumulationRegister_ПеренесенныеНачисленияПоСдельнымНачислениям_RecordType",
+"url": "AccumulationRegister_ПеренесенныеНачисленияПоСдельнымНачислениям_RecordType"
+},
+{
+"name": "AccumulationRegister_ОСНПрочиеДоходы",
+"url": "AccumulationRegister_ОСНПрочиеДоходы"
+},
+{
+"name": "AccumulationRegister_ОСНПрочиеДоходы_RecordType",
+"url": "AccumulationRegister_ОСНПрочиеДоходы_RecordType"
+},
+{
+"name": "AccumulationRegister_ЗакупленныеТоварыКомитентов",
+"url": "AccumulationRegister_ЗакупленныеТоварыКомитентов"
+},
+{
+"name": "AccumulationRegister_ЗакупленныеТоварыКомитентов_RecordType",
+"url": "AccumulationRegister_ЗакупленныеТоварыКомитентов_RecordType"
+},
+{
+"name": "InformationRegister_РасчетПорядкаПеределов",
+"url": "InformationRegister_РасчетПорядкаПеределов"
+},
+{
+"name": "InformationRegister_РасчетПорядкаПеределов_RecordType",
+"url": "InformationRegister_РасчетПорядкаПеределов_RecordType"
+},
+{
+"name": "AccumulationRegister_НачисленияСреднегоЗаработкаПоСотрудникам",
+"url": "AccumulationRegister_НачисленияСреднегоЗаработкаПоСотрудникам"
+},
+{
+"name": "AccumulationRegister_НачисленияСреднегоЗаработкаПоСотрудникам_RecordType",
+"url": "AccumulationRegister_НачисленияСреднегоЗаработкаПоСотрудникам_RecordType"
+},
+{
+"name": "InformationRegister_СчетаБухгалтерскогоУчетаОС",
+"url": "InformationRegister_СчетаБухгалтерскогоУчетаОС"
+},
+{
+"name": "InformationRegister_СчетаБухгалтерскогоУчетаОС_RecordType",
+"url": "InformationRegister_СчетаБухгалтерскогоУчетаОС_RecordType"
+},
+{
+"name": "AccumulationRegister_СведенияОДоходахСтраховыеВзносы",
+"url": "AccumulationRegister_СведенияОДоходахСтраховыеВзносы"
+},
+{
+"name": "AccumulationRegister_СведенияОДоходахСтраховыеВзносы_RecordType",
+"url": "AccumulationRegister_СведенияОДоходахСтраховыеВзносы_RecordType"
+},
+{
+"name": "InformationRegister_РасчетСтоимостиНалоговыхАктивовИОбязательствПослеИзмененияСтавкиНалогаНаПрибыль",
+"url": "InformationRegister_РасчетСтоимостиНалоговыхАктивовИОбязательствПослеИзмененияСтавкиНалогаНаПрибыль"
+},
+{
+"name": "InformationRegister_РасчетСтоимостиНалоговыхАктивовИОбязательствПослеИзмененияСтавкиНалогаНаПрибыль_RecordType",
+"url": "InformationRegister_РасчетСтоимостиНалоговыхАктивовИОбязательствПослеИзмененияСтавкиНалогаНаПрибыль_RecordType"
+},
+{
+"name": "InformationRegister_ПервоначальныеСведенияНМАБухгалтерскийУчет",
+"url": "InformationRegister_ПервоначальныеСведенияНМАБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_ПервоначальныеСведенияНМАБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_ПервоначальныеСведенияНМАБухгалтерскийУчет_RecordType"
+},
+{
+"name": "InformationRegister_ПрименениеСтандартныхВычетовПоНДФЛ",
+"url": "InformationRegister_ПрименениеСтандартныхВычетовПоНДФЛ"
+},
+{
+"name": "InformationRegister_ПрименениеСтандартныхВычетовПоНДФЛ_RecordType",
+"url": "InformationRegister_ПрименениеСтандартныхВычетовПоНДФЛ_RecordType"
+},
+{
+"name": "InformationRegister_АктивВФормеПраваПервоначальныеСведения",
+"url": "InformationRegister_АктивВФормеПраваПервоначальныеСведения"
+},
+{
+"name": "InformationRegister_АктивВФормеПраваПервоначальныеСведения_RecordType",
+"url": "InformationRegister_АктивВФормеПраваПервоначальныеСведения_RecordType"
+},
+{
+"name": "InformationRegister_РасчетТорговойНаценкиАТТ",
+"url": "InformationRegister_РасчетТорговойНаценкиАТТ"
+},
+{
+"name": "InformationRegister_РасчетТорговойНаценкиАТТ_RecordType",
+"url": "InformationRegister_РасчетТорговойНаценкиАТТ_RecordType"
+},
+{
+"name": "InformationRegister_СтандартныеВычетыФизическихЛицНДФЛ",
+"url": "InformationRegister_СтандартныеВычетыФизическихЛицНДФЛ"
+},
+{
+"name": "InformationRegister_СтандартныеВычетыФизическихЛицНДФЛ_RecordType",
+"url": "InformationRegister_СтандартныеВычетыФизическихЛицНДФЛ_RecordType"
+},
+{
+"name": "InformationRegister_НачислениеАмортизацииНМАСпециальныйКоэффициентНалоговыйУчет",
+"url": "InformationRegister_НачислениеАмортизацииНМАСпециальныйКоэффициентНалоговыйУчет"
+},
+{
+"name": "InformationRegister_НачислениеАмортизацииНМАСпециальныйКоэффициентНалоговыйУчет_RecordType",
+"url": "InformationRegister_НачислениеАмортизацииНМАСпециальныйКоэффициентНалоговыйУчет_RecordType"
+},
+{
+"name": "AccumulationRegister_ВыработкаНМА",
+"url": "AccumulationRegister_ВыработкаНМА"
+},
+{
+"name": "AccumulationRegister_ВыработкаНМА_RecordType",
+"url": "AccumulationRegister_ВыработкаНМА_RecordType"
+},
+{
+"name": "AccumulationRegister_УплатаНДФЛНалоговымиАгентамиКРаспределению",
+"url": "AccumulationRegister_УплатаНДФЛНалоговымиАгентамиКРаспределению"
+},
+{
+"name": "AccumulationRegister_УплатаНДФЛНалоговымиАгентамиКРаспределению_RecordType",
+"url": "AccumulationRegister_УплатаНДФЛНалоговымиАгентамиКРаспределению_RecordType"
+},
+{
+"name": "InformationRegister_УсловияУдержанияПоИсполнительномуДокументу",
+"url": "InformationRegister_УсловияУдержанияПоИсполнительномуДокументу"
+},
+{
+"name": "InformationRegister_УсловияУдержанияПоИсполнительномуДокументу_RecordType",
+"url": "InformationRegister_УсловияУдержанияПоИсполнительномуДокументу_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьСтраховыеВзносыСведенияОДоходах",
+"url": "AccumulationRegister_УдалитьСтраховыеВзносыСведенияОДоходах"
+},
+{
+"name": "AccumulationRegister_УдалитьСтраховыеВзносыСведенияОДоходах_RecordType",
+"url": "AccumulationRegister_УдалитьСтраховыеВзносыСведенияОДоходах_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСРаздельныйУчет",
+"url": "AccumulationRegister_НДСРаздельныйУчет"
+},
+{
+"name": "AccumulationRegister_НДСРаздельныйУчет_RecordType",
+"url": "AccumulationRegister_НДСРаздельныйУчет_RecordType"
+},
+{
+"name": "AccumulationRegister_ДанныеОВыплатеДивидендов",
+"url": "AccumulationRegister_ДанныеОВыплатеДивидендов"
+},
+{
+"name": "AccumulationRegister_ДанныеОВыплатеДивидендов_RecordType",
+"url": "AccumulationRegister_ДанныеОВыплатеДивидендов_RecordType"
+},
+{
+"name": "AccumulationRegister_ЗарплатаКВыплате",
+"url": "AccumulationRegister_ЗарплатаКВыплате"
+},
+{
+"name": "AccumulationRegister_ЗарплатаКВыплате_RecordType",
+"url": "AccumulationRegister_ЗарплатаКВыплате_RecordType"
+},
+{
+"name": "InformationRegister_ГрафикиАмортизацииОСБухгалтерскийУчет",
+"url": "InformationRegister_ГрафикиАмортизацииОСБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_ГрафикиАмортизацииОСБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_ГрафикиАмортизацииОСБухгалтерскийУчет_RecordType"
+},
+{
+"name": "AccumulationRegister_ОценочныеОбязательстваПоСотрудникам",
+"url": "AccumulationRegister_ОценочныеОбязательстваПоСотрудникам"
+},
+{
+"name": "AccumulationRegister_ОценочныеОбязательстваПоСотрудникам_RecordType",
+"url": "AccumulationRegister_ОценочныеОбязательстваПоСотрудникам_RecordType"
+},
+{
+"name": "InformationRegister_СчетаБухгалтерскогоУчетаНМА",
+"url": "InformationRegister_СчетаБухгалтерскогоУчетаНМА"
+},
+{
+"name": "InformationRegister_СчетаБухгалтерскогоУчетаНМА_RecordType",
+"url": "InformationRegister_СчетаБухгалтерскогоУчетаНМА_RecordType"
+},
+{
+"name": "InformationRegister_СостоянияОСОрганизаций",
+"url": "InformationRegister_СостоянияОСОрганизаций"
+},
+{
+"name": "InformationRegister_СостоянияОСОрганизаций_RecordType",
+"url": "InformationRegister_СостоянияОСОрганизаций_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьОСНДоходы",
+"url": "AccumulationRegister_УдалитьОСНДоходы"
+},
+{
+"name": "AccumulationRegister_УдалитьОСНДоходы_RecordType",
+"url": "AccumulationRegister_УдалитьОСНДоходы_RecordType"
+},
+{
+"name": "InformationRegister_РасчетСтавкиНалогаНаПрибыльЗаМесяц",
+"url": "InformationRegister_РасчетСтавкиНалогаНаПрибыльЗаМесяц"
+},
+{
+"name": "InformationRegister_РасчетСтавкиНалогаНаПрибыльЗаМесяц_RecordType",
+"url": "InformationRegister_РасчетСтавкиНалогаНаПрибыльЗаМесяц_RecordType"
+},
+{
+"name": "InformationRegister_ОплаченныеВедомостиПоЗарплате",
+"url": "InformationRegister_ОплаченныеВедомостиПоЗарплате"
+},
+{
+"name": "InformationRegister_ОплаченныеВедомостиПоЗарплате_RecordType",
+"url": "InformationRegister_ОплаченныеВедомостиПоЗарплате_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСНеоблагаемыеОперации",
+"url": "AccumulationRegister_НДСНеоблагаемыеОперации"
+},
+{
+"name": "AccumulationRegister_НДСНеоблагаемыеОперации_RecordType",
+"url": "AccumulationRegister_НДСНеоблагаемыеОперации_RecordType"
+},
+{
+"name": "AccumulationRegister_ИспользованиеДавальческогоСырья",
+"url": "AccumulationRegister_ИспользованиеДавальческогоСырья"
+},
+{
+"name": "AccumulationRegister_ИспользованиеДавальческогоСырья_RecordType",
+"url": "AccumulationRegister_ИспользованиеДавальческогоСырья_RecordType"
+},
+{
+"name": "AccumulationRegister_ВзаиморасчетыССотрудниками",
+"url": "AccumulationRegister_ВзаиморасчетыССотрудниками"
+},
+{
+"name": "AccumulationRegister_ВзаиморасчетыССотрудниками_RecordType",
+"url": "AccumulationRegister_ВзаиморасчетыССотрудниками_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСПредъявленный",
+"url": "AccumulationRegister_НДСПредъявленный"
+},
+{
+"name": "AccumulationRegister_НДСПредъявленный_RecordType",
+"url": "AccumulationRegister_НДСПредъявленный_RecordType"
+},
+{
+"name": "InformationRegister_ПараметрыАмортизацииОСНалоговыйУчет",
+"url": "InformationRegister_ПараметрыАмортизацииОСНалоговыйУчет"
+},
+{
+"name": "InformationRegister_ПараметрыАмортизацииОСНалоговыйУчет_RecordType",
+"url": "InformationRegister_ПараметрыАмортизацииОСНалоговыйУчет_RecordType"
+},
+{
+"name": "InformationRegister_РасчетНалогаНаИмущество",
+"url": "InformationRegister_РасчетНалогаНаИмущество"
+},
+{
+"name": "InformationRegister_РасчетНалогаНаИмущество_RecordType",
+"url": "InformationRegister_РасчетНалогаНаИмущество_RecordType"
+},
+{
+"name": "InformationRegister_РасчетСписанияРБП",
+"url": "InformationRegister_РасчетСписанияРБП"
+},
+{
+"name": "InformationRegister_РасчетСписанияРБП_RecordType",
+"url": "InformationRegister_РасчетСписанияРБП_RecordType"
+},
+{
+"name": "InformationRegister_РасчетТорговойНаценкиНТТ",
+"url": "InformationRegister_РасчетТорговойНаценкиНТТ"
+},
+{
+"name": "InformationRegister_РасчетТорговойНаценкиНТТ_RecordType",
+"url": "InformationRegister_РасчетТорговойНаценкиНТТ_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСПредъявленныйРеализация0",
+"url": "AccumulationRegister_НДСПредъявленныйРеализация0"
+},
+{
+"name": "AccumulationRegister_НДСПредъявленныйРеализация0_RecordType",
+"url": "AccumulationRegister_НДСПредъявленныйРеализация0_RecordType"
+},
+{
+"name": "InformationRegister_ОшибочныеРеквизитыКонтрагентов",
+"url": "InformationRegister_ОшибочныеРеквизитыКонтрагентов"
+},
+{
+"name": "InformationRegister_ОшибочныеРеквизитыКонтрагентов_RecordType",
+"url": "InformationRegister_ОшибочныеРеквизитыКонтрагентов_RecordType"
+},
+{
+"name": "AccumulationRegister_ВыпускПродукцииУслуг",
+"url": "AccumulationRegister_ВыпускПродукцииУслуг"
+},
+{
+"name": "AccumulationRegister_ВыпускПродукцииУслуг_RecordType",
+"url": "AccumulationRegister_ВыпускПродукцииУслуг_RecordType"
+},
+{
+"name": "InformationRegister_РасчетРазницВОценкеАктивовИОбязательств",
+"url": "InformationRegister_РасчетРазницВОценкеАктивовИОбязательств"
+},
+{
+"name": "InformationRegister_РасчетРазницВОценкеАктивовИОбязательств_RecordType",
+"url": "InformationRegister_РасчетРазницВОценкеАктивовИОбязательств_RecordType"
+},
+{
+"name": "InformationRegister_КадроваяИсторияСотрудников",
+"url": "InformationRegister_КадроваяИсторияСотрудников"
+},
+{
+"name": "InformationRegister_КадроваяИсторияСотрудников_RecordType",
+"url": "InformationRegister_КадроваяИсторияСотрудников_RecordType"
+},
+{
+"name": "InformationRegister_РасчетСтоимостиНалоговыхАктивовИОбязательств",
+"url": "InformationRegister_РасчетСтоимостиНалоговыхАктивовИОбязательств"
+},
+{
+"name": "InformationRegister_РасчетСтоимостиНалоговыхАктивовИОбязательств_RecordType",
+"url": "InformationRegister_РасчетСтоимостиНалоговыхАктивовИОбязательств_RecordType"
+},
+{
+"name": "InformationRegister_ЗначенияПериодическихПоказателейРасчетаЗарплатыСотрудников",
+"url": "InformationRegister_ЗначенияПериодическихПоказателейРасчетаЗарплатыСотрудников"
+},
+{
+"name": "InformationRegister_ЗначенияПериодическихПоказателейРасчетаЗарплатыСотрудников_RecordType",
+"url": "InformationRegister_ЗначенияПериодическихПоказателейРасчетаЗарплатыСотрудников_RecordType"
+},
+{
+"name": "InformationRegister_СтандартныеВычетыНаДетейНДФЛ",
+"url": "InformationRegister_СтандартныеВычетыНаДетейНДФЛ"
+},
+{
+"name": "InformationRegister_СтандартныеВычетыНаДетейНДФЛ_RecordType",
+"url": "InformationRegister_СтандартныеВычетыНаДетейНДФЛ_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛРасчетыСБюджетом",
+"url": "AccumulationRegister_УдалитьНДФЛРасчетыСБюджетом"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛРасчетыСБюджетом_RecordType",
+"url": "AccumulationRegister_УдалитьНДФЛРасчетыСБюджетом_RecordType"
+},
+{
+"name": "InformationRegister_ОтдельноеОтражениеЗарплатыВРеглУчете",
+"url": "InformationRegister_ОтдельноеОтражениеЗарплатыВРеглУчете"
+},
+{
+"name": "InformationRegister_ОтдельноеОтражениеЗарплатыВРеглУчете_RecordType",
+"url": "InformationRegister_ОтдельноеОтражениеЗарплатыВРеглУчете_RecordType"
+},
+{
+"name": "AccumulationRegister_РасчетыНалогоплательщиковСБюджетомПоНДФЛ",
+"url": "AccumulationRegister_РасчетыНалогоплательщиковСБюджетомПоНДФЛ"
+},
+{
+"name": "AccumulationRegister_РасчетыНалогоплательщиковСБюджетомПоНДФЛ_RecordType",
+"url": "AccumulationRegister_РасчетыНалогоплательщиковСБюджетомПоНДФЛ_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьПособияСоциальномуСтрахованию",
+"url": "AccumulationRegister_УдалитьПособияСоциальномуСтрахованию"
+},
+{
+"name": "AccumulationRegister_УдалитьПособияСоциальномуСтрахованию_RecordType",
+"url": "AccumulationRegister_УдалитьПособияСоциальномуСтрахованию_RecordType"
+},
+{
+"name": "AccumulationRegister_РасчетыСФондамиПоСтраховымВзносам",
+"url": "AccumulationRegister_РасчетыСФондамиПоСтраховымВзносам"
+},
+{
+"name": "AccumulationRegister_РасчетыСФондамиПоСтраховымВзносам_RecordType",
+"url": "AccumulationRegister_РасчетыСФондамиПоСтраховымВзносам_RecordType"
+},
+{
+"name": "InformationRegister_ПредоставленныеОтпускаПоОтработаннымПериодам",
+"url": "InformationRegister_ПредоставленныеОтпускаПоОтработаннымПериодам"
+},
+{
+"name": "InformationRegister_ПредоставленныеОтпускаПоОтработаннымПериодам_RecordType",
+"url": "InformationRegister_ПредоставленныеОтпускаПоОтработаннымПериодам_RecordType"
+},
+{
+"name": "InformationRegister_РасчетРезервовПоСомнительнымДолгам",
+"url": "InformationRegister_РасчетРезервовПоСомнительнымДолгам"
+},
+{
+"name": "InformationRegister_РасчетРезервовПоСомнительнымДолгам_RecordType",
+"url": "InformationRegister_РасчетРезервовПоСомнительнымДолгам_RecordType"
+},
+{
+"name": "InformationRegister_ПараметрыАмортизацииОСБухгалтерскийУчет",
+"url": "InformationRegister_ПараметрыАмортизацииОСБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_ПараметрыАмортизацииОСБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_ПараметрыАмортизацииОСБухгалтерскийУчет_RecordType"
+},
+{
+"name": "InformationRegister_РасчетКалькуляцииСебестоимости",
+"url": "InformationRegister_РасчетКалькуляцииСебестоимости"
+},
+{
+"name": "InformationRegister_РасчетКалькуляцииСебестоимости_RecordType",
+"url": "InformationRegister_РасчетКалькуляцииСебестоимости_RecordType"
+},
+{
+"name": "AccumulationRegister_ЗарплатаКВыплатеАвансом",
+"url": "AccumulationRegister_ЗарплатаКВыплатеАвансом"
+},
+{
+"name": "AccumulationRegister_ЗарплатаКВыплатеАвансом_RecordType",
+"url": "AccumulationRegister_ЗарплатаКВыплатеАвансом_RecordType"
+},
+{
+"name": "AccumulationRegister_ПособияПоУходуЗаРебенком",
+"url": "AccumulationRegister_ПособияПоУходуЗаРебенком"
+},
+{
+"name": "AccumulationRegister_ПособияПоУходуЗаРебенком_RecordType",
+"url": "AccumulationRegister_ПособияПоУходуЗаРебенком_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСОплатаРеализацииНаЭкспорт",
+"url": "AccumulationRegister_НДСОплатаРеализацииНаЭкспорт"
+},
+{
+"name": "AccumulationRegister_НДСОплатаРеализацииНаЭкспорт_RecordType",
+"url": "AccumulationRegister_НДСОплатаРеализацииНаЭкспорт_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСПоПриобретеннымЦенностям",
+"url": "AccumulationRegister_НДСПоПриобретеннымЦенностям"
+},
+{
+"name": "AccumulationRegister_НДСПоПриобретеннымЦенностям_RecordType",
+"url": "AccumulationRegister_НДСПоПриобретеннымЦенностям_RecordType"
+},
+{
+"name": "AccumulationRegister_ИсчисленныеСтраховыеВзносы",
+"url": "AccumulationRegister_ИсчисленныеСтраховыеВзносы"
+},
+{
+"name": "AccumulationRegister_ИсчисленныеСтраховыеВзносы_RecordType",
+"url": "AccumulationRegister_ИсчисленныеСтраховыеВзносы_RecordType"
+},
+{
+"name": "InformationRegister_УдалитьЗаработкиПолучателейПособияПоУходуЗаРебенкомДоПолутораЛет",
+"url": "InformationRegister_УдалитьЗаработкиПолучателейПособияПоУходуЗаРебенкомДоПолутораЛет"
+},
+{
+"name": "InformationRegister_УдалитьЗаработкиПолучателейПособияПоУходуЗаРебенкомДоПолутораЛет_RecordType",
+"url": "InformationRegister_УдалитьЗаработкиПолучателейПособияПоУходуЗаРебенкомДоПолутораЛет_RecordType"
+},
+{
+"name": "InformationRegister_УдалитьЛицевыеСчетаРаботниковОрганизации",
+"url": "InformationRegister_УдалитьЛицевыеСчетаРаботниковОрганизации"
+},
+{
+"name": "InformationRegister_УдалитьЛицевыеСчетаРаботниковОрганизации_RecordType",
+"url": "InformationRegister_УдалитьЛицевыеСчетаРаботниковОрганизации_RecordType"
+},
+{
+"name": "InformationRegister_УдалитьСведенияОВыплатахРаботникамОрганизацийПоПлатежнымВедомостям",
+"url": "InformationRegister_УдалитьСведенияОВыплатахРаботникамОрганизацийПоПлатежнымВедомостям"
+},
+{
+"name": "InformationRegister_УдалитьСведенияОВыплатахРаботникамОрганизацийПоПлатежнымВедомостям_RecordType",
+"url": "InformationRegister_УдалитьСведенияОВыплатахРаботникамОрганизацийПоПлатежнымВедомостям_RecordType"
+},
+{
+"name": "InformationRegister_УдалитьСтандартныеВычетыНаДетейНДФЛ",
+"url": "InformationRegister_УдалитьСтандартныеВычетыНаДетейНДФЛ"
+},
+{
+"name": "InformationRegister_УдалитьСтандартныеВычетыНаДетейНДФЛ_RecordType",
+"url": "InformationRegister_УдалитьСтандартныеВычетыНаДетейНДФЛ_RecordType"
+},
+{
+"name": "InformationRegister_АмортизацияБУНачисляетсяСДатыВводаВЭксплуатацию",
+"url": "InformationRegister_АмортизацияБУНачисляетсяСДатыВводаВЭксплуатацию"
+},
+{
+"name": "InformationRegister_АмортизацияБУНачисляетсяСДатыВводаВЭксплуатацию_RecordType",
+"url": "InformationRegister_АмортизацияБУНачисляетсяСДатыВводаВЭксплуатацию_RecordType"
+},
+{
+"name": "InformationRegister_РасчетНалогаУСН",
+"url": "InformationRegister_РасчетНалогаУСН"
+},
+{
+"name": "InformationRegister_РасчетНалогаУСН_RecordType",
+"url": "InformationRegister_РасчетНалогаУСН_RecordType"
+},
+{
+"name": "InformationRegister_АрхивДанныхРегламентированнойОтчетности",
+"url": "InformationRegister_АрхивДанныхРегламентированнойОтчетности"
+},
+{
+"name": "InformationRegister_АрхивДанныхРегламентированнойОтчетности_RecordType",
+"url": "InformationRegister_АрхивДанныхРегламентированнойОтчетности_RecordType"
+},
+{
+"name": "InformationRegister_АктивВФормеПраваГрафикАмортизации",
+"url": "InformationRegister_АктивВФормеПраваГрафикАмортизации"
+},
+{
+"name": "InformationRegister_АктивВФормеПраваГрафикАмортизации_RecordType",
+"url": "InformationRegister_АктивВФормеПраваГрафикАмортизации_RecordType"
+},
+{
+"name": "InformationRegister_АктивВФормеПраваГрафикВыделенияТекущейЧастиОбязательства",
+"url": "InformationRegister_АктивВФормеПраваГрафикВыделенияТекущейЧастиОбязательства"
+},
+{
+"name": "InformationRegister_АктивВФормеПраваГрафикВыделенияТекущейЧастиОбязательства_RecordType",
+"url": "InformationRegister_АктивВФормеПраваГрафикВыделенияТекущейЧастиОбязательства_RecordType"
+},
+{
+"name": "InformationRegister_ГрафикРаботыСотрудников",
+"url": "InformationRegister_ГрафикРаботыСотрудников"
+},
+{
+"name": "InformationRegister_ГрафикРаботыСотрудников_RecordType",
+"url": "InformationRegister_ГрафикРаботыСотрудников_RecordType"
+},
+{
+"name": "InformationRegister_РасчетСписанияКосвенныхРасходов",
+"url": "InformationRegister_РасчетСписанияКосвенныхРасходов"
+},
+{
+"name": "InformationRegister_РасчетСписанияКосвенныхРасходов_RecordType",
+"url": "InformationRegister_РасчетСписанияКосвенныхРасходов_RecordType"
+},
+{
+"name": "InformationRegister_РасчетНормированияРасходов",
+"url": "InformationRegister_РасчетНормированияРасходов"
+},
+{
+"name": "InformationRegister_РасчетНормированияРасходов_RecordType",
+"url": "InformationRegister_РасчетНормированияРасходов_RecordType"
+},
+{
+"name": "InformationRegister_АктивВФормеПраваГрафикРасчета",
+"url": "InformationRegister_АктивВФормеПраваГрафикРасчета"
+},
+{
+"name": "InformationRegister_АктивВФормеПраваГрафикРасчета_RecordType",
+"url": "InformationRegister_АктивВФормеПраваГрафикРасчета_RecordType"
+},
+{
+"name": "InformationRegister_ДанныеСостоянийСотрудников",
+"url": "InformationRegister_ДанныеСостоянийСотрудников"
+},
+{
+"name": "InformationRegister_ДанныеСостоянийСотрудников_RecordType",
+"url": "InformationRegister_ДанныеСостоянийСотрудников_RecordType"
+},
+{
+"name": "InformationRegister_ДокументыПоНеоблагаемымНДСОперациям",
+"url": "InformationRegister_ДокументыПоНеоблагаемымНДСОперациям"
+},
+{
+"name": "InformationRegister_ДокументыПоНеоблагаемымНДСОперациям_RecordType",
+"url": "InformationRegister_ДокументыПоНеоблагаемымНДСОперациям_RecordType"
+},
+{
+"name": "InformationRegister_ДолиСписанияКосвенныхРасходов",
+"url": "InformationRegister_ДолиСписанияКосвенныхРасходов"
+},
+{
+"name": "InformationRegister_ДолиСписанияКосвенныхРасходов_RecordType",
+"url": "InformationRegister_ДолиСписанияКосвенныхРасходов_RecordType"
+},
+{
+"name": "InformationRegister_ЖурналУчетаСчетовФактур",
+"url": "InformationRegister_ЖурналУчетаСчетовФактур"
+},
+{
+"name": "InformationRegister_ЖурналУчетаСчетовФактур_RecordType",
+"url": "InformationRegister_ЖурналУчетаСчетовФактур_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛСведенияОДоходах",
+"url": "AccumulationRegister_УдалитьНДФЛСведенияОДоходах"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛСведенияОДоходах_RecordType",
+"url": "AccumulationRegister_УдалитьНДФЛСведенияОДоходах_RecordType"
+},
+{
+"name": "InformationRegister_ИмпортТоваровТаможенныйСоюз",
+"url": "InformationRegister_ИмпортТоваровТаможенныйСоюз"
+},
+{
+"name": "InformationRegister_ИмпортТоваровТаможенныйСоюз_RecordType",
+"url": "InformationRegister_ИмпортТоваровТаможенныйСоюз_RecordType"
+},
+{
+"name": "InformationRegister_МестонахождениеНМАБухгалтерскийУчет",
+"url": "InformationRegister_МестонахождениеНМАБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_МестонахождениеНМАБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_МестонахождениеНМАБухгалтерскийУчет_RecordType"
+},
+{
+"name": "InformationRegister_МестонахождениеОСБухгалтерскийУчет",
+"url": "InformationRegister_МестонахождениеОСБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_МестонахождениеОСБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_МестонахождениеОСБухгалтерскийУчет_RecordType"
+},
+{
+"name": "InformationRegister_НачислениеАмортизацииОСБухгалтерскийУчет",
+"url": "InformationRegister_НачислениеАмортизацииОСБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_НачислениеАмортизацииОСБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_НачислениеАмортизацииОСБухгалтерскийУчет_RecordType"
+},
+{
+"name": "InformationRegister_НеявкиСотрудников",
+"url": "InformationRegister_НеявкиСотрудников"
+},
+{
+"name": "InformationRegister_НеявкиСотрудников_RecordType",
+"url": "InformationRegister_НеявкиСотрудников_RecordType"
+},
+{
+"name": "InformationRegister_ОтмененныеНеявкиСотрудников",
+"url": "InformationRegister_ОтмененныеНеявкиСотрудников"
+},
+{
+"name": "InformationRegister_ОтмененныеНеявкиСотрудников_RecordType",
+"url": "InformationRegister_ОтмененныеНеявкиСотрудников_RecordType"
+},
+{
+"name": "InformationRegister_ПервоначальныеСведенияНМАНалоговыйУчет",
+"url": "InformationRegister_ПервоначальныеСведенияНМАНалоговыйУчет"
+},
+{
+"name": "InformationRegister_ПервоначальныеСведенияНМАНалоговыйУчет_RecordType",
+"url": "InformationRegister_ПервоначальныеСведенияНМАНалоговыйУчет_RecordType"
+},
+{
+"name": "InformationRegister_ПервоначальныеСведенияОСБухгалтерскийУчет",
+"url": "InformationRegister_ПервоначальныеСведенияОСБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_ПервоначальныеСведенияОСБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_ПервоначальныеСведенияОСБухгалтерскийУчет_RecordType"
+},
+{
+"name": "InformationRegister_ПериодыДляРезервовОтпусков",
+"url": "InformationRegister_ПериодыДляРезервовОтпусков"
+},
+{
+"name": "InformationRegister_ПериодыДляРезервовОтпусков_RecordType",
+"url": "InformationRegister_ПериодыДляРезервовОтпусков_RecordType"
+},
+{
+"name": "InformationRegister_ПлановыеУдержания",
+"url": "InformationRegister_ПлановыеУдержания"
+},
+{
+"name": "InformationRegister_ПлановыеУдержания_RecordType",
+"url": "InformationRegister_ПлановыеУдержания_RecordType"
+},
+{
+"name": "InformationRegister_ПорядокЗакрытияПодразделенийОрганизаций",
+"url": "InformationRegister_ПорядокЗакрытияПодразделенийОрганизаций"
+},
+{
+"name": "InformationRegister_ПорядокЗакрытияПодразделенийОрганизаций_RecordType",
+"url": "InformationRegister_ПорядокЗакрытияПодразделенийОрганизаций_RecordType"
+},
+{
+"name": "InformationRegister_РасчетДолейБазыНалогаНаПрибыль",
+"url": "InformationRegister_РасчетДолейБазыНалогаНаПрибыль"
+},
+{
+"name": "InformationRegister_РасчетДолейБазыНалогаНаПрибыль_RecordType",
+"url": "InformationRegister_РасчетДолейБазыНалогаНаПрибыль_RecordType"
+},
+{
+"name": "InformationRegister_РасчетЗемельногоНалога",
+"url": "InformationRegister_РасчетЗемельногоНалога"
+},
+{
+"name": "InformationRegister_РасчетЗемельногоНалога_RecordType",
+"url": "InformationRegister_РасчетЗемельногоНалога_RecordType"
+},
+{
+"name": "InformationRegister_РасчетРасходовПоАренде",
+"url": "InformationRegister_РасчетРасходовПоАренде"
+},
+{
+"name": "InformationRegister_РасчетРасходовПоАренде_RecordType",
+"url": "InformationRegister_РасчетРасходовПоАренде_RecordType"
+},
+{
+"name": "InformationRegister_РасчетРезерваОтпусков",
+"url": "InformationRegister_РасчетРезерваОтпусков"
+},
+{
+"name": "InformationRegister_РасчетРезерваОтпусков_RecordType",
+"url": "InformationRegister_РасчетРезерваОтпусков_RecordType"
+},
+{
+"name": "InformationRegister_РублевыеСуммыДокументовВВалюте",
+"url": "InformationRegister_РублевыеСуммыДокументовВВалюте"
+},
+{
+"name": "InformationRegister_РублевыеСуммыДокументовВВалюте_RecordType",
+"url": "InformationRegister_РублевыеСуммыДокументовВВалюте_RecordType"
+},
+{
+"name": "InformationRegister_ОплатаВедомостейНаВыплатуЗарплаты",
+"url": "InformationRegister_ОплатаВедомостейНаВыплатуЗарплаты"
+},
+{
+"name": "InformationRegister_ОплатаВедомостейНаВыплатуЗарплаты_RecordType",
+"url": "InformationRegister_ОплатаВедомостейНаВыплатуЗарплаты_RecordType"
+},
+{
+"name": "InformationRegister_СобытияОСОрганизаций",
+"url": "InformationRegister_СобытияОСОрганизаций"
+},
+{
+"name": "InformationRegister_СобытияОСОрганизаций_RecordType",
+"url": "InformationRegister_СобытияОСОрганизаций_RecordType"
+},
+{
+"name": "InformationRegister_НачислениеАмортизацииОССпециальныйКоэффициентНалоговыйУчет",
+"url": "InformationRegister_НачислениеАмортизацииОССпециальныйКоэффициентНалоговыйУчет"
+},
+{
+"name": "InformationRegister_НачислениеАмортизацииОССпециальныйКоэффициентНалоговыйУчет_RecordType",
+"url": "InformationRegister_НачислениеАмортизацииОССпециальныйКоэффициентНалоговыйУчет_RecordType"
+},
+{
+"name": "InformationRegister_СпособыОтраженияРасходовПоАмортизацииНМАБухгалтерскийУчет",
+"url": "InformationRegister_СпособыОтраженияРасходовПоАмортизацииНМАБухгалтерскийУчет"
+},
+{
+"name": "InformationRegister_СпособыОтраженияРасходовПоАмортизацииНМАБухгалтерскийУчет_RecordType",
+"url": "InformationRegister_СпособыОтраженияРасходовПоАмортизацииНМАБухгалтерскийУчет_RecordType"
+},
+{
+"name": "InformationRegister_СпособыОтраженияРасходовПоАренднымПлатежамОСНалоговыйУчет",
+"url": "InformationRegister_СпособыОтраженияРасходовПоАренднымПлатежамОСНалоговыйУчет"
+},
+{
+"name": "InformationRegister_СпособыОтраженияРасходовПоАренднымПлатежамОСНалоговыйУчет_RecordType",
+"url": "InformationRegister_СпособыОтраженияРасходовПоАренднымПлатежамОСНалоговыйУчет_RecordType"
+},
+{
+"name": "InformationRegister_СтруктураСтоимостиЗапасов",
+"url": "InformationRegister_СтруктураСтоимостиЗапасов"
+},
+{
+"name": "InformationRegister_СтруктураСтоимостиЗапасов_RecordType",
+"url": "InformationRegister_СтруктураСтоимостиЗапасов_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСПериодическийВычет",
+"url": "AccumulationRegister_НДСПериодическийВычет"
+},
+{
+"name": "AccumulationRegister_НДСПериодическийВычет_RecordType",
+"url": "AccumulationRegister_НДСПериодическийВычет_RecordType"
+},
+{
+"name": "InformationRegister_УдалитьПлановыеНачисленияРаботниковОрганизаций",
+"url": "InformationRegister_УдалитьПлановыеНачисленияРаботниковОрганизаций"
+},
+{
+"name": "InformationRegister_УдалитьПлановыеНачисленияРаботниковОрганизаций_RecordType",
+"url": "InformationRegister_УдалитьПлановыеНачисленияРаботниковОрганизаций_RecordType"
+},
+{
+"name": "InformationRegister_УдалитьРаботникиОрганизаций",
+"url": "InformationRegister_УдалитьРаботникиОрганизаций"
+},
+{
+"name": "InformationRegister_УдалитьРаботникиОрганизаций_RecordType",
+"url": "InformationRegister_УдалитьРаботникиОрганизаций_RecordType"
+},
+{
+"name": "InformationRegister_НДФЛУчетРабочихМест",
+"url": "InformationRegister_НДФЛУчетРабочихМест"
+},
+{
+"name": "InformationRegister_НДФЛУчетРабочихМест_RecordType",
+"url": "InformationRegister_НДФЛУчетРабочихМест_RecordType"
+},
+{
+"name": "InformationRegister_ЦеныНоменклатуры",
+"url": "InformationRegister_ЦеныНоменклатуры"
+},
+{
+"name": "InformationRegister_ЦеныНоменклатуры_RecordType",
+"url": "InformationRegister_ЦеныНоменклатуры_RecordType"
+},
+{
+"name": "InformationRegister_ЯвкиСотрудников",
+"url": "InformationRegister_ЯвкиСотрудников"
+},
+{
+"name": "InformationRegister_ЯвкиСотрудников_RecordType",
+"url": "InformationRegister_ЯвкиСотрудников_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьАвансовыеПлатежиИностранцевПоНДФЛ",
+"url": "AccumulationRegister_УдалитьАвансовыеПлатежиИностранцевПоНДФЛ"
+},
+{
+"name": "AccumulationRegister_УдалитьАвансовыеПлатежиИностранцевПоНДФЛ_RecordType",
+"url": "AccumulationRegister_УдалитьАвансовыеПлатежиИностранцевПоНДФЛ_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьВзаиморасчетыСДепонентамиОрганизаций",
+"url": "AccumulationRegister_УдалитьВзаиморасчетыСДепонентамиОрганизаций"
+},
+{
+"name": "AccumulationRegister_УдалитьВзаиморасчетыСДепонентамиОрганизаций_RecordType",
+"url": "AccumulationRegister_УдалитьВзаиморасчетыСДепонентамиОрганизаций_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьВзаиморасчетыСРаботникамиОрганизаций",
+"url": "AccumulationRegister_УдалитьВзаиморасчетыСРаботникамиОрганизаций"
+},
+{
+"name": "AccumulationRegister_УдалитьВзаиморасчетыСРаботникамиОрганизаций_RecordType",
+"url": "AccumulationRegister_УдалитьВзаиморасчетыСРаботникамиОрганизаций_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьВыплатаОтпусковЗаСчетРезерва",
+"url": "AccumulationRegister_УдалитьВыплатаОтпусковЗаСчетРезерва"
+},
+{
+"name": "AccumulationRegister_УдалитьВыплатаОтпусковЗаСчетРезерва_RecordType",
+"url": "AccumulationRegister_УдалитьВыплатаОтпусковЗаСчетРезерва_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьЕСНИсчисленный",
+"url": "AccumulationRegister_УдалитьЕСНИсчисленный"
+},
+{
+"name": "AccumulationRegister_УдалитьЕСНИсчисленный_RecordType",
+"url": "AccumulationRegister_УдалитьЕСНИсчисленный_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛКЗачету",
+"url": "AccumulationRegister_УдалитьНДФЛКЗачету"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛКЗачету_RecordType",
+"url": "AccumulationRegister_УдалитьНДФЛКЗачету_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьОСНПрочиеДоходы",
+"url": "AccumulationRegister_УдалитьОСНПрочиеДоходы"
+},
+{
+"name": "AccumulationRegister_УдалитьОСНПрочиеДоходы_RecordType",
+"url": "AccumulationRegister_УдалитьОСНПрочиеДоходы_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛПредоставленныеСтандартныеВычетыФизЛиц",
+"url": "AccumulationRegister_УдалитьНДФЛПредоставленныеСтандартныеВычетыФизЛиц"
+},
+{
+"name": "AccumulationRegister_УдалитьНДФЛПредоставленныеСтандартныеВычетыФизЛиц_RecordType",
+"url": "AccumulationRegister_УдалитьНДФЛПредоставленныеСтандартныеВычетыФизЛиц_RecordType"
+},
+{
+"name": "AccumulationRegister_ПлатежиВБюджет",
+"url": "AccumulationRegister_ПлатежиВБюджет"
+},
+{
+"name": "AccumulationRegister_ПлатежиВБюджет_RecordType",
+"url": "AccumulationRegister_ПлатежиВБюджет_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьУСНДоходы",
+"url": "AccumulationRegister_УдалитьУСНДоходы"
+},
+{
+"name": "AccumulationRegister_УдалитьУСНДоходы_RecordType",
+"url": "AccumulationRegister_УдалитьУСНДоходы_RecordType"
+},
+{
+"name": "AccumulationRegister_УдалитьУСНПрочиеДоходы",
+"url": "AccumulationRegister_УдалитьУСНПрочиеДоходы"
+},
+{
+"name": "AccumulationRegister_УдалитьУСНПрочиеДоходы_RecordType",
+"url": "AccumulationRegister_УдалитьУСНПрочиеДоходы_RecordType"
+},
+{
+"name": "AccumulationRegister_ВыработкаМатериалов",
+"url": "AccumulationRegister_ВыработкаМатериалов"
+},
+{
+"name": "AccumulationRegister_ВыработкаМатериалов_RecordType",
+"url": "AccumulationRegister_ВыработкаМатериалов_RecordType"
+},
+{
+"name": "AccumulationRegister_АвансовыеПлатежиИностранцевПоНДФЛ",
+"url": "AccumulationRegister_АвансовыеПлатежиИностранцевПоНДФЛ"
+},
+{
+"name": "AccumulationRegister_АвансовыеПлатежиИностранцевПоНДФЛ_RecordType",
+"url": "AccumulationRegister_АвансовыеПлатежиИностранцевПоНДФЛ_RecordType"
+},
+{
+"name": "AccumulationRegister_ВзаиморасчетыСДепонентами",
+"url": "AccumulationRegister_ВзаиморасчетыСДепонентами"
+},
+{
+"name": "AccumulationRegister_ВзаиморасчетыСДепонентами_RecordType",
+"url": "AccumulationRegister_ВзаиморасчетыСДепонентами_RecordType"
+},
+{
+"name": "AccumulationRegister_ВыработкаОС",
+"url": "AccumulationRegister_ВыработкаОС"
+},
+{
+"name": "AccumulationRegister_ВыработкаОС_RecordType",
+"url": "AccumulationRegister_ВыработкаОС_RecordType"
+},
+{
+"name": "AccumulationRegister_ВытесняемоеПлановоеВремяСотрудников",
+"url": "AccumulationRegister_ВытесняемоеПлановоеВремяСотрудников"
+},
+{
+"name": "AccumulationRegister_ВытесняемоеПлановоеВремяСотрудников_RecordType",
+"url": "AccumulationRegister_ВытесняемоеПлановоеВремяСотрудников_RecordType"
+},
+{
+"name": "AccumulationRegister_ДанныеДляРасчетаНалогаНаВодныеРесурсы",
+"url": "AccumulationRegister_ДанныеДляРасчетаНалогаНаВодныеРесурсы"
+},
+{
+"name": "AccumulationRegister_ДанныеДляРасчетаНалогаНаВодныеРесурсы_RecordType",
+"url": "AccumulationRegister_ДанныеДляРасчетаНалогаНаВодныеРесурсы_RecordType"
+},
+{
+"name": "AccumulationRegister_НачисленияУдержанияПоСотрудникам",
+"url": "AccumulationRegister_НачисленияУдержанияПоСотрудникам"
+},
+{
+"name": "AccumulationRegister_НачисленияУдержанияПоСотрудникам_RecordType",
+"url": "AccumulationRegister_НачисленияУдержанияПоСотрудникам_RecordType"
+},
+{
+"name": "AccumulationRegister_ДанныеСводногоУчетаРабочегоВремениСотрудников",
+"url": "AccumulationRegister_ДанныеСводногоУчетаРабочегоВремениСотрудников"
+},
+{
+"name": "AccumulationRegister_ДанныеСводногоУчетаРабочегоВремениСотрудников_RecordType",
+"url": "AccumulationRegister_ДанныеСводногоУчетаРабочегоВремениСотрудников_RecordType"
+},
+{
+"name": "AccumulationRegister_ДанныеТабельногоУчетаРабочегоВремениСотрудников",
+"url": "AccumulationRegister_ДанныеТабельногоУчетаРабочегоВремениСотрудников"
+},
+{
+"name": "AccumulationRegister_ДанныеТабельногоУчетаРабочегоВремениСотрудников_RecordType",
+"url": "AccumulationRegister_ДанныеТабельногоУчетаРабочегоВремениСотрудников_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСЗаписиРаздела7Декларации",
+"url": "AccumulationRegister_НДСЗаписиРаздела7Декларации"
+},
+{
+"name": "AccumulationRegister_НДСЗаписиРаздела7Декларации_RecordType",
+"url": "AccumulationRegister_НДСЗаписиРаздела7Декларации_RecordType"
+},
+{
+"name": "AccumulationRegister_НачислениеАмортизацииОСНУ",
+"url": "AccumulationRegister_НачислениеАмортизацииОСНУ"
+},
+{
+"name": "AccumulationRegister_НачислениеАмортизацииОСНУ_RecordType",
+"url": "AccumulationRegister_НачислениеАмортизацииОСНУ_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСАвансыПоДоговорамКомиссии",
+"url": "AccumulationRegister_НДСАвансыПоДоговорамКомиссии"
+},
+{
+"name": "AccumulationRegister_НДСАвансыПоДоговорамКомиссии_RecordType",
+"url": "AccumulationRegister_НДСАвансыПоДоговорамКомиссии_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСВходящийРаздельныйУчет",
+"url": "AccumulationRegister_НДСВходящийРаздельныйУчет"
+},
+{
+"name": "AccumulationRegister_НДСВходящийРаздельныйУчет_RecordType",
+"url": "AccumulationRegister_НДСВходящийРаздельныйУчет_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСДополнительноеОтражениеВОтчетности",
+"url": "AccumulationRegister_НДСДополнительноеОтражениеВОтчетности"
+},
+{
+"name": "AccumulationRegister_НДСДополнительноеОтражениеВОтчетности_RecordType",
+"url": "AccumulationRegister_НДСДополнительноеОтражениеВОтчетности_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСНачисленный",
+"url": "AccumulationRegister_НДСНачисленный"
+},
+{
+"name": "AccumulationRegister_НДСНачисленный_RecordType",
+"url": "AccumulationRegister_НДСНачисленный_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСРеализация0",
+"url": "AccumulationRegister_НДСРеализация0"
+},
+{
+"name": "AccumulationRegister_НДСРеализация0_RecordType",
+"url": "AccumulationRegister_НДСРеализация0_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСЗаписиКнигиПокупок",
+"url": "AccumulationRegister_НДСЗаписиКнигиПокупок"
+},
+{
+"name": "AccumulationRegister_НДСЗаписиКнигиПокупок_RecordType",
+"url": "AccumulationRegister_НДСЗаписиКнигиПокупок_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСЗаписиКнигиПродаж",
+"url": "AccumulationRegister_НДСЗаписиКнигиПродаж"
+},
+{
+"name": "AccumulationRegister_НДСЗаписиКнигиПродаж_RecordType",
+"url": "AccumulationRegister_НДСЗаписиКнигиПродаж_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСРеестрВходящихСчетовФактур",
+"url": "AccumulationRegister_НДСРеестрВходящихСчетовФактур"
+},
+{
+"name": "AccumulationRegister_НДСРеестрВходящихСчетовФактур_RecordType",
+"url": "AccumulationRegister_НДСРеестрВходящихСчетовФактур_RecordType"
+},
+{
+"name": "AccumulationRegister_НДСВключенныйВСтоимость",
+"url": "AccumulationRegister_НДСВключенныйВСтоимость"
+},
+{
+"name": "AccumulationRegister_НДСВключенныйВСтоимость_RecordType",
+"url": "AccumulationRegister_НДСВключенныйВСтоимость_RecordType"
+},
+{
+"name": "AccumulationRegister_ОплатаСчетов",
+"url": "AccumulationRegister_ОплатаСчетов"
+},
+{
+"name": "AccumulationRegister_ОплатаСчетов_RecordType",
+"url": "AccumulationRegister_ОплатаСчетов_RecordType"
+},
+{
+"name": "AccumulationRegister_ОСНДоходы",
+"url": "AccumulationRegister_ОСНДоходы"
+},
+{
+"name": "AccumulationRegister_ОСНДоходы_RecordType",
+"url": "AccumulationRegister_ОСНДоходы_RecordType"
+},
+{
+"name": "AccumulationRegister_ОстаткиТопливаТранспортныхСредств",
+"url": "AccumulationRegister_ОстаткиТопливаТранспортныхСредств"
+},
+{
+"name": "AccumulationRegister_ОстаткиТопливаТранспортныхСредств_RecordType",
+"url": "AccumulationRegister_ОстаткиТопливаТранспортныхСредств_RecordType"
+},
+{
+"name": "AccumulationRegister_ОценочныеОбязательства",
+"url": "AccumulationRegister_ОценочныеОбязательства"
+},
+{
+"name": "AccumulationRegister_ОценочныеОбязательства_RecordType",
+"url": "AccumulationRegister_ОценочныеОбязательства_RecordType"
+},
+{
+"name": "AccumulationRegister_ПокупкиПоКорпоративнымКартам",
+"url": "AccumulationRegister_ПокупкиПоКорпоративнымКартам"
+},
+{
+"name": "AccumulationRegister_ПокупкиПоКорпоративнымКартам_RecordType",
+"url": "AccumulationRegister_ПокупкиПоКорпоративнымКартам_RecordType"
+},
+{
+"name": "AccumulationRegister_ПособияПоСоциальномуСтрахованию",
+"url": "AccumulationRegister_ПособияПоСоциальномуСтрахованию"
+},
+{
+"name": "AccumulationRegister_ПособияПоСоциальномуСтрахованию_RecordType",
+"url": "AccumulationRegister_ПособияПоСоциальномуСтрахованию_RecordType"
+},
+{
+"name": "AccumulationRegister_ПредоставленныеСтандартныеИСоциальныеВычетыНДФЛ",
+"url": "AccumulationRegister_ПредоставленныеСтандартныеИСоциальныеВычетыНДФЛ"
+},
+{
+"name": "AccumulationRegister_ПредоставленныеСтандартныеИСоциальныеВычетыНДФЛ_RecordType",
+"url": "AccumulationRegister_ПредоставленныеСтандартныеИСоциальныеВычетыНДФЛ_RecordType"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументыМаршруты",
+"url": "AccumulationRegister_ПроездныеДокументыМаршруты"
+},
+{
+"name": "AccumulationRegister_ПроездныеДокументыМаршруты_RecordType",
+"url": "AccumulationRegister_ПроездныеДокументыМаршруты_RecordType"
+},
+{
+"name": "AccumulationRegister_РасходыНаПлатон",
+"url": "AccumulationRegister_РасходыНаПлатон"
+},
+{
+"name": "AccumulationRegister_РасходыНаПлатон_RecordType",
+"url": "AccumulationRegister_РасходыНаПлатон_RecordType"
+},
+{
+"name": "AccumulationRegister_РеализованныеТоварыКомитентов",
+"url": "AccumulationRegister_РеализованныеТоварыКомитентов"
+},
+{
+"name": "AccumulationRegister_РеализованныеТоварыКомитентов_RecordType",
+"url": "AccumulationRegister_РеализованныеТоварыКомитентов_RecordType"
+},
+{
+"name": "AccumulationRegister_СтраховыеВзносыПереданныеВПФР",
+"url": "AccumulationRegister_СтраховыеВзносыПереданныеВПФР"
+},
+{
+"name": "AccumulationRegister_СтраховыеВзносыПереданныеВПФР_RecordType",
+"url": "AccumulationRegister_СтраховыеВзносыПереданныеВПФР_RecordType"
+},
+{
+"name": "AccumulationRegister_СтраховыеВзносыПоФизическимЛицам",
+"url": "AccumulationRegister_СтраховыеВзносыПоФизическимЛицам"
+},
+{
+"name": "AccumulationRegister_СтраховыеВзносыПоФизическимЛицам_RecordType",
+"url": "AccumulationRegister_СтраховыеВзносыПоФизическимЛицам_RecordType"
+},
+{
+"name": "AccumulationRegister_УНДСДоходы",
+"url": "AccumulationRegister_УНДСДоходы"
+},
+{
+"name": "AccumulationRegister_УНДСДоходы_RecordType",
+"url": "AccumulationRegister_УНДСДоходы_RecordType"
+},
+{
+"name": "AccumulationRegister_УСНДоходы",
+"url": "AccumulationRegister_УСНДоходы"
+},
+{
+"name": "AccumulationRegister_УСНДоходы_RecordType",
+"url": "AccumulationRegister_УСНДоходы_RecordType"
+},
+{
+"name": "AccumulationRegister_УСНПрочиеДоходы",
+"url": "AccumulationRegister_УСНПрочиеДоходы"
+},
+{
+"name": "AccumulationRegister_УСНПрочиеДоходы_RecordType",
+"url": "AccumulationRegister_УСНПрочиеДоходы_RecordType"
+},
+{
+"name": "AccumulationRegister_СведенияОДоходахНДФЛ",
+"url": "AccumulationRegister_СведенияОДоходахНДФЛ"
+},
+{
+"name": "AccumulationRegister_СведенияОДоходахНДФЛ_RecordType",
+"url": "AccumulationRegister_СведенияОДоходахНДФЛ_RecordType"
+},
+{
+"name": "AccumulationRegister_ФактическаяВыработкаРаботниковОрганизаций",
+"url": "AccumulationRegister_ФактическаяВыработкаРаботниковОрганизаций"
+},
+{
+"name": "AccumulationRegister_ФактическаяВыработкаРаботниковОрганизаций_RecordType",
+"url": "AccumulationRegister_ФактическаяВыработкаРаботниковОрганизаций_RecordType"
+},
+{
+"name": "AccountingRegister_Хозрасчетный",
+"url": "AccountingRegister_Хозрасчетный"
+},
+{
+"name": "AccountingRegister_Хозрасчетный_RecordType",
+"url": "AccountingRegister_Хозрасчетный_RecordType"
+},
+{
+"name": "CalculationRegister_СП_Начисления",
+"url": "CalculationRegister_СП_Начисления"
+},
+{
+"name": "CalculationRegister_СП_Начисления_RecordType",
+"url": "CalculationRegister_СП_Начисления_RecordType"
+},
+{
+"name": "Catalog_УдалитьДокументыУдостоверяющиеЛичность",
+"url": "Catalog_УдалитьДокументыУдостоверяющиеЛичность"
+},
+{
+"name": "Document_ПутевойЛист",
+"url": "Document_ПутевойЛист"
+},
+{
+"name": "Document_ПутевойЛист_Топливо",
+"url": "Document_ПутевойЛист_Топливо"
+},
+{
+"name": "Document_ПутевойЛист_Маршрут",
+"url": "Document_ПутевойЛист_Маршрут"
+},
+{
+"name": "Document_ПутевойЛист_ВыданныеАвансы",
+"url": "Document_ПутевойЛист_ВыданныеАвансы"
+},
+{
+"name": "Document_ПринятиеКУчетуНМА",
+"url": "Document_ПринятиеКУчетуНМА"
+},
+{
+"name": "Document_ПринятиеКУчетуНМА_ОплатаНМА",
+"url": "Document_ПринятиеКУчетуНМА_ОплатаНМА"
+},
+{
+"name": "Document_УдалитьУвольнениеИзОрганизаций",
+"url": "Document_УдалитьУвольнениеИзОрганизаций"
+},
+{
+"name": "Document_УдалитьУвольнениеИзОрганизаций_РаботникиОрганизации",
+"url": "Document_УдалитьУвольнениеИзОрганизаций_РаботникиОрганизации"
+},
+{
+"name": "Catalog_УдалитьПараметрыИсчисляемогоСтраховогоСтажа",
+"url": "Catalog_УдалитьПараметрыИсчисляемогоСтраховогоСтажа"
+},
+{
+"name": "Catalog_ЕдиныеНормыАмортизационныхОтчисленийОсновныхФондов",
+"url": "Catalog_ЕдиныеНормыАмортизационныхОтчисленийОсновныхФондов"
+},
+{
+"name": "Catalog_УдалитьДоходыЕСН",
+"url": "Catalog_УдалитьДоходыЕСН"
+},
+{
+"name": "Catalog_УдалитьДоходыНДФЛ",
+"url": "Catalog_УдалитьДоходыНДФЛ"
+},
+{
+"name": "Document_УдалитьЗаявлениеОбОбменеДубликатеСтраховогоСвидетельства",
+"url": "Document_УдалитьЗаявлениеОбОбменеДубликатеСтраховогоСвидетельства"
+},
+{
+"name": "Document_УдалитьЗаявлениеОбОбменеДубликатеСтраховогоСвидетельства_РаботникиОрганизации",
+"url": "Document_УдалитьЗаявлениеОбОбменеДубликатеСтраховогоСвидетельства_РаботникиОрганизации"
+},
+{
+"name": "Catalog_УдалитьНалоговыеОрганы",
+"url": "Catalog_УдалитьНалоговыеОрганы"
+},
+{
+"name": "Catalog_УдалитьНалоговыеОрганы_Сертификаты",
+"url": "Catalog_УдалитьНалоговыеОрганы_Сертификаты"
+},
+{
+"name": "Document_ВосстановлениеНДСПоОбъектамНедвижимости",
+"url": "Document_ВосстановлениеНДСПоОбъектамНедвижимости"
+},
+{
+"name": "Document_ВосстановлениеНДСПоОбъектамНедвижимости_ОбъектыНедвижимости",
+"url": "Document_ВосстановлениеНДСПоОбъектамНедвижимости_ОбъектыНедвижимости"
+},
+{
+"name": "Document_ВосстановлениеНДСПоОбъектамНедвижимости_СчетаФактуры",
+"url": "Document_ВосстановлениеНДСПоОбъектамНедвижимости_СчетаФактуры"
+},
+{
+"name": "Catalog_УдалитьОснованияВыслугиЛет",
+"url": "Catalog_УдалитьОснованияВыслугиЛет"
+},
+{
+"name": "Catalog_УдалитьОснованияДосрочногоНазначенияПенсии",
+"url": "Catalog_УдалитьОснованияДосрочногоНазначенияПенсии"
+},
+{
+"name": "Catalog_ВидыДоходовНДФЛ",
+"url": "Catalog_ВидыДоходовНДФЛ"
+},
+{
+"name": "Catalog_УдалитьОснованияИсчисляемогоСтраховогоСтажа",
+"url": "Catalog_УдалитьОснованияИсчисляемогоСтраховогоСтажа"
+},
+{
+"name": "Catalog_УдалитьОснованияУвольненийИзОрганизаций",
+"url": "Catalog_УдалитьОснованияУвольненийИзОрганизаций"
+},
+{
+"name": "Catalog_УдалитьОсобыеУсловияТруда",
+"url": "Catalog_УдалитьОсобыеУсловияТруда"
+},
+{
+"name": "Catalog_УдалитьОценочныеОбязательства",
+"url": "Catalog_УдалитьОценочныеОбязательства"
+},
+{
+"name": "Document_УдалитьПеречислениеНДФЛвБюджет",
+"url": "Document_УдалитьПеречислениеНДФЛвБюджет"
+},
+{
+"name": "Document_УдалитьПеречислениеНДФЛвБюджет_СотрудникиОрганизации",
+"url": "Document_УдалитьПеречислениеНДФЛвБюджет_СотрудникиОрганизации"
+},
+{
+"name": "Catalog_УдалитьПараметрыИсчисляемогоСтраховогоСтажа2014",
+"url": "Catalog_УдалитьПараметрыИсчисляемогоСтраховогоСтажа2014"
+},
+{
+"name": "Document_АвизоРасчетыВходящее",
+"url": "Document_АвизоРасчетыВходящее"
+},
+{
+"name": "Document_АвизоРасчетыВходящее_СуммыДолга",
+"url": "Document_АвизоРасчетыВходящее_СуммыДолга"
+},
+{
+"name": "Catalog_УдалитьСерверыДокументооборота",
+"url": "Catalog_УдалитьСерверыДокументооборота"
+},
+{
+"name": "Document_ПередачаМатериаловВЭксплуатацию",
+"url": "Document_ПередачаМатериаловВЭксплуатацию"
+},
+{
+"name": "Document_ПередачаМатериаловВЭксплуатацию_Спецодежда",
+"url": "Document_ПередачаМатериаловВЭксплуатацию_Спецодежда"
+},
+{
+"name": "Document_ПередачаМатериаловВЭксплуатацию_Спецоснастка",
+"url": "Document_ПередачаМатериаловВЭксплуатацию_Спецоснастка"
+},
+{
+"name": "Document_ПередачаМатериаловВЭксплуатацию_ИнвентарьИХозяйственныеПринадлежности",
+"url": "Document_ПередачаМатериаловВЭксплуатацию_ИнвентарьИХозяйственныеПринадлежности"
+},
+{
+"name": "Document_ПередачаМатериаловВЭксплуатацию_ИнвентаризационнаяКомиссия",
+"url": "Document_ПередачаМатериаловВЭксплуатацию_ИнвентаризационнаяКомиссия"
+},
+{
+"name": "Catalog_УдалитьСпособыОтраженияЗарплатыВРеглУчете",
+"url": "Catalog_УдалитьСпособыОтраженияЗарплатыВРеглУчете"
+},
+{
+"name": "Document_УдалитьСведенияОНачисленномЗаработкеСЗВ63",
+"url": "Document_УдалитьСведенияОНачисленномЗаработкеСЗВ63"
+},
+{
+"name": "Document_УдалитьСведенияОНачисленномЗаработкеСЗВ63_СотрудникиОрганизации",
+"url": "Document_УдалитьСведенияОНачисленномЗаработкеСЗВ63_СотрудникиОрганизации"
+},
+{
+"name": "Document_УдалитьСведенияОНачисленномЗаработкеСЗВ63_СведенияОЗаработке",
+"url": "Document_УдалитьСведенияОНачисленномЗаработкеСЗВ63_СведенияОЗаработке"
+},
+{
+"name": "Catalog_УдалитьДоходыПоСтраховымВзносам",
+"url": "Catalog_УдалитьДоходыПоСтраховымВзносам"
+},
+{
+"name": "Catalog_УдалитьСтавки",
+"url": "Catalog_УдалитьСтавки"
+},
+{
+"name": "Catalog_УдалитьТерриториальныеУсловияПФР",
+"url": "Catalog_УдалитьТерриториальныеУсловияПФР"
+},
+{
+"name": "Catalog_УдалитьТерриториальныеУсловия",
+"url": "Catalog_УдалитьТерриториальныеУсловия"
+},
+{
+"name": "Catalog_УдалитьУчетныеЗаписиДокументооборота",
+"url": "Catalog_УдалитьУчетныеЗаписиДокументооборота"
+},
+{
+"name": "Catalog_УдалитьШифрБолезниПоМКБ",
+"url": "Catalog_УдалитьШифрБолезниПоМКБ"
+},
+{
+"name": "Catalog_Агенты",
+"url": "Catalog_Агенты"
+},
+{
+"name": "Catalog_Банки",
+"url": "Catalog_Банки"
+},
+{
+"name": "Catalog_dibank_Банки",
+"url": "Catalog_dibank_Банки"
+},
+{
+"name": "Catalog_БанковскиеСчета",
+"url": "Catalog_БанковскиеСчета"
+},
+{
+"name": "Catalog_dibank_БанковскиеСчета",
+"url": "Catalog_dibank_БанковскиеСчета"
+},
+{
+"name": "Catalog_БиологическиеАктивы",
+"url": "Catalog_БиологическиеАктивы"
+},
+{
+"name": "Catalog_БланкиОтчетов",
+"url": "Catalog_БланкиОтчетов"
+},
+{
+"name": "Catalog_БланкиОтчетов_МакетРаскрытий",
+"url": "Catalog_БланкиОтчетов_МакетРаскрытий"
+},
+{
+"name": "Catalog_БланкиОтчетов_АдресаЭлементовСтруктурыОтчета",
+"url": "Catalog_БланкиОтчетов_АдресаЭлементовСтруктурыОтчета"
+},
+{
+"name": "Catalog_БланкиОтчетов_ДополнительныеБланки",
+"url": "Catalog_БланкиОтчетов_ДополнительныеБланки"
+},
+{
+"name": "Document_ВыбытиеАктива",
+"url": "Document_ВыбытиеАктива"
+},
+{
+"name": "Catalog_СобытияОС",
+"url": "Catalog_СобытияОС"
+},
+{
+"name": "Catalog_БланкиСтрогойОтчетности",
+"url": "Catalog_БланкиСтрогойОтчетности"
+},
+{
+"name": "Document_Командировка",
+"url": "Document_Командировка"
+},
+{
+"name": "Document_Командировка_Сотрудники",
+"url": "Document_Командировка_Сотрудники"
+},
+{
+"name": "Catalog_Валюты",
+"url": "Catalog_Валюты"
+},
+{
+"name": "Catalog_uzbled_Валюты",
+"url": "Catalog_uzbled_Валюты"
+},
+{
+"name": "Catalog_ВерсииФайлов",
+"url": "Catalog_ВерсииФайлов"
+},
+{
+"name": "Catalog_ВерсииФайлов_УдалитьЭлектронныеПодписи",
+"url": "Catalog_ВерсииФайлов_УдалитьЭлектронныеПодписи"
+},
+{
+"name": "Catalog_РолиКонтактныхЛиц",
+"url": "Catalog_РолиКонтактныхЛиц"
+},
+{
+"name": "Catalog_ВидыВременныхРазниц",
+"url": "Catalog_ВидыВременныхРазниц"
+},
+{
+"name": "Catalog_ВидыВычетовНДФЛ",
+"url": "Catalog_ВидыВычетовНДФЛ"
+},
+{
+"name": "Catalog_ВидыДвиженийМСФО",
+"url": "Catalog_ВидыДвиженийМСФО"
+},
+{
+"name": "Catalog_ВидыДеятельностиПредпринимателей",
+"url": "Catalog_ВидыДеятельностиПредпринимателей"
+},
+{
+"name": "Catalog_ВидыДеятельностиITPark",
+"url": "Catalog_ВидыДеятельностиITPark"
+},
+{
+"name": "Catalog_ВидыДокументовФизическихЛиц",
+"url": "Catalog_ВидыДокументовФизическихЛиц"
+},
+{
+"name": "Catalog_ВидыДоходовПоСтраховымВзносам",
+"url": "Catalog_ВидыДоходовПоСтраховымВзносам"
+},
+{
+"name": "Document_ПланПроизводства",
+"url": "Document_ПланПроизводства"
+},
+{
+"name": "Document_ПланПроизводства_Продукция",
+"url": "Document_ПланПроизводства_Продукция"
+},
+{
+"name": "Catalog_ВидыИспользованияРабочегоВремени",
+"url": "Catalog_ВидыИспользованияРабочегоВремени"
+},
+{
+"name": "Catalog_ВидыКонтактнойИнформации",
+"url": "Catalog_ВидыКонтактнойИнформации"
+},
+{
+"name": "Catalog_ВидыКонтактнойИнформации_Представления",
+"url": "Catalog_ВидыКонтактнойИнформации_Представления"
+},
+{
+"name": "Document_АктВыполненныхРаботПоДоговоруПодряда",
+"url": "Document_АктВыполненныхРаботПоДоговоруПодряда"
+},
+{
+"name": "Document_АктВыполненныхРаботПоДоговоруПодряда_Работы",
+"url": "Document_АктВыполненныхРаботПоДоговоруПодряда_Работы"
+},
+{
+"name": "Catalog_ВидыНалоговыхОрганов",
+"url": "Catalog_ВидыНалоговыхОрганов"
+},
+{
+"name": "Catalog_ВидыНоменклатуры",
+"url": "Catalog_ВидыНоменклатуры"
+},
+{
+"name": "Catalog_ВидыОбразованияФизЛиц",
+"url": "Catalog_ВидыОбразованияФизЛиц"
+},
+{
+"name": "Catalog_ВидыОбъектовФинансовогоХарактера",
+"url": "Catalog_ВидыОбъектовФинансовогоХарактера"
+},
+{
+"name": "Catalog_ВидыОплатОрганизаций",
+"url": "Catalog_ВидыОплатОрганизаций"
+},
+{
+"name": "Catalog_ВидыОплатОрганизаций_КомиссияБанка",
+"url": "Catalog_ВидыОплатОрганизаций_КомиссияБанка"
+},
+{
+"name": "Catalog_ВидыОтчетов",
+"url": "Catalog_ВидыОтчетов"
+},
+{
+"name": "Catalog_ВидыОтчетов_ПараметрыОтчета",
+"url": "Catalog_ВидыОтчетов_ПараметрыОтчета"
+},
+{
+"name": "Catalog_ВидыОтчетов_ИспользуемыеВидыИтоговПоСчетам",
+"url": "Catalog_ВидыОтчетов_ИспользуемыеВидыИтоговПоСчетам"
+},
+{
+"name": "Catalog_ВидыВзаиморасчетов",
+"url": "Catalog_ВидыВзаиморасчетов"
+},
+{
+"name": "Document_СписаниеОСНеПризнаваемыхВУчетеПоМСФО",
+"url": "Document_СписаниеОСНеПризнаваемыхВУчетеПоМСФО"
+},
+{
+"name": "Document_СписаниеОСНеПризнаваемыхВУчетеПоМСФО_ОС",
+"url": "Document_СписаниеОСНеПризнаваемыхВУчетеПоМСФО_ОС"
+},
+{
+"name": "Document_ОперацияУчетаПоСтраховымВзносам",
+"url": "Document_ОперацияУчетаПоСтраховымВзносам"
+},
+{
+"name": "Document_ОперацияУчетаПоСтраховымВзносам_СведенияОДоходах",
+"url": "Document_ОперацияУчетаПоСтраховымВзносам_СведенияОДоходах"
+},
+{
+"name": "Document_ОперацияУчетаПоСтраховымВзносам_ПособияПоСоциальномуСтрахованию",
+"url": "Document_ОперацияУчетаПоСтраховымВзносам_ПособияПоСоциальномуСтрахованию"
+},
+{
+"name": "Document_ОперацияУчетаПоСтраховымВзносам_ПособияПоУходуЗаРебенком",
+"url": "Document_ОперацияУчетаПоСтраховымВзносам_ПособияПоУходуЗаРебенком"
+},
+{
+"name": "Document_НазначениеПлановогоНачисления",
+"url": "Document_НазначениеПлановогоНачисления"
+},
+{
+"name": "Document_НазначениеПлановогоНачисления_Сотрудники",
+"url": "Document_НазначениеПлановогоНачисления_Сотрудники"
+},
+{
+"name": "Document_НазначениеПлановогоНачисления_ПоказателиСотрудников",
+"url": "Document_НазначениеПлановогоНачисления_ПоказателиСотрудников"
+},
+{
+"name": "Document_НазначениеПлановогоНачисления_ФизическиеЛица",
+"url": "Document_НазначениеПлановогоНачисления_ФизическиеЛица"
+},
+{
+"name": "Catalog_Сборы",
+"url": "Catalog_Сборы"
+},
+{
+"name": "Catalog_ВидыСтажа",
+"url": "Catalog_ВидыСтажа"
+},
+{
+"name": "Catalog_ВнешниеИнформационныеБазы",
+"url": "Catalog_ВнешниеИнформационныеБазы"
+},
+{
+"name": "Catalog_ВнешниеИнформационныеБазы_СтруктураИмени",
+"url": "Catalog_ВнешниеИнформационныеБазы_СтруктураИмени"
+},
+{
+"name": "Catalog_ГодовыеГрафикиАмортизацииОС",
+"url": "Catalog_ГодовыеГрафикиАмортизацииОС"
+},
+{
+"name": "Catalog_Календари",
+"url": "Catalog_Календари"
+},
+{
+"name": "Catalog_Календари_ШаблонЗаполнения",
+"url": "Catalog_Календари_ШаблонЗаполнения"
+},
+{
+"name": "Catalog_Календари_РасписаниеРаботы",
+"url": "Catalog_Календари_РасписаниеРаботы"
+},
+{
+"name": "Document_ВозвратНаРаботу",
+"url": "Document_ВозвратНаРаботу"
+},
+{
+"name": "Document_ВозвратНаРаботу_Сотрудники",
+"url": "Document_ВозвратНаРаботу_Сотрудники"
+},
+{
+"name": "Catalog_ГрафикиРаботыСотрудников",
+"url": "Catalog_ГрафикиРаботыСотрудников"
+},
+{
+"name": "Catalog_ГрафикиРаботыСотрудников_ШаблонЗаполнения",
+"url": "Catalog_ГрафикиРаботыСотрудников_ШаблонЗаполнения"
+},
+{
+"name": "Catalog_ГрафикиРаботыСотрудников_ВидыВремени",
+"url": "Catalog_ГрафикиРаботыСотрудников_ВидыВремени"
+},
+{
+"name": "Catalog_ГрафикиРаботыСотрудников_ДанныеОРабочихЧасах",
+"url": "Catalog_ГрафикиРаботыСотрудников_ДанныеОРабочихЧасах"
+},
+{
+"name": "Catalog_ГрафикиРаботыСотрудников_ДополнительныеРеквизиты",
+"url": "Catalog_ГрафикиРаботыСотрудников_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_ГруппыРаскрытия",
+"url": "Catalog_ГруппыРаскрытия"
+},
+{
+"name": "Catalog_ГруппыРаскрытия_ПравилаОтображенияПолей",
+"url": "Catalog_ГруппыРаскрытия_ПравилаОтображенияПолей"
+},
+{
+"name": "Catalog_УчасткиУчета",
+"url": "Catalog_УчасткиУчета"
+},
+{
+"name": "Catalog_СерверыДокументооборота",
+"url": "Catalog_СерверыДокументооборота"
+},
+{
+"name": "Catalog_ГруппыПараметровРасчетаРезервов",
+"url": "Catalog_ГруппыПараметровРасчетаРезервов"
+},
+{
+"name": "Catalog_Диагноз",
+"url": "Catalog_Диагноз"
+},
+{
+"name": "Catalog_ДоверенностиНалогоплательщика",
+"url": "Catalog_ДоверенностиНалогоплательщика"
+},
+{
+"name": "Catalog_ДоверенностиНалогоплательщика_ПолномочияПредставителя",
+"url": "Catalog_ДоверенностиНалогоплательщика_ПолномочияПредставителя"
+},
+{
+"name": "Catalog_ДоверенностиНалогоплательщика_ФИО",
+"url": "Catalog_ДоверенностиНалогоплательщика_ФИО"
+},
+{
+"name": "Catalog_ДоверенностиНалогоплательщика_Адреса",
+"url": "Catalog_ДоверенностиНалогоплательщика_Адреса"
+},
+{
+"name": "Catalog_ДоверенностиНалогоплательщика_УдЛичности",
+"url": "Catalog_ДоверенностиНалогоплательщика_УдЛичности"
+},
+{
+"name": "Document_СчетНаОплатуПокупателю",
+"url": "Document_СчетНаОплатуПокупателю"
+},
+{
+"name": "Document_СчетНаОплатуПокупателю_Товары",
+"url": "Document_СчетНаОплатуПокупателю_Товары"
+},
+{
+"name": "Document_СчетНаОплатуПокупателю_ВозвратнаяТара",
+"url": "Document_СчетНаОплатуПокупателю_ВозвратнаяТара"
+},
+{
+"name": "Document_СчетНаОплатуПокупателю_УдалитьУслуги",
+"url": "Document_СчетНаОплатуПокупателю_УдалитьУслуги"
+},
+{
+"name": "Document_ВозвратОСОтАрендатора",
+"url": "Document_ВозвратОСОтАрендатора"
+},
+{
+"name": "Document_ВозвратОСОтАрендатора_ОС",
+"url": "Document_ВозвратОСОтАрендатора_ОС"
+},
+{
+"name": "Catalog_ЗарплатныеПроекты",
+"url": "Catalog_ЗарплатныеПроекты"
+},
+{
+"name": "Catalog_ЗарплатныеПроекты_ДополнительныеРеквизиты",
+"url": "Catalog_ЗарплатныеПроекты_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_ЗарплатныеПроекты_СистемыРасчетовПоБанковскимКартам",
+"url": "Catalog_ЗарплатныеПроекты_СистемыРасчетовПоБанковскимКартам"
+},
+{
+"name": "Catalog_ДоговорыКонтрагентов",
+"url": "Catalog_ДоговорыКонтрагентов"
+},
+{
+"name": "Catalog_ДоговорыКонтрагентов_ДополнительныеРеквизиты",
+"url": "Catalog_ДоговорыКонтрагентов_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_dibank_ДоговорыКонтрагентов",
+"url": "Catalog_dibank_ДоговорыКонтрагентов"
+},
+{
+"name": "Catalog_uzbled_ДоговорыКонтрагентов",
+"url": "Catalog_uzbled_ДоговорыКонтрагентов"
+},
+{
+"name": "Catalog_ДокументыБД",
+"url": "Catalog_ДокументыБД"
+},
+{
+"name": "Catalog_ДокументыБД_Реквизиты",
+"url": "Catalog_ДокументыБД_Реквизиты"
+},
+{
+"name": "Catalog_ДокументыБД_ДопРеквизитыМатрицыПроцесса",
+"url": "Catalog_ДокументыБД_ДопРеквизитыМатрицыПроцесса"
+},
+{
+"name": "Catalog_ДокументыБД_ДоступныеФормыСхемРеквизитов",
+"url": "Catalog_ДокументыБД_ДоступныеФормыСхемРеквизитов"
+},
+{
+"name": "Catalog_Должности",
+"url": "Catalog_Должности"
+},
+{
+"name": "Catalog_Должности_ДополнительныеРеквизиты",
+"url": "Catalog_Должности_ДополнительныеРеквизиты"
+},
+{
+"name": "Document_АктПриемаПередачиТМЦВЭксплуатации",
+"url": "Document_АктПриемаПередачиТМЦВЭксплуатации"
+},
+{
+"name": "Document_АктПриемаПередачиТМЦВЭксплуатации_ТМЦВЭксплуатации",
+"url": "Document_АктПриемаПередачиТМЦВЭксплуатации_ТМЦВЭксплуатации"
+},
+{
+"name": "Catalog_ПараметрыИсчисляемогоСтраховогоСтажа",
+"url": "Catalog_ПараметрыИсчисляемогоСтраховогоСтажа"
+},
+{
+"name": "Catalog_ДополнительныеУсловия",
+"url": "Catalog_ДополнительныеУсловия"
+},
+{
+"name": "Catalog_ДоходыБудущихПериодов",
+"url": "Catalog_ДоходыБудущихПериодов"
+},
+{
+"name": "Document_НазначениеПлановогоУдержания",
+"url": "Document_НазначениеПлановогоУдержания"
+},
+{
+"name": "Document_НазначениеПлановогоУдержания_Сотрудники",
+"url": "Document_НазначениеПлановогоУдержания_Сотрудники"
+},
+{
+"name": "Document_НазначениеПлановогоУдержания_ПоказателиСотрудников",
+"url": "Document_НазначениеПлановогоУдержания_ПоказателиСотрудников"
+},
+{
+"name": "Document_НазначениеПлановогоУдержания_ФизическиеЛица",
+"url": "Document_НазначениеПлановогоУдержания_ФизическиеЛица"
+},
+{
+"name": "Document_КорректировкаОстатковПриПереходеСФИФОнаАВЕКО",
+"url": "Document_КорректировкаОстатковПриПереходеСФИФОнаАВЕКО"
+},
+{
+"name": "Document_КорректировкаОстатковПриПереходеСФИФОнаАВЕКО_Товары",
+"url": "Document_КорректировкаОстатковПриПереходеСФИФОнаАВЕКО_Товары"
+},
+{
+"name": "Document_КорректировкаОстатковПриПереходеСФИФОнаАВЕКО_СчетаУчета",
+"url": "Document_КорректировкаОстатковПриПереходеСФИФОнаАВЕКО_СчетаУчета"
+},
+{
+"name": "Catalog_Склады",
+"url": "Catalog_Склады"
+},
+{
+"name": "Catalog_Склады_ДополнительныеРеквизиты",
+"url": "Catalog_Склады_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_ДрайверыОборудования",
+"url": "Catalog_ДрайверыОборудования"
+},
+{
+"name": "Document_ИнвентаризацияНЗП",
+"url": "Document_ИнвентаризацияНЗП"
+},
+{
+"name": "Document_ИнвентаризацияНЗП_Состав",
+"url": "Document_ИнвентаризацияНЗП_Состав"
+},
+{
+"name": "Catalog_ИдентификаторыОбъектовМетаданных",
+"url": "Catalog_ИдентификаторыОбъектовМетаданных"
+},
+{
+"name": "Catalog_УчетныеЗаписиЭлектроннойПочты",
+"url": "Catalog_УчетныеЗаписиЭлектроннойПочты"
+},
+{
+"name": "Catalog_КассыОрганизаций",
+"url": "Catalog_КассыОрганизаций"
+},
+{
+"name": "Catalog_РазделыПланаСчетов",
+"url": "Catalog_РазделыПланаСчетов"
+},
+{
+"name": "Catalog_КлассификаторЕдиницИзмерения",
+"url": "Catalog_КлассификаторЕдиницИзмерения"
+},
+{
+"name": "Catalog_КлассификаторЛьготПоНалогообложению",
+"url": "Catalog_КлассификаторЛьготПоНалогообложению"
+},
+{
+"name": "Catalog_ОбщероссийскийКлассификаторПродукции",
+"url": "Catalog_ОбщероссийскийКлассификаторПродукции"
+},
+{
+"name": "Catalog_КлассификаторСпециальностейПоОбразованию",
+"url": "Catalog_КлассификаторСпециальностейПоОбразованию"
+},
+{
+"name": "Catalog_uzbled_КлассификаторСтанций",
+"url": "Catalog_uzbled_КлассификаторСтанций"
+},
+{
+"name": "Catalog_КлассификаторТНВЭД",
+"url": "Catalog_КлассификаторТНВЭД"
+},
+{
+"name": "Catalog_КлассификаторВидовЭкономическойДеятельности",
+"url": "Catalog_КлассификаторВидовЭкономическойДеятельности"
+},
+{
+"name": "Catalog_КлючиАналитикиУчетаЗатрат",
+"url": "Catalog_КлючиАналитикиУчетаЗатрат"
+},
+{
+"name": "Catalog_КлючиАналитикиУчетаНДС",
+"url": "Catalog_КлючиАналитикиУчетаНДС"
+},
+{
+"name": "Catalog_КолонкиОтчетов",
+"url": "Catalog_КолонкиОтчетов"
+},
+{
+"name": "Catalog_КонтактныеЛица",
+"url": "Catalog_КонтактныеЛица"
+},
+{
+"name": "Catalog_КонтактныеЛица_КонтактнаяИнформация",
+"url": "Catalog_КонтактныеЛица_КонтактнаяИнформация"
+},
+{
+"name": "Catalog_КонтактныеЛица_ДополнительныеРеквизиты",
+"url": "Catalog_КонтактныеЛица_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_Контрагенты",
+"url": "Catalog_Контрагенты"
+},
+{
+"name": "Catalog_Контрагенты_КонтактнаяИнформация",
+"url": "Catalog_Контрагенты_КонтактнаяИнформация"
+},
+{
+"name": "Catalog_Контрагенты_ДополнительныеРеквизиты",
+"url": "Catalog_Контрагенты_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_Контрагенты_ИсторияКПП",
+"url": "Catalog_Контрагенты_ИсторияКПП"
+},
+{
+"name": "Catalog_Контрагенты_ИсторияНаименований",
+"url": "Catalog_Контрагенты_ИсторияНаименований"
+},
+{
+"name": "Catalog_Контрагенты_ИсторияКонтактнойИнформации",
+"url": "Catalog_Контрагенты_ИсторияКонтактнойИнформации"
+},
+{
+"name": "Document_ФормированиеРезерваНаОбесценениеВНА",
+"url": "Document_ФормированиеРезерваНаОбесценениеВНА"
+},
+{
+"name": "Document_ФормированиеРезерваНаОбесценениеВНА_ОсновноеСредство",
+"url": "Document_ФормированиеРезерваНаОбесценениеВНА_ОсновноеСредство"
+},
+{
+"name": "Document_ФормированиеРезерваНаОбесценениеВНА_НематериальныеАктивы",
+"url": "Document_ФормированиеРезерваНаОбесценениеВНА_НематериальныеАктивы"
+},
+{
+"name": "Document_ФормированиеРезерваНаОбесценениеВНА_АктивыВФормеПраваПользования",
+"url": "Document_ФормированиеРезерваНаОбесценениеВНА_АктивыВФормеПраваПользования"
+},
+{
+"name": "Catalog_dibank_Контрагенты",
+"url": "Catalog_dibank_Контрагенты"
+},
+{
+"name": "Catalog_uzbled_Контрагенты",
+"url": "Catalog_uzbled_Контрагенты"
+},
+{
+"name": "Catalog_МедицинскиеОрганизации",
+"url": "Catalog_МедицинскиеОрганизации"
+},
+{
+"name": "Catalog_МетаданныеДляОграниченияДоступаДобавлениеИИзменение",
+"url": "Catalog_МетаданныеДляОграниченияДоступаДобавлениеИИзменение"
+},
+{
+"name": "Catalog_МетаданныеДляОграниченияДоступаЧтения",
+"url": "Catalog_МетаданныеДляОграниченияДоступаЧтения"
+},
+{
+"name": "Catalog_НазначениеЦелевыхСредств",
+"url": "Catalog_НазначениеЦелевыхСредств"
+},
+{
+"name": "Document_УдалитьНДФЛПерерасчет",
+"url": "Document_УдалитьНДФЛПерерасчет"
+},
+{
+"name": "Document_УдалитьНДФЛПерерасчет_РаботникиОрганизации",
+"url": "Document_УдалитьНДФЛПерерасчет_РаботникиОрганизации"
+},
+{
+"name": "Catalog_Регионы",
+"url": "Catalog_Регионы"
+},
+{
+"name": "Catalog_НазначенияИспользования",
+"url": "Catalog_НазначенияИспользования"
+},
+{
+"name": "Catalog_ОказанныеУслугиВРамкахВидовДеятельностиITPark",
+"url": "Catalog_ОказанныеУслугиВРамкахВидовДеятельностиITPark"
+},
+{
+"name": "Catalog_ВидыНалоговИПлатежейВБюджет",
+"url": "Catalog_ВидыНалоговИПлатежейВБюджет"
+},
+{
+"name": "Catalog_НалоговыеОрганы",
+"url": "Catalog_НалоговыеОрганы"
+},
+{
+"name": "Catalog_НалоговыеОрганы_Сертификаты",
+"url": "Catalog_НалоговыеОрганы_Сертификаты"
+},
+{
+"name": "Catalog_НаправленияИспользованияПрибыли",
+"url": "Catalog_НаправленияИспользованияПрибыли"
+},
+{
+"name": "Catalog_НациональностиФизическихЛиц",
+"url": "Catalog_НациональностиФизическихЛиц"
+},
+{
+"name": "Catalog_НематериальныеАктивы",
+"url": "Catalog_НематериальныеАктивы"
+},
+{
+"name": "Catalog_НематериальныеАктивы_ДополнительныеРеквизиты",
+"url": "Catalog_НематериальныеАктивы_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_Номенклатура",
+"url": "Catalog_Номенклатура"
+},
+{
+"name": "Catalog_Номенклатура_ДополнительныеРеквизиты",
+"url": "Catalog_Номенклатура_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_ДенежныеДокументы",
+"url": "Catalog_ДенежныеДокументы"
+},
+{
+"name": "Document_НачислениеПеней",
+"url": "Document_НачислениеПеней"
+},
+{
+"name": "Document_НачислениеПеней_Задолженность",
+"url": "Document_НачислениеПеней_Задолженность"
+},
+{
+"name": "Catalog_НоменклатурныеГруппы",
+"url": "Catalog_НоменклатурныеГруппы"
+},
+{
+"name": "Catalog_НоменклатурныеГруппы_ДополнительныеРеквизиты",
+"url": "Catalog_НоменклатурныеГруппы_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_НоменклатураПоставщиков",
+"url": "Catalog_НоменклатураПоставщиков"
+},
+{
+"name": "Catalog_НомераГТД",
+"url": "Catalog_НомераГТД"
+},
+{
+"name": "Document_УдалитьАнкетаЗастрахованногоЛица",
+"url": "Document_УдалитьАнкетаЗастрахованногоЛица"
+},
+{
+"name": "Document_УдалитьАнкетаЗастрахованногоЛица_РаботникиОрганизации",
+"url": "Document_УдалитьАнкетаЗастрахованногоЛица_РаботникиОрганизации"
+},
+{
+"name": "Catalog_НумераторСФ",
+"url": "Catalog_НумераторСФ"
+},
+{
+"name": "Catalog_ОбъектыСтроительства",
+"url": "Catalog_ОбъектыСтроительства"
+},
+{
+"name": "Document_ОприходованиеТоваров",
+"url": "Document_ОприходованиеТоваров"
+},
+{
+"name": "Document_ОприходованиеТоваров_Товары",
+"url": "Document_ОприходованиеТоваров_Товары"
+},
+{
+"name": "Catalog_Организации",
+"url": "Catalog_Организации"
+},
+{
+"name": "Catalog_Организации_КонтактнаяИнформация",
+"url": "Catalog_Организации_КонтактнаяИнформация"
+},
+{
+"name": "Catalog_Организации_ДополнительныеРеквизиты",
+"url": "Catalog_Организации_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_Организации_ИсторияНаименований",
+"url": "Catalog_Организации_ИсторияНаименований"
+},
+{
+"name": "Catalog_Организации_ИсторияКонтактнойИнформации",
+"url": "Catalog_Организации_ИсторияКонтактнойИнформации"
+},
+{
+"name": "Catalog_ПланыСчетовБД",
+"url": "Catalog_ПланыСчетовБД"
+},
+{
+"name": "Catalog_ПланыСчетовБД_СчетаИтогов",
+"url": "Catalog_ПланыСчетовБД_СчетаИтогов"
+},
+{
+"name": "Catalog_dibank_Организации",
+"url": "Catalog_dibank_Организации"
+},
+{
+"name": "Catalog_uzbled_Организации",
+"url": "Catalog_uzbled_Организации"
+},
+{
+"name": "Catalog_ОснованияИсчисляемогоСтраховогоСтажа",
+"url": "Catalog_ОснованияИсчисляемогоСтраховогоСтажа"
+},
+{
+"name": "Catalog_ПеречисленияБД",
+"url": "Catalog_ПеречисленияБД"
+},
+{
+"name": "Catalog_ПеречисленияБД_Реквизиты",
+"url": "Catalog_ПеречисленияБД_Реквизиты"
+},
+{
+"name": "Catalog_ОснованияПраваПодписи",
+"url": "Catalog_ОснованияПраваПодписи"
+},
+{
+"name": "Catalog_ОснованияУвольнения",
+"url": "Catalog_ОснованияУвольнения"
+},
+{
+"name": "Catalog_ОсновныеСредства",
+"url": "Catalog_ОсновныеСредства"
+},
+{
+"name": "Catalog_ОсновныеСредства_ДополнительныеРеквизиты",
+"url": "Catalog_ОсновныеСредства_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_ОсновныеСредства_КонтактнаяИнформация",
+"url": "Catalog_ОсновныеСредства_КонтактнаяИнформация"
+},
+{
+"name": "Document_СчетНаОплатуПоставщика",
+"url": "Document_СчетНаОплатуПоставщика"
+},
+{
+"name": "Document_СчетНаОплатуПоставщика_Товары",
+"url": "Document_СчетНаОплатуПоставщика_Товары"
+},
+{
+"name": "Document_СчетНаОплатуПоставщика_ВозвратнаяТара",
+"url": "Document_СчетНаОплатуПоставщика_ВозвратнаяТара"
+},
+{
+"name": "Document_СчетНаОплатуПоставщика_УдалитьУслуги",
+"url": "Document_СчетНаОплатуПоставщика_УдалитьУслуги"
+},
+{
+"name": "Document_НачислениеДивидендов",
+"url": "Document_НачислениеДивидендов"
+},
+{
+"name": "Document_НачислениеДивидендов_СписокУчредителей",
+"url": "Document_НачислениеДивидендов_СписокУчредителей"
+},
+{
+"name": "Catalog_Резервы",
+"url": "Catalog_Резервы"
+},
+{
+"name": "Catalog_ПапкиФайлов",
+"url": "Catalog_ПапкиФайлов"
+},
+{
+"name": "Catalog_ПапкиФайлов_ДополнительныеРеквизиты",
+"url": "Catalog_ПапкиФайлов_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_ПараметрыВыработкиОС",
+"url": "Catalog_ПараметрыВыработкиОС"
+},
+{
+"name": "Catalog_ПараметрыРасчетаРезервовПоДЗ",
+"url": "Catalog_ПараметрыРасчетаРезервовПоДЗ"
+},
+{
+"name": "Catalog_ПараметрыРасчетаРезервовПоЗапасам",
+"url": "Catalog_ПараметрыРасчетаРезервовПоЗапасам"
+},
+{
+"name": "Catalog_ПараметрыТиповойОперации",
+"url": "Catalog_ПараметрыТиповойОперации"
+},
+{
+"name": "Catalog_ПартииТоваров",
+"url": "Catalog_ПартииТоваров"
+},
+{
+"name": "Catalog_ПланыВидовХарактеристикБД",
+"url": "Catalog_ПланыВидовХарактеристикБД"
+},
+{
+"name": "Catalog_ПланыВидовХарактеристикБД_Реквизиты",
+"url": "Catalog_ПланыВидовХарактеристикБД_Реквизиты"
+},
+{
+"name": "Catalog_ПодключаемоеОборудование",
+"url": "Catalog_ПодключаемоеОборудование"
+},
+{
+"name": "Catalog_ПодключаемоеОборудование_ПараметрыРегистрации",
+"url": "Catalog_ПодключаемоеОборудование_ПараметрыРегистрации"
+},
+{
+"name": "Catalog_ТрудовыеДоговора",
+"url": "Catalog_ТрудовыеДоговора"
+},
+{
+"name": "Catalog_ПодразделенияОрганизаций",
+"url": "Catalog_ПодразделенияОрганизаций"
+},
+{
+"name": "Catalog_ПодразделенияОрганизаций_ДополнительныеРеквизиты",
+"url": "Catalog_ПодразделенияОрганизаций_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_ПодразделенияОрганизаций_КонтактнаяИнформация",
+"url": "Catalog_ПодразделенияОрганизаций_КонтактнаяИнформация"
+},
+{
+"name": "Catalog_ПоказателиОтчетов",
+"url": "Catalog_ПоказателиОтчетов"
+},
+{
+"name": "Catalog_ПоказателиОтчетов_ПоказателиДляКурсовВалют",
+"url": "Catalog_ПоказателиОтчетов_ПоказателиДляКурсовВалют"
+},
+{
+"name": "Catalog_СП_ПоказателиРасчетаЗарплаты",
+"url": "Catalog_СП_ПоказателиРасчетаЗарплаты"
+},
+{
+"name": "Catalog_СП_ПоказателиРасчетаЗарплаты_ШкалаОценкиСтажа",
+"url": "Catalog_СП_ПоказателиРасчетаЗарплаты_ШкалаОценкиСтажа"
+},
+{
+"name": "Catalog_СП_ПоказателиРасчетаЗарплаты_ДополнительныеРеквизиты",
+"url": "Catalog_СП_ПоказателиРасчетаЗарплаты_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_Пользователи",
+"url": "Catalog_Пользователи"
+},
+{
+"name": "Catalog_Пользователи_ДополнительныеРеквизиты",
+"url": "Catalog_Пользователи_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_Пользователи_КонтактнаяИнформация",
+"url": "Catalog_Пользователи_КонтактнаяИнформация"
+},
+{
+"name": "Catalog_ПредметыДоговора",
+"url": "Catalog_ПредметыДоговора"
+},
+{
+"name": "Catalog_ДоговорыКонтрагентовПрисоединенныеФайлы",
+"url": "Catalog_ДоговорыКонтрагентовПрисоединенныеФайлы"
+},
+{
+"name": "Catalog_ДоговорыКонтрагентовПрисоединенныеФайлы_УдалитьЭлектронныеПодписи",
+"url": "Catalog_ДоговорыКонтрагентовПрисоединенныеФайлы_УдалитьЭлектронныеПодписи"
+},
+{
+"name": "Catalog_ДоговорыКонтрагентовПрисоединенныеФайлы_УдалитьСертификатыШифрования",
+"url": "Catalog_ДоговорыКонтрагентовПрисоединенныеФайлы_УдалитьСертификатыШифрования"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг",
+"url": "Document_ПоступлениеТоваровУслуг"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_Оборудование",
+"url": "Document_ПоступлениеТоваровУслуг_Оборудование"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ОбъектыСтроительства",
+"url": "Document_ПоступлениеТоваровУслуг_ОбъектыСтроительства"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_Товары",
+"url": "Document_ПоступлениеТоваровУслуг_Товары"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_Услуги",
+"url": "Document_ПоступлениеТоваровУслуг_Услуги"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ВозвратнаяТара",
+"url": "Document_ПоступлениеТоваровУслуг_ВозвратнаяТара"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ЗачетАвансов",
+"url": "Document_ПоступлениеТоваровУслуг_ЗачетАвансов"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_АгентскиеУслуги",
+"url": "Document_ПоступлениеТоваровУслуг_АгентскиеУслуги"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ОсновныеСредства",
+"url": "Document_ПоступлениеТоваровУслуг_ОсновныеСредства"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_РаздельныйУчетВходящегоНДС",
+"url": "Document_ПоступлениеТоваровУслуг_РаздельныйУчетВходящегоНДС"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ДопРасходы",
+"url": "Document_ПоступлениеТоваровУслуг_ДопРасходы"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_УдалитьМаркировка",
+"url": "Document_ПоступлениеТоваровУслуг_УдалитьМаркировка"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ИнвентаризационнаяКомиссия",
+"url": "Document_ПоступлениеТоваровУслуг_ИнвентаризационнаяКомиссия"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_АдресаТТН",
+"url": "Document_ПоступлениеТоваровУслуг_АдресаТТН"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ПрицепыТТН",
+"url": "Document_ПоступлениеТоваровУслуг_ПрицепыТТН"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ВладельцыТранспорта",
+"url": "Document_ПоступлениеТоваровУслуг_ВладельцыТранспорта"
+},
+{
+"name": "Document_ПоступлениеТоваровУслуг_ТоварыТТН",
+"url": "Document_ПоступлениеТоваровУслуг_ТоварыТТН"
+},
+{
+"name": "Catalog_ОрганизацииПрисоединенныеФайлы",
+"url": "Catalog_ОрганизацииПрисоединенныеФайлы"
+},
+{
+"name": "Catalog_ОрганизацииПрисоединенныеФайлы_УдалитьЭлектронныеПодписи",
+"url": "Catalog_ОрганизацииПрисоединенныеФайлы_УдалитьЭлектронныеПодписи"
+},
+{
+"name": "Catalog_ОрганизацииПрисоединенныеФайлы_УдалитьСертификатыШифрования",
+"url": "Catalog_ОрганизацииПрисоединенныеФайлы_УдалитьСертификатыШифрования"
+},
+{
+"name": "Document_РеклассификацияДебиторскойИКредиторскойЗадолженности",
+"url": "Document_РеклассификацияДебиторскойИКредиторскойЗадолженности"
+},
+{
+"name": "Document_РеклассификацияДебиторскойИКредиторскойЗадолженности_Контрагенты",
+"url": "Document_РеклассификацияДебиторскойИКредиторскойЗадолженности_Контрагенты"
+},
+{
+"name": "Document_РеклассификацияДебиторскойИКредиторскойЗадолженности_СчетаРасчетов",
+"url": "Document_РеклассификацияДебиторскойИКредиторскойЗадолженности_СчетаРасчетов"
+},
+{
+"name": "Document_КорректировкаТМЗОСПриПереходеНаНДС",
+"url": "Document_КорректировкаТМЗОСПриПереходеНаНДС"
+},
+{
+"name": "Document_КорректировкаТМЗОСПриПереходеНаНДС_СписокСчетов",
+"url": "Document_КорректировкаТМЗОСПриПереходеНаНДС_СписокСчетов"
+},
+{
+"name": "Document_КорректировкаТМЗОСПриПереходеНаНДС_ТМЗ",
+"url": "Document_КорректировкаТМЗОСПриПереходеНаНДС_ТМЗ"
+},
+{
+"name": "Document_КорректировкаТМЗОСПриПереходеНаНДС_ОС",
+"url": "Document_КорректировкаТМЗОСПриПереходеНаНДС_ОС"
+},
+{
+"name": "Catalog_ПричиныОбесцененияВНА",
+"url": "Catalog_ПричиныОбесцененияВНА"
+},
+{
+"name": "Catalog_ПричиныСписанияОС",
+"url": "Catalog_ПричиныСписанияОС"
+},
+{
+"name": "Catalog_ПроектыВГосударственномСектореITPark",
+"url": "Catalog_ПроектыВГосударственномСектореITPark"
+},
+{
+"name": "Catalog_ПроизводственныеКалендари",
+"url": "Catalog_ПроизводственныеКалендари"
+},
+{
+"name": "Catalog_ПрочиеДоходыИРасходы",
+"url": "Catalog_ПрочиеДоходыИРасходы"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПродаж",
+"url": "Document_ФормированиеЗаписейКнигиПродаж"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПродаж_Реализация",
+"url": "Document_ФормированиеЗаписейКнигиПродаж_Реализация"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПродаж_Авансы",
+"url": "Document_ФормированиеЗаписейКнигиПродаж_Авансы"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПродаж_НачисленКУплате",
+"url": "Document_ФормированиеЗаписейКнигиПродаж_НачисленКУплате"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПродаж_ВосстановленПоАвансам",
+"url": "Document_ФормированиеЗаписейКнигиПродаж_ВосстановленПоАвансам"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПродаж_Восстановлен",
+"url": "Document_ФормированиеЗаписейКнигиПродаж_Восстановлен"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПродаж_НеОтражаетсяВКниге",
+"url": "Document_ФормированиеЗаписейКнигиПродаж_НеОтражаетсяВКниге"
+},
+{
+"name": "Catalog_РабочиеМеста",
+"url": "Catalog_РабочиеМеста"
+},
+{
+"name": "Catalog_РасходыБудущихПериодов",
+"url": "Catalog_РасходыБудущихПериодов"
+},
+{
+"name": "Catalog_РегистрацииВНалоговомОргане",
+"url": "Catalog_РегистрацииВНалоговомОргане"
+},
+{
+"name": "Catalog_РегистрыБухгалтерииБД",
+"url": "Catalog_РегистрыБухгалтерииБД"
+},
+{
+"name": "Catalog_РегистрыБухгалтерииБД_Измерения",
+"url": "Catalog_РегистрыБухгалтерииБД_Измерения"
+},
+{
+"name": "Catalog_РегистрыБухгалтерииБД_Ресурсы",
+"url": "Catalog_РегистрыБухгалтерииБД_Ресурсы"
+},
+{
+"name": "Catalog_РегистрыБухгалтерииБД_Реквизиты",
+"url": "Catalog_РегистрыБухгалтерииБД_Реквизиты"
+},
+{
+"name": "Document_ДепонированиеЗарплаты",
+"url": "Document_ДепонированиеЗарплаты"
+},
+{
+"name": "Document_ДепонированиеЗарплаты_Депоненты",
+"url": "Document_ДепонированиеЗарплаты_Депоненты"
+},
+{
+"name": "Catalog_РеестрДокументов",
+"url": "Catalog_РеестрДокументов"
+},
+{
+"name": "Catalog_Сертификаты1СОтчетности",
+"url": "Catalog_Сертификаты1СОтчетности"
+},
+{
+"name": "Catalog_СП_СменыРаботыСотрудников",
+"url": "Catalog_СП_СменыРаботыСотрудников"
+},
+{
+"name": "Catalog_СП_СменыРаботыСотрудников_Расписание",
+"url": "Catalog_СП_СменыРаботыСотрудников_Расписание"
+},
+{
+"name": "Catalog_Сотрудники",
+"url": "Catalog_Сотрудники"
+},
+{
+"name": "Catalog_Сотрудники_ДополнительныеРеквизиты",
+"url": "Catalog_Сотрудники_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_Сотрудники_УдалитьНаборыЗначенийДоступа",
+"url": "Catalog_Сотрудники_УдалитьНаборыЗначенийДоступа"
+},
+{
+"name": "Catalog_СпецификацииНоменклатуры",
+"url": "Catalog_СпецификацииНоменклатуры"
+},
+{
+"name": "Catalog_СпецификацииНоменклатуры_ИсходныеКомплектующие",
+"url": "Catalog_СпецификацииНоменклатуры_ИсходныеКомплектующие"
+},
+{
+"name": "Catalog_СпецификацииНоменклатуры_ВозвратныеОтходы",
+"url": "Catalog_СпецификацииНоменклатуры_ВозвратныеОтходы"
+},
+{
+"name": "Document_ПередачаОборудованияВМонтаж",
+"url": "Document_ПередачаОборудованияВМонтаж"
+},
+{
+"name": "Document_ПередачаОборудованияВМонтаж_Оборудование",
+"url": "Document_ПередачаОборудованияВМонтаж_Оборудование"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛСотрудникуС2015",
+"url": "Document_УдалитьСправкаПоНДФЛСотрудникуС2015"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛСотрудникуС2015_СведенияОДоходах",
+"url": "Document_УдалитьСправкаПоНДФЛСотрудникуС2015_СведенияОДоходах"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛСотрудникуС2015_СведенияОВычетах",
+"url": "Document_УдалитьСправкаПоНДФЛСотрудникуС2015_СведенияОВычетах"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛСотрудникуС2015_СуммыНалогов",
+"url": "Document_УдалитьСправкаПоНДФЛСотрудникуС2015_СуммыНалогов"
+},
+{
+"name": "Catalog_СпособыВыплатыЗарплаты",
+"url": "Catalog_СпособыВыплатыЗарплаты"
+},
+{
+"name": "Catalog_СпособыОкругленияПриРасчетеЗарплаты",
+"url": "Catalog_СпособыОкругленияПриРасчетеЗарплаты"
+},
+{
+"name": "Catalog_СпособыОтраженияРасходовПоАмортизации",
+"url": "Catalog_СпособыОтраженияРасходовПоАмортизации"
+},
+{
+"name": "Catalog_СпособыОтраженияРасходовПоАмортизации_Способы",
+"url": "Catalog_СпособыОтраженияРасходовПоАмортизации_Способы"
+},
+{
+"name": "Catalog_СпособыОтраженияЗарплатыВБухУчете",
+"url": "Catalog_СпособыОтраженияЗарплатыВБухУчете"
+},
+{
+"name": "Catalog_СпособыОтраженияЗарплатыВБухУчете_ДополнительныеРеквизиты",
+"url": "Catalog_СпособыОтраженияЗарплатыВБухУчете_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_СправочникиБД",
+"url": "Catalog_СправочникиБД"
+},
+{
+"name": "Catalog_СправочникиБД_Реквизиты",
+"url": "Catalog_СправочникиБД_Реквизиты"
+},
+{
+"name": "Catalog_СправочникиБД_Владельцы",
+"url": "Catalog_СправочникиБД_Владельцы"
+},
+{
+"name": "Catalog_СправочникиБД_ДоступныеФормыСхемРеквизитов",
+"url": "Catalog_СправочникиБД_ДоступныеФормыСхемРеквизитов"
+},
+{
+"name": "Catalog_СтатьиДвиженияДенежныхСредств",
+"url": "Catalog_СтатьиДвиженияДенежныхСредств"
+},
+{
+"name": "Catalog_СтатьиЗатрат",
+"url": "Catalog_СтатьиЗатрат"
+},
+{
+"name": "Catalog_СтатьиЗатратНаПриобретение",
+"url": "Catalog_СтатьиЗатратНаПриобретение"
+},
+{
+"name": "Catalog_СтепениРодстваФизЛиц",
+"url": "Catalog_СтепениРодстваФизЛиц"
+},
+{
+"name": "Document_АвизоМПЗИсходящее",
+"url": "Document_АвизоМПЗИсходящее"
+},
+{
+"name": "Document_АвизоМПЗИсходящее_Товары",
+"url": "Document_АвизоМПЗИсходящее_Товары"
+},
+{
+"name": "Document_АвизоМПЗИсходящее_ДанныеПоПартиям",
+"url": "Document_АвизоМПЗИсходящее_ДанныеПоПартиям"
+},
+{
+"name": "Document_АвизоМПЗИсходящее_ДанныеПоСФ",
+"url": "Document_АвизоМПЗИсходящее_ДанныеПоСФ"
+},
+{
+"name": "Catalog_СтраныМира",
+"url": "Catalog_СтраныМира"
+},
+{
+"name": "Catalog_СтрокиОтчетов",
+"url": "Catalog_СтрокиОтчетов"
+},
+{
+"name": "Catalog_Субконто",
+"url": "Catalog_Субконто"
+},
+{
+"name": "Document_КорректировкаТорговойНаценкиПриИзмененииСпособаУчетаНаценки",
+"url": "Document_КорректировкаТорговойНаценкиПриИзмененииСпособаУчетаНаценки"
+},
+{
+"name": "Document_КорректировкаТорговойНаценкиПриИзмененииСпособаУчетаНаценки_Товары",
+"url": "Document_КорректировкаТорговойНаценкиПриИзмененииСпособаУчетаНаценки_Товары"
+},
+{
+"name": "Catalog_СчетаБД",
+"url": "Catalog_СчетаБД"
+},
+{
+"name": "Catalog_СчетаБД_ВидыСубконто",
+"url": "Catalog_СчетаБД_ВидыСубконто"
+},
+{
+"name": "Catalog_СчетаУчетаКурсовыхРазниц",
+"url": "Catalog_СчетаУчетаКурсовыхРазниц"
+},
+{
+"name": "Catalog_ТарифныеРазряды",
+"url": "Catalog_ТарифныеРазряды"
+},
+{
+"name": "Document_УдалитьПриемНаРаботуВОрганизацию",
+"url": "Document_УдалитьПриемНаРаботуВОрганизацию"
+},
+{
+"name": "Document_УдалитьПриемНаРаботуВОрганизацию_РаботникиОрганизации",
+"url": "Document_УдалитьПриемНаРаботуВОрганизацию_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьПриемНаРаботуВОрганизацию_ОсновныеНачисления",
+"url": "Document_УдалитьПриемНаРаботуВОрганизацию_ОсновныеНачисления"
+},
+{
+"name": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР",
+"url": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР"
+},
+{
+"name": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_РаботникиОрганизации",
+"url": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_СведенияОЗаработке",
+"url": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_СведенияОЗаработке"
+},
+{
+"name": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_СведенияОЗаработкеНаВредныхИТяжелыхРаботах",
+"url": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_СведенияОЗаработкеНаВредныхИТяжелыхРаботах"
+},
+{
+"name": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_ЗаписиОСтаже",
+"url": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_ЗаписиОСтаже"
+},
+{
+"name": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_НачисленныеУплаченныеВзносы",
+"url": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_НачисленныеУплаченныеВзносы"
+},
+{
+"name": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_УплаченныеВзносыРасшифровка",
+"url": "Document_УдалитьДанныеОКорректировкеСведенийЗастрахованныхЛицСЗВ_КОРР_УплаченныеВзносыРасшифровка"
+},
+{
+"name": "Catalog_ТерриториальныеУсловияПФР",
+"url": "Catalog_ТерриториальныеУсловияПФР"
+},
+{
+"name": "Catalog_ТехнологическиеОперации",
+"url": "Catalog_ТехнологическиеОперации"
+},
+{
+"name": "Catalog_ТиповыеОперации",
+"url": "Catalog_ТиповыеОперации"
+},
+{
+"name": "Catalog_ТиповыеОперации_Хозрасчетный",
+"url": "Catalog_ТиповыеОперации_Хозрасчетный"
+},
+{
+"name": "Catalog_ТиповыеОперации_ДвиженияРегистров",
+"url": "Catalog_ТиповыеОперации_ДвиженияРегистров"
+},
+{
+"name": "Catalog_ТипыДокументовПодтверждающихЛьготуНДС",
+"url": "Catalog_ТипыДокументовПодтверждающихЛьготуНДС"
+},
+{
+"name": "Catalog_ТипыБазДанных",
+"url": "Catalog_ТипыБазДанных"
+},
+{
+"name": "Catalog_ТипыБазДанных_СоответствиеВидовСубконто",
+"url": "Catalog_ТипыБазДанных_СоответствиеВидовСубконто"
+},
+{
+"name": "Catalog_ТипыПоказателей",
+"url": "Catalog_ТипыПоказателей"
+},
+{
+"name": "Catalog_ТипыЦенНоменклатуры",
+"url": "Catalog_ТипыЦенНоменклатуры"
+},
+{
+"name": "Document_Увольнение",
+"url": "Document_Увольнение"
+},
+{
+"name": "Document_Увольнение_Сотрудники",
+"url": "Document_Увольнение_Сотрудники"
+},
+{
+"name": "Document_ВозвратМатериаловИзЭксплуатации",
+"url": "Document_ВозвратМатериаловИзЭксплуатации"
+},
+{
+"name": "Document_ВозвратМатериаловИзЭксплуатации_Спецодежда",
+"url": "Document_ВозвратМатериаловИзЭксплуатации_Спецодежда"
+},
+{
+"name": "Document_ВозвратМатериаловИзЭксплуатации_Спецоснастка",
+"url": "Document_ВозвратМатериаловИзЭксплуатации_Спецоснастка"
+},
+{
+"name": "Document_ВозвратМатериаловИзЭксплуатации_ИнвентарьИХозяйственныеПринадлежности",
+"url": "Document_ВозвратМатериаловИзЭксплуатации_ИнвентарьИХозяйственныеПринадлежности"
+},
+{
+"name": "Catalog_ТранспортныеСредства",
+"url": "Catalog_ТранспортныеСредства"
+},
+{
+"name": "Document_ПачкаРазделов6РасчетаРСВ_1",
+"url": "Document_ПачкаРазделов6РасчетаРСВ_1"
+},
+{
+"name": "Document_ПачкаРазделов6РасчетаРСВ_1_Сотрудники",
+"url": "Document_ПачкаРазделов6РасчетаРСВ_1_Сотрудники"
+},
+{
+"name": "Document_ПачкаРазделов6РасчетаРСВ_1_СведенияОЗаработке",
+"url": "Document_ПачкаРазделов6РасчетаРСВ_1_СведенияОЗаработке"
+},
+{
+"name": "Document_ПачкаРазделов6РасчетаРСВ_1_СведенияОЗаработкеНаВредныхИТяжелыхРаботах",
+"url": "Document_ПачкаРазделов6РасчетаРСВ_1_СведенияОЗаработкеНаВредныхИТяжелыхРаботах"
+},
+{
+"name": "Document_ПачкаРазделов6РасчетаРСВ_1_ЗаписиОСтаже",
+"url": "Document_ПачкаРазделов6РасчетаРСВ_1_ЗаписиОСтаже"
+},
+{
+"name": "Document_ПачкаРазделов6РасчетаРСВ_1_ФизическиеЛица",
+"url": "Document_ПачкаРазделов6РасчетаРСВ_1_ФизическиеЛица"
+},
+{
+"name": "Document_ПачкаРазделов6РасчетаРСВ_1_КорректирующиеСведения",
+"url": "Document_ПачкаРазделов6РасчетаРСВ_1_КорректирующиеСведения"
+},
+{
+"name": "Catalog_УчебныеЗаведения",
+"url": "Catalog_УчебныеЗаведения"
+},
+{
+"name": "Catalog_УчетныеЗаписиДокументооборота",
+"url": "Catalog_УчетныеЗаписиДокументооборота"
+},
+{
+"name": "Catalog_УчетныеЗаписиДокументооборота_ПредыдущиеСертификаты",
+"url": "Catalog_УчетныеЗаписиДокументооборота_ПредыдущиеСертификаты"
+},
+{
+"name": "Catalog_Файлы",
+"url": "Catalog_Файлы"
+},
+{
+"name": "Catalog_Файлы_ДополнительныеРеквизиты",
+"url": "Catalog_Файлы_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_Файлы_УдалитьСертификатыШифрования",
+"url": "Catalog_Файлы_УдалитьСертификатыШифрования"
+},
+{
+"name": "Catalog_ФизическиеЛица",
+"url": "Catalog_ФизическиеЛица"
+},
+{
+"name": "Catalog_ФизическиеЛица_КонтактнаяИнформация",
+"url": "Catalog_ФизическиеЛица_КонтактнаяИнформация"
+},
+{
+"name": "Catalog_ФизическиеЛица_ДополнительныеРеквизиты",
+"url": "Catalog_ФизическиеЛица_ДополнительныеРеквизиты"
+},
+{
+"name": "Catalog_ФизическиеЛица_Стажи",
+"url": "Catalog_ФизическиеЛица_Стажи"
+},
+{
+"name": "Catalog_ФизическиеЛица_СоставСемьи",
+"url": "Catalog_ФизическиеЛица_СоставСемьи"
+},
+{
+"name": "Catalog_ФизическиеЛица_Образование",
+"url": "Catalog_ФизическиеЛица_Образование"
+},
+{
+"name": "Catalog_ЦенныеБумаги",
+"url": "Catalog_ЦенныеБумаги"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_НДФЛСведенияОДоходах",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_НДФЛСведенияОДоходах"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_НДФЛИсчисленный13",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_НДФЛИсчисленный13"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_НДФЛПредоставленныеВычеты",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_НДФЛПредоставленныеВычеты"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_НДФЛУдержанный",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_НДФЛУдержанный"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ЕСНСведенияОДоходах",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ЕСНСведенияОДоходах"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ЕСННалоги",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ЕСННалоги"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ПособияСоциальномуСтрахованию",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ПособияСоциальномуСтрахованию"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ПособияПоУходуЗаРебенкомДоПолутораЛет",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ПособияПоУходуЗаРебенкомДоПолутораЛет"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_СтраховыеВзносыСведенияОДоходах",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_СтраховыеВзносыСведенияОДоходах"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_СтраховыеВзносы",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_СтраховыеВзносы"
+},
+{
+"name": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ФизическиеЛица",
+"url": "Document_УдалитьНДФЛиЕСНДоходыИНалоги_ФизическиеЛица"
+},
+{
+"name": "Document_УдалитьВводСведенийОПлановыхНачисленияхРаботниковОрганизаций",
+"url": "Document_УдалитьВводСведенийОПлановыхНачисленияхРаботниковОрганизаций"
+},
+{
+"name": "Document_УдалитьВводСведенийОПлановыхНачисленияхРаботниковОрганизаций_ОсновныеНачисления",
+"url": "Document_УдалитьВводСведенийОПлановыхНачисленияхРаботниковОрганизаций_ОсновныеНачисления"
+},
+{
+"name": "Document_УдалитьНДФЛВозвратНалога",
+"url": "Document_УдалитьНДФЛВозвратНалога"
+},
+{
+"name": "Document_УдалитьНДФЛВозвратНалога_РаботникиОрганизации",
+"url": "Document_УдалитьНДФЛВозвратНалога_РаботникиОрганизации"
+},
+{
+"name": "Document_АвизоОСИсходящее",
+"url": "Document_АвизоОСИсходящее"
+},
+{
+"name": "Document_АвизоОСИсходящее_ОС",
+"url": "Document_АвизоОСИсходящее_ОС"
+},
+{
+"name": "Document_УдалитьДепонированиеОрганизаций",
+"url": "Document_УдалитьДепонированиеОрганизаций"
+},
+{
+"name": "Document_УдалитьДепонированиеОрганизаций_ДепонированиеЗаработнойПлаты",
+"url": "Document_УдалитьДепонированиеОрганизаций_ДепонированиеЗаработнойПлаты"
+},
+{
+"name": "Document_УдалитьДепонированиеОрганизаций_Работники",
+"url": "Document_УдалитьДепонированиеОрганизаций_Работники"
+},
+{
+"name": "Document_УдалитьЗаявкаНаОткрытиеСчетов",
+"url": "Document_УдалитьЗаявкаНаОткрытиеСчетов"
+},
+{
+"name": "Document_УдалитьЗаявкаНаОткрытиеСчетов_РаботникиОрганизации",
+"url": "Document_УдалитьЗаявкаНаОткрытиеСчетов_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьЗаявлениеАбонентаСпецоператораСвязи",
+"url": "Document_УдалитьЗаявлениеАбонентаСпецоператораСвязи"
+},
+{
+"name": "Document_УдалитьЗаявлениеАбонентаСпецоператораСвязи_Получатели",
+"url": "Document_УдалитьЗаявлениеАбонентаСпецоператораСвязи_Получатели"
+},
+{
+"name": "Document_УдалитьЗаявлениеОПодтвержденииПраваНаЗачетАвансовПоНДФЛ",
+"url": "Document_УдалитьЗаявлениеОПодтвержденииПраваНаЗачетАвансовПоНДФЛ"
+},
+{
+"name": "Document_УдалитьЗаявлениеОПодтвержденииПраваНаЗачетАвансовПоНДФЛ_РаботникиОрганизации",
+"url": "Document_УдалитьЗаявлениеОПодтвержденииПраваНаЗачетАвансовПоНДФЛ_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьКадровоеПеремещениеОрганизаций",
+"url": "Document_УдалитьКадровоеПеремещениеОрганизаций"
+},
+{
+"name": "Document_УдалитьКадровоеПеремещениеОрганизаций_РаботникиОрганизации",
+"url": "Document_УдалитьКадровоеПеремещениеОрганизаций_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьКадровоеПеремещениеОрганизаций_ОсновныеНачисления",
+"url": "Document_УдалитьКадровоеПеремещениеОрганизаций_ОсновныеНачисления"
+},
+{
+"name": "Document_УдалитьНачислениеЗарплатыРаботникамОрганизаций",
+"url": "Document_УдалитьНачислениеЗарплатыРаботникамОрганизаций"
+},
+{
+"name": "Document_УдалитьНачислениеЗарплатыРаботникамОрганизаций_Начисления",
+"url": "Document_УдалитьНачислениеЗарплатыРаботникамОрганизаций_Начисления"
+},
+{
+"name": "Document_УдалитьНачислениеЗарплатыРаботникамОрганизаций_НДФЛ",
+"url": "Document_УдалитьНачислениеЗарплатыРаботникамОрганизаций_НДФЛ"
+},
+{
+"name": "Document_УдалитьРасчетЕСН",
+"url": "Document_УдалитьРасчетЕСН"
+},
+{
+"name": "Document_УдалитьРасчетЕСН_ОсновныеНачисления",
+"url": "Document_УдалитьРасчетЕСН_ОсновныеНачисления"
+},
+{
+"name": "Document_УдалитьРасчетЕСН_ИсчисленныйЕСН",
+"url": "Document_УдалитьРасчетЕСН_ИсчисленныйЕСН"
+},
+{
+"name": "Document_УдалитьРасчетЕСН_ИсчисленныеСтраховыеВзносы",
+"url": "Document_УдалитьРасчетЕСН_ИсчисленныеСтраховыеВзносы"
+},
+{
+"name": "Document_УдалитьПередачаСЗВ4вПФР",
+"url": "Document_УдалитьПередачаСЗВ4вПФР"
+},
+{
+"name": "Document_УдалитьПередачаСЗВ4вПФР_ПачкиДокументов",
+"url": "Document_УдалитьПередачаСЗВ4вПФР_ПачкиДокументов"
+},
+{
+"name": "Document_УдалитьПередачаСЗВ4вПФР_СведенияОЗадолженности",
+"url": "Document_УдалитьПередачаСЗВ4вПФР_СведенияОЗадолженности"
+},
+{
+"name": "Document_УдалитьПередачаСЗВ4вПФР_ПачкиДокументов2013",
+"url": "Document_УдалитьПередачаСЗВ4вПФР_ПачкиДокументов2013"
+},
+{
+"name": "Document_УдалитьПередачаСЗВ4вПФР_ПачкиДокументов2014",
+"url": "Document_УдалитьПередачаСЗВ4вПФР_ПачкиДокументов2014"
+},
+{
+"name": "Document_УдалитьОтражениеЗарплатыВУчете",
+"url": "Document_УдалитьОтражениеЗарплатыВУчете"
+},
+{
+"name": "Document_УдалитьОтражениеЗарплатыВУчете_ОтражениеВУчете",
+"url": "Document_УдалитьОтражениеЗарплатыВУчете_ОтражениеВУчете"
+},
+{
+"name": "Document_УдалитьПачкаДокументовСПВ_2",
+"url": "Document_УдалитьПачкаДокументовСПВ_2"
+},
+{
+"name": "Document_УдалитьПачкаДокументовСПВ_2_РаботникиОрганизации",
+"url": "Document_УдалитьПачкаДокументовСПВ_2_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьПачкаДокументовСПВ_2_ЗаписиОСтаже",
+"url": "Document_УдалитьПачкаДокументовСПВ_2_ЗаписиОСтаже"
+},
+{
+"name": "Document_ВыгрузкаРегламентированныхОтчетов",
+"url": "Document_ВыгрузкаРегламентированныхОтчетов"
+},
+{
+"name": "Document_ВыгрузкаРегламентированныхОтчетов_Основная",
+"url": "Document_ВыгрузкаРегламентированныхОтчетов_Основная"
+},
+{
+"name": "Document_ВыгрузкаРегламентированныхОтчетов_Выгрузки",
+"url": "Document_ВыгрузкаРегламентированныхОтчетов_Выгрузки"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛСотруднику",
+"url": "Document_УдалитьСправкаПоНДФЛСотруднику"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛСотруднику_СведенияОДоходах",
+"url": "Document_УдалитьСправкаПоНДФЛСотруднику_СведенияОДоходах"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛСотруднику_СведенияОВычетах",
+"url": "Document_УдалитьСправкаПоНДФЛСотруднику_СведенияОВычетах"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛСотруднику_СуммыНалогов",
+"url": "Document_УдалитьСправкаПоНДФЛСотруднику_СуммыНалогов"
+},
+{
+"name": "Document_УдалитьПачкаДокументовСЗВ_6_4",
+"url": "Document_УдалитьПачкаДокументовСЗВ_6_4"
+},
+{
+"name": "Document_УдалитьПачкаДокументовСЗВ_6_4_РаботникиОрганизации",
+"url": "Document_УдалитьПачкаДокументовСЗВ_6_4_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьПачкаДокументовСЗВ_6_4_СведенияОЗаработке",
+"url": "Document_УдалитьПачкаДокументовСЗВ_6_4_СведенияОЗаработке"
+},
+{
+"name": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1",
+"url": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1"
+},
+{
+"name": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1_РаботникиОрганизации",
+"url": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1_СведенияОЗаработке",
+"url": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1_СведенияОЗаработке"
+},
+{
+"name": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1_СведенияОЗаработкеНаВредныхИТяжелыхРаботах",
+"url": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1_СведенияОЗаработкеНаВредныхИТяжелыхРаботах"
+},
+{
+"name": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1_ЗаписиОСтаже",
+"url": "Document_УдалитьПачкаРазделов6РасчетаРСВ_1_ЗаписиОСтаже"
+},
+{
+"name": "Document_УдалитьПередачаДСВвПФР",
+"url": "Document_УдалитьПередачаДСВвПФР"
+},
+{
+"name": "Document_УдалитьПередачаДСВвПФР_РаботникиОрганизации",
+"url": "Document_УдалитьПередачаДСВвПФР_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьНДФЛПодтверждениеПраваНаИмущественныйВычет",
+"url": "Document_УдалитьНДФЛПодтверждениеПраваНаИмущественныйВычет"
+},
+{
+"name": "Document_УдалитьНДФЛПодтверждениеПраваНаИмущественныйВычет_РаботникиОрганизации",
+"url": "Document_УдалитьНДФЛПодтверждениеПраваНаИмущественныйВычет_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьРасчетыПоСтраховымВзносам",
+"url": "Document_УдалитьРасчетыПоСтраховымВзносам"
+},
+{
+"name": "Document_СчетФактураВыданный",
+"url": "Document_СчетФактураВыданный"
+},
+{
+"name": "Document_СчетФактураВыданный_ДокументыОснования",
+"url": "Document_СчетФактураВыданный_ДокументыОснования"
+},
+{
+"name": "Document_СчетФактураВыданный_ПлатежноРасчетныеДокументы",
+"url": "Document_СчетФактураВыданный_ПлатежноРасчетныеДокументы"
+},
+{
+"name": "Document_СчетФактураВыданный_Авансы",
+"url": "Document_СчетФактураВыданный_Авансы"
+},
+{
+"name": "Document_УдалитьРегистрацияОплатыНДСВБюджет",
+"url": "Document_УдалитьРегистрацияОплатыНДСВБюджет"
+},
+{
+"name": "Document_УдалитьРегистрацияОплатыНДСВБюджет_ОплатаПоДоговорамНалоговогоАгента",
+"url": "Document_УдалитьРегистрацияОплатыНДСВБюджет_ОплатаПоДоговорамНалоговогоАгента"
+},
+{
+"name": "Document_УдалитьРегистрацияОплатыНДСВБюджет_ОплатаДляСобственногоПотребления",
+"url": "Document_УдалитьРегистрацияОплатыНДСВБюджет_ОплатаДляСобственногоПотребления"
+},
+{
+"name": "Document_УдалитьСведенияОВзносахИСтраховомСтажеСПВ1",
+"url": "Document_УдалитьСведенияОВзносахИСтраховомСтажеСПВ1"
+},
+{
+"name": "Document_УдалитьСведенияОВзносахИСтраховомСтажеСПВ1_РаботникиОрганизации",
+"url": "Document_УдалитьСведенияОВзносахИСтраховомСтажеСПВ1_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьСведенияОДоходахФизлиц",
+"url": "Document_УдалитьСведенияОДоходахФизлиц"
+},
+{
+"name": "Document_УдалитьСведенияОДоходахФизлиц_РаботникиОрганизации",
+"url": "Document_УдалитьСведенияОДоходахФизлиц_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьСведенияОДоходахФизлиц_ПеречисленоНДФЛПоФизлицам",
+"url": "Document_УдалитьСведенияОДоходахФизлиц_ПеречисленоНДФЛПоФизлицам"
+},
+{
+"name": "Document_УдалитьСведенияОДоходахФизлиц_ПеречисленоНДФЛВсего",
+"url": "Document_УдалитьСведенияОДоходахФизлиц_ПеречисленоНДФЛВсего"
+},
+{
+"name": "Document_УдалитьСведенияОЗастрахованныхЛицахСЗВ_М",
+"url": "Document_УдалитьСведенияОЗастрахованныхЛицахСЗВ_М"
+},
+{
+"name": "Document_УдалитьСведенияОЗастрахованныхЛицахСЗВ_М_РаботникиОрганизации",
+"url": "Document_УдалитьСведенияОЗастрахованныхЛицахСЗВ_М_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьСведенияОСтраховомСтажеЗастрахованныхЛицСЗВ_СТАЖ",
+"url": "Document_УдалитьСведенияОСтраховомСтажеЗастрахованныхЛицСЗВ_СТАЖ"
+},
+{
+"name": "Document_УдалитьСведенияОСтраховомСтажеЗастрахованныхЛицСЗВ_СТАЖ_РаботникиОрганизации",
+"url": "Document_УдалитьСведенияОСтраховомСтажеЗастрахованныхЛицСЗВ_СТАЖ_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьСведенияОСтраховомСтажеЗастрахованныхЛицСЗВ_СТАЖ_ЗаписиОСтаже",
+"url": "Document_УдалитьСведенияОСтраховомСтажеЗастрахованныхЛицСЗВ_СТАЖ_ЗаписиОСтаже"
+},
+{
+"name": "Document_УдалитьСведенияОСтраховомСтажеЗастрахованныхЛицСЗВ_СТАЖ_ДосрочноеНазначениеПенсии",
+"url": "Document_УдалитьСведенияОСтраховомСтажеЗастрахованныхЛицСЗВ_СТАЖ_ДосрочноеНазначениеПенсии"
+},
+{
+"name": "Document_УдалитьСведенияОТрудовомСтажеИЗаработкеСЗВ4",
+"url": "Document_УдалитьСведенияОТрудовомСтажеИЗаработкеСЗВ4"
+},
+{
+"name": "Document_УдалитьСведенияОТрудовомСтажеИЗаработкеСЗВ4_РаботникиОрганизации",
+"url": "Document_УдалитьСведенияОТрудовомСтажеИЗаработкеСЗВ4_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьСписаниеДепонентовВДоходыОрганизаций",
+"url": "Document_УдалитьСписаниеДепонентовВДоходыОрганизаций"
+},
+{
+"name": "Document_УдалитьСписаниеДепонентовВДоходыОрганизаций_ВыплатаДепонентов",
+"url": "Document_УдалитьСписаниеДепонентовВДоходыОрганизаций_ВыплатаДепонентов"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган_СотрудникиОрганизации",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган_СотрудникиОрганизации"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган_СведенияОДоходах",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган_СведенияОДоходах"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган_СведенияОВычетах",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган_СведенияОВычетах"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган_СуммыНалогов",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрган_СуммыНалогов"
+},
+{
+"name": "Document_РегламентированныйОтчет",
+"url": "Document_РегламентированныйОтчет"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015_СотрудникиОрганизации",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015_СотрудникиОрганизации"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015_СведенияОДоходах",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015_СведенияОДоходах"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015_СведенияОВычетах",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015_СведенияОВычетах"
+},
+{
+"name": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015_СуммыНалогов",
+"url": "Document_УдалитьСправкаПоНДФЛВНалоговыйОрганС2015_СуммыНалогов"
+},
+{
+"name": "Document_АвансовыйОтчет",
+"url": "Document_АвансовыйОтчет"
+},
+{
+"name": "Document_АвансовыйОтчет_ВыданныеАвансы",
+"url": "Document_АвансовыйОтчет_ВыданныеАвансы"
+},
+{
+"name": "Document_АвансовыйОтчет_Товары",
+"url": "Document_АвансовыйОтчет_Товары"
+},
+{
+"name": "Document_АвансовыйОтчет_ВозвратнаяТара",
+"url": "Document_АвансовыйОтчет_ВозвратнаяТара"
+},
+{
+"name": "Document_АвансовыйОтчет_ОплатаПоставщикам",
+"url": "Document_АвансовыйОтчет_ОплатаПоставщикам"
+},
+{
+"name": "Document_АвансовыйОтчет_Прочее",
+"url": "Document_АвансовыйОтчет_Прочее"
+},
+{
+"name": "Document_АвансовыйОтчет_РаздельныйУчетВходящегоНДС",
+"url": "Document_АвансовыйОтчет_РаздельныйУчетВходящегоНДС"
+},
+{
+"name": "Document_АвансовыйПлатежИностранцаПоНДФЛ",
+"url": "Document_АвансовыйПлатежИностранцаПоНДФЛ"
+},
+{
+"name": "Document_АвансовыйПлатежИностранцаПоНДФЛ_ДополнительныеРеквизиты",
+"url": "Document_АвансовыйПлатежИностранцаПоНДФЛ_ДополнительныеРеквизиты"
+},
+{
+"name": "Document_АвизоМПЗВходящее",
+"url": "Document_АвизоМПЗВходящее"
+},
+{
+"name": "Document_АвизоМПЗВходящее_ДанныеПоПартиям",
+"url": "Document_АвизоМПЗВходящее_ДанныеПоПартиям"
+},
+{
+"name": "Document_АвизоМПЗВходящее_ДанныеПоСФ",
+"url": "Document_АвизоМПЗВходящее_ДанныеПоСФ"
+},
+{
+"name": "Document_ДокументРасчетовСКонтрагентом",
+"url": "Document_ДокументРасчетовСКонтрагентом"
+},
+{
+"name": "Document_АвизоОСВходящее",
+"url": "Document_АвизоОСВходящее"
+},
+{
+"name": "Document_АвизоОСВходящее_ОС",
+"url": "Document_АвизоОСВходящее_ОС"
+},
+{
+"name": "Document_АвизоРасчетыИсходящее",
+"url": "Document_АвизоРасчетыИсходящее"
+},
+{
+"name": "Document_АвизоРасчетыИсходящее_СуммыДолга",
+"url": "Document_АвизоРасчетыИсходящее_СуммыДолга"
+},
+{
+"name": "Document_АвизоПрочееВходящее",
+"url": "Document_АвизоПрочееВходящее"
+},
+{
+"name": "Document_АвизоПрочееВходящее_ДанныеБух",
+"url": "Document_АвизоПрочееВходящее_ДанныеБух"
+},
+{
+"name": "Document_УстановкаПорядкаЗакрытияПодразделений",
+"url": "Document_УстановкаПорядкаЗакрытияПодразделений"
+},
+{
+"name": "Document_УстановкаПорядкаЗакрытияПодразделений_ПорядокЗакрытия",
+"url": "Document_УстановкаПорядкаЗакрытияПодразделений_ПорядокЗакрытия"
+},
+{
+"name": "Document_АвизоПрочееИсходящее",
+"url": "Document_АвизоПрочееИсходящее"
+},
+{
+"name": "Document_АвизоПрочееИсходящее_ДанныеБух",
+"url": "Document_АвизоПрочееИсходящее_ДанныеБух"
+},
+{
+"name": "Document_АктПроверкиСтраховыхВзносов",
+"url": "Document_АктПроверкиСтраховыхВзносов"
+},
+{
+"name": "Document_АктПроверкиСтраховыхВзносов_Взносы",
+"url": "Document_АктПроверкиСтраховыхВзносов_Взносы"
+},
+{
+"name": "Document_АктПроверкиСтраховыхВзносов_СведенияОДоходах",
+"url": "Document_АктПроверкиСтраховыхВзносов_СведенияОДоходах"
+},
+{
+"name": "Document_АктПроверкиСтраховыхВзносов_ФизическиеЛица",
+"url": "Document_АктПроверкиСтраховыхВзносов_ФизическиеЛица"
+},
+{
+"name": "Document_БольничныйЛист",
+"url": "Document_БольничныйЛист"
+},
+{
+"name": "Document_БольничныйЛист_Начисления",
+"url": "Document_БольничныйЛист_Начисления"
+},
+{
+"name": "Document_БольничныйЛист_СреднийЗаработокФСС",
+"url": "Document_БольничныйЛист_СреднийЗаработокФСС"
+},
+{
+"name": "Document_БольничныйЛист_ОтработанноеВремяДляСреднегоФСС",
+"url": "Document_БольничныйЛист_ОтработанноеВремяДляСреднегоФСС"
+},
+{
+"name": "Document_БольничныйЛист_НДФЛ",
+"url": "Document_БольничныйЛист_НДФЛ"
+},
+{
+"name": "Document_БольничныйЛист_ПримененныеВычетыНаДетейИИмущественные",
+"url": "Document_БольничныйЛист_ПримененныеВычетыНаДетейИИмущественные"
+},
+{
+"name": "Document_БольничныйЛист_КорректировкиВыплаты",
+"url": "Document_БольничныйЛист_КорректировкиВыплаты"
+},
+{
+"name": "Document_ИзменениеСпециальногоКоэффициентаНМА",
+"url": "Document_ИзменениеСпециальногоКоэффициентаНМА"
+},
+{
+"name": "Document_ИзменениеСпециальногоКоэффициентаНМА_НМА",
+"url": "Document_ИзменениеСпециальногоКоэффициентаНМА_НМА"
+},
+{
+"name": "Document_УдержаниеУИсточникаВыплатыНДФЛ",
+"url": "Document_УдержаниеУИсточникаВыплатыНДФЛ"
+},
+{
+"name": "Document_УдержаниеУИсточникаВыплатыНДФЛ_НДФЛСведенияОДоходах",
+"url": "Document_УдержаниеУИсточникаВыплатыНДФЛ_НДФЛСведенияОДоходах"
+},
+{
+"name": "Document_УдержаниеУИсточникаВыплатыНДФЛ_НДФЛИсчисленныйШкала",
+"url": "Document_УдержаниеУИсточникаВыплатыНДФЛ_НДФЛИсчисленныйШкала"
+},
+{
+"name": "Document_УдержаниеУИсточникаВыплатыНДФЛ_НДФЛУдержанный",
+"url": "Document_УдержаниеУИсточникаВыплатыНДФЛ_НДФЛУдержанный"
+},
+{
+"name": "Document_УдержаниеУИсточникаВыплатыНДФЛ_ОтражениеВУчете",
+"url": "Document_УдержаниеУИсточникаВыплатыНДФЛ_ОтражениеВУчете"
+},
+{
+"name": "Document_ВводНачальныхОстатков",
+"url": "Document_ВводНачальныхОстатков"
+},
+{
+"name": "Document_ВводНачальныхОстатков_ОС",
+"url": "Document_ВводНачальныхОстатков_ОС"
+},
+{
+"name": "Document_ВводНачальныхОстатков_НМА",
+"url": "Document_ВводНачальныхОстатков_НМА"
+},
+{
+"name": "Document_ВводНачальныхОстатков_РасчетыСКонтрагентами",
+"url": "Document_ВводНачальныхОстатков_РасчетыСКонтрагентами"
+},
+{
+"name": "Document_ВводНачальныхОстатков_РасчетыПоНалогамИСборам",
+"url": "Document_ВводНачальныхОстатков_РасчетыПоНалогамИСборам"
+},
+{
+"name": "Document_ВводНачальныхОстатков_РасчетыПоЗаработнойПлате",
+"url": "Document_ВводНачальныхОстатков_РасчетыПоЗаработнойПлате"
+},
+{
+"name": "Document_ВводНачальныхОстатков_БухСправка",
+"url": "Document_ВводНачальныхОстатков_БухСправка"
+},
+{
+"name": "Document_ВводНачальныхОстатков_РасчетыСПодотчетнымиЛицами",
+"url": "Document_ВводНачальныхОстатков_РасчетыСПодотчетнымиЛицами"
+},
+{
+"name": "Document_ВводНачальныхОстатков_МПЗОтгруженные",
+"url": "Document_ВводНачальныхОстатков_МПЗОтгруженные"
+},
+{
+"name": "Document_ВводНачальныхОстатков_ДанныеПоСФ",
+"url": "Document_ВводНачальныхОстатков_ДанныеПоСФ"
+},
+{
+"name": "Document_ВводНачальныхОстатков_Обороты",
+"url": "Document_ВводНачальныхОстатков_Обороты"
+},
+{
+"name": "Document_ВводНачальныхОстатков_ДанныеПоНДС",
+"url": "Document_ВводНачальныхОстатков_ДанныеПоНДС"
+},
+{
+"name": "Document_ВводНачальныхОстатков_РасходыБудущихПериодов",
+"url": "Document_ВводНачальныхОстатков_РасходыБудущихПериодов"
+},
+{
+"name": "Document_ВводНачальныхОстатков_МПЗРеализованныеИП",
+"url": "Document_ВводНачальныхОстатков_МПЗРеализованныеИП"
+},
+{
+"name": "Document_ВводНачальныхОстатков_ДопРасходыИП",
+"url": "Document_ВводНачальныхОстатков_ДопРасходыИП"
+},
+{
+"name": "Document_ВводНачальныхОстатков_ПрочиеРасходыИП",
+"url": "Document_ВводНачальныхОстатков_ПрочиеРасходыИП"
+},
+{
+"name": "Document_ВводНачальныхОстатков_МПЗРеализованныеУСН",
+"url": "Document_ВводНачальныхОстатков_МПЗРеализованныеУСН"
+},
+{
+"name": "Document_ВводНачальныхОстатков_ДопРасходыУСН",
+"url": "Document_ВводНачальныхОстатков_ДопРасходыУСН"
+},
+{
+"name": "Document_ВводНачальныхОстатков_УслугиУСН",
+"url": "Document_ВводНачальныхОстатков_УслугиУСН"
+},
+{
+"name": "Document_ВводНачальныхОстатков_НоменклатураНаСкладе",
+"url": "Document_ВводНачальныхОстатков_НоменклатураНаСкладе"
+},
+{
+"name": "Document_ВводНачальныхОстатков_СпецодеждаИСпецоснасткаВЭксплуатации",
+"url": "Document_ВводНачальныхОстатков_СпецодеждаИСпецоснасткаВЭксплуатации"
+},
+{
+"name": "Document_ВводНачальныхОстатков_МатериалыПереданныеВПереработку",
+"url": "Document_ВводНачальныхОстатков_МатериалыПереданныеВПереработку"
+},
+{
+"name": "Document_ВводНачальныхОстатков_ТоварыВРозничнойТорговлеАТТ",
+"url": "Document_ВводНачальныхОстатков_ТоварыВРозничнойТорговлеАТТ"
+},
+{
+"name": "Document_ВводНачальныхОстатков_ТоварыВРозничнойТорговлеНТТ",
+"url": "Document_ВводНачальныхОстатков_ТоварыВРозничнойТорговлеНТТ"
+},
+{
+"name": "Document_ВводНачальныхОстатков_УдалитьМПЗПриобретенные",
+"url": "Document_ВводНачальныхОстатков_УдалитьМПЗПриобретенные"
+},
+{
+"name": "Document_ВводНачальныхОстатков_СтруктураСтоимостиЗапасов",
+"url": "Document_ВводНачальныхОстатков_СтруктураСтоимостиЗапасов"
+},
+{
+"name": "Document_ВводНачальныхОстатков_СреднийЗаработок",
+"url": "Document_ВводНачальныхОстатков_СреднийЗаработок"
+},
+{
+"name": "Document_ВводНачальныхОстатков_СдельныеНаряды",
+"url": "Document_ВводНачальныхОстатков_СдельныеНаряды"
+},
+{
+"name": "Document_ВводОстатковПоНУ2023",
+"url": "Document_ВводОстатковПоНУ2023"
+},
+{
+"name": "Document_ВводОстатковПоНУ2023_СчетаУчета",
+"url": "Document_ВводОстатковПоНУ2023_СчетаУчета"
+},
+{
+"name": "Document_ВводОстатковПоНУ2023_ТаблицаОстатков",
+"url": "Document_ВводОстатковПоНУ2023_ТаблицаОстатков"
+},
+{
+"name": "Document_ВводОстатковПоНУ2023_ТаблицаОстатковОС",
+"url": "Document_ВводОстатковПоНУ2023_ТаблицаОстатковОС"
+},
+{
+"name": "Document_ВводОстатковПоНУ2023_ПараметрыАмортизации",
+"url": "Document_ВводОстатковПоНУ2023_ПараметрыАмортизации"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВБанк",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВБанк"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВБанк_Состав",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВБанк_Состав"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВБанк_Зарплата",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВБанк_Зарплата"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВБанк_ФизическиеЛица",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВБанк_ФизическиеЛица"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВБанк_Начисления",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВБанк_Начисления"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВКассу",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВКассу"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВКассу_Состав",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВКассу_Состав"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВКассу_Зарплата",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВКассу_Зарплата"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВКассу_ФизическиеЛица",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВКассу_ФизическиеЛица"
+},
+{
+"name": "Document_ВедомостьНаВыплатуЗарплатыВКассу_Начисления",
+"url": "Document_ВедомостьНаВыплатуЗарплатыВКассу_Начисления"
+},
+{
+"name": "Document_ВозвратТоваровОтПокупателя",
+"url": "Document_ВозвратТоваровОтПокупателя"
+},
+{
+"name": "Document_ВозвратТоваровОтПокупателя_Товары",
+"url": "Document_ВозвратТоваровОтПокупателя_Товары"
+},
+{
+"name": "Document_ВозвратТоваровОтПокупателя_ВозвратнаяТара",
+"url": "Document_ВозвратТоваровОтПокупателя_ВозвратнаяТара"
+},
+{
+"name": "Document_ВозвратТоваровОтПокупателя_УдалитьМаркировка",
+"url": "Document_ВозвратТоваровОтПокупателя_УдалитьМаркировка"
+},
+{
+"name": "Document_ВозвратТоваровОтПокупателя_АдресаТТН",
+"url": "Document_ВозвратТоваровОтПокупателя_АдресаТТН"
+},
+{
+"name": "Document_ВозвратТоваровОтПокупателя_ПрицепыТТН",
+"url": "Document_ВозвратТоваровОтПокупателя_ПрицепыТТН"
+},
+{
+"name": "Document_ВозвратТоваровОтПокупателя_ВладельцыТранспорта",
+"url": "Document_ВозвратТоваровОтПокупателя_ВладельцыТранспорта"
+},
+{
+"name": "Document_ВозвратТоваровОтПокупателя_ТоварыТТН",
+"url": "Document_ВозвратТоваровОтПокупателя_ТоварыТТН"
+},
+{
+"name": "Document_ВозвратТоваровПоставщику",
+"url": "Document_ВозвратТоваровПоставщику"
+},
+{
+"name": "Document_ВозвратТоваровПоставщику_Товары",
+"url": "Document_ВозвратТоваровПоставщику_Товары"
+},
+{
+"name": "Document_ВозвратТоваровПоставщику_ВозвратнаяТара",
+"url": "Document_ВозвратТоваровПоставщику_ВозвратнаяТара"
+},
+{
+"name": "Document_ВозвратТоваровПоставщику_РаздельныйУчетВходящегоНДС",
+"url": "Document_ВозвратТоваровПоставщику_РаздельныйУчетВходящегоНДС"
+},
+{
+"name": "Document_ВосстановлениеНДС",
+"url": "Document_ВосстановлениеНДС"
+},
+{
+"name": "Document_ВосстановлениеНДС_Состав",
+"url": "Document_ВосстановлениеНДС_Состав"
+},
+{
+"name": "Document_ВосстановлениеРезервов",
+"url": "Document_ВосстановлениеРезервов"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ВознагражденияРаботникам",
+"url": "Document_ВосстановлениеРезервов_ВознагражденияРаботникам"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ОбесценениеДебиторскойЗадолженности",
+"url": "Document_ВосстановлениеРезервов_ОбесценениеДебиторскойЗадолженности"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ОбесценениеАктивовВФормеПраваПользования",
+"url": "Document_ВосстановлениеРезервов_ОбесценениеАктивовВФормеПраваПользования"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ОбесценениеНМА",
+"url": "Document_ВосстановлениеРезервов_ОбесценениеНМА"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ОбесценениеКапВложенийНМА",
+"url": "Document_ВосстановлениеРезервов_ОбесценениеКапВложенийНМА"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ОбесценениеОС",
+"url": "Document_ВосстановлениеРезервов_ОбесценениеОС"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ОбесценениеКапВложенийОС",
+"url": "Document_ВосстановлениеРезервов_ОбесценениеКапВложенийОС"
+},
+{
+"name": "Document_ВосстановлениеРезервов_НачисленниеОценочныхОбязательств",
+"url": "Document_ВосстановлениеРезервов_НачисленниеОценочныхОбязательств"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ОбесценениеФинансовыхАктивов",
+"url": "Document_ВосстановлениеРезервов_ОбесценениеФинансовыхАктивов"
+},
+{
+"name": "Document_ВосстановлениеРезервов_ОбесценениеЗапасов",
+"url": "Document_ВосстановлениеРезервов_ОбесценениеЗапасов"
+},
+{
+"name": "Document_ВыбытиеФинансовогоИнструмента",
+"url": "Document_ВыбытиеФинансовогоИнструмента"
+},
+{
+"name": "Document_ВыбытиеФинансовогоИнструмента_График",
+"url": "Document_ВыбытиеФинансовогоИнструмента_График"
+},
+{
+"name": "Document_ВыдачаДенежныхДокументов",
+"url": "Document_ВыдачаДенежныхДокументов"
+},
+{
+"name": "Document_ВыдачаДенежныхДокументов_ДенежныеДокументы",
+"url": "Document_ВыдачаДенежныхДокументов_ДенежныеДокументы"
+},
+{
+"name": "Document_РасходныйКассовыйОрдер",
+"url": "Document_РасходныйКассовыйОрдер"
+},
+{
+"name": "Document_РасходныйКассовыйОрдер_РасшифровкаПлатежа",
+"url": "Document_РасходныйКассовыйОрдер_РасшифровкаПлатежа"
+},
+{
+"name": "Document_РасходныйКассовыйОрдер_ВыплатаЗаработнойПлаты",
+"url": "Document_РасходныйКассовыйОрдер_ВыплатаЗаработнойПлаты"
+},
+{
+"name": "Document_РасходныйКассовыйОрдер_ВыплатаДепонентов",
+"url": "Document_РасходныйКассовыйОрдер_ВыплатаДепонентов"
+},
+{
+"name": "Document_РасходныйКассовыйОрдер_НалоговыйАгентНДС",
+"url": "Document_РасходныйКассовыйОрдер_НалоговыйАгентНДС"
+},
+{
+"name": "Document_РасходныйКассовыйОрдер_РаспределениеВыплатыЗП",
+"url": "Document_РасходныйКассовыйОрдер_РаспределениеВыплатыЗП"
+},
+{
+"name": "Document_ВыкупПредметовЛизинга",
+"url": "Document_ВыкупПредметовЛизинга"
+},
+{
+"name": "Document_ВыкупПредметовЛизинга_ОС",
+"url": "Document_ВыкупПредметовЛизинга_ОС"
+},
+{
+"name": "Document_ВыкупПредметовЛизинга_ЗачетАвансов",
+"url": "Document_ВыкупПредметовЛизинга_ЗачетАвансов"
+},
+{
+"name": "Document_ВыкупПредметовЛизинга_Оплата",
+"url": "Document_ВыкупПредметовЛизинга_Оплата"
+},
+{
+"name": "Document_ВыработкаМатериалов",
+"url": "Document_ВыработкаМатериалов"
+},
+{
+"name": "Document_ВыработкаМатериалов_Материалы",
+"url": "Document_ВыработкаМатериалов_Материалы"
+},
+{
+"name": "Document_ВыработкаНМА",
+"url": "Document_ВыработкаНМА"
+},
+{
+"name": "Document_ВыработкаНМА_НМА",
+"url": "Document_ВыработкаНМА_НМА"
+},
+{
+"name": "Document_ПодтверждениеНулевойСтавкиНДС",
+"url": "Document_ПодтверждениеНулевойСтавкиНДС"
+},
+{
+"name": "Document_ПодтверждениеНулевойСтавкиНДС_Состав",
+"url": "Document_ПодтверждениеНулевойСтавкиНДС_Состав"
+},
+{
+"name": "Document_ВыработкаОС",
+"url": "Document_ВыработкаОС"
+},
+{
+"name": "Document_ВыработкаОС_ОС",
+"url": "Document_ВыработкаОС_ОС"
+},
+{
+"name": "Document_ГТДИмпорт",
+"url": "Document_ГТДИмпорт"
+},
+{
+"name": "Document_ГТДИмпорт_Разделы",
+"url": "Document_ГТДИмпорт_Разделы"
+},
+{
+"name": "Document_ГТДИмпорт_Товары",
+"url": "Document_ГТДИмпорт_Товары"
+},
+{
+"name": "Document_ГТДИмпорт_ЗачетАвансов",
+"url": "Document_ГТДИмпорт_ЗачетАвансов"
+},
+{
+"name": "Document_ГТДИмпорт_РаздельныйУчетВходящегоНДС",
+"url": "Document_ГТДИмпорт_РаздельныйУчетВходящегоНДС"
+},
+{
+"name": "Document_Доверенность",
+"url": "Document_Доверенность"
+},
+{
+"name": "Document_Доверенность_Товары",
+"url": "Document_Доверенность_Товары"
+},
+{
+"name": "Document_Доверенность_ДокументыРасчетов",
+"url": "Document_Доверенность_ДокументыРасчетов"
+},
+{
+"name": "Document_РезервыПоЗапасам",
+"url": "Document_РезервыПоЗапасам"
+},
+{
+"name": "Document_РезервыПоЗапасам_Резервы",
+"url": "Document_РезервыПоЗапасам_Резервы"
+},
+{
+"name": "Document_ПризнаниеФинансовогоИнструмента",
+"url": "Document_ПризнаниеФинансовогоИнструмента"
+},
+{
+"name": "Document_ПризнаниеФинансовогоИнструмента_График",
+"url": "Document_ПризнаниеФинансовогоИнструмента_График"
+},
+{
+"name": "Document_ДоговорГПХ",
+"url": "Document_ДоговорГПХ"
+},
+{
+"name": "Document_ЗаявлениеНаПредоставлениеСтандартныхВычетовПоНДФЛ",
+"url": "Document_ЗаявлениеНаПредоставлениеСтандартныхВычетовПоНДФЛ"
+},
+{
+"name": "Document_ЗаявлениеНаПредоставлениеСтандартныхВычетовПоНДФЛ_ВычетыНаДетей",
+"url": "Document_ЗаявлениеНаПредоставлениеСтандартныхВычетовПоНДФЛ_ВычетыНаДетей"
+},
+{
+"name": "Document_ИзменениеГрафиковАмортизацииОС",
+"url": "Document_ИзменениеГрафиковАмортизацииОС"
+},
+{
+"name": "Document_ИзменениеГрафиковАмортизацииОС_ОС",
+"url": "Document_ИзменениеГрафиковАмортизацииОС_ОС"
+},
+{
+"name": "Document_ИзменениеСпециальногоКоэффициентаОС",
+"url": "Document_ИзменениеСпециальногоКоэффициентаОС"
+},
+{
+"name": "Document_ИзменениеСпециальногоКоэффициентаОС_ОС",
+"url": "Document_ИзменениеСпециальногоКоэффициентаОС_ОС"
+},
+{
+"name": "Document_ИзменениеСпособовОтраженияРасходовПоАмортизацииНМА",
+"url": "Document_ИзменениеСпособовОтраженияРасходовПоАмортизацииНМА"
+},
+{
+"name": "Document_ИзменениеСпособовОтраженияРасходовПоАмортизацииНМА_НМА",
+"url": "Document_ИзменениеСпособовОтраженияРасходовПоАмортизацииНМА_НМА"
+},
+{
+"name": "Document_ИзменениеСпособовОтраженияРасходовПоАмортизацииОС",
+"url": "Document_ИзменениеСпособовОтраженияРасходовПоАмортизацииОС"
+},
+{
+"name": "Document_ИзменениеСпособовОтраженияРасходовПоАмортизацииОС_ОС",
+"url": "Document_ИзменениеСпособовОтраженияРасходовПоАмортизацииОС_ОС"
+},
+{
+"name": "Document_ИзменениеОтраженияРасходовПоЛизинговымПлатежамОС",
+"url": "Document_ИзменениеОтраженияРасходовПоЛизинговымПлатежамОС"
+},
+{
+"name": "Document_ИзменениеОтраженияРасходовПоЛизинговымПлатежамОС_ОС",
+"url": "Document_ИзменениеОтраженияРасходовПоЛизинговымПлатежамОС_ОС"
+},
+{
+"name": "Document_КадровыйПеревод",
+"url": "Document_КадровыйПеревод"
+},
+{
+"name": "Document_КадровыйПеревод_Начисления",
+"url": "Document_КадровыйПеревод_Начисления"
+},
+{
+"name": "Document_КадровыйПеревод_Сотрудники",
+"url": "Document_КадровыйПеревод_Сотрудники"
+},
+{
+"name": "Document_КадровыйПеревод_НачисленияСотрудников",
+"url": "Document_КадровыйПеревод_НачисленияСотрудников"
+},
+{
+"name": "Document_ИзменениеПараметровНачисленияАмортизацииОС",
+"url": "Document_ИзменениеПараметровНачисленияАмортизацииОС"
+},
+{
+"name": "Document_ИзменениеПараметровНачисленияАмортизацииОС_ОС",
+"url": "Document_ИзменениеПараметровНачисленияАмортизацииОС_ОС"
+},
+{
+"name": "Document_ПодтверждениеОплатыНДСВБюджет",
+"url": "Document_ПодтверждениеОплатыНДСВБюджет"
+},
+{
+"name": "Document_ПодтверждениеОплатыНДСВБюджет_Состав",
+"url": "Document_ПодтверждениеОплатыНДСВБюджет_Состав"
+},
+{
+"name": "Document_ИзменениеПлановыхНачислений",
+"url": "Document_ИзменениеПлановыхНачислений"
+},
+{
+"name": "Document_ИзменениеПлановыхНачислений_УдалитьНачисления",
+"url": "Document_ИзменениеПлановыхНачислений_УдалитьНачисления"
+},
+{
+"name": "Document_ИзменениеПлановыхНачислений_Сотрудники",
+"url": "Document_ИзменениеПлановыхНачислений_Сотрудники"
+},
+{
+"name": "Document_ИзменениеПлановыхНачислений_НачисленияСотрудников",
+"url": "Document_ИзменениеПлановыхНачислений_НачисленияСотрудников"
+},
+{
+"name": "Document_ИзменениеПлановыхНачислений_ПоказателиСотрудников",
+"url": "Document_ИзменениеПлановыхНачислений_ПоказателиСотрудников"
+},
+{
+"name": "Document_ИзменениеПлановыхНачислений_ФизическиеЛица",
+"url": "Document_ИзменениеПлановыхНачислений_ФизическиеЛица"
+},
+{
+"name": "Document_ИзменениеПлановыхНачислений_УдалитьПоказателиПозиции",
+"url": "Document_ИзменениеПлановыхНачислений_УдалитьПоказателиПозиции"
+},
+{
+"name": "Document_НачислениеЗарплаты",
+"url": "Document_НачислениеЗарплаты"
+},
+{
+"name": "Document_НачислениеЗарплаты_Начисления",
+"url": "Document_НачислениеЗарплаты_Начисления"
+},
+{
+"name": "Document_НачислениеЗарплаты_Удержания",
+"url": "Document_НачислениеЗарплаты_Удержания"
+},
+{
+"name": "Document_НачислениеЗарплаты_НДФЛ",
+"url": "Document_НачислениеЗарплаты_НДФЛ"
+},
+{
+"name": "Document_НачислениеЗарплаты_ПримененныеВычетыНаДетейИИмущественные",
+"url": "Document_НачислениеЗарплаты_ПримененныеВычетыНаДетейИИмущественные"
+},
+{
+"name": "Document_НачислениеЗарплаты_Взносы",
+"url": "Document_НачислениеЗарплаты_Взносы"
+},
+{
+"name": "Document_НачислениеЗарплаты_ФизическиеЛица",
+"url": "Document_НачислениеЗарплаты_ФизическиеЛица"
+},
+{
+"name": "Document_НачислениеЗарплаты_Сотрудники",
+"url": "Document_НачислениеЗарплаты_Сотрудники"
+},
+{
+"name": "Document_НачислениеЗарплаты_КорректировкиВыплаты",
+"url": "Document_НачислениеЗарплаты_КорректировкиВыплаты"
+},
+{
+"name": "Document_ИзменениеПлановыхУдержаний",
+"url": "Document_ИзменениеПлановыхУдержаний"
+},
+{
+"name": "Document_ИзменениеПлановыхУдержаний_УдалитьНачисления",
+"url": "Document_ИзменениеПлановыхУдержаний_УдалитьНачисления"
+},
+{
+"name": "Document_ИзменениеПлановыхУдержаний_Сотрудники",
+"url": "Document_ИзменениеПлановыхУдержаний_Сотрудники"
+},
+{
+"name": "Document_ИзменениеПлановыхУдержаний_НачисленияСотрудников",
+"url": "Document_ИзменениеПлановыхУдержаний_НачисленияСотрудников"
+},
+{
+"name": "Document_ИзменениеПлановыхУдержаний_ПоказателиСотрудников",
+"url": "Document_ИзменениеПлановыхУдержаний_ПоказателиСотрудников"
+},
+{
+"name": "Document_ИзменениеПлановыхУдержаний_ФизическиеЛица",
+"url": "Document_ИзменениеПлановыхУдержаний_ФизическиеЛица"
+},
+{
+"name": "Document_ИзменениеПлановыхУдержаний_УдалитьПоказателиПозиции",
+"url": "Document_ИзменениеПлановыхУдержаний_УдалитьПоказателиПозиции"
+},
+{
+"name": "Document_ИзменениеСостоянияОС",
+"url": "Document_ИзменениеСостоянияОС"
+},
+{
+"name": "Document_ИзменениеСостоянияОС_ОС",
+"url": "Document_ИзменениеСостоянияОС_ОС"
+},
+{
+"name": "Document_ИзменениеСтоимостиНМА",
+"url": "Document_ИзменениеСтоимостиНМА"
+},
+{
+"name": "Document_ИзменениеСтоимостиНМА_НематериальныеАктивы",
+"url": "Document_ИзменениеСтоимостиНМА_НематериальныеАктивы"
+},
+{
+"name": "Document_Партия",
+"url": "Document_Партия"
+},
+{
+"name": "Document_ИнвентаризацияТоваровНаСкладе",
+"url": "Document_ИнвентаризацияТоваровНаСкладе"
+},
+{
+"name": "Document_ИнвентаризацияТоваровНаСкладе_Товары",
+"url": "Document_ИнвентаризацияТоваровНаСкладе_Товары"
+},
+{
+"name": "Document_ИнвентаризацияТоваровНаСкладе_ИнвентаризационнаяКомиссия",
+"url": "Document_ИнвентаризацияТоваровНаСкладе_ИнвентаризационнаяКомиссия"
+},
+{
+"name": "Document_ИсполнительныйЛист",
+"url": "Document_ИсполнительныйЛист"
+},
+{
+"name": "Document_КомплектацияНоменклатуры",
+"url": "Document_КомплектацияНоменклатуры"
+},
+{
+"name": "Document_КомплектацияНоменклатуры_Комплектующие",
+"url": "Document_КомплектацияНоменклатуры_Комплектующие"
+},
+{
+"name": "Document_КорректировкаДолга",
+"url": "Document_КорректировкаДолга"
+},
+{
+"name": "Document_КорректировкаДолга_ДебиторскаяЗадолженность",
+"url": "Document_КорректировкаДолга_ДебиторскаяЗадолженность"
+},
+{
+"name": "Document_КорректировкаДолга_КредиторскаяЗадолженность",
+"url": "Document_КорректировкаДолга_КредиторскаяЗадолженность"
+},
+{
+"name": "Document_КорректировкаПоступления",
+"url": "Document_КорректировкаПоступления"
+},
+{
+"name": "Document_КорректировкаПоступления_Товары",
+"url": "Document_КорректировкаПоступления_Товары"
+},
+{
+"name": "Document_КорректировкаПоступления_Услуги",
+"url": "Document_КорректировкаПоступления_Услуги"
+},
+{
+"name": "Document_КорректировкаПоступления_АгентскиеУслуги",
+"url": "Document_КорректировкаПоступления_АгентскиеУслуги"
+},
+{
+"name": "Document_КорректировкаРеализации",
+"url": "Document_КорректировкаРеализации"
+},
+{
+"name": "Document_КорректировкаРеализации_Товары",
+"url": "Document_КорректировкаРеализации_Товары"
+},
+{
+"name": "Document_КорректировкаРеализации_Услуги",
+"url": "Document_КорректировкаРеализации_Услуги"
+},
+{
+"name": "Document_КорректировкаРеализации_АгентскиеУслуги",
+"url": "Document_КорректировкаРеализации_АгентскиеУслуги"
+},
+{
+"name": "Document_МодернизацияОС",
+"url": "Document_МодернизацияОС"
+},
+{
+"name": "Document_МодернизацияОС_ОС",
+"url": "Document_МодернизацияОС_ОС"
+},
+{
+"name": "Document_МодернизацияОС_Оплата",
+"url": "Document_МодернизацияОС_Оплата"
+},
+{
+"name": "Document_НачислениеНДСпоСМРхозспособом",
+"url": "Document_НачислениеНДСпоСМРхозспособом"
+},
+{
+"name": "Document_НачислениеНДСпоСМРхозспособом_СМРхозспособом",
+"url": "Document_НачислениеНДСпоСМРхозспособом_СМРхозспособом"
+},
+{
+"name": "Document_НачислениеОценочныхОбязательствПоОтпускам",
+"url": "Document_НачислениеОценочныхОбязательствПоОтпускам"
+},
+{
+"name": "Document_НачислениеОценочныхОбязательствПоОтпускам_РасчетРезерваОтпусков",
+"url": "Document_НачислениеОценочныхОбязательствПоОтпускам_РасчетРезерваОтпусков"
+},
+{
+"name": "Document_НачислениеОценочныхОбязательствПоОтпускам_ОценочныеОбязательстваПоСотрудникам",
+"url": "Document_НачислениеОценочныхОбязательствПоОтпускам_ОценочныеОбязательстваПоСотрудникам"
+},
+{
+"name": "Document_НачислениеОценочныхОбязательствПоОтпускам_ОценочныеОбязательства",
+"url": "Document_НачислениеОценочныхОбязательствПоОтпускам_ОценочныеОбязательства"
+},
+{
+"name": "Document_НачислениеОценочныхОбязательствПоОтпускам_ФизическиеЛица",
+"url": "Document_НачислениеОценочныхОбязательствПоОтпускам_ФизическиеЛица"
+},
+{
+"name": "Document_ОбесценениеЗапасов",
+"url": "Document_ОбесценениеЗапасов"
+},
+{
+"name": "Document_ОбесценениеЗапасов_СписокСчетов",
+"url": "Document_ОбесценениеЗапасов_СписокСчетов"
+},
+{
+"name": "Document_ОбесценениеЗапасов_Товары",
+"url": "Document_ОбесценениеЗапасов_Товары"
+},
+{
+"name": "Document_АктОбОказанииПроизводственныхУслуг",
+"url": "Document_АктОбОказанииПроизводственныхУслуг"
+},
+{
+"name": "Document_АктОбОказанииПроизводственныхУслуг_Услуги",
+"url": "Document_АктОбОказанииПроизводственныхУслуг_Услуги"
+},
+{
+"name": "Document_АктОбОказанииПроизводственныхУслуг_ЗачетАвансов",
+"url": "Document_АктОбОказанииПроизводственныхУслуг_ЗачетАвансов"
+},
+{
+"name": "Document_ОказаниеУслуг",
+"url": "Document_ОказаниеУслуг"
+},
+{
+"name": "Document_ОказаниеУслуг_Контрагенты",
+"url": "Document_ОказаниеУслуг_Контрагенты"
+},
+{
+"name": "Document_ОперацияБух",
+"url": "Document_ОперацияБух"
+},
+{
+"name": "Document_ОперацияБух_ТаблицаРегистровСведений",
+"url": "Document_ОперацияБух_ТаблицаРегистровСведений"
+},
+{
+"name": "Document_ОперацияБух_ТаблицаРегистровНакопления",
+"url": "Document_ОперацияБух_ТаблицаРегистровНакопления"
+},
+{
+"name": "Document_ОплатаПлатежнойКартой",
+"url": "Document_ОплатаПлатежнойКартой"
+},
+{
+"name": "Document_ОплатаПлатежнойКартой_РасшифровкаПлатежа",
+"url": "Document_ОплатаПлатежнойКартой_РасшифровкаПлатежа"
+},
+{
+"name": "Document_ПрекращениеСтандартныхВычетовНДФЛ",
+"url": "Document_ПрекращениеСтандартныхВычетовНДФЛ"
+},
+{
+"name": "Document_Отпуск",
+"url": "Document_Отпуск"
+},
+{
+"name": "Document_Отпуск_Начисления",
+"url": "Document_Отпуск_Начисления"
+},
+{
+"name": "Document_Отпуск_ОтработанноеВремяДляСреднегоОбщий",
+"url": "Document_Отпуск_ОтработанноеВремяДляСреднегоОбщий"
+},
+{
+"name": "Document_Отпуск_СреднийЗаработокОбщий",
+"url": "Document_Отпуск_СреднийЗаработокОбщий"
+},
+{
+"name": "Document_Отпуск_НДФЛ",
+"url": "Document_Отпуск_НДФЛ"
+},
+{
+"name": "Document_Отпуск_ПримененныеВычетыНаДетейИИмущественные",
+"url": "Document_Отпуск_ПримененныеВычетыНаДетейИИмущественные"
+},
+{
+"name": "Document_Отпуск_КорректировкиВыплаты",
+"url": "Document_Отпуск_КорректировкиВыплаты"
+},
+{
+"name": "Document_Отпуск_ОтпускаЗаПериод",
+"url": "Document_Отпуск_ОтпускаЗаПериод"
+},
+{
+"name": "Document_Отпуск_Сотрудники",
+"url": "Document_Отпуск_Сотрудники"
+},
+{
+"name": "Document_Отпуск_ПересекающиесяОтпуска",
+"url": "Document_Отпуск_ПересекающиесяОтпуска"
+},
+{
+"name": "ChartOfAccounts_Хозрасчетный",
+"url": "ChartOfAccounts_Хозрасчетный"
+},
+{
+"name": "Document_ОтсутствиеНаРаботе",
+"url": "Document_ОтсутствиеНаРаботе"
+},
+{
+"name": "Document_ОтсутствиеНаРаботе_Сотрудники",
+"url": "Document_ОтсутствиеНаРаботе_Сотрудники"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах",
+"url": "Document_ОтчетКомиссионераОПродажах"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах_Товары",
+"url": "Document_ОтчетКомиссионераОПродажах_Товары"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах_Услуги",
+"url": "Document_ОтчетКомиссионераОПродажах_Услуги"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах_ДенежныеСредства",
+"url": "Document_ОтчетКомиссионераОПродажах_ДенежныеСредства"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах_ЗачетАвансов",
+"url": "Document_ОтчетКомиссионераОПродажах_ЗачетАвансов"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах_Покупатели",
+"url": "Document_ОтчетКомиссионераОПродажах_Покупатели"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах_Возвраты",
+"url": "Document_ОтчетКомиссионераОПродажах_Возвраты"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах_ТоварыВозвращенные",
+"url": "Document_ОтчетКомиссионераОПродажах_ТоварыВозвращенные"
+},
+{
+"name": "Document_ОтчетКомиссионераОПродажах_АгентскиеУслуги",
+"url": "Document_ОтчетКомиссионераОПродажах_АгентскиеУслуги"
+},
+{
+"name": "Document_ОтчетКомитентуОПродажах",
+"url": "Document_ОтчетКомитентуОПродажах"
+},
+{
+"name": "Document_ОтчетКомитентуОПродажах_Товары",
+"url": "Document_ОтчетКомитентуОПродажах_Товары"
+},
+{
+"name": "Document_ОтчетКомитентуОПродажах_ДенежныеСредства",
+"url": "Document_ОтчетКомитентуОПродажах_ДенежныеСредства"
+},
+{
+"name": "Document_ОтчетКомитентуОПродажах_Поставщики",
+"url": "Document_ОтчетКомитентуОПродажах_Поставщики"
+},
+{
+"name": "Document_ОтчетОРозничныхПродажах",
+"url": "Document_ОтчетОРозничныхПродажах"
+},
+{
+"name": "Document_ОтчетОРозничныхПродажах_Товары",
+"url": "Document_ОтчетОРозничныхПродажах_Товары"
+},
+{
+"name": "Document_ОтчетОРозничныхПродажах_АгентскиеУслуги",
+"url": "Document_ОтчетОРозничныхПродажах_АгентскиеУслуги"
+},
+{
+"name": "Document_ОтчетОРозничныхПродажах_ПодарочныеСертификаты",
+"url": "Document_ОтчетОРозничныхПродажах_ПодарочныеСертификаты"
+},
+{
+"name": "Document_ОтчетОРозничныхПродажах_Оплата",
+"url": "Document_ОтчетОРозничныхПродажах_Оплата"
+},
+{
+"name": "Document_ОтчетПроизводстваЗаСмену",
+"url": "Document_ОтчетПроизводстваЗаСмену"
+},
+{
+"name": "Document_ОтчетПроизводстваЗаСмену_Продукция",
+"url": "Document_ОтчетПроизводстваЗаСмену_Продукция"
+},
+{
+"name": "Document_ОтчетПроизводстваЗаСмену_Услуги",
+"url": "Document_ОтчетПроизводстваЗаСмену_Услуги"
+},
+{
+"name": "Document_ОтчетПроизводстваЗаСмену_ВозвратныеОтходы",
+"url": "Document_ОтчетПроизводстваЗаСмену_ВозвратныеОтходы"
+},
+{
+"name": "Document_ОтчетПроизводстваЗаСмену_Материалы",
+"url": "Document_ОтчетПроизводстваЗаСмену_Материалы"
+},
+{
+"name": "Document_ПартияМатериаловВЭксплуатации",
+"url": "Document_ПартияМатериаловВЭксплуатации"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_1",
+"url": "Document_ПачкаДокументовСЗВ_6_1"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_1_Сотрудники",
+"url": "Document_ПачкаДокументовСЗВ_6_1_Сотрудники"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_1_ЗаписиОСтаже",
+"url": "Document_ПачкаДокументовСЗВ_6_1_ЗаписиОСтаже"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_1_ФизическиеЛица",
+"url": "Document_ПачкаДокументовСЗВ_6_1_ФизическиеЛица"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_4",
+"url": "Document_ПачкаДокументовСЗВ_6_4"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_4_Сотрудники",
+"url": "Document_ПачкаДокументовСЗВ_6_4_Сотрудники"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_4_СведенияОЗаработке",
+"url": "Document_ПачкаДокументовСЗВ_6_4_СведенияОЗаработке"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_4_ЗаписиОСтаже",
+"url": "Document_ПачкаДокументовСЗВ_6_4_ЗаписиОСтаже"
+},
+{
+"name": "Document_ПачкаДокументовСЗВ_6_4_ФизическиеЛица",
+"url": "Document_ПачкаДокументовСЗВ_6_4_ФизическиеЛица"
+},
+{
+"name": "Document_ПередачаНМА",
+"url": "Document_ПередачаНМА"
+},
+{
+"name": "Document_ПередачаНМА_ЗачетАвансов",
+"url": "Document_ПередачаНМА_ЗачетАвансов"
+},
+{
+"name": "Document_ПередачаОС",
+"url": "Document_ПередачаОС"
+},
+{
+"name": "Document_ПередачаОС_ОС",
+"url": "Document_ПередачаОС_ОС"
+},
+{
+"name": "Document_ПередачаОС_ЗачетАвансов",
+"url": "Document_ПередачаОС_ЗачетАвансов"
+},
+{
+"name": "Document_ПоступлениеНаРасчетныйСчет",
+"url": "Document_ПоступлениеНаРасчетныйСчет"
+},
+{
+"name": "Document_ПоступлениеНаРасчетныйСчет_РасшифровкаПлатежа",
+"url": "Document_ПоступлениеНаРасчетныйСчет_РасшифровкаПлатежа"
+},
+{
+"name": "Document_ПоступлениеНаРасчетныйСчет_РеквизитыКонтрагента",
+"url": "Document_ПоступлениеНаРасчетныйСчет_РеквизитыКонтрагента"
+},
+{
+"name": "Document_ПоступлениеНаРасчетныйСчет_РаспределениеВозвратаЗП",
+"url": "Document_ПоступлениеНаРасчетныйСчет_РаспределениеВозвратаЗП"
+},
+{
+"name": "Document_ПередачаОСВАренду",
+"url": "Document_ПередачаОСВАренду"
+},
+{
+"name": "Document_ПередачаОСВАренду_ОС",
+"url": "Document_ПередачаОСВАренду_ОС"
+},
+{
+"name": "Document_ПередачаТоваров",
+"url": "Document_ПередачаТоваров"
+},
+{
+"name": "Document_ПередачаТоваров_Товары",
+"url": "Document_ПередачаТоваров_Товары"
+},
+{
+"name": "Document_ПередачаТоваров_ВозвратнаяТара",
+"url": "Document_ПередачаТоваров_ВозвратнаяТара"
+},
+{
+"name": "Document_ПередачаТоваров_АдресаТТН",
+"url": "Document_ПередачаТоваров_АдресаТТН"
+},
+{
+"name": "Document_ПередачаТоваров_ПрицепыТТН",
+"url": "Document_ПередачаТоваров_ПрицепыТТН"
+},
+{
+"name": "Document_ПередачаТоваров_ВладельцыТранспорта",
+"url": "Document_ПередачаТоваров_ВладельцыТранспорта"
+},
+{
+"name": "Document_ПередачаТоваров_ТоварыТТН",
+"url": "Document_ПередачаТоваров_ТоварыТТН"
+},
+{
+"name": "Document_ПеремещениеОС",
+"url": "Document_ПеремещениеОС"
+},
+{
+"name": "Document_ПеремещениеОС_ОС",
+"url": "Document_ПеремещениеОС_ОС"
+},
+{
+"name": "Document_ПеремещениеОС_АдресаТТН",
+"url": "Document_ПеремещениеОС_АдресаТТН"
+},
+{
+"name": "Document_ПеремещениеОС_ПрицепыТТН",
+"url": "Document_ПеремещениеОС_ПрицепыТТН"
+},
+{
+"name": "Document_ПеремещениеОС_ВладельцыТранспорта",
+"url": "Document_ПеремещениеОС_ВладельцыТранспорта"
+},
+{
+"name": "Document_ПеремещениеОС_ТоварыТТН",
+"url": "Document_ПеремещениеОС_ТоварыТТН"
+},
+{
+"name": "Document_ПеремещениеОСПоСчетам",
+"url": "Document_ПеремещениеОСПоСчетам"
+},
+{
+"name": "Document_ПеремещениеОСПоСчетам_ОсновноеСредство",
+"url": "Document_ПеремещениеОСПоСчетам_ОсновноеСредство"
+},
+{
+"name": "Document_ПеремещениеТоваров",
+"url": "Document_ПеремещениеТоваров"
+},
+{
+"name": "Document_ПеремещениеТоваров_Товары",
+"url": "Document_ПеремещениеТоваров_Товары"
+},
+{
+"name": "Document_ПеремещениеТоваров_ТоварыНаКомиссии",
+"url": "Document_ПеремещениеТоваров_ТоварыНаКомиссии"
+},
+{
+"name": "Document_ПеремещениеТоваров_ВозвратнаяТара",
+"url": "Document_ПеремещениеТоваров_ВозвратнаяТара"
+},
+{
+"name": "Document_ПеремещениеТоваров_АдресаТТН",
+"url": "Document_ПеремещениеТоваров_АдресаТТН"
+},
+{
+"name": "Document_ПеремещениеТоваров_ПрицепыТТН",
+"url": "Document_ПеремещениеТоваров_ПрицепыТТН"
+},
+{
+"name": "Document_ПеремещениеТоваров_ВладельцыТранспорта",
+"url": "Document_ПеремещениеТоваров_ВладельцыТранспорта"
+},
+{
+"name": "Document_ПеремещениеТоваров_ТоварыТТН",
+"url": "Document_ПеремещениеТоваров_ТоварыТТН"
+},
+{
+"name": "Document_ПереоценкаНМАПризнаваемыхВУчетеПоМСФО",
+"url": "Document_ПереоценкаНМАПризнаваемыхВУчетеПоМСФО"
+},
+{
+"name": "Document_ПереоценкаНМАПризнаваемыхВУчетеПоМСФО_ОплатаНМА",
+"url": "Document_ПереоценкаНМАПризнаваемыхВУчетеПоМСФО_ОплатаНМА"
+},
+{
+"name": "Document_ПереоценкаОСиНМА",
+"url": "Document_ПереоценкаОСиНМА"
+},
+{
+"name": "Document_ПереоценкаОСиНМА_ОС",
+"url": "Document_ПереоценкаОСиНМА_ОС"
+},
+{
+"name": "Document_ПереоценкаОСиНМА_НМА",
+"url": "Document_ПереоценкаОСиНМА_НМА"
+},
+{
+"name": "Document_ПереоценкаОСиНМА_Оборудование",
+"url": "Document_ПереоценкаОСиНМА_Оборудование"
+},
+{
+"name": "Document_ПереоценкаОСиНМА_Строительство",
+"url": "Document_ПереоценкаОСиНМА_Строительство"
+},
+{
+"name": "Document_ПереоценкаОСМСФО",
+"url": "Document_ПереоценкаОСМСФО"
+},
+{
+"name": "Document_ПереоценкаОСМСФО_ОС",
+"url": "Document_ПереоценкаОСМСФО_ОС"
+},
+{
+"name": "Document_ПереоценкаОСМСФО_НМА",
+"url": "Document_ПереоценкаОСМСФО_НМА"
+},
+{
+"name": "Document_ПереоценкаОСМСФО_Оборудование",
+"url": "Document_ПереоценкаОСМСФО_Оборудование"
+},
+{
+"name": "Document_ПереоценкаОСМСФО_Строительство",
+"url": "Document_ПереоценкаОСМСФО_Строительство"
+},
+{
+"name": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО",
+"url": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО"
+},
+{
+"name": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО_ОС",
+"url": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО_ОС"
+},
+{
+"name": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО_НМА",
+"url": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО_НМА"
+},
+{
+"name": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО_Оборудование",
+"url": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО_Оборудование"
+},
+{
+"name": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО_Строительство",
+"url": "Document_ПереоценкаОСПризнаваемыхВУчетеПоМСФО_Строительство"
+},
+{
+"name": "Document_ПереоценкаТоваровВРознице",
+"url": "Document_ПереоценкаТоваровВРознице"
+},
+{
+"name": "Document_ПереоценкаТоваровВРознице_Товары",
+"url": "Document_ПереоценкаТоваровВРознице_Товары"
+},
+{
+"name": "Document_ПерерасчетСтраховыхВзносов",
+"url": "Document_ПерерасчетСтраховыхВзносов"
+},
+{
+"name": "Document_ПерерасчетСтраховыхВзносов_Взносы",
+"url": "Document_ПерерасчетСтраховыхВзносов_Взносы"
+},
+{
+"name": "Document_ПерерасчетСтраховыхВзносов_СведенияОДоходах",
+"url": "Document_ПерерасчетСтраховыхВзносов_СведенияОДоходах"
+},
+{
+"name": "Document_ПерерасчетСтраховыхВзносов_ФизическиеЛица",
+"url": "Document_ПерерасчетСтраховыхВзносов_ФизическиеЛица"
+},
+{
+"name": "Document_ПлатежноеПоручение",
+"url": "Document_ПлатежноеПоручение"
+},
+{
+"name": "Document_ПлатежноеТребование",
+"url": "Document_ПлатежноеТребование"
+},
+{
+"name": "Document_ПокупкаПоКорпоративнойКарте",
+"url": "Document_ПокупкаПоКорпоративнойКарте"
+},
+{
+"name": "Document_ПокупкаПоКорпоративнойКарте_Товары",
+"url": "Document_ПокупкаПоКорпоративнойКарте_Товары"
+},
+{
+"name": "Document_ПокупкаПоКорпоративнойКарте_Услуги",
+"url": "Document_ПокупкаПоКорпоративнойКарте_Услуги"
+},
+{
+"name": "Document_ПокупкаПоКорпоративнойКарте_РаздельныйУчетВходящегоНДС",
+"url": "Document_ПокупкаПоКорпоративнойКарте_РаздельныйУчетВходящегоНДС"
+},
+{
+"name": "Document_ПоступлениеДенежныхДокументов",
+"url": "Document_ПоступлениеДенежныхДокументов"
+},
+{
+"name": "Document_ПоступлениеДенежныхДокументов_ДенежныеДокументы",
+"url": "Document_ПоступлениеДенежныхДокументов_ДенежныеДокументы"
+},
+{
+"name": "Document_ПоступлениеДопРасходов",
+"url": "Document_ПоступлениеДопРасходов"
+},
+{
+"name": "Document_ПоступлениеДопРасходов_Товары",
+"url": "Document_ПоступлениеДопРасходов_Товары"
+},
+{
+"name": "Document_ПоступлениеДопРасходов_ЗачетАвансов",
+"url": "Document_ПоступлениеДопРасходов_ЗачетАвансов"
+},
+{
+"name": "Document_ПоступлениеДопРасходов_РаздельныйУчетВходящегоНДС",
+"url": "Document_ПоступлениеДопРасходов_РаздельныйУчетВходящегоНДС"
+},
+{
+"name": "Document_ПоступлениеДопРасходов_НематериальныеАктивы",
+"url": "Document_ПоступлениеДопРасходов_НематериальныеАктивы"
+},
+{
+"name": "Document_ПоступлениеИзПереработки",
+"url": "Document_ПоступлениеИзПереработки"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_Продукция",
+"url": "Document_ПоступлениеИзПереработки_Продукция"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_Услуги",
+"url": "Document_ПоступлениеИзПереработки_Услуги"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_ИспользованныеМатериалы",
+"url": "Document_ПоступлениеИзПереработки_ИспользованныеМатериалы"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_ВозвращенныеМатериалы",
+"url": "Document_ПоступлениеИзПереработки_ВозвращенныеМатериалы"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_ВозвратнаяТара",
+"url": "Document_ПоступлениеИзПереработки_ВозвратнаяТара"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_ЗачетАвансов",
+"url": "Document_ПоступлениеИзПереработки_ЗачетАвансов"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_ВозвратныеОтходы",
+"url": "Document_ПоступлениеИзПереработки_ВозвратныеОтходы"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_ДопРасходы",
+"url": "Document_ПоступлениеИзПереработки_ДопРасходы"
+},
+{
+"name": "Document_ПоступлениеИзПереработки_РаздельныйУчетВходящегоНДС",
+"url": "Document_ПоступлениеИзПереработки_РаздельныйУчетВходящегоНДС"
+},
+{
+"name": "Document_ПриходныйКассовыйОрдер",
+"url": "Document_ПриходныйКассовыйОрдер"
+},
+{
+"name": "Document_ПриходныйКассовыйОрдер_РасшифровкаПлатежа",
+"url": "Document_ПриходныйКассовыйОрдер_РасшифровкаПлатежа"
+},
+{
+"name": "Document_ПриходныйКассовыйОрдер_РаспределениеВозвратаЗП",
+"url": "Document_ПриходныйКассовыйОрдер_РаспределениеВозвратаЗП"
+},
+{
+"name": "Document_ПоступлениеНМА",
+"url": "Document_ПоступлениеНМА"
+},
+{
+"name": "Document_ПоступлениеНМА_НематериальныеАктивы",
+"url": "Document_ПоступлениеНМА_НематериальныеАктивы"
+},
+{
+"name": "Document_ПоступлениеНМА_ЗачетАвансов",
+"url": "Document_ПоступлениеНМА_ЗачетАвансов"
+},
+{
+"name": "Document_ПрекращениеПлановогоНачисления",
+"url": "Document_ПрекращениеПлановогоНачисления"
+},
+{
+"name": "Document_ПрекращениеПлановогоНачисления_Сотрудники",
+"url": "Document_ПрекращениеПлановогоНачисления_Сотрудники"
+},
+{
+"name": "Document_ПрекращениеПлановогоНачисления_ФизическиеЛица",
+"url": "Document_ПрекращениеПлановогоНачисления_ФизическиеЛица"
+},
+{
+"name": "Document_ПрекращениеПлановогоНачисления_ДополнительныеРеквизиты",
+"url": "Document_ПрекращениеПлановогоНачисления_ДополнительныеРеквизиты"
+},
+{
+"name": "Document_ПрекращениеПлановогоУдержания",
+"url": "Document_ПрекращениеПлановогоУдержания"
+},
+{
+"name": "Document_ПрекращениеПлановогоУдержания_Сотрудники",
+"url": "Document_ПрекращениеПлановогоУдержания_Сотрудники"
+},
+{
+"name": "Document_ПрекращениеПлановогоУдержания_ФизическиеЛица",
+"url": "Document_ПрекращениеПлановогоУдержания_ФизическиеЛица"
+},
+{
+"name": "Document_ПрекращениеПлановогоУдержания_ДополнительныеРеквизиты",
+"url": "Document_ПрекращениеПлановогоУдержания_ДополнительныеРеквизиты"
+},
+{
+"name": "Document_ПриемНаРаботу",
+"url": "Document_ПриемНаРаботу"
+},
+{
+"name": "Document_ПриемНаРаботу_Начисления",
+"url": "Document_ПриемНаРаботу_Начисления"
+},
+{
+"name": "Document_ПриемНаРаботу_Сотрудники",
+"url": "Document_ПриемНаРаботу_Сотрудники"
+},
+{
+"name": "Document_ПриемНаРаботу_НачисленияСотрудников",
+"url": "Document_ПриемНаРаботу_НачисленияСотрудников"
+},
+{
+"name": "Document_ПризнаниеАктиваВФормеПрава",
+"url": "Document_ПризнаниеАктиваВФормеПрава"
+},
+{
+"name": "Document_ПризнаниеАктиваВФормеПрава_График",
+"url": "Document_ПризнаниеАктиваВФормеПрава_График"
+},
+{
+"name": "Document_ПринятиеКУчетуОС",
+"url": "Document_ПринятиеКУчетуОС"
+},
+{
+"name": "Document_ПринятиеКУчетуОС_ОС",
+"url": "Document_ПринятиеКУчетуОС_ОС"
+},
+{
+"name": "Document_ПринятиеКУчетуОС_Оплата",
+"url": "Document_ПринятиеКУчетуОС_Оплата"
+},
+{
+"name": "Document_ПринятиеКУчетуОС_ИнвентаризационнаяКомиссия",
+"url": "Document_ПринятиеКУчетуОС_ИнвентаризационнаяКомиссия"
+},
+{
+"name": "Document_ПроезднойДокумент",
+"url": "Document_ПроезднойДокумент"
+},
+{
+"name": "Document_РаспределениеНДС",
+"url": "Document_РаспределениеНДС"
+},
+{
+"name": "Document_РаспределениеНДС_СоставКосвенныхРасходов",
+"url": "Document_РаспределениеНДС_СоставКосвенныхРасходов"
+},
+{
+"name": "Document_РаспределениеНДС_СчетаУчетаРасходов",
+"url": "Document_РаспределениеНДС_СчетаУчетаРасходов"
+},
+{
+"name": "Document_РаспределениеНДС_РаспределяемыйНДС",
+"url": "Document_РаспределениеНДС_РаспределяемыйНДС"
+},
+{
+"name": "Document_РасчетОтложенныхНалогов",
+"url": "Document_РасчетОтложенныхНалогов"
+},
+{
+"name": "Document_РасчетОтложенныхНалогов_Налоги",
+"url": "Document_РасчетОтложенныхНалогов_Налоги"
+},
+{
+"name": "Document_РасчетРезерваОтпусков",
+"url": "Document_РасчетРезерваОтпусков"
+},
+{
+"name": "Document_РасчетРезерваОтпусков_Основное",
+"url": "Document_РасчетРезерваОтпусков_Основное"
+},
+{
+"name": "Document_РасчетРезерваОтпусков_ОсновноеДетально",
+"url": "Document_РасчетРезерваОтпусков_ОсновноеДетально"
+},
+{
+"name": "Document_РасчетРезерваОтпусков_Начисления",
+"url": "Document_РасчетРезерваОтпусков_Начисления"
+},
+{
+"name": "Document_РеализацияТоваровУслуг",
+"url": "Document_РеализацияТоваровУслуг"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_Товары",
+"url": "Document_РеализацияТоваровУслуг_Товары"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_ВозвратнаяТара",
+"url": "Document_РеализацияТоваровУслуг_ВозвратнаяТара"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_Услуги",
+"url": "Document_РеализацияТоваровУслуг_Услуги"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_АгентскиеУслуги",
+"url": "Document_РеализацияТоваровУслуг_АгентскиеУслуги"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_ЗачетАвансов",
+"url": "Document_РеализацияТоваровУслуг_ЗачетАвансов"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_Оплата",
+"url": "Document_РеализацияТоваровУслуг_Оплата"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_ПоступлениеВалютнойВыручки",
+"url": "Document_РеализацияТоваровУслуг_ПоступлениеВалютнойВыручки"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_УдалитьМаркировка",
+"url": "Document_РеализацияТоваровУслуг_УдалитьМаркировка"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_Материалы",
+"url": "Document_РеализацияТоваровУслуг_Материалы"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_АдресаТТН",
+"url": "Document_РеализацияТоваровУслуг_АдресаТТН"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_ПрицепыТТН",
+"url": "Document_РеализацияТоваровУслуг_ПрицепыТТН"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_ВладельцыТранспорта",
+"url": "Document_РеализацияТоваровУслуг_ВладельцыТранспорта"
+},
+{
+"name": "Document_РеализацияТоваровУслуг_ТоварыТТН",
+"url": "Document_РеализацияТоваровУслуг_ТоварыТТН"
+},
+{
+"name": "Document_РеализацияОтгруженныхТоваров",
+"url": "Document_РеализацияОтгруженныхТоваров"
+},
+{
+"name": "Document_РеализацияОтгруженныхТоваров_ЗачетАвансов",
+"url": "Document_РеализацияОтгруженныхТоваров_ЗачетАвансов"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке",
+"url": "Document_РеализацияУслугПоПереработке"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке_Услуги",
+"url": "Document_РеализацияУслугПоПереработке_Услуги"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке_МатериалыЗаказчика",
+"url": "Document_РеализацияУслугПоПереработке_МатериалыЗаказчика"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке_ЗачетАвансов",
+"url": "Document_РеализацияУслугПоПереработке_ЗачетАвансов"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке_ВозвратныеОтходы",
+"url": "Document_РеализацияУслугПоПереработке_ВозвратныеОтходы"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке_АдресаТТН",
+"url": "Document_РеализацияУслугПоПереработке_АдресаТТН"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке_ПрицепыТТН",
+"url": "Document_РеализацияУслугПоПереработке_ПрицепыТТН"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке_ВладельцыТранспорта",
+"url": "Document_РеализацияУслугПоПереработке_ВладельцыТранспорта"
+},
+{
+"name": "Document_РеализацияУслугПоПереработке_ТоварыТТН",
+"url": "Document_РеализацияУслугПоПереработке_ТоварыТТН"
+},
+{
+"name": "ChartOfCalculationTypes_Удержания",
+"url": "ChartOfCalculationTypes_Удержания"
+},
+{
+"name": "ChartOfCalculationTypes_Удержания_ДополнительныеРеквизиты",
+"url": "ChartOfCalculationTypes_Удержания_ДополнительныеРеквизиты"
+},
+{
+"name": "ChartOfCalculationTypes_Удержания_Показатели",
+"url": "ChartOfCalculationTypes_Удержания_Показатели"
+},
+{
+"name": "ChartOfCalculationTypes_Удержания_НачисленияДляРасчета",
+"url": "ChartOfCalculationTypes_Удержания_НачисленияДляРасчета"
+},
+{
+"name": "Document_ТребованиеНакладная",
+"url": "Document_ТребованиеНакладная"
+},
+{
+"name": "Document_ТребованиеНакладная_Материалы",
+"url": "Document_ТребованиеНакладная_Материалы"
+},
+{
+"name": "Document_ТребованиеНакладная_МатериалыЗаказчика",
+"url": "Document_ТребованиеНакладная_МатериалыЗаказчика"
+},
+{
+"name": "Document_РегистрацияОтметокВТабеле",
+"url": "Document_РегистрацияОтметокВТабеле"
+},
+{
+"name": "Document_РегистрацияОтметокВТабеле_ДанныеОВремени",
+"url": "Document_РегистрацияОтметокВТабеле_ДанныеОВремени"
+},
+{
+"name": "Document_РегистрацияОтметокВТабеле_ФизическиеЛица",
+"url": "Document_РегистрацияОтметокВТабеле_ФизическиеЛица"
+},
+{
+"name": "Document_РегламентнаяОперация",
+"url": "Document_РегламентнаяОперация"
+},
+{
+"name": "Document_РегламентнаяОперация_УдалитьОшибки",
+"url": "Document_РегламентнаяОперация_УдалитьОшибки"
+},
+{
+"name": "Document_РеестрДСВ_3",
+"url": "Document_РеестрДСВ_3"
+},
+{
+"name": "Document_РеестрДСВ_3_Сотрудники",
+"url": "Document_РеестрДСВ_3_Сотрудники"
+},
+{
+"name": "Document_РеестрСЗВ_6_2",
+"url": "Document_РеестрСЗВ_6_2"
+},
+{
+"name": "Document_РеестрСЗВ_6_2_Сотрудники",
+"url": "Document_РеестрСЗВ_6_2_Сотрудники"
+},
+{
+"name": "Document_РеестрСЗВ_6_2_ЗаписиОСтаже",
+"url": "Document_РеестрСЗВ_6_2_ЗаписиОСтаже"
+},
+{
+"name": "Document_РеестрСЗВ_6_2_ФизическиеЛица",
+"url": "Document_РеестрСЗВ_6_2_ФизическиеЛица"
+},
+{
+"name": "Document_РезервыПоДЗИАвансамВыданным",
+"url": "Document_РезервыПоДЗИАвансамВыданным"
+},
+{
+"name": "Document_РезервыПоДЗИАвансамВыданным_Резервы",
+"url": "Document_РезервыПоДЗИАвансамВыданным_Резервы"
+},
+{
+"name": "Document_РезервыПоДЗИАвансамВыданным_ПараметрыРасчета",
+"url": "Document_РезервыПоДЗИАвансамВыданным_ПараметрыРасчета"
+},
+{
+"name": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ",
+"url": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ"
+},
+{
+"name": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_РаботникиОрганизации",
+"url": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_РаботникиОрганизации"
+},
+{
+"name": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_СведенияОЗаработке",
+"url": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_СведенияОЗаработке"
+},
+{
+"name": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_СведенияОЗаработкеНаВредныхИТяжелыхРаботах",
+"url": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_СведенияОЗаработкеНаВредныхИТяжелыхРаботах"
+},
+{
+"name": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_ЗаписиОСтаже",
+"url": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_ЗаписиОСтаже"
+},
+{
+"name": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_НачисленныеУплаченныеВзносы",
+"url": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_НачисленныеУплаченныеВзносы"
+},
+{
+"name": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_УплаченныеВзносыРасшифровка",
+"url": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_УплаченныеВзносыРасшифровка"
+},
+{
+"name": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_ДосрочноеНазначениеПенсии",
+"url": "Document_УдалитьСведенияОЗаработкеСтажеЗастрахованныхЛицСЗВ_ИСХ_ДосрочноеНазначениеПенсии"
+},
+{
+"name": "Document_СдельныйНаряд",
+"url": "Document_СдельныйНаряд"
+},
+{
+"name": "Document_СдельныйНаряд_Выработка",
+"url": "Document_СдельныйНаряд_Выработка"
+},
+{
+"name": "Document_СдельныйНаряд_Исполнители",
+"url": "Document_СдельныйНаряд_Исполнители"
+},
+{
+"name": "Document_СписаниеДепонированнойЗарплаты",
+"url": "Document_СписаниеДепонированнойЗарплаты"
+},
+{
+"name": "Document_СписаниеДепонированнойЗарплаты_Депоненты",
+"url": "Document_СписаниеДепонированнойЗарплаты_Депоненты"
+},
+{
+"name": "Document_СписаниеМатериаловИзЭксплуатации",
+"url": "Document_СписаниеМатериаловИзЭксплуатации"
+},
+{
+"name": "Document_СписаниеМатериаловИзЭксплуатации_Спецодежда",
+"url": "Document_СписаниеМатериаловИзЭксплуатации_Спецодежда"
+},
+{
+"name": "Document_СписаниеМатериаловИзЭксплуатации_Спецоснастка",
+"url": "Document_СписаниеМатериаловИзЭксплуатации_Спецоснастка"
+},
+{
+"name": "Document_СписаниеМатериаловИзЭксплуатации_ИнвентарьИХозяйственныеПринадлежности",
+"url": "Document_СписаниеМатериаловИзЭксплуатации_ИнвентарьИХозяйственныеПринадлежности"
+},
+{
+"name": "Document_СписаниеМатериаловИзЭксплуатации_ИнвентаризационнаяКомиссия",
+"url": "Document_СписаниеМатериаловИзЭксплуатации_ИнвентаризационнаяКомиссия"
+},
+{
+"name": "Document_СписаниеНДС",
+"url": "Document_СписаниеНДС"
+},
+{
+"name": "Document_СписаниеНДС_Состав",
+"url": "Document_СписаниеНДС_Состав"
+},
+{
+"name": "Document_СписаниеНДС_АвансыПолученные",
+"url": "Document_СписаниеНДС_АвансыПолученные"
+},
+{
+"name": "Document_СписаниеНМА",
+"url": "Document_СписаниеНМА"
+},
+{
+"name": "Document_СписаниеНМАНеПризнаваемыхВУчетеПоМСФО",
+"url": "Document_СписаниеНМАНеПризнаваемыхВУчетеПоМСФО"
+},
+{
+"name": "Document_СписаниеОС",
+"url": "Document_СписаниеОС"
+},
+{
+"name": "Document_СписаниеОС_ОС",
+"url": "Document_СписаниеОС_ОС"
+},
+{
+"name": "Document_СписаниеОС_ИнвентаризационнаяКомиссия",
+"url": "Document_СписаниеОС_ИнвентаризационнаяКомиссия"
+},
+{
+"name": "Document_СписаниеОС_Товары",
+"url": "Document_СписаниеОС_Товары"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета",
+"url": "Document_СписаниеСРасчетногоСчета"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_РасшифровкаПлатежа",
+"url": "Document_СписаниеСРасчетногоСчета_РасшифровкаПлатежа"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_ПеречислениеЗаработнойПлаты",
+"url": "Document_СписаниеСРасчетногоСчета_ПеречислениеЗаработнойПлаты"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_РеквизитыКонтрагента",
+"url": "Document_СписаниеСРасчетногоСчета_РеквизитыКонтрагента"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_ПеречислениеДепонентов",
+"url": "Document_СписаниеСРасчетногоСчета_ПеречислениеДепонентов"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_ПеречислениеНДФЛ",
+"url": "Document_СписаниеСРасчетногоСчета_ПеречислениеНДФЛ"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_НалоговыйАгентНДС",
+"url": "Document_СписаниеСРасчетногоСчета_НалоговыйАгентНДС"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_ПеречислениеИНПС",
+"url": "Document_СписаниеСРасчетногоСчета_ПеречислениеИНПС"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_ПеречислениеНДССНерезидентов",
+"url": "Document_СписаниеСРасчетногоСчета_ПеречислениеНДССНерезидентов"
+},
+{
+"name": "Document_СписаниеСРасчетногоСчета_РаспределениеВыплатыЗП",
+"url": "Document_СписаниеСРасчетногоСчета_РаспределениеВыплатыЗП"
+},
+{
+"name": "Document_СписаниеТоваров",
+"url": "Document_СписаниеТоваров"
+},
+{
+"name": "Document_СписаниеТоваров_Товары",
+"url": "Document_СписаниеТоваров_Товары"
+},
+{
+"name": "Document_СписаниеТоваров_ВозвратнаяТара",
+"url": "Document_СписаниеТоваров_ВозвратнаяТара"
+},
+{
+"name": "Document_СписаниеТоваров_ИнвентаризационнаяКомиссия",
+"url": "Document_СписаниеТоваров_ИнвентаризационнаяКомиссия"
+},
+{
+"name": "Document_СчетФактураПолученный",
+"url": "Document_СчетФактураПолученный"
+},
+{
+"name": "Document_СчетФактураПолученный_ДокументыОснования",
+"url": "Document_СчетФактураПолученный_ДокументыОснования"
+},
+{
+"name": "Document_СчетФактураПолученный_Авансы",
+"url": "Document_СчетФактураПолученный_Авансы"
+},
+{
+"name": "Document_СчетФактураПолученный_СчетаФактурыВыданныеПокупателям",
+"url": "Document_СчетФактураПолученный_СчетаФактурыВыданныеПокупателям"
+},
+{
+"name": "Document_СчетФактураПолученный_Продавцы",
+"url": "Document_СчетФактураПолученный_Продавцы"
+},
+{
+"name": "Document_СчетФактураПолученный_ПлатежноРасчетныеДокументы",
+"url": "Document_СчетФактураПолученный_ПлатежноРасчетныеДокументы"
+},
+{
+"name": "Document_ТабельУчетаРабочегоВремени",
+"url": "Document_ТабельУчетаРабочегоВремени"
+},
+{
+"name": "Document_ТабельУчетаРабочегоВремени_ДанныеОВремени",
+"url": "Document_ТабельУчетаРабочегоВремени_ДанныеОВремени"
+},
+{
+"name": "Document_ТабельУчетаРабочегоВремени_СотрудникиСИсправлениями",
+"url": "Document_ТабельУчетаРабочегоВремени_СотрудникиСИсправлениями"
+},
+{
+"name": "Document_ТабельУчетаРабочегоВремени_ФизическиеЛица",
+"url": "Document_ТабельУчетаРабочегоВремени_ФизическиеЛица"
+},
+{
+"name": "Document_ТабельУчетаРабочегоВремени_ДанныеОВремениСводноЗаПериод",
+"url": "Document_ТабельУчетаРабочегоВремени_ДанныеОВремениСводноЗаПериод"
+},
+{
+"name": "Document_УстановкаЦенНоменклатуры",
+"url": "Document_УстановкаЦенНоменклатуры"
+},
+{
+"name": "Document_УстановкаЦенНоменклатуры_Товары",
+"url": "Document_УстановкаЦенНоменклатуры_Товары"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПокупок",
+"url": "Document_ФормированиеЗаписейКнигиПокупок"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПокупок_ВычетПоПриобретеннымЦенностям",
+"url": "Document_ФормированиеЗаписейКнигиПокупок_ВычетПоПриобретеннымЦенностям"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПокупок_НДСсАвансов",
+"url": "Document_ФормированиеЗаписейКнигиПокупок_НДСсАвансов"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПокупок_НДСсАвансовВыданных",
+"url": "Document_ФормированиеЗаписейКнигиПокупок_НДСсАвансовВыданных"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПокупок_ВычетНДСПоНалоговомуАгенту",
+"url": "Document_ФормированиеЗаписейКнигиПокупок_ВычетНДСПоНалоговомуАгенту"
+},
+{
+"name": "Document_ФормированиеЗаписейКнигиПокупок_ВычетПриИзмененииСтоимостиВСторонуУменьшения",
+"url": "Document_ФормированиеЗаписейКнигиПокупок_ВычетПриИзмененииСтоимостиВСторонуУменьшения"
+},
+{
+"name": "Document_ФормированиеЗаписейРаздела7ДекларацииНДС",
+"url": "Document_ФормированиеЗаписейРаздела7ДекларацииНДС"
+},
+{
+"name": "Document_ФормированиеЗаписейРаздела7ДекларацииНДС_НеоблагаемыеНДСОперации",
+"url": "Document_ФормированиеЗаписейРаздела7ДекларацииНДС_НеоблагаемыеНДСОперации"
+},
+{
+"name": "Document_ФормированиеЗаписейРаздела7ДекларацииНДС_ПодтверждающиеДокументы",
+"url": "Document_ФормированиеЗаписейРаздела7ДекларацииНДС_ПодтверждающиеДокументы"
+},
+{
+"name": "Document_ФормированиеУставногоКапитала",
+"url": "Document_ФормированиеУставногоКапитала"
+},
+{
+"name": "Document_ФормированиеУставногоКапитала_Учредители",
+"url": "Document_ФормированиеУставногоКапитала_Учредители"
+},
+{
+"name": "Document_ЧекЕГАИС",
+"url": "Document_ЧекЕГАИС"
+},
+{
+"name": "Document_ЧекЕГАИС_Товары",
+"url": "Document_ЧекЕГАИС_Товары"
+},
+{
+"name": "Document_ЧекЕГАИС_АкцизныеМарки",
+"url": "Document_ЧекЕГАИС_АкцизныеМарки"
+},
+{
+"name": "ChartOfCalculationTypes_Начисления",
+"url": "ChartOfCalculationTypes_Начисления"
+},
+{
+"name": "ChartOfCalculationTypes_Начисления_ДополнительныеРеквизиты",
+"url": "ChartOfCalculationTypes_Начисления_ДополнительныеРеквизиты"
+},
+{
+"name": "ChartOfCalculationTypes_Начисления_Показатели",
+"url": "ChartOfCalculationTypes_Начисления_Показатели"
+},
+{
+"name": "ChartOfCalculationTypes_Начисления_ОбозначенияВТабелеУчетаРабочегоВремени",
+"url": "ChartOfCalculationTypes_Начисления_ОбозначенияВТабелеУчетаРабочегоВремени"
+},
+{
+"name": "ChartOfCharacteristicTypes_ВидыСубконтоХозрасчетные",
+"url": "ChartOfCharacteristicTypes_ВидыСубконтоХозрасчетные"
+},
+{
+"name": "ChartOfCalculationTypes_УдалитьОсновныеНачисленияОрганизаций",
+"url": "ChartOfCalculationTypes_УдалитьОсновныеНачисленияОрганизаций"
+},
+{
+"name": "InformationRegister_ГрафикиРаботыПоВидамВремени",
+"url": "InformationRegister_ГрафикиРаботыПоВидамВремени"
+}
+]
+}

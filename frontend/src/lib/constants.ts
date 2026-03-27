@@ -8,6 +8,23 @@ export const FINANCE_CATEGORIES = {
   CLUBS: "Кружки",
   MAINTENANCE: "Хоз. нужды",
   SALARY: "Зарплата",
+  OTHER: "Прочее",
+};
+
+export const TRANSACTION_CHANNELS = {
+  CASH: "Касса",
+  BANK: "Банк",
+};
+
+export const INVOICE_DIRECTIONS = {
+  INCOMING: "Поступление",
+  OUTGOING: "Реализация",
+};
+
+export const BALANCE_TYPES = {
+  CASH: "Касса",
+  BANK: "Расчётный счёт",
+  CONTRACTOR_DEBT: "Долг контрагента",
 };
 
 export const ROLE_LABELS = {

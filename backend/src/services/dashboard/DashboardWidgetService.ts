@@ -358,21 +358,55 @@ class DashboardWidgetServiceClass {
 
     return cached(`finance-overview:${days}`, 120_000, async () => {
       const since = daysAgo(days);
-      const transactions = await prisma.financeTransaction.groupBy({
-        by: ['type'],
-        _sum: { amount: true },
-        _count: true,
-        where: { date: { gte: since } },
-      });
 
-      const income = transactions.find(t => t.type === 'INCOME');
-      const expense = transactions.find(t => t.type === 'EXPENSE');
+      const [byType, byChannel, latestBalances] = await Promise.all([
+        prisma.financeTransaction.groupBy({
+          by: ['type'],
+          _sum: { amount: true },
+          _count: true,
+          where: { date: { gte: since } },
+        }),
+        prisma.financeTransaction.groupBy({
+          by: ['channel', 'type'],
+          _sum: { amount: true },
+          _count: true,
+          where: { date: { gte: since }, channel: { not: null } },
+        }),
+        prisma.balanceSnapshot.findMany({
+          where: {
+            balanceType: { in: ['CASH', 'BANK'] },
+          },
+          orderBy: { snapshotDate: 'desc' },
+          take: 2,
+          distinct: ['balanceType'],
+          select: { balanceType: true, amount: true, snapshotDate: true },
+        }),
+      ]);
+
+      const income = byType.find(t => t.type === 'INCOME');
+      const expense = byType.find(t => t.type === 'EXPENSE');
+
+      const channelBreakdown = byChannel.map(c => ({
+        channel: c.channel,
+        type: c.type,
+        total: Number(c._sum.amount || 0),
+        count: c._count,
+      }));
+
+      const cashBalance = latestBalances.find(b => b.balanceType === 'CASH');
+      const bankBalance = latestBalances.find(b => b.balanceType === 'BANK');
 
       return {
         period: days,
         income: { total: Number(income?._sum.amount || 0), count: income?._count || 0 },
         expense: { total: Number(expense?._sum.amount || 0), count: expense?._count || 0 },
         balance: Number(income?._sum.amount || 0) - Number(expense?._sum.amount || 0),
+        channelBreakdown,
+        balances: {
+          cash: cashBalance ? Number(cashBalance.amount) : null,
+          bank: bankBalance ? Number(bankBalance.amount) : null,
+          snapshotDate: (cashBalance ?? bankBalance)?.snapshotDate?.toISOString() ?? null,
+        },
       };
     });
   }

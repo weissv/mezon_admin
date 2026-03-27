@@ -460,4 +460,48 @@ router.delete("/suppliers/:id", checkRole(["DEVELOPER", "DIRECTOR", "ADMIN"]), a
   }
 });
 
+// =====================================================
+// ИМПОРТИРОВАННЫЕ НАКЛАДНЫЕ ИЗ 1С (только INCOMING)
+// =====================================================
+
+// GET /api/procurement/invoices — поступления от поставщиков (из 1С)
+router.get(
+  "/invoices",
+  checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN", "ZAVHOZ"]),
+  async (req, res) => {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const pageSize = Math.min(100, Math.max(1, Number(req.query.pageSize) || 20));
+    const skip = (page - 1) * pageSize;
+
+    const where: any = { direction: "INCOMING" as const };
+
+    if (req.query.contractorId) {
+      where.contractorId = Number(req.query.contractorId);
+    }
+    if (req.query.posted === "true" || req.query.posted === "false") {
+      where.posted = req.query.posted === "true";
+    }
+    if (req.query.startDate || req.query.endDate) {
+      where.date = {};
+      if (req.query.startDate) where.date.gte = new Date(String(req.query.startDate));
+      if (req.query.endDate) where.date.lte = new Date(String(req.query.endDate));
+    }
+
+    const [items, total] = await Promise.all([
+      prisma.invoice.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { date: "desc" },
+        include: {
+          contractor: { select: { id: true, name: true, inn: true } },
+        },
+      }),
+      prisma.invoice.count({ where }),
+    ]);
+
+    return res.json({ items, total });
+  }
+);
+
 export default router;

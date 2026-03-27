@@ -23,6 +23,19 @@ export type {
 
 export type {
   FinanceTransaction,
+  Invoice,
+  BalancesResponse,
+  BalanceItem,
+  DebtorItem,
+  DebtorsResponse,
+  ContractorRef,
+  PersonRef,
+  CashFlowArticleRef,
+  TransactionChannel,
+  FinanceType,
+  FinanceCategory,
+  InvoiceDirection,
+  BalanceType,
 } from './finance';
 
 export type {

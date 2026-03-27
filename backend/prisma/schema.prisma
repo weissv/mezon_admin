@@ -60,6 +60,26 @@ enum FinanceCategory {
   CLUBS
   MAINTENANCE
   SALARY
+  OTHER       // Прочее (автоимпорт из 1С)
+}
+
+/// Канал финансовой операции (1С)
+enum TransactionChannel {
+  CASH   // Кассовые операции (ПКО / РКО)
+  BANK   // Банковские операции (Поступление / Списание РС)
+}
+
+/// Направление товарного документа
+enum InvoiceDirection {
+  INCOMING  // Поступление (Document_ПоступлениеТоваровУслуг)
+  OUTGOING  // Реализация (Document_РеализацияТоваровУслуг)
+}
+
+/// Тип агрегированного остатка
+enum BalanceType {
+  CASH              // Остаток в кассе
+  BANK              // Остаток на расчётном счёте
+  CONTRACTOR_DEBT   // Сальдо с контрагентом
 }
 
 enum InventoryType {
@@ -324,9 +344,10 @@ model Attendance {
 
 model FinanceTransaction {
   id          Int             @id @default(autoincrement())
-  amount      Decimal         @db.Decimal(14, 2)
+  externalId  String?         @unique // Ref_Key из 1С
+  amount      Decimal         @db.Decimal(14, 2) // + приход, − расход
   type        FinanceType
-  category    FinanceCategory
+  category    FinanceCategory @default(OTHER)
   source      FinanceSource   @default(BUDGET)
   description String?
   date        DateTime
@@ -334,14 +355,34 @@ model FinanceTransaction {
   clubId      Int?
   club        Club?           @relation(fields: [clubId], references: [id])
 
+  // ── 1С Integration ──
+  channel             TransactionChannel?   // CASH / BANK
+  documentNumber      String?               // Номер документа в 1С
+  operationType       String?               // ВидОперации из 1С
+  posted              Boolean?              // Проведён в 1С
+  counterpartyType    String?               // Catalog_Контрагенты | Catalog_ФизическиеЛица | …
+  counterpartyRefKey  String?               // Raw Ref_Key контрагента в 1С
+  contractorId        Int?
+  contractor          Contractor?           @relation(fields: [contractorId], references: [id])
+  personId            Int?
+  person              Person?               @relation(fields: [personId], references: [id])
+  cashFlowArticleId   Int?
+  cashFlowArticle     CashFlowArticle?      @relation(fields: [cashFlowArticleId], references: [id])
+  purpose             String?               // НазначениеПлатежа / Основание
+
   createdAt DateTime @default(now())
 
   @@index([type, category, date])
   @@index([clubId])
+  @@index([channel, date])
+  @@index([contractorId])
+  @@index([personId])
+  @@index([cashFlowArticleId])
 }
 
 model InventoryItem {
   id           Int           @id @default(autoincrement())
+  externalId   String?       @unique // Ref_Key из 1С (Catalog_Номенклатура)
   name         String
   quantity     Float
   unit         String // "кг", "шт", "л"
@@ -558,6 +599,7 @@ model MenuDish {
 
 model Supplier {
   id          Int             @id @default(autoincrement())
+  externalId  String?         @unique // Ref_Key из 1С (Catalog_Контрагенты)
   name        String          @unique
   contactInfo String?
   phone       String?
@@ -1244,4 +1286,99 @@ model DashboardPreference {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+// ──────────────────────────────────────
+// 1С Integration Models
+// ──────────────────────────────────────
+
+/// Контрагенты (Catalog_Контрагенты)
+model Contractor {
+  id         Int      @id @default(autoincrement())
+  externalId String   @unique              // Ref_Key
+  code       String?                       // Code
+  name       String                        // Description
+  fullName   String?                       // НаименованиеПолное
+  inn        String?                       // ИНН
+  kpp        String?                       // КПП
+  isFolder   Boolean  @default(false)      // IsFolder
+  isActive   Boolean  @default(true)       // !DeletionMark
+
+  transactions FinanceTransaction[]
+  invoices     Invoice[]
+
+  balanceSnapshots BalanceSnapshot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([inn])
+  @@index([name])
+}
+
+/// Физические лица (Catalog_ФизическиеЛица)
+model Person {
+  id         Int      @id @default(autoincrement())
+  externalId String   @unique              // Ref_Key
+  code       String?                       // Code
+  name       String                        // Description
+  isActive   Boolean  @default(true)       // !DeletionMark
+
+  transactions FinanceTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+/// Статьи движения денежных средств (Catalog_СтатьиДвиженияДенежныхСредств)
+model CashFlowArticle {
+  id         Int      @id @default(autoincrement())
+  externalId String   @unique              // Ref_Key
+  code       String?                       // Code
+  name       String                        // Description
+  isFolder   Boolean  @default(false)      // IsFolder
+
+  transactions FinanceTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Товарные документы (Поступление / Реализация товаров и услуг)
+model Invoice {
+  id              Int              @id @default(autoincrement())
+  externalId      String           @unique           // Ref_Key
+  direction       InvoiceDirection                    // INCOMING / OUTGOING
+  documentNumber  String?                             // Number
+  date            DateTime                            // Date
+  posted          Boolean          @default(false)    // Posted
+  operationType   String?                             // ВидОперации
+  contractorId    Int?
+  contractor      Contractor?      @relation(fields: [contractorId], references: [id])
+  totalAmount     Decimal          @db.Decimal(14, 2) // СуммаДокумента
+  comment         String?                             // Комментарий
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([direction, date])
+  @@index([contractorId])
+}
+
+/// Агрегированный остаток (рассчитывается из FinanceTransaction)
+model BalanceSnapshot {
+  id           Int         @id @default(autoincrement())
+  snapshotDate DateTime                            // Дата среза
+  balanceType  BalanceType                         // CASH / BANK / CONTRACTOR_DEBT
+  amount       Decimal     @db.Decimal(14, 2)      // Итоговое сальдо
+  contractorId Int?                                // Заполняется для CONTRACTOR_DEBT
+  contractor   Contractor? @relation(fields: [contractorId], references: [id])
+  label        String?                             // Подпись (имя контрагента, и т.д.)
+
+  createdAt DateTime @default(now())
+
+  @@index([snapshotDate, balanceType])
+  @@index([contractorId])
 }
