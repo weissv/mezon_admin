@@ -8,7 +8,8 @@ import {
   ShoppingCart, Users, PlusCircle, AlertTriangle, Search, 
   Package, Check, X, Truck, ClipboardCheck, ArrowRight,
   BarChart3, Edit, Trash2, Eye, Send, Ban, RefreshCw,
-  TrendingUp, Clock, DollarSign, Archive, Link2, AlertCircle
+  TrendingUp, Clock, DollarSign, Archive, Link2, AlertCircle,
+  FileText
 } from 'lucide-react';
 import { 
   PurchaseOrder, Supplier, PurchaseOrderStatus,
@@ -16,13 +17,16 @@ import {
   purchaseOrderTypeLabels, purchaseOrderTypeColors,
   priorityLabels, priorityColors,
 } from '../types/procurement';
+import type { Invoice } from '../types/finance';
 import { PurchaseOrderForm } from '../components/forms/PurchaseOrderForm';
 import { SupplierForm } from '../components/forms/SupplierForm';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 
+const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 });
+
 export default function ProcurementPage() {
-  const [viewMode, setViewMode] = useState<'orders' | 'suppliers'>('orders');
+  const [viewMode, setViewMode] = useState<'orders' | 'suppliers' | 'invoices'>('orders');
 
   return (
     <div className="space-y-4">
@@ -33,7 +37,7 @@ export default function ProcurementPage() {
             <ShoppingCart className="h-6 w-6 text-blue-600" />
             Закупки
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">Управление заказами и поставщиками</p>
+          <p className="text-sm text-gray-500 mt-0.5">Управление заказами, поставщиками и накладными</p>
         </div>
         <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
           <button
@@ -58,10 +62,106 @@ export default function ProcurementPage() {
             <Users className="h-4 w-4" />
             Поставщики
           </button>
+          <button
+            onClick={() => setViewMode('invoices')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'invoices'
+                ? 'bg-white text-blue-700 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            Накладные 1С
+          </button>
         </div>
       </div>
 
-      {viewMode === 'orders' ? <OrdersView /> : <SuppliersView />}
+      {viewMode === 'orders' && <OrdersView />}
+      {viewMode === 'suppliers' && <SuppliersView />}
+      {viewMode === 'invoices' && <IncomingInvoicesView />}
+    </div>
+  );
+}
+
+// =====================================================
+// Накладные от поставщиков (из 1С)
+// =====================================================
+function IncomingInvoicesView() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const pageSize = 20;
+
+  const fetchInvoices = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.get(`/api/procurement/invoices?page=${page}&pageSize=${pageSize}`);
+      setInvoices(data.items || []);
+      setTotal(data.total || 0);
+    } catch (error: any) {
+      toast.error('Ошибка загрузки накладных', { description: error?.message });
+    } finally {
+      setLoading(false);
+    }
+  }, [page]);
+
+  useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
+        <FileText className="inline h-4 w-4 mr-1" />
+        Поступления от поставщиков, импортированные из 1С. Только для просмотра.
+      </div>
+
+      {loading ? (
+        <div className="p-4 text-center text-gray-500">Загрузка...</div>
+      ) : invoices.length === 0 ? (
+        <div className="p-8 text-center text-gray-500">Накладные не найдены</div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-50 text-left">
+                  <th className="p-3 font-medium">Дата</th>
+                  <th className="p-3 font-medium">№ документа</th>
+                  <th className="p-3 font-medium">Контрагент</th>
+                  <th className="p-3 font-medium">Сумма</th>
+                  <th className="p-3 font-medium">Проведён</th>
+                  <th className="p-3 font-medium">Комментарий</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoices.map(inv => (
+                  <tr key={inv.id} className="border-b hover:bg-gray-50">
+                    <td className="p-3">{new Date(inv.date).toLocaleDateString()}</td>
+                    <td className="p-3 font-mono text-xs">{inv.documentNumber || '—'}</td>
+                    <td className="p-3">{inv.contractor?.name || '—'}</td>
+                    <td className="p-3 font-medium">{currency.format(Number(inv.totalAmount))}</td>
+                    <td className="p-3">{inv.posted ? <Check className="h-4 w-4 text-green-600" /> : '—'}</td>
+                    <td className="p-3 text-gray-500 truncate max-w-[200px]">{inv.comment || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-2 mt-4">
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+                ← Назад
+              </Button>
+              <span className="py-2 px-3 text-sm text-gray-600">{page} / {totalPages}</span>
+              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+                Вперёд →
+              </Button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
