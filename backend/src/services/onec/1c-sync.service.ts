@@ -328,6 +328,15 @@ export class OneCSyncService {
 
   // ── Invoice syncs ────────────────────────────────────────────
 
+  private extractInvoiceContractorRefKey(row: any): string | null {
+    if (row.Контрагент_Key) return row.Контрагент_Key;
+
+    const firstContractor = Array.isArray(row.Контрагенты) ? row.Контрагенты[0] : null;
+    if (firstContractor?.Контрагент_Key) return firstContractor.Контрагент_Key;
+
+    return null;
+  }
+
   /**
    * Generic invoice document sync.
    * Invoice docs use Контрагент_Key (direct ref to Catalog_Контрагенты).
@@ -336,6 +345,12 @@ export class OneCSyncService {
     entity: string,
     label: string,
     direction: InvoiceDirection,
+    options?: {
+      contractorRefExtractor?: (row: any) => string | null;
+      totalAmountExtractor?: (row: any) => number;
+      commentExtractor?: (row: any) => string | null;
+      operationTypeExtractor?: (row: any) => string | null;
+    },
   ): Promise<SyncResult> {
     const filter = "DeletionMark eq false";
     const rows = await this.fetchAll(entity, filter);
@@ -344,8 +359,19 @@ export class OneCSyncService {
 
     for (const r of rows as any[]) {
       try {
-        const contractorId = await this.resolveContractorId(r.Контрагент_Key);
-        const totalAmount = parseFloat(r.СуммаДокумента) || 0;
+        const contractorRefKey = options?.contractorRefExtractor
+          ? options.contractorRefExtractor(r)
+          : this.extractInvoiceContractorRefKey(r);
+        const contractorId = await this.resolveContractorId(contractorRefKey);
+        const totalAmount = options?.totalAmountExtractor
+          ? options.totalAmountExtractor(r)
+          : parseFloat(r.СуммаДокумента) || 0;
+        const operationType = options?.operationTypeExtractor
+          ? options.operationTypeExtractor(r)
+          : r.ВидОперации ?? null;
+        const comment = options?.commentExtractor
+          ? options.commentExtractor(r)
+          : r.Комментарий ?? null;
 
         await this.db.invoice.upsert({
           where: { externalId: r.Ref_Key },
@@ -355,20 +381,20 @@ export class OneCSyncService {
             documentNumber: r.Number ?? null,
             date: new Date(r.Date),
             posted: r.Posted ?? false,
-            operationType: r.ВидОперации ?? null,
+            operationType,
             contractorId,
             totalAmount,
-            comment: r.Комментарий ?? null,
+            comment,
           },
           update: {
             direction,
             documentNumber: r.Number ?? null,
             date: new Date(r.Date),
             posted: r.Posted ?? false,
-            operationType: r.ВидОперации ?? null,
+            operationType,
             contractorId,
             totalAmount,
-            comment: r.Комментарий ?? null,
+            comment,
           },
         });
         upserted++;
@@ -458,6 +484,492 @@ export class OneCSyncService {
     return { entity, fetched: 0, upserted, errors };
   }
 
+  // ── Generic catalog sync ──────────────────────────────────────
+
+  private async syncGenericCatalog(
+    entity: string,
+    model: string,
+    fieldMap: Record<string, string>,
+    selectFields?: string,
+  ): Promise<SyncResult> {
+    const filter = "DeletionMark eq false";
+    const rows = await this.fetchAll(entity, filter, selectFields);
+    let upserted = 0;
+    let errors = 0;
+
+    for (const r of rows as any[]) {
+      try {
+        const data: Record<string, any> = { isActive: true };
+        for (const [oneCField, dbField] of Object.entries(fieldMap)) {
+          data[dbField] = r[oneCField] ?? null;
+        }
+        data.name = data.name || r.Description || "—";
+        const db = this.db as any;
+        await db[model].upsert({
+          where: { externalId: r.Ref_Key },
+          create: { externalId: r.Ref_Key, ...data },
+          update: data,
+        });
+        upserted++;
+      } catch (err) {
+        errors++;
+      }
+    }
+    return { entity, fetched: rows.length, upserted, errors };
+  }
+
+  // ── Extended catalog syncs ──────────────────────────────────
+
+  async syncOrganizations(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_Организации", "oneCOrganization",
+      { Code: "code", Description: "name", НаименованиеПолное: "fullName", ИНН: "inn", КПП: "kpp", ОГРН: "ogrn" },
+    );
+  }
+
+  async syncNomenclature(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_Номенклатура", "oneCNomenclature",
+      { Code: "code", Description: "name", НаименованиеПолное: "fullName", IsFolder: "isFolder" },
+    );
+  }
+
+  async syncBankAccounts(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_БанковскиеСчета", "oneCBankAccount",
+      { Code: "code", Description: "name", НомерСчета: "accountNumber" },
+    );
+  }
+
+  async syncContracts(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_ДоговорыКонтрагентов", "oneCContract",
+      { Code: "code", Description: "name", Owner_Key: "contractorRefKey" },
+    );
+  }
+
+  async syncOneCEmployees(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_Сотрудники", "oneCEmployee",
+      { Code: "code", Description: "name", ФизическоеЛицо_Key: "personRefKey", Должность_Key: "positionRefKey", Организация_Key: "orgRefKey" },
+    );
+  }
+
+  async syncPositions(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_Должности", "oneCPosition",
+      { Code: "code", Description: "name" },
+    );
+  }
+
+  async syncFixedAssets(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_ОсновныеСредства", "oneCFixedAsset",
+      { Code: "code", Description: "name", НаименованиеПолное: "fullName", IsFolder: "isFolder" },
+    );
+  }
+
+  async syncWarehouses(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_Склады", "oneCWarehouse",
+      { Code: "code", Description: "name" },
+    );
+  }
+
+  async syncCurrencies(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_Валюты", "oneCCurrency",
+      { Code: "code", Description: "name" },
+    );
+  }
+
+  async syncDepartments(): Promise<SyncResult> {
+    return this.syncGenericCatalog(
+      "Catalog_ПодразделенияОрганизаций", "oneCDepartment",
+      { Code: "code", Description: "name", Parent_Key: "parentRefKey", Owner_Key: "orgRefKey" },
+    );
+  }
+
+  // ── Generic 1C document sync ────────────────────────────────
+
+  private async syncGenericDocument(
+    entity: string,
+    docType: string,
+    model: "oneCDocument" | "oneCHRDocument" | "oneCPayrollDocument",
+    extractor: (row: any) => Record<string, any>,
+  ): Promise<SyncResult> {
+    const filter = "DeletionMark eq false";
+    const rows = await this.fetchAll(entity, filter);
+    let upserted = 0;
+    let errors = 0;
+
+    for (const r of rows as any[]) {
+      try {
+        const extra = extractor(r);
+        const baseData = {
+          docType,
+          documentNumber: r.Number ?? null,
+          date: new Date(r.Date),
+          posted: r.Posted ?? false,
+          comment: r.Комментарий ?? null,
+          isActive: true,
+          ...extra,
+        };
+        const db = this.db as any;
+        await db[model].upsert({
+          where: { externalId: r.Ref_Key },
+          create: { externalId: r.Ref_Key, ...baseData },
+          update: baseData,
+        });
+        upserted++;
+      } catch (err) {
+        errors++;
+      }
+    }
+    return { entity, fetched: rows.length, upserted, errors };
+  }
+
+  // ── Finance document syncs (generic 1C document model) ──────
+
+  async syncAccountingEntries(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ОперацияБух", "ОперацияБух", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаОперации) || null,
+      operationType: r.Содержание ?? null,
+      meta: { СпособЗаполнения: r.СпособЗаполнения },
+    }));
+  }
+
+  async syncDebtCorrections(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_КорректировкаДолга", "КорректировкаДолга", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаКтЗадолженности) || parseFloat(r.СуммаДтЗадолженности) || null,
+      operationType: r.ВидОперации ?? null,
+      contractorRefKey: r.КонтрагентДебитор_Key ?? r.КонтрагентКредитор_Key ?? null,
+    }));
+  }
+
+  async syncReceivedInvoices(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_СчетФактураПолученный", "СчетФактураПолученный", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      contractorRefKey: r.Контрагент_Key ?? null,
+      operationType: r.ВидСчетаФактуры ?? null,
+    }));
+  }
+
+  async syncIssuedInvoices(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_СчетФактураВыданный", "СчетФактураВыданный", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      contractorRefKey: r.Контрагент_Key ?? null,
+      operationType: r.ВидСчетаФактуры ?? null,
+    }));
+  }
+
+  async syncAdvanceReports(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_АвансовыйОтчет", "АвансовыйОтчет", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      personRefKey: r.ФизЛицо_Key ?? null,
+    }));
+  }
+
+  async syncCustomerInvoices(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_СчетНаОплатуПокупателю", "СчетНаОплатуПокупателю", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      contractorRefKey: r.Контрагент_Key ?? null,
+    }));
+  }
+
+  async syncContractorSettlements(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ДокументРасчетовСКонтрагентом", "ДокументРасчетовСКонтрагентом", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      contractorRefKey: r.Контрагент_Key ?? null,
+    }));
+  }
+
+  async syncPenaltyCharges(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_НачислениеПеней", "НачислениеПеней", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      contractorRefKey: r.Контрагент_Key ?? null,
+      meta: { СтавкаПени: r.СтавкаПени, ПериодРасчета: r.ПериодРасчета },
+    }));
+  }
+
+  async syncDividends(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_НачислениеДивидендов", "НачислениеДивидендов", "oneCDocument", (r) => ({
+      operationType: r.ВидОперации ?? null,
+    }));
+  }
+
+  async syncRegOperations(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_РегламентнаяОперация", "РегламентнаяОперация", "oneCDocument", (r) => ({
+      operationType: r.ВидОперации ?? null,
+      meta: { Состояние: r.Состояние },
+    }));
+  }
+
+  // ── Inventory / warehouse documents ─────────────────────────
+
+  async syncGoodsWriteOff(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_СписаниеТоваров", "СписаниеТоваров", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      meta: { Основание: r.Основание },
+    }));
+  }
+
+  async syncInventoryCheck(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ИнвентаризацияТоваровНаСкладе", "ИнвентаризацияТоваровНаСкладе", "oneCDocument", (r) => ({
+      meta: { ДатаНачалаИнвентаризации: r.ДатаНачалаИнвентаризации, ДатаОкончанияИнвентаризации: r.ДатаОкончанияИнвентаризации },
+    }));
+  }
+
+  async syncDemandInvoice(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ТребованиеНакладная", "ТребованиеНакладная", "oneCDocument", (r) => ({
+      contractorRefKey: r.Контрагент_Key ?? null,
+    }));
+  }
+
+  async syncGoodsTransfer(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ПеремещениеТоваров", "ПеремещениеТоваров", "oneCDocument", (r) => ({
+      meta: { СкладОтправитель_Key: r.СкладОтправитель_Key, СкладПолучатель_Key: r.СкладПолучатель_Key },
+    }));
+  }
+
+  async syncNomenclatureAssembly(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_КомплектацияНоменклатуры", "КомплектацияНоменклатуры", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      operationType: r.ВидОперации ?? null,
+    }));
+  }
+
+  async syncFixedAssetAcceptance(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ПринятиеКУчетуОС", "ПринятиеКУчетуОС", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СтоимостьБУ) || null,
+      operationType: r.ВидОперации ?? null,
+    }));
+  }
+
+  async syncAdditionalExpenses(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ПоступлениеДопРасходов", "ПоступлениеДопРасходов", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      contractorRefKey: r.Контрагент_Key ?? null,
+    }));
+  }
+
+  async syncRetailSalesReport(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ОтчетОРозничныхПродажах", "ОтчетОРозничныхПродажах", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+    }));
+  }
+
+  async syncPaymentOrder(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ПлатежноеПоручение", "ПлатежноеПоручение", "oneCDocument", (r) => ({
+      amount: parseFloat(r.СуммаДокумента) || null,
+      contractorRefKey: r.Контрагент ?? null,
+      meta: { НазначениеПлатежа: r.НазначениеПлатежа },
+    }));
+  }
+
+  async syncInitialBalances(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ВводНачальныхОстатков", "ВводНачальныхОстатков", "oneCDocument", (r) => ({
+      operationType: r.РазделУчета ?? null,
+    }));
+  }
+
+  async syncMaterialTransfer(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ПередачаМатериаловВЭксплуатацию", "ПередачаМатериаловВЭксплуатацию", "oneCDocument", (r) => ({}));
+  }
+
+  async syncMaterialWriteOff(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_СписаниеМатериаловИзЭксплуатации", "СписаниеМатериаловИзЭксплуатации", "oneCDocument", (r) => ({}));
+  }
+
+  async syncRegReports(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_РегламентированныйОтчет", "РегламентированныйОтчет", "oneCDocument", (r) => ({
+      operationType: r.Вид ?? null,
+      meta: { Период: r.Период, НаименованиеОтчета: r.НаименованиеОтчета },
+    }));
+  }
+
+  async syncWarrant(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_Доверенность", "Доверенность", "oneCDocument", (r) => ({
+      contractorRefKey: r.Контрагент_Key ?? null,
+      personRefKey: r.ФизЛицо_Key ?? null,
+    }));
+  }
+
+  async syncWaybill(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ПутевойЛист", "ПутевойЛист", "oneCDocument", (r) => ({
+      personRefKey: r.ФизЛицо_Key ?? null,
+      meta: { ТранспортноеСредство_Key: r.ТранспортноеСредство_Key, НормаРасхода: r.НормаРасхода },
+    }));
+  }
+
+  // ── HR documents ────────────────────────────────────────────
+
+  async syncHiring(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ПриемНаРаботу", "ПриемНаРаботу", "oneCHRDocument", (r) => ({
+      employeeRefKey: r.Сотрудник_Key ?? null,
+      employeeName: null,
+      personRefKey: r.ФизическоеЛицо_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+      positionRefKey: r.Должность_Key ?? null,
+      dateStart: r.ДатаПриема ? new Date(r.ДатаПриема) : null,
+      meta: { ВидЗанятости: r.ВидЗанятости, КоличествоСтавок: r.КоличествоСтавок },
+    }));
+  }
+
+  async syncDismissal(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_Увольнение", "Увольнение", "oneCHRDocument", (r) => ({
+      employeeRefKey: r.Сотрудник_Key ?? null,
+      personRefKey: r.ФизическоеЛицо_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      dateStart: r.ДатаУвольнения ? new Date(r.ДатаУвольнения) : null,
+      meta: { ОснованиеУвольнения: r.ОснованиеУвольнения },
+    }));
+  }
+
+  async syncTransfer(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_КадровыйПеревод", "КадровыйПеревод", "oneCHRDocument", (r) => ({
+      employeeRefKey: r.Сотрудник_Key ?? null,
+      personRefKey: r.ФизическоеЛицо_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+      positionRefKey: r.Должность_Key ?? null,
+      dateStart: r.ДатаНачала ? new Date(r.ДатаНачала) : null,
+    }));
+  }
+
+  async syncVacation(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_Отпуск", "Отпуск", "oneCHRDocument", (r) => ({
+      employeeRefKey: r.Сотрудник_Key ?? null,
+      personRefKey: r.ФизическоеЛицо_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      dateStart: r.ДатаНачалаОсновногоОтпуска ? new Date(r.ДатаНачалаОсновногоОтпуска) : null,
+      dateEnd: r.ДатаОкончанияОсновногоОтпуска ? new Date(r.ДатаОкончанияОсновногоОтпуска) : null,
+      amount: parseFloat(r.Начислено) || null,
+      meta: { КоличествоДнейОсновногоОтпуска: r.КоличествоДнейОсновногоОтпуска },
+    }));
+  }
+
+  async syncSickLeave(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_БольничныйЛист", "БольничныйЛист", "oneCHRDocument", (r) => ({
+      employeeRefKey: r.Сотрудник_Key ?? null,
+      personRefKey: r.ФизическоеЛицо_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      dateStart: r.ДатаНачала ? new Date(r.ДатаНачала) : null,
+      dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
+      amount: parseFloat(r.Начислено) || null,
+      meta: { ПричинаНетрудоспособности: r.ПричинаНетрудоспособности },
+    }));
+  }
+
+  async syncAbsence(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ОтсутствиеНаРаботе", "ОтсутствиеНаРаботе", "oneCHRDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+    }));
+  }
+
+  async syncBusinessTrip(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_Командировка", "Командировка", "oneCHRDocument", (r) => ({
+      employeeRefKey: r.Сотрудник_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      dateStart: r.ДатаНачала ? new Date(r.ДатаНачала) : null,
+      dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
+      meta: { СтранаНазначения: r.СтранаНазначения, Цель: r.Цель },
+    }));
+  }
+
+  async syncGPHContract(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ДоговорГПХ", "ДоговорГПХ", "oneCHRDocument", (r) => ({
+      employeeRefKey: r.Сотрудник_Key ?? null,
+      personRefKey: r.ФизическоеЛицо_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+      positionRefKey: r.Должность_Key ?? null,
+      dateStart: r.ДатаНачала ? new Date(r.ДатаНачала) : null,
+      dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
+      amount: parseFloat(r.Размер) || null,
+    }));
+  }
+
+  async syncGPHAct(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_АктВыполненныхРаботПоДоговоруПодряда", "АктВыполненныхРабот", "oneCHRDocument", (r) => ({
+      employeeRefKey: r.Сотрудник_Key ?? null,
+      personRefKey: r.ФизическоеЛицо_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      dateStart: r.ДатаНачала ? new Date(r.ДатаНачала) : null,
+      dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
+      amount: parseFloat(r.Размер) || null,
+    }));
+  }
+
+  async syncExecutionList(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ИсполнительныйЛист", "ИсполнительныйЛист", "oneCHRDocument", (r) => ({
+      personRefKey: r.ФизическоеЛицо_Key ?? null,
+      orgRefKey: r.Организация_Key ?? null,
+      dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
+      amount: parseFloat(r.Сумма) || null,
+    }));
+  }
+
+  async syncTimesheet(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ТабельУчетаРабочегоВремени", "ТабельУчетаРабочегоВремени", "oneCHRDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+      dateStart: r.ДатаНачалаПериода ? new Date(r.ДатаНачалаПериода) : null,
+      dateEnd: r.ДатаОкончанияПериода ? new Date(r.ДатаОкончанияПериода) : null,
+    }));
+  }
+
+  // ── Payroll documents ────────────────────────────────────────
+
+  async syncPayrollAccrual(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_НачислениеЗарплаты", "НачислениеЗарплаты", "oneCPayrollDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+      period: r.МесяцНачисления ? new Date(r.МесяцНачисления) : null,
+      amount: parseFloat(r.Начислено) || null,
+    }));
+  }
+
+  async syncPayrollBankStatement(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ВедомостьНаВыплатуЗарплатыВБанк", "ВедомостьЗарплатыБанк", "oneCPayrollDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+      period: r.ПериодРегистрации ? new Date(r.ПериодРегистрации) : null,
+      amount: parseFloat(r.СуммаПоДокументу) || null,
+    }));
+  }
+
+  async syncPayrollCashStatement(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ВедомостьНаВыплатуЗарплатыВКассу", "ВедомостьЗарплатыКасса", "oneCPayrollDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+      period: r.ПериодРегистрации ? new Date(r.ПериодРегистрации) : null,
+      amount: parseFloat(r.СуммаПоДокументу) || null,
+    }));
+  }
+
+  async syncNDFLWithholding(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_УдержаниеУИсточникаВыплатыНДФЛ", "УдержаниеНДФЛ", "oneCPayrollDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+    }));
+  }
+
+  async syncPlannedAccrual(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_НазначениеПлановогоНачисления", "НазначениеПлановогоНачисления", "oneCPayrollDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+    }));
+  }
+
+  async syncPlannedDeduction(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_НазначениеПлановогоУдержания", "НазначениеПлановогоУдержания", "oneCPayrollDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+    }));
+  }
+
   // ── Orchestrator ─────────────────────────────────────────────
 
   async syncAll(): Promise<SyncReport> {
@@ -484,26 +996,101 @@ export class OneCSyncService {
       }
     };
 
-    // Phase 1: Catalogs (must run before documents for FK resolution)
-    console.log("[1C-Sync] ═══ Phase 1: Catalogs ═══");
+    // Phase 1: Core Catalogs (FK resolution)
+    console.log("[1C-Sync] ═══ Phase 1: Core Catalogs ═══");
     await run(() => this.syncContractors());
     await run(() => this.syncPersons());
     await run(() => this.syncCashFlowArticles());
 
-    // Phase 2: Finance documents
+    // Phase 1b: Extended Catalogs
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 1b: Extended Catalogs ═══");
+    await run(() => this.syncOrganizations());
+    await run(() => this.syncNomenclature());
+    await run(() => this.syncBankAccounts());
+    await run(() => this.syncContracts());
+    await run(() => this.syncOneCEmployees());
+    await run(() => this.syncPositions());
+    await run(() => this.syncFixedAssets());
+    await run(() => this.syncWarehouses());
+    await run(() => this.syncCurrencies());
+    await run(() => this.syncDepartments());
+
+    // Phase 2: Finance documents (existing)
     if (!aborted) console.log("[1C-Sync] ═══ Phase 2: Finance Documents ═══");
     await run(() => this.syncFinanceDoc("Document_ПриходныйКассовыйОрдер", "ПКО (Cash In)", "CASH", 1));
     await run(() => this.syncFinanceDoc("Document_РасходныйКассовыйОрдер", "РКО (Cash Out)", "CASH", -1));
     await run(() => this.syncFinanceDoc("Document_ПоступлениеНаРасчетныйСчет", "Bank In", "BANK", 1));
     await run(() => this.syncFinanceDoc("Document_СписаниеСРасчетногоСчета", "Bank Out", "BANK", -1));
 
-    // Phase 3: Invoices
+    // Phase 3: Invoices (existing)
     if (!aborted) console.log("[1C-Sync] ═══ Phase 3: Invoices ═══");
     await run(() => this.syncInvoiceDoc("Document_ПоступлениеТоваровУслуг", "Incoming Goods", "INCOMING"));
     await run(() => this.syncInvoiceDoc("Document_РеализацияТоваровУслуг", "Outgoing Goods", "OUTGOING"));
+    await run(() =>
+      this.syncInvoiceDoc("Document_ОказаниеУслуг", "Outgoing Services", "OUTGOING", {
+        contractorRefExtractor: (row) => row.Контрагенты?.[0]?.Контрагент_Key ?? null,
+        totalAmountExtractor: (row) => parseFloat(row.СуммаДокумента) || 0,
+        commentExtractor: (row) => row.Комментарий ?? null,
+        operationTypeExtractor: (row) => row.ВидВзаиморасчетов ?? row.ВидОперации ?? null,
+      })
+    );
 
-    // Phase 4: Recalculate balance snapshots
-    if (!aborted) console.log("[1C-Sync] ═══ Phase 4: Balance Snapshots ═══");
+    // Phase 4: Extended finance documents
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 4: Extended Finance Documents ═══");
+    await run(() => this.syncAccountingEntries());
+    await run(() => this.syncDebtCorrections());
+    await run(() => this.syncReceivedInvoices());
+    await run(() => this.syncIssuedInvoices());
+    await run(() => this.syncAdvanceReports());
+    await run(() => this.syncCustomerInvoices());
+    await run(() => this.syncContractorSettlements());
+    await run(() => this.syncPenaltyCharges());
+    await run(() => this.syncDividends());
+    await run(() => this.syncRegOperations());
+    await run(() => this.syncPaymentOrder());
+    await run(() => this.syncInitialBalances());
+    await run(() => this.syncRegReports());
+    await run(() => this.syncWarrant());
+
+    // Phase 5: Warehousing / inventory documents
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 5: Warehouse Documents ═══");
+    await run(() => this.syncGoodsWriteOff());
+    await run(() => this.syncInventoryCheck());
+    await run(() => this.syncDemandInvoice());
+    await run(() => this.syncGoodsTransfer());
+    await run(() => this.syncNomenclatureAssembly());
+    await run(() => this.syncFixedAssetAcceptance());
+    await run(() => this.syncAdditionalExpenses());
+    await run(() => this.syncRetailSalesReport());
+    await run(() => this.syncMaterialTransfer());
+    await run(() => this.syncMaterialWriteOff());
+    await run(() => this.syncWaybill());
+
+    // Phase 6: HR documents
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 6: HR Documents ═══");
+    await run(() => this.syncHiring());
+    await run(() => this.syncDismissal());
+    await run(() => this.syncTransfer());
+    await run(() => this.syncVacation());
+    await run(() => this.syncSickLeave());
+    await run(() => this.syncAbsence());
+    await run(() => this.syncBusinessTrip());
+    await run(() => this.syncGPHContract());
+    await run(() => this.syncGPHAct());
+    await run(() => this.syncExecutionList());
+    await run(() => this.syncTimesheet());
+
+    // Phase 7: Payroll documents
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 7: Payroll Documents ═══");
+    await run(() => this.syncPayrollAccrual());
+    await run(() => this.syncPayrollBankStatement());
+    await run(() => this.syncPayrollCashStatement());
+    await run(() => this.syncNDFLWithholding());
+    await run(() => this.syncPlannedAccrual());
+    await run(() => this.syncPlannedDeduction());
+
+    // Phase 8: Recalculate balance snapshots
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 8: Balance Snapshots ═══");
     await run(() => this.syncBalanceSnapshots());
 
     const finishedAt = new Date();

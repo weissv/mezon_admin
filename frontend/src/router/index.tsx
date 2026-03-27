@@ -23,6 +23,7 @@ import FeedbackPage from "../pages/FeedbackPage";
 import ProcurementPage from "../pages/ProcurementPage";
 import RecipesPage from "../pages/RecipesPage";
 import IntegrationPage from "../pages/IntegrationPage";
+import OneCDataPage from "../pages/OneCDataPage";
 import UsersPage from "../pages/UsersPage";
 import AiAssistantPage from "../pages/AiAssistantPage";
 import GroupsPage from "../pages/GroupsPage";
@@ -185,6 +186,7 @@ export default function Router() {
 
             <Route element={<RoleBasedRoute roles={["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT"]} />}>
               <Route path="integration" element={<IntegrationPage />} />
+              <Route path="onec-data" element={<OneCDataPage />} />
             </Route>
 
             {/* Контрольные работы - для учителей и админов */}

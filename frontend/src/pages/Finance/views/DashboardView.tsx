@@ -96,6 +96,9 @@ function SummarySection({ summary }: { summary: any }) {
   const income = Number(summary.byType?.find((t: any) => t.type === "INCOME")?._sum?.amount || 0);
   const expense = Math.abs(Number(summary.byType?.find((t: any) => t.type === "EXPENSE")?._sum?.amount || 0));
   const profit = income - expense;
+  const totalTransactions = Number(summary.totals?.totalTransactions ?? 0);
+  const totalInvoices = Number(summary.totals?.totalInvoices ?? 0);
+  const totalDocuments = Number(summary.totals?.totalDocuments ?? totalTransactions);
 
   const kpis = [
     {
@@ -120,12 +123,13 @@ function SummarySection({ summary }: { summary: any }) {
       bg: profit >= 0 ? "bg-emerald-50" : "bg-red-50",
     },
     {
-      label: "Всего операций",
-      value: summary.totals?.totalTransactions ?? 0,
+      label: "Всего документов",
+      value: totalDocuments,
       icon: BarChart3,
       color: "text-blue-600",
       bg: "bg-blue-50",
       isCurrency: false,
+      hint: `Операции: ${totalTransactions} • Накладные: ${totalInvoices}`,
     },
   ];
 
@@ -143,6 +147,7 @@ function SummarySection({ summary }: { summary: any }) {
             <p className={`text-xl font-bold ${k.color}`}>
               {k.isCurrency === false ? k.value : currency.format(k.value)}
             </p>
+            {k.hint && <p className="mt-1 text-xs text-gray-400">{k.hint}</p>}
           </div>
         </Card>
       ))}

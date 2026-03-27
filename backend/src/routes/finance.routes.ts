@@ -306,8 +306,11 @@ router.get(
     appendDateRange(where, startDate, endDate);
     if (channel) where.channel = String(channel);
 
+    const invoiceWhere: Record<string, any> = {};
+    appendDateRange(invoiceWhere, startDate, endDate);
+
   // Группировка по категории, типу, источнику, каналу
-  const [byCategory, byType, bySource, byChannel] = await Promise.all([
+  const [byCategory, byType, bySource, byChannel, totals, invoiceTotals] = await Promise.all([
     prisma.financeTransaction.groupBy({
       by: ["category"],
       _sum: { amount: true },
@@ -332,20 +335,26 @@ router.get(
       _count: { id: true },
       where,
     }),
+    prisma.financeTransaction.aggregate({
+      _sum: { amount: true },
+      _count: { id: true },
+      where,
+    }),
+    prisma.invoice.aggregate({
+      _sum: { totalAmount: true },
+      _count: { id: true },
+      where: invoiceWhere,
+    }),
   ]);
-
-  // Общая статистика
-  const totals = await prisma.financeTransaction.aggregate({
-    _sum: { amount: true },
-    _count: { id: true },
-    where,
-  });
 
     return res.json({
       period: { startDate, endDate },
     totals: {
       totalAmount: totals._sum.amount || 0,
       totalTransactions: totals._count.id,
+      totalInvoices: invoiceTotals._count.id,
+      totalDocuments: totals._count.id + invoiceTotals._count.id,
+      totalInvoiceAmount: invoiceTotals._sum.totalAmount || 0,
     },
     byCategory,
     byType,
