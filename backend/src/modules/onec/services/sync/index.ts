@@ -34,6 +34,7 @@ interface SyncPhase {
 
 export class OneCSyncService {
   private ctx: SyncContext;
+  private running = false;
 
   constructor(client?: AxiosInstance, db?: PrismaClient) {
     this.ctx = new SyncContext(
@@ -61,6 +62,26 @@ export class OneCSyncService {
   }
 
   async syncAll(): Promise<SyncReport> {
+    if (this.running) {
+      logger.warn("[1C-Sync] Sync already in progress — skipping");
+      return {
+        startedAt: new Date(),
+        finishedAt: new Date(),
+        results: [],
+        aborted: true,
+        error: "Sync already in progress",
+      };
+    }
+
+    this.running = true;
+    try {
+      return await this.executeSyncPhases();
+    } finally {
+      this.running = false;
+    }
+  }
+
+  private async executeSyncPhases(): Promise<SyncReport> {
     const startedAt = new Date();
     const results: SyncResult[] = [];
     let aborted = false;
@@ -74,14 +95,14 @@ export class OneCSyncService {
         logger.info(
           `[1C-Sync] ${result.entity}: fetched=${result.fetched} upserted=${result.upserted} errors=${result.errors}`,
         );
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (isNetworkError(err)) {
-          abortReason = err.message;
+          abortReason = (err as Error).message;
           logger.warn(`[1C-Sync] Network error — aborting sync cycle: ${abortReason}`);
           aborted = true;
           return;
         }
-        logger.error(`[1C-Sync] Unexpected error:`, err.message);
+        logger.error(`[1C-Sync] Unexpected error:`, (err as Error).message);
         results.push({ entity: "unknown", fetched: 0, upserted: 0, errors: 1 });
       }
     };

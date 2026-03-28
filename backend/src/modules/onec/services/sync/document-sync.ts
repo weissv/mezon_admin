@@ -1,4 +1,5 @@
 import type { SyncContext, SyncResult } from "./sync-context";
+import { logger } from "../../../../utils/logger";
 
 async function syncGenericDocument(
   ctx: SyncContext,
@@ -18,7 +19,7 @@ async function syncGenericDocument(
       const baseData = {
         docType,
         documentNumber: r.Number ?? null,
-        date: new Date(r.Date),
+        date: r.Date ? new Date(r.Date) : new Date(),
         posted: r.Posted ?? false,
         comment: r.Комментарий ?? null,
         isActive: true,
@@ -33,6 +34,7 @@ async function syncGenericDocument(
       upserted++;
     } catch (err) {
       errors++;
+      logger.error(`[1C-Sync] ${docType} upsert error for ${r.Ref_Key}:`, (err as Error).message);
     }
   }
   return { entity, fetched: rows.length, upserted, errors };

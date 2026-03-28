@@ -1,26 +1,8 @@
 import { Router } from "express";
-import { checkRole } from "../middleware/checkRole";
-import { oneCAllowedRoles } from "../modules/onec/services/onec-data.service";
-import { oneCSyncService } from "../modules/onec/services/sync";
 
 const router = Router();
 
-// POST /api/integrations/1c/sync
-router.post(
-  "/1c/sync",
-  checkRole(oneCAllowedRoles),
-  async (_req, res) => {
-    try {
-      const report = await oneCSyncService.syncAll();
-      return res.json(report);
-    } catch (error: any) {
-      console.error("1C sync error:", error);
-      return res.status(500).json({
-        status: "error",
-        message: "Ошибка синхронизации с 1С",
-      });
-    }
-  }
-);
+// 1C sync route has been consolidated into modules/onec/routes/sync.routes.ts
+// mounted at /api/integrations/1c/sync
 
 export default router;
