@@ -13,6 +13,7 @@ import {
   Archive,
   Filter,
   X,
+  Users,
 } from 'lucide-react';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
@@ -24,6 +25,8 @@ import { useChildren, useChildMutations, useGroups } from '../hooks/useChildren'
 import { api } from '../lib/api';
 import { toast } from 'sonner';
 import type { Child, ChildFilters, Gender } from '../types/child';
+
+const selectClassName = 'mezon-field';
 
 const genderLabel = (g?: Gender | null) => {
   if (g === 'MALE') return 'М';
@@ -42,12 +45,12 @@ const statusLabel = (s: string) => {
 
 const statusBadge = (s: string) => {
   const colors: Record<string, string> = {
-    ACTIVE: 'bg-green-100 text-green-800',
-    LEFT: 'bg-yellow-100 text-yellow-800',
-    ARCHIVED: 'bg-gray-100 text-gray-600',
+    ACTIVE: 'bg-[rgba(52,199,89,0.14)] text-[var(--macos-green)]',
+    LEFT: 'bg-[rgba(255,204,0,0.12)] text-[var(--macos-orange)]',
+    ARCHIVED: 'bg-[rgba(60,60,67,0.1)] text-[var(--mezon-text-secondary)]',
   };
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[s] ?? 'bg-gray-100'}`}>
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colors[s] ?? 'bg-[rgba(60,60,67,0.1)] text-[var(--mezon-text-secondary)]'}`}>
       {statusLabel(s)}
     </span>
   );
@@ -206,13 +209,24 @@ export default function ChildrenPage() {
 
   return (
     <div>
-      <h1 className="text-xl sm:text-2xl font-bold mb-4">Управление контингентом детей</h1>
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+            <Users className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="mezon-badge mb-2">Children · контингент</div>
+            <h1 className="mezon-section-title mb-1">Управление контингентом детей</h1>
+            <p className="mezon-subtitle">Профили учеников, статусы, родители и массовый импорт в одном рабочем пространстве.</p>
+          </div>
+        </div>
+      </div>
 
       {/* Import/Export Card */}
       <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-semibold">Массовая загрузка списков</p>
-          <p className="text-sm text-gray-600">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон для кураторов.</p>
+          <p className="font-semibold text-[var(--mezon-dark)]">Массовая загрузка списков</p>
+          <p className="text-sm text-[var(--mezon-text-secondary)]">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон для кураторов.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={handleExport} disabled={isExporting}>
@@ -225,7 +239,7 @@ export default function ChildrenPage() {
       </Card>
 
       {/* Search + Filters + Add */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-[18px] border border-[var(--glass-border)] bg-[var(--mezon-panel-muted)] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px] sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 flex-1">
           <div className="relative flex-1 max-w-sm">
             <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
@@ -242,7 +256,7 @@ export default function ChildrenPage() {
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="h-4 w-4 mr-1" /> Фильтры
-            {hasActiveFilters && <span className="ml-1 bg-white text-black rounded-full text-xs w-4 h-4 inline-flex items-center justify-center">!</span>}
+            {hasActiveFilters && <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-xs text-black">!</span>}
           </Button>
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
@@ -260,9 +274,9 @@ export default function ChildrenPage() {
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="text-sm text-gray-600 block mb-1">Статус</label>
+              <label className="mb-1 block text-sm text-[var(--mezon-text-secondary)]">Статус</label>
               <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className={selectClassName}
                 value={filters.status ?? ''}
                 onChange={(e) => {
                   setFilters((prev: ChildFilters) => ({ ...prev, status: (e.target.value as any) || undefined }));
@@ -276,9 +290,9 @@ export default function ChildrenPage() {
               </select>
             </div>
             <div>
-              <label className="text-sm text-gray-600 block mb-1">Класс</label>
+              <label className="mb-1 block text-sm text-[var(--mezon-text-secondary)]">Класс</label>
               <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className={selectClassName}
                 value={filters.groupId ?? ''}
                 onChange={(e) => {
                   setFilters((prev: ChildFilters) => ({ ...prev, groupId: e.target.value ? Number(e.target.value) : undefined }));
@@ -292,9 +306,9 @@ export default function ChildrenPage() {
               </select>
             </div>
             <div>
-              <label className="text-sm text-gray-600 block mb-1">Пол</label>
+              <label className="mb-1 block text-sm text-[var(--mezon-text-secondary)]">Пол</label>
               <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className={selectClassName}
                 value={filters.gender ?? ''}
                 onChange={(e) => {
                   setFilters((prev: ChildFilters) => ({ ...prev, gender: (e.target.value as Gender) || undefined }));
@@ -338,15 +352,15 @@ export default function ChildrenPage() {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление ученика">
         <div className="p-4">
           <div className="flex items-start gap-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-full">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+            <div className="rounded-full bg-[rgba(255,59,48,0.12)] p-2">
+              <AlertCircle className="h-6 w-6 text-[var(--macos-red)]" />
             </div>
             <div>
-              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить ученика?</p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="font-medium text-[var(--mezon-dark)]">Вы уверены, что хотите удалить ученика?</p>
+              <p className="mt-1 text-sm text-[var(--mezon-text-secondary)]">
                 <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.group?.name})
               </p>
-              <p className="text-sm text-red-600 mt-2">
+              <p className="mt-2 text-sm text-[var(--macos-red)]">
                 Все связанные данные (посещаемость, отсутствия, записи в кружки) будут удалены.
               </p>
             </div>
