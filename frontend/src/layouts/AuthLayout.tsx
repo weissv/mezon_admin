@@ -4,9 +4,10 @@ import { Toaster } from "sonner";
 
 export default function AuthLayout() {
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-[#fef3e6] via-[#f9e2f0] to-[#f0f6ff] pb-16 pt-8">
+    <div className="relative min-h-screen bg-[#F5F5F7] pb-16 pt-8">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,122,255,0.05),transparent_60%)]" />
       <Toaster position="top-right" richColors />
-      <Outlet /> {/* Этот компонент будет отображать LoginPage */}
+      <Outlet />
     </div>
   );
 }

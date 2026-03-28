@@ -100,10 +100,10 @@ export default function SideNav() {
             onClick={closeMobileMenu}
             aria-label="Close menu"
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5" />
           </button>
         </div>
-        <p>Системность и уют из Mezon school теперь и в управлении.</p>
+        <p>Управление школой из одного окна</p>
       </div>
 
       <div className="mezon-sidenav__nav">
@@ -141,16 +141,16 @@ export default function SideNav() {
       </div>
 
       <div className="mezon-sidenav__footer">
-        <p>Есть вопрос? Свяжитесь с нами:</p>
-        <p className="font-semibold text-[var(--mezon-accent)]">+ 71 // 207 17 30</p>
-        <div className="mt-2 mezon-top-bar__social">
+        <p>Есть вопрос? Свяжитесь:</p>
+        <p className="font-semibold text-[#007AFF] text-[12px]">+ 71 // 207 17 30</p>
+        <div className="mt-1.5 mezon-top-bar__social">
           {socialLinks.map(({ icon: Icon, href }) => (
             <a key={href} href={href} target="_blank" rel="noreferrer">
-              <Icon className="h-4 w-4" />
+              <Icon className="h-3.5 w-3.5" />
             </a>
           ))}
         </div>
-        <Button type="button" className="mt-4 w-full" variant="outline" onClick={logout}>
+        <Button type="button" className="mt-3 w-full" variant="outline" size="sm" onClick={logout}>
           Выйти
         </Button>
       </div>

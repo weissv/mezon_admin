@@ -22,24 +22,24 @@ interface EmptyStateProps {
 const sizeClasses = {
   sm: {
     container: 'py-8 px-4',
-    icon: 'w-10 h-10',
-    iconWrapper: 'w-16 h-16',
-    title: 'text-base',
-    description: 'text-sm',
+    icon: 'w-8 h-8',
+    iconWrapper: 'w-14 h-14',
+    title: 'text-[14px]',
+    description: 'text-[12px]',
   },
   md: {
     container: 'py-12 px-6',
-    icon: 'w-12 h-12',
-    iconWrapper: 'w-20 h-20',
-    title: 'text-lg',
-    description: 'text-sm',
+    icon: 'w-10 h-10',
+    iconWrapper: 'w-16 h-16',
+    title: 'text-[15px]',
+    description: 'text-[13px]',
   },
   lg: {
     container: 'py-16 px-8',
-    icon: 'w-16 h-16',
-    iconWrapper: 'w-24 h-24',
-    title: 'text-xl',
-    description: 'text-base',
+    icon: 'w-12 h-12',
+    iconWrapper: 'w-20 h-20',
+    title: 'text-[17px]',
+    description: 'text-[14px]',
   },
 };
 
@@ -58,17 +58,17 @@ export function EmptyState({
     <div className={cn('text-center', sizes.container, className)}>
       <div
         className={cn(
-          'mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4',
+          'mx-auto bg-[rgba(0,0,0,0.04)] rounded-[12px] flex items-center justify-center mb-4',
           sizes.iconWrapper
         )}
       >
-        <Icon className={cn('text-gray-400', sizes.icon)} />
+        <Icon className={cn('text-[#86868B]', sizes.icon)} />
       </div>
-      <h3 className={cn('font-semibold text-gray-900 mb-1', sizes.title)}>
+      <h3 className={cn('font-semibold text-[#1D1D1F] mb-1 tracking-[-0.01em]', sizes.title)}>
         {title}
       </h3>
       {description && (
-        <p className={cn('text-gray-500 mb-4', sizes.description)}>
+        <p className={cn('text-[#86868B] mb-4', sizes.description)}>
           {description}
         </p>
       )}

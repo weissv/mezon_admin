@@ -22,23 +22,23 @@ export default function LmsLayout() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <span className="text-sm text-gray-500">Загрузка...</span>
+      <div className="flex min-h-screen items-center justify-center bg-[#F5F5F7]">
+        <span className="text-[13px] text-[#86868B]">Загрузка...</span>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 text-center">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#F5F5F7] px-6 text-center">
         <div className="max-w-md space-y-4">
-          <p className="text-2xl font-semibold text-gray-800">Сессия потеряна</p>
-          <p className="text-gray-600">
+          <p className="text-xl font-semibold text-[#1D1D1F]">Сессия потеряна</p>
+          <p className="text-[13px] text-[#86868B]">
              Вы не авторизованы. Войдите для доступа к LMS.
           </p>
           <Link
             to="/auth/login"
-            className="inline-flex items-center justify-center rounded-lg bg-[var(--mezon-accent)] px-6 py-3 font-semibold text-white shadow-lg shadow-[var(--mezon-accent-transparent)] transition hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-[8px] bg-[#007AFF] px-5 py-2.5 text-[13px] font-medium text-white shadow-sm transition hover:opacity-90"
           >
             Войти
           </Link>

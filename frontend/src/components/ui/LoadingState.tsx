@@ -25,7 +25,7 @@ export function Spinner({ size = 'md', className }: SpinnerProps) {
   return (
     <Loader2 
       className={cn(
-        'animate-spin text-[var(--mezon-accent)]',
+        'animate-spin text-[#007AFF]',
         spinnerSizes[size],
         className
       )} 
@@ -43,9 +43,9 @@ interface FullPageLoaderProps {
 
 export function FullPageLoader({ message = 'Загрузка...' }: FullPageLoaderProps) {
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+    <div className="fixed inset-0 bg-[#F5F5F7]/80 backdrop-blur-[20px] z-50 flex flex-col items-center justify-center">
       <Spinner size="xl" />
-      <p className="mt-4 text-gray-600">{message}</p>
+      <p className="mt-4 text-[13px] text-[#86868B]">{message}</p>
     </div>
   );
 }
@@ -64,13 +64,13 @@ export function LoadingCard({ className, message, height = 200 }: LoadingCardPro
   return (
     <div 
       className={cn(
-        'flex flex-col items-center justify-center bg-gray-50 rounded-lg',
+        'flex flex-col items-center justify-center bg-[rgba(0,0,0,0.02)] rounded-[10px]',
         className
       )}
       style={{ minHeight: height }}
     >
       <Spinner size="lg" />
-      {message && <p className="mt-2 text-sm text-gray-500">{message}</p>}
+      {message && <p className="mt-2 text-[12px] text-[#86868B]">{message}</p>}
     </div>
   );
 }
@@ -103,7 +103,7 @@ export function Skeleton({
   return (
     <div
       className={cn(
-        'animate-pulse bg-gray-200',
+        'animate-pulse bg-[rgba(0,0,0,0.06)]',
         roundedClasses[rounded],
         className
       )}

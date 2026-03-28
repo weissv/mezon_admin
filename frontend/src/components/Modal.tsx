@@ -4,16 +4,16 @@ import { ReactNode } from "react";
 export function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: ReactNode; }) {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-4 shadow-lg sm:p-6">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold sm:text-xl">{title}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-[14px] bg-white/92 backdrop-blur-[40px] saturate-[1.8] border border-white/50 shadow-[0_24px_80px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.06)] p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-[#1D1D1F]">{title}</h2>
           <button 
             onClick={onClose} 
-            className="text-gray-500 hover:text-gray-700 text-2xl leading-none px-2"
+            className="w-7 h-7 rounded-full bg-[rgba(0,0,0,0.06)] hover:bg-[rgba(0,0,0,0.1)] flex items-center justify-center text-[#86868B] hover:text-[#1D1D1F] transition-colors text-sm leading-none"
             aria-label="Close"
           >
-            ×
+            &times;
           </button>
         </div>
         {children}
