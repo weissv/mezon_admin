@@ -1609,3 +1609,54 @@ model OneCPayrollDocument {
   @@index([docType, date])
   @@index([docType])
 }
+
+// ══════════════════════════════════════════════════════════════
+// 1С СИНХРОНИЗАЦИЯ — Универсальный справочник
+// ══════════════════════════════════════════════════════════════
+
+/// Универсальная модель для справочников 1С, не имеющих отдельной модели
+/// (Банки, ВидыНоменклатуры, КонтактныеЛица, Календари и т.д.)
+model OneCCatalog {
+  id            Int      @id @default(autoincrement())
+  externalId    String
+  catalogType   String                            // "Банки", "ВидыНоменклатуры" и т.д.
+  code          String?
+  name          String
+  fullName      String?
+  isFolder      Boolean  @default(false)
+  parentRefKey  String?
+  ownerRefKey   String?
+  isActive      Boolean  @default(true)
+  meta          Json?                              // Все дополнительные поля
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([catalogType, externalId])
+  @@index([catalogType])
+  @@index([catalogType, name])
+}
+
+// ══════════════════════════════════════════════════════════════
+// 1С СИНХРОНИЗАЦИЯ — Регистры
+// ══════════════════════════════════════════════════════════════
+
+/// Универсальная модель для регистров 1С (накопления и сведения)
+model OneCRegister {
+  id              Int      @id @default(autoincrement())
+  externalId      String
+  registerType    String                            // "ГрафикиРаботыПоВидамВремени", "НДСРеестрВходящихСчетовФактур"
+  registerKind    String   @default("Information")  // "Information" | "Accumulation"
+  period          DateTime?
+  recorder        String?                           // Ref_Key регистратора-документа
+  recorderType    String?                           // Тип документа-регистратора
+  lineNumber      Int?
+  active          Boolean  @default(true)
+  data            Json                              // Все поля записи регистра
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([registerType, externalId])
+  @@index([registerType])
+  @@index([registerType, period])
+  @@index([recorder])
+}
