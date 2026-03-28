@@ -10,6 +10,7 @@ import {
   NotFoundError,
   ConflictError,
   DatabaseError,
+  handlePrismaError,
 } from './errors';
 import { HTTP_STATUS } from '../constants';
 
@@ -166,5 +167,62 @@ describe('DatabaseError', () => {
     const error = new DatabaseError('Constraint violation', dbDetails);
 
     expect(error.details).toEqual(dbDetails);
+  });
+});
+
+
+describe('handlePrismaError', () => {
+  it('должен возвращать ConflictError при ошибке P2002 (уникальность) с полем из meta.target', () => {
+    const error = { code: 'P2002', meta: { target: ['email'] } };
+    const result = handlePrismaError(error);
+
+    expect(result).toBeInstanceOf(ConflictError);
+    expect(result.message).toBe('Запись с таким значением email уже существует');
+  });
+
+  it('должен возвращать ConflictError при ошибке P2002 без поля из meta.target', () => {
+    const error = { code: 'P2002' };
+    const result = handlePrismaError(error);
+
+    expect(result).toBeInstanceOf(ConflictError);
+    expect(result.message).toBe('Запись с таким значением поле уже существует');
+  });
+
+  it('должен возвращать NotFoundError при ошибке P2025 (не найдено)', () => {
+    const error = { code: 'P2025' };
+    const result = handlePrismaError(error);
+
+    expect(result).toBeInstanceOf(NotFoundError);
+    expect(result.message).toBe('Запись не найден'); // 'Запись не найден' is what it returns according to NotFoundError logic which appends ' не найден'
+  });
+
+  it('должен возвращать ValidationError при ошибке P2003 (внешний ключ)', () => {
+    const error = { code: 'P2003' };
+    const result = handlePrismaError(error);
+
+    expect(result).toBeInstanceOf(ValidationError);
+    expect(result.message).toBe('Нарушение внешнего ключа. Проверьте связанные записи.');
+  });
+
+  it('должен возвращать ValidationError при ошибке P2014 (отношения)', () => {
+    const error = { code: 'P2014' };
+    const result = handlePrismaError(error);
+
+    expect(result).toBeInstanceOf(ValidationError);
+    expect(result.message).toBe('Операция нарушит требуемое отношение между записями.');
+  });
+
+  it('должен возвращать DatabaseError для других ошибок Prisma или неизвестных ошибок', () => {
+    const error = { code: 'P9999', message: 'Unknown Prisma error' };
+    const result = handlePrismaError(error);
+
+    expect(result).toBeInstanceOf(DatabaseError);
+    expect(result.message).toBe('Unknown Prisma error');
+  });
+
+  it('должен возвращать DatabaseError для null/undefined ошибок', () => {
+    const result = handlePrismaError(null);
+
+    expect(result).toBeInstanceOf(DatabaseError);
   });
 });

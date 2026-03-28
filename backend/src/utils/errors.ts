@@ -148,7 +148,7 @@ export const handlePrismaError = (error: any): AppError => {
   }
 
   // Общая ошибка базы данных
-  return new DatabaseError(error.message);
+  return new DatabaseError(error?.message || "Неизвестная ошибка базы данных");
 };
 
 /**
