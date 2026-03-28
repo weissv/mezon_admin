@@ -25,6 +25,7 @@ import { hrSyncSteps } from "./hr-sync";
 import { payrollSyncSteps } from "./payroll-sync";
 import { universalCatalogSteps, chartEntitySteps, registerSteps, extraRegisterSteps } from "./universal-sync";
 import { syncBalanceSnapshots } from "./balance-sync";
+import { logger } from "../../../../utils/logger";
 
 interface SyncPhase {
   label: string;
@@ -70,17 +71,17 @@ export class OneCSyncService {
       try {
         const result = await fn();
         results.push(result);
-        console.log(
+        logger.info(
           `[1C-Sync] ${result.entity}: fetched=${result.fetched} upserted=${result.upserted} errors=${result.errors}`,
         );
       } catch (err: any) {
         if (isNetworkError(err)) {
           abortReason = err.message;
-          console.warn(`[1C-Sync] Network error — aborting sync cycle: ${abortReason}`);
+          logger.warn(`[1C-Sync] Network error — aborting sync cycle: ${abortReason}`);
           aborted = true;
           return;
         }
-        console.error(`[1C-Sync] Unexpected error:`, err.message);
+        logger.error(`[1C-Sync] Unexpected error:`, err.message);
         results.push({ entity: "unknown", fetched: 0, upserted: 0, errors: 1 });
       }
     };
@@ -88,7 +89,7 @@ export class OneCSyncService {
     for (const phase of this.buildSyncPhases()) {
       if (aborted) break;
 
-      console.log(`[1C-Sync] ═══ ${phase.label} ═══`);
+      logger.info(`[1C-Sync] ═══ ${phase.label} ═══`);
       for (const step of phase.steps) {
         await run(step);
         if (aborted) break;
@@ -99,7 +100,7 @@ export class OneCSyncService {
     const report: SyncReport = { startedAt, finishedAt, results, aborted, error: abortReason };
 
     const durationMs = finishedAt.getTime() - startedAt.getTime();
-    console.log(
+    logger.info(
       `[1C-Sync] ═══ Completed in ${(durationMs / 1000).toFixed(1)}s — ` +
         `${results.length} stages, aborted=${aborted} ═══`,
     );
@@ -109,20 +110,20 @@ export class OneCSyncService {
 
   startSchedule(): void {
     const schedule = config.oneCCronSchedule;
-    console.log(`[1C-Sync] Starting cron schedule: ${schedule}`);
+    logger.info(`[1C-Sync] Starting cron schedule: ${schedule}`);
 
     cron.schedule(schedule, async () => {
-      console.log(`[1C-Sync] Cron triggered at ${new Date().toISOString()}`);
+      logger.info(`[1C-Sync] Cron triggered at ${new Date().toISOString()}`);
       try {
         await this.syncAll();
       } catch (err) {
-        console.error("[1C-Sync] Top-level sync error:", (err as Error).message);
+        logger.error("[1C-Sync] Top-level sync error:", (err as Error).message);
       }
     });
   }
 
   async runOnce(): Promise<SyncReport> {
-    console.log("[1C-Sync] Running one-shot sync...");
+    logger.info("[1C-Sync] Running one-shot sync...");
     return this.syncAll();
   }
 }
