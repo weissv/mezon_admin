@@ -13,6 +13,9 @@ import { FormError } from '../components/ui/FormError';
 import { DataTable } from '../components/DataTable/DataTable';
 import { Trash2, AlertCircle, Edit, Plus, Filter, Shield } from 'lucide-react';
 
+const selectClassName = 'mezon-field';
+const textareaClassName = 'mezon-field min-h-[112px] resize-y';
+
 const eventTypeLabels: Record<string, string> = {
   INCIDENT: 'Происшествие',
   FIRE_CHECK: 'Проверка ПБ',
@@ -21,10 +24,10 @@ const eventTypeLabels: Record<string, string> = {
 };
 
 const eventTypeColors: Record<string, string> = {
-  INCIDENT: 'bg-red-100 text-red-800',
-  FIRE_CHECK: 'bg-orange-100 text-orange-800',
-  VISITOR_LOG: 'bg-blue-100 text-blue-800',
-  DOCUMENT: 'bg-green-100 text-green-800',
+  INCIDENT: 'bg-[rgba(255,59,48,0.12)] text-[var(--macos-red)]',
+  FIRE_CHECK: 'bg-[rgba(255,149,0,0.14)] text-[var(--macos-orange)]',
+  VISITOR_LOG: 'bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)]',
+  DOCUMENT: 'bg-[rgba(52,199,89,0.14)] text-[var(--macos-green)]',
 };
 
 // Схема на основе createSecurityLogSchema
@@ -198,10 +201,16 @@ export default function SecurityPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Shield className="h-6 w-6" />
-          Журнал безопасности
-        </h1>
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+            <Shield className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="mezon-badge mb-2">Safety · журнал</div>
+            <h1 className="mezon-section-title mb-1">Журнал безопасности</h1>
+            <p className="mezon-subtitle">Происшествия, проверки, посетители и документы по охране в одном реестре.</p>
+          </div>
+        </div>
         <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" /> Добавить запись
         </Button>
@@ -210,27 +219,30 @@ export default function SecurityPage() {
       {/* Статистика */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(eventTypeLabels).map(([key, label]) => (
-          <div 
+          <Card
             key={key} 
-            className={`bg-white rounded-lg border cursor-pointer transition-all hover:shadow-md ${filterType === key ? 'ring-2 ring-blue-500' : ''}`}
-            onClick={() => setFilterType(filterType === key ? '' : key)}
+            className={`p-0 transition-all ${filterType === key ? 'ring-2 ring-[var(--mezon-accent)]' : 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
           >
-            <div className="p-4 flex items-center gap-3">
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 p-4 text-left"
+              onClick={() => setFilterType(filterType === key ? '' : key)}
+            >
               <div className={`p-2 rounded-full ${eventTypeColors[key]}`}>
                 <Shield className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">{label}</p>
-                <p className="text-xl font-bold">{stats[key] || 0}</p>
+                <p className="text-sm text-[var(--mezon-text-secondary)]">{label}</p>
+                <p className="text-xl font-bold text-[var(--mezon-dark)]">{stats[key] || 0}</p>
               </div>
-            </div>
-          </div>
+            </button>
+          </Card>
         ))}
       </div>
 
       {/* Фильтр */}
       {filterType && (
-        <div className="flex items-center gap-2 text-sm bg-blue-50 text-blue-700 px-3 py-2 rounded-lg">
+        <div className="flex items-center gap-2 rounded-lg bg-[rgba(10,132,255,0.08)] px-3 py-2 text-sm text-[var(--mezon-accent)]">
           <Filter className="h-4 w-4" />
           <span>Фильтр: {eventTypeLabels[filterType]}</span>
           <button onClick={() => setFilterType('')} className="ml-2 underline hover:no-underline">
@@ -242,11 +254,11 @@ export default function SecurityPage() {
       <Card>
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-500">Загрузка...</p>
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-[var(--mezon-accent)]"></div>
+            <p className="mt-2 text-[var(--mezon-text-secondary)]">Загрузка...</p>
           </div>
         ) : filteredLogs.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-[var(--mezon-text-secondary)]">
             {filterType ? 'Нет записей выбранного типа' : 'Журнал пуст. Добавьте первую запись.'}
           </div>
         ) : (
@@ -269,14 +281,14 @@ export default function SecurityPage() {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
           <div>
-            <label htmlFor="date" className="block mb-1 font-medium">Дата и время *</label>
+            <label htmlFor="date" className="mb-1 block font-medium text-[var(--mezon-dark)]">Дата и время *</label>
             <Input type="datetime-local" {...register('date')} id="date" />
             {errors.date && <FormError message={errors.date.message} />}
           </div>
 
           <div>
-            <label htmlFor="eventType" className="block mb-1 font-medium">Тип события *</label>
-            <select {...register('eventType')} id="eventType" className="w-full p-2 border rounded">
+            <label htmlFor="eventType" className="mb-1 block font-medium text-[var(--mezon-dark)]">Тип события *</label>
+            <select {...register('eventType')} id="eventType" className={selectClassName}>
               <option value="INCIDENT">Происшествие</option>
               <option value="FIRE_CHECK">Проверка пожарной безопасности</option>
               <option value="VISITOR_LOG">Учёт посетителей</option>
@@ -286,18 +298,18 @@ export default function SecurityPage() {
           </div>
 
           <div>
-            <label htmlFor="description" className="block mb-1 font-medium">Описание</label>
+            <label htmlFor="description" className="mb-1 block font-medium text-[var(--mezon-dark)]">Описание</label>
             <textarea 
               {...register('description')} 
               id="description" 
-              className="w-full p-2 border rounded" 
+              className={textareaClassName} 
               rows={4}
               placeholder="Подробное описание события..."
             />
           </div>
 
           <div>
-            <label htmlFor="documentUrl" className="block mb-1 font-medium">Ссылка на документ</label>
+            <label htmlFor="documentUrl" className="mb-1 block font-medium text-[var(--mezon-dark)]">Ссылка на документ</label>
             <Input 
               {...register('documentUrl')} 
               id="documentUrl" 
@@ -325,19 +337,19 @@ export default function SecurityPage() {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление записи">
         <div className="p-4">
           <div className="flex items-start gap-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-full">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+            <div className="rounded-full bg-[rgba(255,59,48,0.12)] p-2">
+              <AlertCircle className="h-6 w-6 text-[var(--macos-red)]" />
             </div>
             <div>
-              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить эту запись?</p>
+              <p className="font-medium text-[var(--mezon-dark)]">Вы уверены, что хотите удалить эту запись?</p>
               {deleteConfirm && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+                <div className="mt-2 rounded-lg bg-[rgba(255,255,255,0.58)] p-3 text-sm">
                   <p><strong>Тип:</strong> {eventTypeLabels[deleteConfirm.eventType]}</p>
                   <p><strong>Дата:</strong> {new Date(deleteConfirm.date).toLocaleString('ru-RU')}</p>
                   {deleteConfirm.description && <p><strong>Описание:</strong> {deleteConfirm.description}</p>}
                 </div>
               )}
-              <p className="text-sm text-red-600 mt-2">Это действие нельзя отменить!</p>
+              <p className="mt-2 text-sm text-[var(--macos-red)]">Это действие нельзя отменить!</p>
             </div>
           </div>
           <div className="flex justify-end gap-2">
