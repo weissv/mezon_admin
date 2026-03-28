@@ -10,6 +10,8 @@ import {
   ChevronRight,
   Database,
   Loader2,
+  BookOpen,
+  BarChart3,
 } from "lucide-react";
 import { api } from "../lib/api";
 
@@ -20,6 +22,8 @@ interface Summary {
   documents: { total: number; byType: { type: string; count: number }[] };
   hrDocuments: { total: number; byType: { type: string; count: number }[] };
   payrollDocuments: { total: number; byType: { type: string; count: number }[] };
+  universalCatalogs: { total: number; byType: { type: string; count: number }[] };
+  registers: { total: number; byType: { type: string; count: number }[] };
 }
 
 interface PaginatedResponse<T> {
@@ -30,13 +34,15 @@ interface PaginatedResponse<T> {
   pages: number;
 }
 
-type TabId = "catalogs" | "documents" | "hr" | "payroll";
+type TabId = "catalogs" | "documents" | "hr" | "payroll" | "extra-catalogs" | "registers";
 
 const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: "catalogs", label: "Справочники", icon: <Building2 className="h-4 w-4" /> },
+  { id: "extra-catalogs", label: "Доп. справочники", icon: <BookOpen className="h-4 w-4" /> },
   { id: "documents", label: "Документы", icon: <FileText className="h-4 w-4" /> },
   { id: "hr", label: "Кадры", icon: <Users className="h-4 w-4" /> },
   { id: "payroll", label: "Зарплата", icon: <Wallet className="h-4 w-4" /> },
+  { id: "registers", label: "Регистры", icon: <BarChart3 className="h-4 w-4" /> },
 ];
 
 const catalogTypes: { key: string; label: string }[] = [
@@ -492,6 +498,227 @@ function PayrollTab({ summary }: { summary: Summary | null }) {
   );
 }
 
+// ── Extra Catalogs Tab (Universal) ────────────────────────────
+
+function ExtraCatalogsTab({ summary }: { summary: Summary | null }) {
+  const byType = summary?.universalCatalogs?.byType ?? [];
+  const [selected, setSelected] = useState("");
+  const [items, setItems] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: "50" });
+      if (selected) params.set("catalogType", selected);
+      if (search) params.set("search", search);
+      const res = await api.get<PaginatedResponse<any>>(`/onec-data/universal-catalogs?${params}`);
+      setItems(res.items);
+      setPages(res.pages);
+      setTotal(res.total);
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selected, page, search]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { setPage(1); }, [selected, search]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+        <button
+          onClick={() => setSelected("")}
+          className={`text-xs rounded-full px-3 py-1 border transition-colors ${
+            !selected ? "bg-blue-100 border-blue-400 text-blue-700" : "border-gray-200 hover:border-gray-300"
+          }`}
+        >
+          Все ({summary?.universalCatalogs?.total ?? 0})
+        </button>
+        {byType.map((t) => (
+          <button
+            key={t.type}
+            onClick={() => setSelected(t.type)}
+            className={`text-xs rounded-full px-3 py-1 border transition-colors ${
+              selected === t.type ? "bg-blue-100 border-blue-400 text-blue-700" : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            {t.type} ({t.count})
+          </button>
+        ))}
+      </div>
+
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Поиск по названию / коду..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div className="bg-white rounded-lg border overflow-auto">
+        {loading ? (
+          <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-gray-400" /></div>
+        ) : items.length === 0 ? (
+          <div className="text-center text-gray-400 py-10 text-sm">Нет данных</div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-600">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium">Тип</th>
+                <th className="px-3 py-2 text-left font-medium">Код</th>
+                <th className="px-3 py-2 text-left font-medium">Наименование</th>
+                <th className="px-3 py-2 text-center font-medium">Папка</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {items.map((item: any) => (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-3 py-2 text-xs text-blue-600">{item.catalogType}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-gray-500">{item.code || "—"}</td>
+                  <td className="px-3 py-2">{item.name}</td>
+                  <td className="px-3 py-2 text-center">{item.isFolder ? "Да" : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <div className="flex items-center justify-between text-xs text-gray-500">
+        <span>Всего: {total}</span>
+        <Pagination page={page} pages={pages} onPage={setPage} />
+      </div>
+    </div>
+  );
+}
+
+// ── Registers Tab ─────────────────────────────────────────────
+
+function RegistersTab({ summary }: { summary: Summary | null }) {
+  const byType = summary?.registers?.byType ?? [];
+  const [selected, setSelected] = useState("");
+  const [kindFilter, setKindFilter] = useState("");
+  const [items, setItems] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: "50" });
+      if (selected) params.set("registerType", selected);
+      if (kindFilter) params.set("registerKind", kindFilter);
+      const res = await api.get<PaginatedResponse<any>>(`/onec-data/registers?${params}`);
+      setItems(res.items);
+      setPages(res.pages);
+      setTotal(res.total);
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selected, kindFilter, page]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { setPage(1); }, [selected, kindFilter]);
+
+  return (
+    <div className="space-y-4">
+      {/* Kind filter */}
+      <div className="flex gap-2">
+        {["", "Information", "Accumulation"].map((k) => (
+          <button
+            key={k}
+            onClick={() => setKindFilter(k)}
+            className={`text-xs rounded-full px-3 py-1 border transition-colors ${
+              kindFilter === k ? "bg-blue-100 border-blue-400 text-blue-700" : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            {k === "" ? "Все" : k === "Information" ? "Сведения" : "Накопления"}
+          </button>
+        ))}
+      </div>
+
+      {/* Type selector */}
+      <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+        <button
+          onClick={() => setSelected("")}
+          className={`text-xs rounded-full px-3 py-1 border transition-colors ${
+            !selected ? "bg-green-100 border-green-400 text-green-700" : "border-gray-200 hover:border-gray-300"
+          }`}
+        >
+          Все ({summary?.registers?.total ?? 0})
+        </button>
+        {byType.map((t) => (
+          <button
+            key={t.type}
+            onClick={() => setSelected(t.type)}
+            className={`text-xs rounded-full px-3 py-1 border transition-colors ${
+              selected === t.type ? "bg-green-100 border-green-400 text-green-700" : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            {t.type} ({t.count})
+          </button>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-lg border overflow-auto">
+        {loading ? (
+          <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-gray-400" /></div>
+        ) : items.length === 0 ? (
+          <div className="text-center text-gray-400 py-10 text-sm">Нет данных</div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-600">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium">Тип</th>
+                <th className="px-3 py-2 text-left font-medium">Вид</th>
+                <th className="px-3 py-2 text-left font-medium">Период</th>
+                <th className="px-3 py-2 text-left font-medium">Регистратор</th>
+                <th className="px-3 py-2 text-left font-medium">Данные</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {items.map((item: any) => (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-3 py-2 text-xs text-green-700">{item.registerType}</td>
+                  <td className="px-3 py-2 text-xs">
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${
+                      item.registerKind === "Accumulation" ? "bg-orange-100 text-orange-700" : "bg-sky-100 text-sky-700"
+                    }`}>
+                      {item.registerKind === "Accumulation" ? "Накопл." : "Сведения"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-xs">{formatDate(item.period)}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-gray-500 max-w-[120px] truncate">{item.recorder || "—"}</td>
+                  <td className="px-3 py-2 text-xs text-gray-500 max-w-[300px] truncate">
+                    {item.data ? JSON.stringify(item.data).slice(0, 100) : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <div className="flex items-center justify-between text-xs text-gray-500">
+        <span>Всего: {total}</span>
+        <Pagination page={page} pages={pages} onPage={setPage} />
+      </div>
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 
 export default function OneCDataPage() {
@@ -530,9 +757,11 @@ export default function OneCDataPage() {
   const totalRecords =
     summary
       ? Object.values(summary.catalogs).reduce((a, b) => a + b, 0) +
+        (summary.universalCatalogs?.total ?? 0) +
         summary.documents.total +
         summary.hrDocuments.total +
-        summary.payrollDocuments.total
+        summary.payrollDocuments.total +
+        (summary.registers?.total ?? 0)
       : 0;
 
   return (
@@ -560,13 +789,18 @@ export default function OneCDataPage() {
 
       {/* Summary cards */}
       {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="rounded-lg border bg-white p-4">
             <div className="text-xs text-gray-500 uppercase tracking-wide">Справочники</div>
             <div className="text-2xl font-bold mt-1">
               {Object.values(summary.catalogs).reduce((a, b) => a + b, 0).toLocaleString("ru-RU")}
             </div>
             <div className="text-xs text-gray-400">{Object.keys(summary.catalogs).length} типов</div>
+          </div>
+          <div className="rounded-lg border bg-white p-4">
+            <div className="text-xs text-gray-500 uppercase tracking-wide">Доп. справочники</div>
+            <div className="text-2xl font-bold mt-1">{(summary.universalCatalogs?.total ?? 0).toLocaleString("ru-RU")}</div>
+            <div className="text-xs text-gray-400">{summary.universalCatalogs?.byType?.length ?? 0} типов</div>
           </div>
           <div className="rounded-lg border bg-white p-4">
             <div className="text-xs text-gray-500 uppercase tracking-wide">Документы</div>
@@ -582,6 +816,11 @@ export default function OneCDataPage() {
             <div className="text-xs text-gray-500 uppercase tracking-wide">Зарплата</div>
             <div className="text-2xl font-bold mt-1">{summary.payrollDocuments.total.toLocaleString("ru-RU")}</div>
             <div className="text-xs text-gray-400">{summary.payrollDocuments.byType.length} типов</div>
+          </div>
+          <div className="rounded-lg border bg-white p-4">
+            <div className="text-xs text-gray-500 uppercase tracking-wide">Регистры</div>
+            <div className="text-2xl font-bold mt-1">{(summary.registers?.total ?? 0).toLocaleString("ru-RU")}</div>
+            <div className="text-xs text-gray-400">{summary.registers?.byType?.length ?? 0} типов</div>
           </div>
         </div>
       )}
@@ -609,9 +848,11 @@ export default function OneCDataPage() {
       {/* Tab Content */}
       <div>
         {activeTab === "catalogs" && <CatalogsTab summary={summary} />}
+        {activeTab === "extra-catalogs" && <ExtraCatalogsTab summary={summary} />}
         {activeTab === "documents" && <DocumentsTab summary={summary} />}
         {activeTab === "hr" && <HRTab summary={summary} />}
         {activeTab === "payroll" && <PayrollTab summary={summary} />}
+        {activeTab === "registers" && <RegistersTab summary={summary} />}
       </div>
     </div>
   );

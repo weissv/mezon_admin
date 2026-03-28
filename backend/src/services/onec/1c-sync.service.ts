@@ -9,6 +9,7 @@
  */
 
 import cron from "node-cron";
+import { createHash } from "node:crypto";
 import { AxiosInstance } from "axios";
 import { PrismaClient, TransactionChannel, InvoiceDirection, BalanceType } from "@prisma/client";
 
@@ -80,6 +81,20 @@ export class OneCSyncService {
     }
 
     return results;
+  }
+
+  private buildRegisterExternalId(registerType: string, row: Record<string, unknown>): string {
+    if (typeof row.Ref_Key === "string" && row.Ref_Key) {
+      return row.Ref_Key;
+    }
+
+    const normalizedEntries = Object.entries(row)
+      .filter(([key]) => key !== "DataVersion")
+      .sort(([left], [right]) => left.localeCompare(right));
+
+    const normalizedRow = Object.fromEntries(normalizedEntries);
+    const payload = JSON.stringify(normalizedRow);
+    return `${registerType}_${createHash("sha256").update(payload).digest("hex")}`;
   }
 
   // ── Catalog syncs (run FIRST for FK resolution) ──────────────
@@ -970,6 +985,250 @@ export class OneCSyncService {
     }));
   }
 
+  // ── Missing document ──────────────────────────────────────────
+
+  async syncPlannedAccrualCancellation(): Promise<SyncResult> {
+    return this.syncGenericDocument("Document_ПрекращениеПлановогоНачисления", "ПрекращениеПлановогоНачисления", "oneCPayrollDocument", (r) => ({
+      orgRefKey: r.Организация_Key ?? null,
+      departmentRefKey: r.Подразделение_Key ?? null,
+    }));
+  }
+
+  // ── Universal catalog sync (OneCCatalog model) ─────────────
+
+  private async syncUniversalCatalog(entityName: string): Promise<SyncResult> {
+    const catalogType = entityName.replace("Catalog_", "");
+    const filter = "DeletionMark eq false";
+    const rows = await this.fetchAll(entityName, filter);
+    let upserted = 0;
+    let errors = 0;
+
+    for (const r of rows as any[]) {
+      try {
+        const data: Record<string, any> = {
+          catalogType,
+          code: r.Code ?? null,
+          name: r.Description || "—",
+          fullName: r.НаименованиеПолное ?? null,
+          isFolder: r.IsFolder ?? false,
+          parentRefKey: r.Parent_Key && r.Parent_Key !== EMPTY_GUID ? r.Parent_Key : null,
+          ownerRefKey: r.Owner_Key && r.Owner_Key !== EMPTY_GUID ? r.Owner_Key : null,
+          isActive: true,
+          meta: (() => {
+            const m: Record<string, any> = {};
+            for (const [k, v] of Object.entries(r)) {
+              if (!["Ref_Key","Code","Description","НаименованиеПолное","IsFolder","DeletionMark","Parent_Key","Owner_Key","Predefined","PredefinedDataName","DataVersion"].includes(k)) {
+                m[k] = v;
+              }
+            }
+            return Object.keys(m).length > 0 ? m : null;
+          })(),
+        };
+        const db = this.db as any;
+        await db.oneCCatalog.upsert({
+          where: { catalogType_externalId: { catalogType, externalId: r.Ref_Key } },
+          create: { externalId: r.Ref_Key, ...data },
+          update: data,
+        });
+        upserted++;
+      } catch (err) {
+        errors++;
+      }
+    }
+    return { entity: entityName, fetched: rows.length, upserted, errors };
+  }
+
+  // ── Universal register sync (OneCRegister model) ────────────
+
+  private async syncUniversalRegister(entityName: string): Promise<SyncResult> {
+    const registerType = entityName.replace(/^(InformationRegister_|AccumulationRegister_)/, "");
+    const registerKind = entityName.startsWith("AccumulationRegister_") ? "Accumulation" : "Information";
+    const rows = await this.fetchAll(entityName);
+    let upserted = 0;
+    let errors = 0;
+
+    for (const r of rows as any[]) {
+      const refKey = this.buildRegisterExternalId(registerType, r);
+      try {
+        const data: Record<string, any> = {
+          registerType,
+          registerKind,
+          period: r.Period ? new Date(r.Period) : null,
+          recorder: r.Recorder_Key && r.Recorder_Key !== EMPTY_GUID ? r.Recorder_Key : null,
+          recorderType: r.Recorder_Type ?? null,
+          lineNumber: r.LineNumber ?? null,
+          active: r.Active !== false,
+          data: (() => {
+            const m: Record<string, any> = {};
+            for (const [k, v] of Object.entries(r)) {
+              if (!["Ref_Key","Period","Recorder_Key","Recorder_Type","Recorder","LineNumber","Active","DeletionMark","DataVersion"].includes(k)) {
+                m[k] = v;
+              }
+            }
+            return m;
+          })(),
+        };
+        const db = this.db as any;
+        await db.oneCRegister.upsert({
+          where: { registerType_externalId: { registerType, externalId: refKey } },
+          create: { externalId: refKey, ...data },
+          update: data,
+        });
+        upserted++;
+      } catch (err) {
+        errors++;
+      }
+    }
+    return { entity: entityName, fetched: rows.length, upserted, errors };
+  }
+
+  // ── Lists of all missing entities ───────────────────────────
+
+  private static readonly MISSING_CATALOGS = [
+    "Catalog_Банки",
+    "Catalog_ВидыВзаиморасчетов",
+    "Catalog_ВидыВычетовНДФЛ",
+    "Catalog_ВидыДвиженийМСФО",
+    "Catalog_ВидыДеятельностиITPark",
+    "Catalog_ВидыДеятельностиПредпринимателей",
+    "Catalog_ВидыДокументовФизическихЛиц",
+    "Catalog_ВидыДоходовНДФЛ",
+    "Catalog_ВидыДоходовПоСтраховымВзносам",
+    "Catalog_ВидыИспользованияРабочегоВремени",
+    "Catalog_ВидыКонтактнойИнформации",
+    "Catalog_ВидыНалоговИПлатежейВБюджет",
+    "Catalog_ВидыНоменклатуры",
+    "Catalog_ВидыОбразованияФизЛиц",
+    "Catalog_ВидыОплатОрганизаций",
+    "Catalog_ВидыСтажа",
+    "Catalog_ВнешниеИнформационныеБазы",
+    "Catalog_ГрафикиРаботыСотрудников",
+    "Catalog_Диагноз",
+    "Catalog_ДополнительныеУсловия",
+    "Catalog_ДрайверыОборудования",
+    "Catalog_ЗарплатныеПроекты",
+    "Catalog_ИдентификаторыОбъектовМетаданных",
+    "Catalog_Календари",
+    "Catalog_КассыОрганизаций",
+    "Catalog_КлассификаторЕдиницИзмерения",
+    "Catalog_КлассификаторЛьготПоНалогообложению",
+    "Catalog_КонтактныеЛица",
+    "Catalog_МетаданныеДляОграниченияДоступаДобавлениеИИзменение",
+    "Catalog_МетаданныеДляОграниченияДоступаЧтения",
+    "Catalog_НематериальныеАктивы",
+    "Catalog_НоменклатурныеГруппы",
+    "Catalog_ОбъектыСтроительства",
+    "Catalog_ОснованияИсчисляемогоСтраховогоСтажа",
+    "Catalog_ОснованияУвольнения",
+    "Catalog_ПапкиФайлов",
+    "Catalog_ПараметрыИсчисляемогоСтраховогоСтажа",
+    "Catalog_ПараметрыРасчетаРезервовПоДЗ",
+    "Catalog_Пользователи",
+    "Catalog_ПредметыДоговора",
+    "Catalog_ПричиныОбесцененияВНА",
+    "Catalog_ПроизводственныеКалендари",
+    "Catalog_ПрочиеДоходыИРасходы",
+    "Catalog_РабочиеМеста",
+    "Catalog_РазделыПланаСчетов",
+    "Catalog_РасходыБудущихПериодов",
+    "Catalog_РегистрацииВНалоговомОргане",
+    "Catalog_Резервы",
+    "Catalog_СП_ПоказателиРасчетаЗарплаты",
+    "Catalog_Сборы",
+    "Catalog_СобытияОС",
+    "Catalog_СпособыВыплатыЗарплаты",
+    "Catalog_СпособыОкругленияПриРасчетеЗарплаты",
+    "Catalog_СпособыОтраженияЗарплатыВБухУчете",
+    "Catalog_СпособыОтраженияРасходовПоАмортизации",
+    "Catalog_СтатьиЗатрат",
+    "Catalog_СтатьиЗатратНаПриобретение",
+    "Catalog_СтепениРодстваФизЛиц",
+    "Catalog_СтраныМира",
+    "Catalog_ТерриториальныеУсловияПФР",
+    "Catalog_ТипыБазДанных",
+    "Catalog_ТипыДокументовПодтверждающихЛьготуНДС",
+    "Catalog_ТипыЦенНоменклатуры",
+    "Catalog_ТрудовыеДоговора",
+    "Catalog_УдалитьДокументыУдостоверяющиеЛичность",
+    "Catalog_УдалитьДоходыЕСН",
+    "Catalog_УдалитьДоходыНДФЛ",
+    "Catalog_УдалитьДоходыПоСтраховымВзносам",
+    "Catalog_УдалитьОснованияВыслугиЛет",
+    "Catalog_УдалитьОснованияДосрочногоНазначенияПенсии",
+    "Catalog_УдалитьОснованияИсчисляемогоСтраховогоСтажа",
+    "Catalog_УдалитьОсобыеУсловияТруда",
+    "Catalog_УдалитьПараметрыИсчисляемогоСтраховогоСтажа",
+    "Catalog_УдалитьПараметрыИсчисляемогоСтраховогоСтажа2014",
+    "Catalog_УдалитьСпособыОтраженияЗарплатыВРеглУчете",
+    "Catalog_УдалитьТерриториальныеУсловия",
+    "Catalog_УдалитьТерриториальныеУсловияПФР",
+    "Catalog_УчетныеЗаписиЭлектроннойПочты",
+    "Catalog_uzbled_КлассификаторСтанций",
+  ];
+
+  private static readonly ALL_REGISTERS = [
+    "InformationRegister_ГрафикиРаботыПоВидамВремени",
+    "AccumulationRegister_НДСРеестрВходящихСчетовФактур",
+    "InformationRegister_ЖурналУчетаСчетовФактур",
+    "InformationRegister_ПлановыеНачисления",
+    "AccumulationRegister_НДСПредъявленный",
+    "AccumulationRegister_НДСЗаписиКнигиПродаж",
+    "AccumulationRegister_НДСРеестрИсходящихСчетовФактур",
+    "AccumulationRegister_ОСНДоходы",
+    "AccumulationRegister_ЗарплатаКВыплате",
+    "AccumulationRegister_ВзаиморасчетыССотрудниками",
+    "AccumulationRegister_РасчетыНалогоплательщиковСБюджетомПоНДФЛ",
+    "AccumulationRegister_ПлатежиВБюджет",
+    "InformationRegister_КадроваяИсторияСотрудников",
+    "InformationRegister_ДанныеСостоянийСотрудников",
+    "InformationRegister_ОплаченныеВедомостиПоЗарплате",
+    "AccumulationRegister_РасчетыНалоговыхАгентовСБюджетомПоНДФЛ",
+    "InformationRegister_ОплатаВедомостейНаВыплатуЗарплаты",
+    "InformationRegister_ГрафикРаботыСотрудников",
+    "AccumulationRegister_СведенияОДоходахНДФЛ",
+    "InformationRegister_НеявкиСотрудников",
+    "InformationRegister_НДФЛУчетРабочихМест",
+    "AccumulationRegister_СведенияОДоходахСтраховыеВзносы",
+    "AccumulationRegister_НачисленияУдержанияПоСотрудникам",
+    "InformationRegister_ПлановыеУдержания",
+    "AccumulationRegister_ОтработанноеВремяПоСотрудникам",
+    "InformationRegister_ПлановыеАвансы",
+    "AccumulationRegister_ОСНПрочиеДоходы",
+    "AccumulationRegister_РасчетыСФондамиПоСтраховымВзносам",
+    "AccumulationRegister_ИсчисленныеСтраховыеВзносы",
+    "AccumulationRegister_ДанныеТабельногоУчетаРабочегоВремениСотрудников",
+    "AccumulationRegister_СтраховыеВзносыПоФизическимЛицам",
+    "AccumulationRegister_НачислениеАмортизацииОСНУ",
+    "InformationRegister_СпособыОтраженияРасходовПоАмортизацииОСБухгалтерскийУчет",
+    "InformationRegister_ПервоначальныеСведенияОСНалоговыйУчет",
+    "InformationRegister_НачислениеАмортизацииОСНалоговыйУчет",
+    "InformationRegister_СчетаБухгалтерскогоУчетаОС",
+    "InformationRegister_СостоянияОСОрганизаций",
+    "InformationRegister_ПредоставленныеОтпускаПоОтработаннымПериодам",
+    "InformationRegister_ПараметрыАмортизацииОСБухгалтерскийУчет",
+    "InformationRegister_МестонахождениеОСБухгалтерскийУчет",
+    "InformationRegister_НачислениеАмортизацииОСБухгалтерскийУчет",
+    "InformationRegister_ПервоначальныеСведенияОСБухгалтерскийУчет",
+    "InformationRegister_ПериодыДляРезервовОтпусков",
+    "InformationRegister_СобытияОСОрганизаций",
+    "InformationRegister_ПараметрыАмортизацииОСНалоговыйУчет",
+    "InformationRegister_НачислениеАмортизацииОССпециальныйКоэффициентНалоговыйУчет",
+    "InformationRegister_РасчетСписанияРБП",
+    "AccumulationRegister_ДанныеОВыплатеДивидендов",
+    "AccumulationRegister_ПособияПоСоциальномуСтрахованию",
+    "AccumulationRegister_СведенияОНачисленияПоДивидендам",
+    "AccumulationRegister_РеализацияУслуг",
+    "InformationRegister_СостоянияНМАОрганизаций",
+    "InformationRegister_ПервоначальныеСведенияНМАБухгалтерскийУчет",
+    "InformationRegister_НачислениеАмортизацииНМАСпециальныйКоэффициентНалоговыйУчет",
+    "InformationRegister_УсловияУдержанияПоИсполнительномуДокументу",
+    "InformationRegister_СчетаБухгалтерскогоУчетаНМА",
+    "InformationRegister_МестонахождениеНМАБухгалтерскийУчет",
+    "InformationRegister_ПервоначальныеСведенияНМАНалоговыйУчет",
+    "InformationRegister_СпособыОтраженияРасходовПоАмортизацииНМАБухгалтерскийУчет",
+    "AccumulationRegister_РеализованныеТоварыКомитентов",
+  ];
+
   // ── Orchestrator ─────────────────────────────────────────────
 
   async syncAll(): Promise<SyncReport> {
@@ -1088,9 +1347,22 @@ export class OneCSyncService {
     await run(() => this.syncNDFLWithholding());
     await run(() => this.syncPlannedAccrual());
     await run(() => this.syncPlannedDeduction());
+    await run(() => this.syncPlannedAccrualCancellation());
 
-    // Phase 8: Recalculate balance snapshots
-    if (!aborted) console.log("[1C-Sync] ═══ Phase 8: Balance Snapshots ═══");
+    // Phase 8: Universal catalogs (79 missing → OneCCatalog)
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 8: Universal Catalogs (79) ═══");
+    for (const cat of OneCSyncService.MISSING_CATALOGS) {
+      await run(() => this.syncUniversalCatalog(cat));
+    }
+
+    // Phase 9: All registers (60 → OneCRegister)
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 9: Registers (60) ═══");
+    for (const reg of OneCSyncService.ALL_REGISTERS) {
+      await run(() => this.syncUniversalRegister(reg));
+    }
+
+    // Phase 10: Recalculate balance snapshots
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 10: Balance Snapshots ═══");
     await run(() => this.syncBalanceSnapshots());
 
     const finishedAt = new Date();

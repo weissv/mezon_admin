@@ -5,6 +5,12 @@ import { prisma as db } from "../prisma";
 const router = Router();
 const allowedRoles = ["ADMIN", "ACCOUNTANT", "DIRECTOR"];
 
+function groupCount(value: any): number {
+  if (typeof value === "number") return value;
+  if (value && typeof value._all === "number") return value._all;
+  return 0;
+}
+
 // ── Helpers ───────────────────────────────────────────────────
 
 function paginationParams(req: Request) {
@@ -30,6 +36,7 @@ router.get("/summary", checkRole(allowedRoles), async (_req: Request, res: Respo
       organizations, nomenclature, bankAccounts, contracts, employees,
       positions, fixedAssets, warehouses, currencies, departments,
       documents, hrDocuments, payrollDocuments,
+      universalCatalogs, registers,
     ] = await Promise.all([
       db.oneCOrganization.count(),
       db.oneCNomenclature.count(),
@@ -44,20 +51,26 @@ router.get("/summary", checkRole(allowedRoles), async (_req: Request, res: Respo
       db.oneCDocument.count(),
       db.oneCHRDocument.count(),
       db.oneCPayrollDocument.count(),
+      db.oneCCatalog.count(),
+      db.oneCRegister.count(),
     ]);
 
     // Document type breakdowns
-    const [docTypes, hrDocTypes, payrollDocTypes] = await Promise.all([
+    const [docTypes, hrDocTypes, payrollDocTypes, catalogTypes, registerTypes] = await Promise.all([
       db.oneCDocument.groupBy({ by: ["docType"], _count: true }),
       db.oneCHRDocument.groupBy({ by: ["docType"], _count: true }),
       db.oneCPayrollDocument.groupBy({ by: ["docType"], _count: true }),
+      db.oneCCatalog.groupBy({ by: ["catalogType"], _count: true }),
+      db.oneCRegister.groupBy({ by: ["registerType"], _count: true }),
     ]);
 
     return res.json({
       catalogs: { organizations, nomenclature, bankAccounts, contracts, employees, positions, fixedAssets, warehouses, currencies, departments },
-      documents: { total: documents, byType: docTypes.map((d: any) => ({ type: d.docType, count: d._count })) },
-      hrDocuments: { total: hrDocuments, byType: hrDocTypes.map((d: any) => ({ type: d.docType, count: d._count })) },
-      payrollDocuments: { total: payrollDocuments, byType: payrollDocTypes.map((d: any) => ({ type: d.docType, count: d._count })) },
+      documents: { total: documents, byType: docTypes.map((d: any) => ({ type: d.docType, count: groupCount(d._count) })) },
+      hrDocuments: { total: hrDocuments, byType: hrDocTypes.map((d: any) => ({ type: d.docType, count: groupCount(d._count) })) },
+      payrollDocuments: { total: payrollDocuments, byType: payrollDocTypes.map((d: any) => ({ type: d.docType, count: groupCount(d._count) })) },
+      universalCatalogs: { total: universalCatalogs, byType: catalogTypes.map((d: any) => ({ type: d.catalogType, count: groupCount(d._count) })) },
+      registers: { total: registers, byType: registerTypes.map((d: any) => ({ type: d.registerType, count: groupCount(d._count) })) },
     });
   } catch (err: any) {
     console.error("1C data summary error:", err.message);
@@ -181,6 +194,57 @@ router.get("/payroll-documents", checkRole(allowedRoles), async (req: Request, r
   } catch (err: any) {
     console.error("1C payroll documents error:", err.message);
     return res.status(500).json({ error: "Ошибка получения зарплатных документов" });
+  }
+});
+
+// ── Universal Catalogs: GET /universal-catalogs ───────────────
+
+router.get("/universal-catalogs", checkRole(allowedRoles), async (req: Request, res: Response) => {
+  const { skip, take, page, limit } = paginationParams(req);
+  const catalogType = req.query.catalogType as string | undefined;
+  const search = (req.query.search as string) || "";
+
+  try {
+    const where: any = {};
+    if (catalogType) where.catalogType = catalogType;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { code: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      db.oneCCatalog.findMany({ where, orderBy: { name: "asc" }, skip, take }),
+      db.oneCCatalog.count({ where }),
+    ]);
+    return res.json({ items, total, page, limit, pages: Math.ceil(total / limit) });
+  } catch (err: any) {
+    console.error("1C universal catalogs error:", err.message);
+    return res.status(500).json({ error: "Ошибка получения универсальных справочников" });
+  }
+});
+
+// ── Registers: GET /registers ─────────────────────────────────
+
+router.get("/registers", checkRole(allowedRoles), async (req: Request, res: Response) => {
+  const { skip, take, page, limit } = paginationParams(req);
+  const registerType = req.query.registerType as string | undefined;
+  const registerKind = req.query.registerKind as string | undefined;
+
+  try {
+    const where: any = {};
+    if (registerType) where.registerType = registerType;
+    if (registerKind) where.registerKind = registerKind;
+
+    const [items, total] = await Promise.all([
+      db.oneCRegister.findMany({ where, orderBy: { period: "desc" }, skip, take }),
+      db.oneCRegister.count({ where }),
+    ]);
+    return res.json({ items, total, page, limit, pages: Math.ceil(total / limit) });
+  } catch (err: any) {
+    console.error("1C registers error:", err.message);
+    return res.status(500).json({ error: "Ошибка получения регистров" });
   }
 });
 
