@@ -1,5 +1,5 @@
 // src/components/SideNav.tsx
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import { Facebook, Instagram, Send, X } from "lucide-react";
@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
 import { usePermissions } from "../contexts/PermissionsContext";
 import { getLinksWithPermissions, FULL_ACCESS_ROLES } from "../lib/modules";
-import type { UserRole } from "../types/auth";
+import { ROLE_LABELS, type UserRole } from "../types/auth";
 
 export default function SideNav() {
   const { user, logout } = useAuth();
@@ -18,6 +18,9 @@ export default function SideNav() {
   const [isLogoSpinning, setIsLogoSpinning] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const role = (user?.role || "TEACHER") as UserRole;
+  const userName = user?.employee
+    ? [user.employee.firstName, user.employee.lastName].filter(Boolean).join(" ")
+    : user?.email ?? "Пользователь";
   
   // Получаем ссылки на основе прав из БД
   const links = getLinksWithPermissions(
@@ -28,11 +31,26 @@ export default function SideNav() {
   );
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
-  
-  // Expose function for parent to toggle menu
-  if (typeof window !== 'undefined') {
-    (window as any).toggleMobileMenu = () => setIsMobileMenuOpen(prev => !prev);
-  }
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    (window as { toggleMobileMenu?: () => void }).toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
+
+    return () => {
+      delete (window as { toggleMobileMenu?: () => void }).toggleMobileMenu;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -104,6 +122,11 @@ export default function SideNav() {
           </button>
         </div>
         <p>Управление школой из одного окна</p>
+      </div>
+
+      <div className="mezon-sidenav__user">
+        <strong>{userName}</strong>
+        <span>{ROLE_LABELS[role] ?? role}{permissionsLoading ? " · загрузка прав…" : ""}</span>
       </div>
 
       <div className="mezon-sidenav__nav">

@@ -36,6 +36,8 @@ interface Employee {
   position: string;
 }
 
+const selectClassName = 'mezon-field';
+
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -165,19 +167,21 @@ export default function GroupsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Загрузка классов...</div>
+        <div className="text-[var(--mezon-text-secondary)]">Загрузка классов...</div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Users className="h-6 w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+            <Users className="h-5 w-5" />
+          </div>
           <div>
-            <h1 className="text-2xl font-bold">Управление классами</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="mezon-section-title mb-1">Управление классами</h1>
+            <p className="text-sm text-[var(--mezon-text-secondary)]">
               Классы синхронизированы с LMS
             </p>
           </div>
@@ -195,7 +199,7 @@ export default function GroupsPage() {
       </div>
 
       {groups.length === 0 ? (
-        <Card className="p-8 text-center text-gray-500">
+        <Card className="p-8 text-center text-[var(--mezon-text-secondary)]">
           Классы не найдены. Добавьте первый класс.
         </Card>
       ) : (
@@ -204,19 +208,19 @@ export default function GroupsPage() {
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([grade, gradeGroups]) => (
               <div key={grade}>
-                <h2 className="text-lg font-semibold text-gray-700 mb-3">
+                <h2 className="mb-3 text-lg font-semibold text-[var(--mezon-dark)]">
                   {grade} класс
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {gradeGroups.map((group) => (
                     <Card
                       key={group.id}
-                      className="p-4 hover:shadow-md transition-shadow"
+                      className="p-4"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <p className="font-semibold text-lg">{group.name}</p>
-                          <div className="mt-2 space-y-1 text-sm text-gray-600">
+                          <p className="text-lg font-semibold text-[var(--mezon-dark)]">{group.name}</p>
+                          <div className="mt-2 space-y-1 text-sm text-[var(--mezon-text-secondary)]">
                             <div className="flex items-center gap-1">
                               <Users className="h-4 w-4" />
                               <span>{group._count?.children || 0} учеников</span>
@@ -230,7 +234,7 @@ export default function GroupsPage() {
                               </div>
                             )}
                             {group.academicYear && (
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-[var(--mezon-text-soft)]">
                                 {group.academicYear}
                               </p>
                             )}
@@ -248,7 +252,7 @@ export default function GroupsPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => setDeleteConfirm(group)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-[var(--macos-red)] hover:bg-[rgba(255,59,48,0.08)] hover:text-[var(--macos-red)]"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -271,13 +275,13 @@ export default function GroupsPage() {
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="mb-1 block font-medium text-[var(--mezon-dark)]">
                 Класс (номер)
               </label>
               <select
                 value={formGrade}
                 onChange={(e) => setFormGrade(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={selectClassName}
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((g) => (
                   <option key={g} value={g}>
@@ -287,13 +291,13 @@ export default function GroupsPage() {
               </select>
             </div>
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="mb-1 block font-medium text-[var(--mezon-dark)]">
                 Буква класса
               </label>
               <select
                 value={formSection}
                 onChange={(e) => setFormSection(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={selectClassName}
               >
                 <option value="">Без буквы</option>
                 {['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З'].map((s) => (
@@ -306,7 +310,7 @@ export default function GroupsPage() {
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">
+            <label className="mb-1 block font-medium text-[var(--mezon-dark)]">
               Учебный год
             </label>
             <Input
@@ -317,13 +321,13 @@ export default function GroupsPage() {
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">
+            <label className="mb-1 block font-medium text-[var(--mezon-dark)]">
               Классный руководитель
             </label>
             <select
               value={formTeacherId}
               onChange={(e) => setFormTeacherId(e.target.value ? Number(e.target.value) : '')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={selectClassName}
             >
               <option value="">Не назначен</option>
               {teachers.length > 0 ? (
@@ -343,7 +347,7 @@ export default function GroupsPage() {
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">
+            <label className="mb-1 block font-medium text-[var(--mezon-dark)]">
               Вместимость класса
             </label>
             <Input
@@ -356,7 +360,7 @@ export default function GroupsPage() {
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">
+            <label className="mb-1 block font-medium text-[var(--mezon-dark)]">
               Описание (опционально)
             </label>
             <Input
@@ -390,24 +394,24 @@ export default function GroupsPage() {
       >
         <div className="p-4">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(255,59,48,0.12)]">
+              <AlertTriangle className="h-5 w-5 text-[var(--macos-red)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">
+              <p className="font-medium text-[var(--mezon-dark)]">
                 Вы уверены, что хотите удалить этот класс?
               </p>
               {deleteConfirm && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                <div className="mt-2 rounded-[12px] bg-[rgba(255,255,255,0.62)] p-3">
                   <p className="text-sm font-medium">{deleteConfirm.name}</p>
                   {deleteConfirm._count && deleteConfirm._count.children > 0 && (
-                    <p className="text-xs text-red-500 mt-1">
+                    <p className="mt-1 text-xs text-[var(--macos-red)]">
                       В классе {deleteConfirm._count.children} учеников!
                     </p>
                   )}
                 </div>
               )}
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="mt-2 text-sm text-[var(--mezon-text-secondary)]">
                 Это действие нельзя отменить. Все связанные данные будут удалены.
               </p>
             </div>

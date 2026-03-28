@@ -22,6 +22,12 @@ import { api } from '../lib/api';
 import { PlusCircle, AlertTriangle, Apple, Package, Archive, Pencil, History, ArrowDownCircle, ArrowUpCircle, Trash2, BarChart3 } from 'lucide-react';
 
 type FilterType = 'ALL' | InventoryType;
+const selectClassName = 'mezon-field';
+const inventoryBadgeColors: Record<InventoryType, string> = {
+  FOOD: 'bg-[rgba(52,199,89,0.14)] text-[var(--macos-green)]',
+  HOUSEHOLD: 'bg-[rgba(255,149,0,0.14)] text-[var(--macos-orange)]',
+  STATIONERY: 'bg-[rgba(191,90,242,0.14)] text-[var(--macos-purple)]',
+};
 
 export default function InventoryPage() {
   const { data: items, loading, fetchData } = useApi<Item>({ url: '/api/inventory' });
@@ -81,12 +87,50 @@ export default function InventoryPage() {
     household: items.filter((item: any) => item.type === 'HOUSEHOLD').length,
     stationery: items.filter((item: any) => item.type === 'STATIONERY').length,
   }), [items]);
+  const filterCards = [
+    {
+      type: 'ALL' as const,
+      label: 'Все товары',
+      count: stats.all,
+      icon: Archive,
+      accent: 'text-[var(--mezon-text-secondary)]',
+      iconBg: 'bg-[rgba(60,60,67,0.08)]',
+      ring: 'ring-[var(--mezon-accent)]',
+    },
+    {
+      type: 'FOOD' as const,
+      label: 'Продукты питания',
+      count: stats.food,
+      icon: Apple,
+      accent: 'text-[var(--macos-green)]',
+      iconBg: 'bg-[rgba(52,199,89,0.14)]',
+      ring: 'ring-[var(--macos-green)]',
+    },
+    {
+      type: 'HOUSEHOLD' as const,
+      label: 'Хоз. товары',
+      count: stats.household,
+      icon: Package,
+      accent: 'text-[var(--macos-orange)]',
+      iconBg: 'bg-[rgba(255,149,0,0.14)]',
+      ring: 'ring-[var(--macos-orange)]',
+    },
+    {
+      type: 'STATIONERY' as const,
+      label: 'Канц. товары',
+      count: stats.stationery,
+      icon: Pencil,
+      accent: 'text-[var(--macos-purple)]',
+      iconBg: 'bg-[rgba(191,90,242,0.14)]',
+      ring: 'ring-[var(--macos-purple)]',
+    },
+  ];
 
   const getExpiryClass = (expiryDate?: string) => {
     if (!expiryDate) return '';
     const daysLeft = (new Date(expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
-    if (daysLeft < 0) return 'bg-red-200 text-red-800';
-    if (daysLeft < 7) return 'bg-yellow-200 text-yellow-800';
+    if (daysLeft < 0) return 'bg-[rgba(255,59,48,0.08)]';
+    if (daysLeft < 7) return 'bg-[rgba(255,204,0,0.1)]';
     return '';
   };
 
@@ -247,10 +291,16 @@ export default function InventoryPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Archive className="h-6 w-6" />
-          Складской учет
-        </h1>
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+            <Archive className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="mezon-badge mb-2">Inventory · склад</div>
+            <h1 className="mezon-section-title mb-1">Складской учёт</h1>
+            <p className="mezon-subtitle">Остатки, движения и закупки по продуктам, хозяйственным и канцелярским товарам.</p>
+          </div>
+        </div>
         <div className="flex gap-2">
           <Button onClick={handleCreate}>
             <PlusCircle className="mr-2 h-4 w-4" /> Добавить товар
@@ -264,64 +314,44 @@ export default function InventoryPage() {
 
       {/* Filter tabs */}
       <div className="grid grid-cols-4 gap-4">
-        <div
-          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'ALL' ? 'ring-2 ring-blue-500' : ''}`}
-          onClick={() => setFilterType('ALL')}
-        >
-          <div className="flex items-center gap-2">
-            <Archive className="h-5 w-5 text-gray-600" />
-            <span className="text-sm text-gray-500">Все товары</span>
-          </div>
-          <p className="text-2xl font-bold mt-1">{stats.all}</p>
-        </div>
-        <div
-          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'FOOD' ? 'ring-2 ring-green-500' : ''}`}
-          onClick={() => setFilterType('FOOD')}
-        >
-          <div className="flex items-center gap-2">
-            <Apple className="h-5 w-5 text-green-600" />
-            <span className="text-sm text-gray-500">Продукты питания</span>
-          </div>
-          <p className="text-2xl font-bold text-green-600 mt-1">{stats.food}</p>
-        </div>
-        <div
-          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'HOUSEHOLD' ? 'ring-2 ring-orange-500' : ''}`}
-          onClick={() => setFilterType('HOUSEHOLD')}
-        >
-          <div className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-orange-600" />
-            <span className="text-sm text-gray-500">Хоз. товары</span>
-          </div>
-          <p className="text-2xl font-bold text-orange-600 mt-1">{stats.household}</p>
-        </div>
-        <div
-          className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'STATIONERY' ? 'ring-2 ring-purple-500' : ''}`}
-          onClick={() => setFilterType('STATIONERY')}
-        >
-          <div className="flex items-center gap-2">
-            <Pencil className="h-5 w-5 text-purple-600" />
-            <span className="text-sm text-gray-500">Канц. товары</span>
-          </div>
-          <p className="text-2xl font-bold text-purple-600 mt-1">{stats.stationery}</p>
-        </div>
+        {filterCards.map(({ type, label, count, icon: Icon, accent, iconBg, ring }) => (
+          <Card
+            key={type}
+            className={`p-0 transition-all ${filterType === type ? `ring-2 ${ring}` : 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
+          >
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 p-4 text-left"
+              onClick={() => setFilterType(type)}
+            >
+              <div className={`rounded-xl p-2 ${iconBg}`}>
+                <Icon className={`h-5 w-5 ${accent}`} />
+              </div>
+              <div>
+                <span className="text-sm text-[var(--mezon-text-secondary)]">{label}</span>
+                <p className={`mt-1 text-2xl font-bold ${type === 'ALL' ? 'text-[var(--mezon-dark)]' : accent}`}>{count}</p>
+              </div>
+            </button>
+          </Card>
+        ))}
       </div>
 
       <Card>
-        <h2 className="text-xl font-semibold p-4 flex items-center gap-2">
-          {filterType === 'FOOD' && <Apple className="h-5 w-5 text-green-600" />}
-          {filterType === 'HOUSEHOLD' && <Package className="h-5 w-5 text-orange-600" />}
-          {filterType === 'STATIONERY' && <Pencil className="h-5 w-5 text-purple-600" />}
+        <h2 className="flex items-center gap-2 p-4 text-xl font-semibold text-[var(--mezon-dark)]">
+          {filterType === 'FOOD' && <Apple className="h-5 w-5 text-[var(--macos-green)]" />}
+          {filterType === 'HOUSEHOLD' && <Package className="h-5 w-5 text-[var(--macos-orange)]" />}
+          {filterType === 'STATIONERY' && <Pencil className="h-5 w-5 text-[var(--macos-purple)]" />}
           {filterType === 'ALL' ? 'Все остатки' : inventoryTypeLabels[filterType]}
         </h2>
         {loading ? (
           <div className="p-4">Загрузка...</div>
         ) : filteredItems.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-[var(--mezon-text-secondary)]">
             {filterType === 'ALL' ? 'Нет товаров на складе' : `Нет товаров в категории "${inventoryTypeLabels[filterType]}"`}
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-[rgba(255,255,255,0.6)] text-[var(--mezon-text-secondary)]">
               <tr>
                 <th className="text-left p-2">Наименование</th>
                 <th className="text-left p-2">Тип</th>
@@ -336,9 +366,7 @@ export default function InventoryPage() {
                   <td className="p-2">{item.name}</td>
                   <td className="p-2">
                     <span className={`px-2 py-0.5 rounded text-xs ${
-                      item.type === 'FOOD' ? 'bg-green-100 text-green-800' : 
-                      item.type === 'HOUSEHOLD' ? 'bg-orange-100 text-orange-800' : 
-                      'bg-purple-100 text-purple-800'
+                      inventoryBadgeColors[item.type as InventoryType]
                     }`}>
                       {inventoryTypeLabels[item.type as InventoryType] || item.type}
                     </span>
@@ -353,13 +381,13 @@ export default function InventoryPage() {
                         <Pencil className="h-3 w-3" />
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => { setReceiveItem(item); setReceiveData({ quantity: '', reason: '' }); setReceiveModalOpen(true); }} title="Приёмка">
-                        <ArrowDownCircle className="h-3 w-3 text-green-600" />
+                        <ArrowDownCircle className="h-3 w-3 text-[var(--macos-green)]" />
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => { setWriteOffItem(item); setWriteOffData({ quantity: '', reason: '' }); setWriteOffModalOpen(true); }} title="Списание">
-                        <Trash2 className="h-3 w-3 text-red-600" />
+                        <Trash2 className="h-3 w-3 text-[var(--macos-red)]" />
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => handleShowHistory(item)} title="История движений">
-                        <History className="h-3 w-3 text-blue-600" />
+                        <History className="h-3 w-3 text-[var(--mezon-accent)]" />
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => openDeleteModal(item)} title="Удалить">
                         &times;
@@ -375,9 +403,9 @@ export default function InventoryPage() {
 
       {shoppingList && (
         <Card className="mt-6">
-          <h2 className="text-xl font-semibold p-4">Список закупок</h2>
+          <h2 className="p-4 text-xl font-semibold text-[var(--mezon-dark)]">Список закупок</h2>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-[rgba(255,255,255,0.6)] text-[var(--mezon-text-secondary)]">
               <tr>
                 <th className="text-left p-2">Продукт</th>
                 <th className="text-left p-2">Требуется</th>
@@ -430,7 +458,7 @@ export default function InventoryPage() {
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value as InventoryType })}
-              className="w-full p-2 border rounded"
+              className={selectClassName}
               required
             >
               <option value="FOOD">Продукты питания</option>
@@ -469,7 +497,7 @@ export default function InventoryPage() {
               onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
             />
             {formData.type !== 'FOOD' && (
-              <p className="text-xs text-gray-500 mt-1">Для хозяйственных и канцелярских товаров срок годности обычно не указывается</p>
+              <p className="mt-1 text-xs text-[var(--mezon-text-secondary)]">Для хозяйственных и канцелярских товаров срок годности обычно не указывается</p>
             )}
           </div>
 
@@ -482,7 +510,7 @@ export default function InventoryPage() {
               placeholder="0"
               step="0.01"
             />
-            <p className="text-xs text-gray-500 mt-1">При снижении остатка ниже этого значения товар будет выделяться</p>
+            <p className="mt-1 text-xs text-[var(--mezon-text-secondary)]">При снижении остатка ниже этого значения товар будет выделяться</p>
           </div>
 
           <div className="flex gap-2 justify-end pt-4">
@@ -504,17 +532,17 @@ export default function InventoryPage() {
       {/* Delete confirmation modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
         <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-lg border border-[rgba(255,59,48,0.18)] bg-[rgba(255,59,48,0.08)] p-4">
+            <AlertTriangle className="mt-0.5 h-6 w-6 flex-shrink-0 text-[var(--macos-red)]" />
             <div>
-              <h4 className="font-semibold text-red-800">Внимание!</h4>
-              <p className="text-red-700 text-sm mt-1">
+              <h4 className="font-semibold text-[var(--macos-red)]">Внимание!</h4>
+              <p className="mt-1 text-sm text-[var(--macos-red)]">
                 Вы собираетесь удалить товар со склада. Это действие нельзя отменить.
               </p>
             </div>
           </div>
           {deletingItem && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="rounded-lg bg-[rgba(255,255,255,0.58)] p-3">
               <p><strong>Наименование:</strong> {deletingItem.name}</p>
               <p><strong>Количество:</strong> {deletingItem.quantity} {deletingItem.unit}</p>
               {deletingItem.expiryDate && (
@@ -539,11 +567,11 @@ export default function InventoryPage() {
           {transactionsLoading ? (
             <div className="text-center py-4">Загрузка...</div>
           ) : transactions.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">Нет записей о движениях</div>
+            <div className="py-4 text-center text-[var(--mezon-text-secondary)]">Нет записей о движениях</div>
           ) : (
             <div className="max-h-[60vh] overflow-y-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 sticky top-0">
+                <thead className="sticky top-0 bg-[rgba(255,255,255,0.72)] text-[var(--mezon-text-secondary)]">
                   <tr>
                     <th className="text-left p-2">Дата</th>
                     <th className="text-left p-2">Тип</th>
@@ -562,7 +590,7 @@ export default function InventoryPage() {
                         </span>
                       </td>
                       <td className="p-2 font-mono">
-                        <span className={tx.type === 'IN' ? 'text-green-600' : 'text-red-600'}>
+                        <span className={tx.type === 'IN' ? 'text-[var(--macos-green)]' : 'text-[var(--macos-red)]'}>
                           {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
                         </span>
                       </td>
@@ -583,9 +611,9 @@ export default function InventoryPage() {
       <Modal isOpen={writeOffModalOpen} onClose={() => setWriteOffModalOpen(false)} title="Списание товара">
         <div className="p-4 space-y-4">
           {writeOffItem && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+            <div className="rounded-lg border border-[rgba(255,149,0,0.18)] bg-[rgba(255,149,0,0.1)] p-3">
               <p className="font-medium">{writeOffItem.name}</p>
-              <p className="text-sm text-gray-600">На складе: <strong>{writeOffItem.quantity} {writeOffItem.unit}</strong></p>
+              <p className="text-sm text-[var(--mezon-text-secondary)]">На складе: <strong>{writeOffItem.quantity} {writeOffItem.unit}</strong></p>
             </div>
           )}
           <div>
@@ -620,9 +648,9 @@ export default function InventoryPage() {
       <Modal isOpen={receiveModalOpen} onClose={() => setReceiveModalOpen(false)} title="Приёмка товара">
         <div className="p-4 space-y-4">
           {receiveItem && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="rounded-lg border border-[rgba(52,199,89,0.18)] bg-[rgba(52,199,89,0.1)] p-3">
               <p className="font-medium">{receiveItem.name}</p>
-              <p className="text-sm text-gray-600">Текущий остаток: <strong>{receiveItem.quantity} {receiveItem.unit}</strong></p>
+              <p className="text-sm text-[var(--mezon-text-secondary)]">Текущий остаток: <strong>{receiveItem.quantity} {receiveItem.unit}</strong></p>
             </div>
           )}
           <div>
@@ -658,11 +686,11 @@ export default function InventoryPage() {
           {allTransactionsLoading ? (
             <div className="text-center py-4">Загрузка...</div>
           ) : allTransactions.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">Нет записей о движениях</div>
+            <div className="py-4 text-center text-[var(--mezon-text-secondary)]">Нет записей о движениях</div>
           ) : (
             <div className="max-h-[70vh] overflow-y-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 sticky top-0">
+                <thead className="sticky top-0 bg-[rgba(255,255,255,0.72)] text-[var(--mezon-text-secondary)]">
                   <tr>
                     <th className="text-left p-2">Дата</th>
                     <th className="text-left p-2">Товар</th>
@@ -676,7 +704,7 @@ export default function InventoryPage() {
                 </thead>
                 <tbody>
                   {allTransactions.map((tx: InventoryTransaction) => (
-                    <tr key={tx.id} className="border-t hover:bg-gray-50">
+                    <tr key={tx.id} className="border-t hover:bg-[rgba(255,255,255,0.5)]">
                       <td className="p-2 whitespace-nowrap text-xs">{new Date(tx.createdAt).toLocaleString('ru')}</td>
                       <td className="p-2 font-medium">{tx.inventoryItem?.name || '—'}</td>
                       <td className="p-2">
@@ -685,7 +713,7 @@ export default function InventoryPage() {
                         </span>
                       </td>
                       <td className="p-2 font-mono">
-                        <span className={tx.type === 'IN' ? 'text-green-600' : 'text-red-600'}>
+                        <span className={tx.type === 'IN' ? 'text-[var(--macos-green)]' : 'text-[var(--macos-red)]'}>
                           {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
                         </span>
                       </td>

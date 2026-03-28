@@ -9,20 +9,24 @@ export default function UsersPage() {
   const [activeTab, setActiveTab] = useState<ViewTab>('users');
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <Shield className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">Управление пользователями</h1>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+          <Shield className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="mezon-section-title mb-0">Управление пользователями</h1>
+          <p className="mezon-subtitle">Каталог сотрудников, роли и права доступа в одном рабочем пространстве.</p>
+        </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="mb-6 flex gap-1 rounded-lg bg-gray-100 p-1 w-fit">
+      <div className="inline-flex w-fit gap-1 rounded-[16px] border border-[var(--glass-border)] bg-[var(--mezon-panel-muted)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
         <button
           onClick={() => setActiveTab('users')}
-          className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 rounded-[12px] px-4 py-2 text-sm font-medium transition-all ${
             activeTab === 'users'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
+              : 'text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]'
           }`}
         >
           <Users className="h-4 w-4" />
@@ -30,10 +34,10 @@ export default function UsersPage() {
         </button>
         <button
           onClick={() => setActiveTab('roles')}
-          className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 rounded-[12px] px-4 py-2 text-sm font-medium transition-all ${
             activeTab === 'roles'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
+              : 'text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]'
           }`}
         >
           <Lock className="h-4 w-4" />
