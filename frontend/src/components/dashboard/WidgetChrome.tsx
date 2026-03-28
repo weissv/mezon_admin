@@ -54,17 +54,17 @@ export default function WidgetChrome({
         </div>
         <div className="dashboard-widget__header-actions">
           {onRefresh && !isLoading && (
-            <button onClick={onRefresh} className="dashboard-widget__action-btn" title="Обновить">
+            <button onClick={onRefresh} className="dashboard-widget__action-btn" title="Обновить" aria-label="Обновить">
               <RefreshCw className="h-3.5 w-3.5" />
             </button>
           )}
           {deepLink && (
-            <a href={deepLink} className="dashboard-widget__action-btn" title="Открыть модуль">
+            <a href={deepLink} className="dashboard-widget__action-btn" title="Открыть модуль" aria-label="Открыть модуль">
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           )}
           {onToggleCollapse && (
-            <button onClick={onToggleCollapse} className="dashboard-widget__action-btn" title={isCollapsed ? 'Развернуть' : 'Свернуть'}>
+            <button onClick={onToggleCollapse} className="dashboard-widget__action-btn" title={isCollapsed ? 'Развернуть' : 'Свернуть'} aria-label={isCollapsed ? 'Развернуть' : 'Свернуть'}>
               {isCollapsed ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronUp className="h-3.5 w-3.5" />}
             </button>
           )}
