@@ -35,7 +35,7 @@ function buildQueryParams(params?: QueryParams) {
 
 function normalizePaginatedResponse<T>(response: OneCPaginatedResponse<T>): OneCPaginatedResponse<T> {
   const pageSize = response.pageSize || response.limit || response.items.length || 1;
-  const totalPages = response.totalPages || response.pages || Math.max(1, Math.ceil(response.total / pageSize));
+  const totalPages = response.totalPages || response.pages || Math.max(1, Math.ceil(response.total / Math.max(1, pageSize)));
 
   return {
     ...response,

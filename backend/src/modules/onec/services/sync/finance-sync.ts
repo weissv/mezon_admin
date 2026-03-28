@@ -1,6 +1,7 @@
 import { TransactionChannel } from "@prisma/client";
 import type { SyncContext, SyncResult } from "./sync-context";
 import { resolveCounterparty, resolveCashFlowArticleId } from "./resolvers";
+import { logger } from "../../../../utils/logger";
 
 async function syncFinanceDoc(
   ctx: SyncContext,
@@ -18,7 +19,7 @@ async function syncFinanceDoc(
     try {
       const rawAmount = parseFloat(r.СуммаДокумента) || 0;
       const amount = rawAmount * sign;
-      const date = new Date(r.Date);
+      const date = r.Date ? new Date(r.Date) : new Date();
 
       const { contractorId, personId } = await resolveCounterparty(
         ctx, r.Контрагент, r.Контрагент_Type,
@@ -70,7 +71,7 @@ async function syncFinanceDoc(
       upserted++;
     } catch (err) {
       errors++;
-      console.error(`[1C-Sync] ${label} upsert error:`, (err as Error).message);
+      logger.error(`[1C-Sync] ${label} upsert error:`, (err as Error).message);
     }
   }
 

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { checkRole } from "../../../middleware/checkRole";
 import { oneCAllowedRoles } from "../services/onec-data.service";
 import { oneCSyncService } from "../services/sync";
+import { logger } from "../../../utils/logger";
 
 const router = Router();
 
@@ -13,8 +14,8 @@ router.post(
     try {
       const report = await oneCSyncService.syncAll();
       return res.json(report);
-    } catch (error: any) {
-      console.error("1C sync error:", error);
+    } catch (error: unknown) {
+      logger.error("1C sync error:", error instanceof Error ? error.message : String(error));
       return res.status(500).json({
         status: "error",
         message: "Ошибка синхронизации с 1С",

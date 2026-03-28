@@ -1,4 +1,5 @@
 import type { SyncContext, SyncResult } from "./sync-context";
+import { logger } from "../../../../utils/logger";
 
 export async function syncBalanceSnapshots(ctx: SyncContext): Promise<SyncResult> {
   const entity = "BalanceSnapshot (calculated)";
@@ -61,7 +62,7 @@ export async function syncBalanceSnapshots(ctx: SyncContext): Promise<SyncResult
         upserted++;
       } catch (err) {
         errors++;
-        console.error(`[1C-Sync] BalanceSnapshot contractor debt error:`, (err as Error).message);
+        logger.error(`[1C-Sync] BalanceSnapshot contractor debt error:`, (err as Error).message);
       }
     }
   } catch (err) {

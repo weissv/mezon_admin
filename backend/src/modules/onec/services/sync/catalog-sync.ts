@@ -1,4 +1,5 @@
 import type { SyncContext, SyncResult } from "./sync-context";
+import { logger } from "../../../../utils/logger";
 
 export async function syncContractors(ctx: SyncContext): Promise<SyncResult> {
   const entity = "Catalog_Контрагенты";
@@ -141,6 +142,7 @@ async function syncGenericCatalog(
       upserted++;
     } catch (err) {
       errors++;
+      logger.error(`[1C-Sync] ${entity} upsert error for ${r.Ref_Key}:`, (err as Error).message);
     }
   }
   return { entity, fetched: rows.length, upserted, errors };
