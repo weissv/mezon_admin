@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import mammoth from "mammoth";
 import { EventEmitter } from "events";
 import { SystemSettingsService } from "./SystemSettingsService";
+import { config } from "../config";
 
 const prisma = new PrismaClient();
 
@@ -52,7 +53,7 @@ if (!GEMINI_API_KEY) {
   console.warn("⚠️  GEMINI_API_KEY не установлен. Embeddings и семантический поиск не будут работать.");
 }
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_API_KEY = config.groqApiKey;
 if (!GROQ_API_KEY) {
   console.warn("⚠️  GROQ_API_KEY не установлен. AI-ассистент не будет работать.");
 }
