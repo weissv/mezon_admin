@@ -6,21 +6,35 @@ import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/button';
 import type { SchoolStats } from '../../types/lms';
 
-function KPICard({ title, value, subtitle, icon: Icon, color = "blue" }: any) {
+type KPIColor = 'blue' | 'green' | 'purple' | 'orange';
+
+function KPICard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  color = 'blue',
+}: {
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  icon: typeof Users;
+  color?: KPIColor;
+}) {
   const colorClasses = {
-    blue: "bg-blue-50 text-blue-600",
-    green: "bg-green-50 text-green-600",
-    purple: "bg-purple-50 text-purple-600",
-    orange: "bg-orange-50 text-orange-600",
-  }[color as keyof typeof colorClasses] || "bg-gray-50 text-gray-600";
+    blue: 'bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)]',
+    green: 'bg-[rgba(52,199,89,0.14)] text-[var(--macos-green)]',
+    purple: 'bg-[rgba(191,90,242,0.14)] text-[var(--macos-purple)]',
+    orange: 'bg-[rgba(255,149,0,0.14)] text-[var(--macos-orange)]',
+  }[color];
 
   return (
-    <div className="mezon-card hover:shadow-md transition-shadow">
+    <div className="mezon-card">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <h3 className="text-2xl font-bold mt-1 text-gray-900">{value}</h3>
-          {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
+          <p className="text-sm font-medium text-[var(--mezon-text-secondary)]">{title}</p>
+          <h3 className="mt-1 text-2xl font-bold text-[var(--mezon-dark)]">{value}</h3>
+          {subtitle && <p className="mt-1 text-xs text-[var(--mezon-text-soft)]">{subtitle}</p>}
         </div>
         <div className={`p-3 rounded-xl ${colorClasses}`}>
           <Icon className="h-6 w-6" />
@@ -34,6 +48,9 @@ export default function LmsSchoolDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<SchoolStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const teacherName = user?.employee
+    ? `${user.employee.firstName} ${user.employee.lastName}`
+    : user?.email;
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -51,25 +68,26 @@ export default function LmsSchoolDashboard() {
   }, []);
 
   if (loading) {
-    return <div className="mezon-card animate-pulse h-64">Загрузка статистики...</div>;
+    return <div className="mezon-card h-64 animate-pulse text-[var(--mezon-text-secondary)]">Загрузка статистики...</div>;
   }
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--mezon-dark)]">Школьный обзор</h1>
-          <p className="text-gray-500">Сводка по учебному процессу на сегодня</p>
+          <div className="mezon-badge mb-3">LMS · школьная аналитика</div>
+          <h1 className="mezon-section-title mb-1">Школьный обзор</h1>
+          <p className="mezon-subtitle">
+            Сводка по учебному процессу на сегодня{teacherName ? ` для ${teacherName}` : ''}.
+          </p>
         </div>
         <div className="flex gap-2">
-            <Link to="/lms/school/schedule">
-                <Button variant="outline">Расписание</Button>
-            </Link>
-            <Link to="/lms/diary">
-                <Button className="bg-[var(--mezon-accent)] hover:bg-[var(--mezon-accent-dark)]">
-                    Мой Дневник
-                </Button>
-            </Link>
+          <Link to="/lms/school/schedule">
+            <Button variant="outline">Расписание</Button>
+          </Link>
+          <Link to="/lms/diary">
+            <Button>Мой дневник</Button>
+          </Link>
         </div>
       </div>
 
@@ -109,23 +127,27 @@ export default function LmsSchoolDashboard() {
         {/* Recent Activity / Grades */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Последние оценки</h2>
+            <h2 className="text-lg font-semibold text-[var(--mezon-dark)]">Последние оценки</h2>
             <Link to="/lms/school/gradebook" className="text-sm text-[var(--mezon-accent)] hover:underline">Все оценки</Link>
           </div>
           
           <div className="mezon-card p-0 overflow-hidden">
             {stats?.recentGrades?.length ? (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-[rgba(60,60,67,0.08)]">
                 {stats.recentGrades.map((g) => {
                   const gradeValue = g.value ?? 0;
                   const studentName = g.student?.student
                     ? `${g.student.student.firstName} ${g.student.student.lastName}`
                     : '—';
                   const subjectName = g.subject?.name ?? '—';
-                  const gradeColor = gradeValue >= 90 ? 'bg-green-500' : gradeValue >= 75 ? 'bg-blue-500' : 'bg-orange-500';
+                  const gradeColor = gradeValue >= 90
+                    ? 'bg-[var(--macos-green)]'
+                    : gradeValue >= 75
+                      ? 'bg-[var(--mezon-accent)]'
+                      : 'bg-[var(--macos-orange)]';
 
                   return (
-                    <div key={g.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition">
+                    <div key={g.id} className="flex items-center justify-between p-4 transition hover:bg-[rgba(255,255,255,0.55)]">
                       <div className="flex items-center gap-3">
                         <div className={`
                           w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white
@@ -134,49 +156,49 @@ export default function LmsSchoolDashboard() {
                           {gradeValue}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{studentName}</p>
-                          <p className="text-xs text-gray-500">{subjectName} • {new Date(g.date).toLocaleDateString()}</p>
+                          <p className="font-medium text-[var(--mezon-dark)]">{studentName}</p>
+                          <p className="text-xs text-[var(--mezon-text-secondary)]">{subjectName} • {new Date(g.date).toLocaleDateString()}</p>
                         </div>
                       </div>
                       {g.comment && (
-                          <span className="text-sm text-gray-400 italic max-w-[200px] truncate hidden sm:block">{g.comment}</span>
+                        <span className="hidden max-w-[200px] truncate text-sm italic text-[var(--mezon-text-soft)] sm:block">{g.comment}</span>
                       )}
                     </div>
                   );
                 })}
               </div>
             ) : (
-              <div className="p-8 text-center text-gray-500">Нет свежих оценок</div>
+              <div className="p-8 text-center text-[var(--mezon-text-secondary)]">Нет свежих оценок</div>
             )}
           </div>
         </div>
 
         {/* Upcoming Homework / Events */}
-        <div className="space-y-6">
-           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Ближайшие события</h2>
+         <div className="space-y-6">
+            <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[var(--mezon-dark)]">Ближайшие события</h2>
           </div>
           
           <div className="mezon-card">
             <div className="space-y-4">
-                <div className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                    <div className="bg-red-100 text-red-600 p-2 rounded-lg">
-                        <AlertCircle className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <p className="font-medium text-gray-900">Родительское собрание</p>
-                        <p className="text-sm text-gray-500 mt-1">10 декабря, 18:00. Актовый зал.</p>
-                    </div>
+              <div className="flex items-start gap-3 border-b border-[rgba(60,60,67,0.08)] pb-4 last:border-0 last:pb-0">
+                <div className="rounded-lg bg-[rgba(255,59,48,0.12)] p-2 text-[var(--macos-red)]">
+                  <AlertCircle className="h-5 w-5" />
                 </div>
-                 <div className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                    <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                        <Clock className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <p className="font-medium text-gray-900">Контрольная работа</p>
-                        <p className="text-sm text-gray-500 mt-1">Математика, 5А класс. Завтра.</p>
-                    </div>
+                <div>
+                  <p className="font-medium text-[var(--mezon-dark)]">Родительское собрание</p>
+                  <p className="mt-1 text-sm text-[var(--mezon-text-secondary)]">10 декабря, 18:00. Актовый зал.</p>
                 </div>
+              </div>
+              <div className="flex items-start gap-3 border-b border-[rgba(60,60,67,0.08)] pb-4 last:border-0 last:pb-0">
+                <div className="rounded-lg bg-[rgba(10,132,255,0.12)] p-2 text-[var(--mezon-accent)]">
+                  <Clock className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium text-[var(--mezon-dark)]">Контрольная работа</p>
+                  <p className="mt-1 text-sm text-[var(--mezon-text-secondary)]">Математика, 5А класс. Завтра.</p>
+                </div>
+              </div>
             </div>
           </div>
 
