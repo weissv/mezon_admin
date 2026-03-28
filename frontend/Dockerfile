@@ -1,14 +1,23 @@
 # Multi-stage build for production
 
-# Stage 1: Development (for docker-compose)
-FROM node:20 AS development
+FROM node:20 AS deps
+ENV npm_config_fetch_retries=5 \
+	npm_config_fetch_retry_mintimeout=20000 \
+	npm_config_fetch_retry_maxtimeout=120000 \
+	npm_config_fetch_timeout=600000 \
+	npm_config_progress=false \
+	npm_config_audit=false \
+	npm_config_fund=false
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install only build/runtime dependencies to avoid pulling heavy test tooling in CI
+RUN npm ci --omit=dev
+
+# Stage 1: Development (for docker-compose)
+FROM deps AS development
 
 # Copy source code
 COPY . .
@@ -20,14 +29,7 @@ EXPOSE 5173
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 # Stage 2: Build the application
-FROM node:20 AS builder
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci
+FROM deps AS builder
 
 # Copy source code
 COPY . .
