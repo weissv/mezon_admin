@@ -130,7 +130,7 @@ export default function SideNav() {
       </div>
 
       <div className="mezon-sidenav__nav">
-        <p className="mezon-nav-label">Навигация</p>
+        <p className="mezon-nav-label">Модули</p>
         <div className="flex flex-col gap-1">
           {links.map((l) => {
             const isActive = loc.pathname === l.path || loc.pathname.startsWith(`${l.path}/`);
