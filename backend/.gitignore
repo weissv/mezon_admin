@@ -70,6 +70,11 @@ cypress/videos/
 cypress/screenshots/
 coverage/
 
+# Генерируемые диагностические артефакты
+1c_*.json
+1c_*.xml
+1c_*.txt
+
 # Секреты
 .env
 .env.local
