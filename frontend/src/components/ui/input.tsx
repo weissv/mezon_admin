@@ -7,13 +7,13 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   ref
 ) {
   return (
-    <input
-      ref={ref}
-      className={clsx(
-        "w-full rounded-[8px] border border-[rgba(0,0,0,0.12)] bg-white/90 backdrop-blur-sm px-3 py-2 text-[var(--mezon-dark)] text-[13px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] transition-all focus:border-[#007AFF] focus:outline-none focus:ring-2 focus:ring-[rgba(0,122,255,0.2)] focus:shadow-[0_0_0_3px_rgba(0,122,255,0.12)] min-h-[34px] touch-manipulation placeholder:text-[#86868B]",
-        className
-      )}
-      {...props}
-    />
+      <input
+        ref={ref}
+        className={clsx(
+          "w-full min-h-[36px] rounded-panel border border-black/10 bg-[rgba(255,255,255,0.82)] px-3.5 py-2 text-[13px] text-[var(--mezon-dark)] shadow-macos-input backdrop-blur-sm transition-all duration-200 placeholder:text-[var(--mezon-text-soft)] focus-visible:border-[rgba(10,132,255,0.3)] focus-visible:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(10,132,255,0.14)] disabled:cursor-not-allowed disabled:opacity-60 touch-manipulation",
+          className
+        )}
+        {...props}
+      />
   );
 });
