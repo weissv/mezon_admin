@@ -44,7 +44,14 @@ const shortCurrency = (v: number) => {
   return String(v);
 };
 
-const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
+const PIE_THEME_COLORS = [
+  "var(--mezon-accent)",
+  "var(--macos-green)",
+  "var(--macos-orange)",
+  "var(--macos-red)",
+  "var(--macos-purple)",
+  "var(--macos-teal)",
+];
 
 // ── Balance Cards ──
 function BalanceCards({ data }: { data: BalancesResponse | null }) {
@@ -55,9 +62,9 @@ function BalanceCards({ data }: { data: BalancesResponse | null }) {
   const total = (cash?.amount ?? 0) + (bank?.amount ?? 0);
 
   const cards = [
-    { label: "Касса", amount: cash?.amount ?? 0, icon: Wallet, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { label: "Расчётный счёт", amount: bank?.amount ?? 0, icon: Landmark, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Итого", amount: total, icon: DollarSign, color: "text-violet-600", bg: "bg-violet-50" },
+    { label: "Касса", amount: cash?.amount ?? 0, icon: Wallet, color: "text-[var(--macos-green)]", bg: "bg-[rgba(52,199,89,0.14)]" },
+    { label: "Расчётный счёт", amount: bank?.amount ?? 0, icon: Landmark, color: "text-[var(--mezon-accent)]", bg: "bg-[rgba(10,132,255,0.12)]" },
+    { label: "Итого", amount: total, icon: DollarSign, color: "text-[var(--macos-purple)]", bg: "bg-[rgba(191,90,242,0.14)]" },
   ];
 
   return (
@@ -69,14 +76,14 @@ function BalanceCards({ data }: { data: BalancesResponse | null }) {
               <c.icon className={`h-6 w-6 ${c.color}`} />
             </div>
             <div className="min-w-0">
-              <p className="text-sm text-gray-500 truncate">{c.label}</p>
-              <p className="text-xl font-bold truncate">{currency.format(c.amount)}</p>
+              <p className="truncate text-sm text-[var(--mezon-text-secondary)]">{c.label}</p>
+              <p className="truncate text-xl font-bold text-[var(--mezon-dark)]">{currency.format(c.amount)}</p>
             </div>
           </div>
         </Card>
       ))}
       {data.snapshotDate && (
-        <p className="col-span-full text-xs text-gray-400">
+        <p className="col-span-full text-xs text-[var(--mezon-text-soft)]">
           Данные на {new Date(data.snapshotDate).toLocaleDateString("ru-RU")}
         </p>
       )}
@@ -100,29 +107,29 @@ function SummarySection({ summary }: { summary: any }) {
       label: "Доходы",
       value: income,
       icon: ArrowUpRight,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
+      color: "text-[var(--macos-green)]",
+      bg: "bg-[rgba(52,199,89,0.14)]",
     },
     {
       label: "Расходы",
       value: expense,
       icon: ArrowDownRight,
-      color: "text-red-600",
-      bg: "bg-red-50",
+      color: "text-[var(--macos-red)]",
+      bg: "bg-[rgba(255,59,48,0.12)]",
     },
     {
       label: "Прибыль",
       value: profit,
       icon: profit >= 0 ? TrendingUp : TrendingDown,
-      color: profit >= 0 ? "text-emerald-600" : "text-red-600",
-      bg: profit >= 0 ? "bg-emerald-50" : "bg-red-50",
+      color: profit >= 0 ? "text-[var(--macos-green)]" : "text-[var(--macos-red)]",
+      bg: profit >= 0 ? "bg-[rgba(52,199,89,0.14)]" : "bg-[rgba(255,59,48,0.12)]",
     },
     {
       label: "Всего документов",
       value: totalDocuments,
       icon: BarChart3,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-[var(--mezon-accent)]",
+      bg: "bg-[rgba(10,132,255,0.12)]",
       isCurrency: false,
       hint: `Операции: ${totalTransactions} • Накладные: ${totalInvoices}`,
     },
@@ -134,7 +141,7 @@ function SummarySection({ summary }: { summary: any }) {
         <Card key={k.label} className="p-0 overflow-hidden">
           <div className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-500">{k.label}</span>
+              <span className="text-sm text-[var(--mezon-text-secondary)]">{k.label}</span>
               <div className={`${k.bg} p-2 rounded-lg`}>
                 <k.icon className={`h-4 w-4 ${k.color}`} />
               </div>
@@ -142,7 +149,7 @@ function SummarySection({ summary }: { summary: any }) {
             <p className={`text-xl font-bold ${k.color}`}>
               {k.isCurrency === false ? k.value : currency.format(k.value)}
             </p>
-            {k.hint && <p className="mt-1 text-xs text-gray-400">{k.hint}</p>}
+            {k.hint && <p className="mt-1 text-xs text-[var(--mezon-text-soft)]">{k.hint}</p>}
           </div>
         </Card>
       ))}
@@ -162,18 +169,18 @@ function CategoryChart({ summary }: { summary: any }) {
 
   return (
     <Card className="p-6">
-      <h3 className="font-semibold text-lg mb-4">Распределение по категориям</h3>
+      <h3 className="mb-4 text-lg font-semibold text-[var(--mezon-dark)]">Распределение по категориям</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ left: 10, right: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis type="number" tickFormatter={(v) => shortCurrency(v)} fontSize={12} />
-            <YAxis type="category" dataKey="name" width={100} fontSize={12} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(60,60,67,0.12)" />
+            <XAxis type="number" tickFormatter={(v) => shortCurrency(v)} fontSize={12} stroke="var(--mezon-text-soft)" />
+            <YAxis type="category" dataKey="name" width={100} fontSize={12} stroke="var(--mezon-text-soft)" />
             <Tooltip
               formatter={(val: number) => currency.format(val)}
               labelStyle={{ fontWeight: 600 }}
             />
-            <Bar dataKey="amount" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={28} name="Сумма" />
+            <Bar dataKey="amount" fill="var(--mezon-accent)" radius={[0, 4, 4, 0]} barSize={28} name="Сумма" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -196,7 +203,7 @@ function ChannelChart({ summary }: { summary: any }) {
 
   return (
     <Card className="p-6">
-      <h3 className="font-semibold text-lg mb-4">По каналам (касса / банк)</h3>
+      <h3 className="mb-4 text-lg font-semibold text-[var(--mezon-dark)]">По каналам (касса / банк)</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -212,7 +219,7 @@ function ChannelChart({ summary }: { summary: any }) {
               labelLine={false}
             >
               {data.map((_: any, idx: number) => (
-                <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+                <Cell key={idx} fill={PIE_THEME_COLORS[idx % PIE_THEME_COLORS.length]} />
               ))}
             </Pie>
             <Tooltip formatter={(val: number) => currency.format(val)} />
@@ -252,32 +259,32 @@ function UnitEconomicsWidget() {
   return (
     <Card className="p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Calculator className="h-5 w-5 text-blue-600" />
-        <h3 className="font-semibold text-lg">Unit-экономика</h3>
-        <span className="ml-auto text-xs text-gray-400">
+        <Calculator className="h-5 w-5 text-[var(--mezon-accent)]" />
+        <h3 className="text-lg font-semibold text-[var(--mezon-dark)]">Unit-экономика</h3>
+        <span className="ml-auto text-xs text-[var(--mezon-text-soft)]">
           {data.period.workingDays} раб. дн. · {data.children.total} детей
         </span>
       </div>
 
       {/* Summary row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        <div className="bg-blue-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-blue-500">Расход/мес на ребёнка</p>
-          <p className="text-lg font-bold text-blue-700">{currency.format(data.totals.costPerChildMonthly)}</p>
+        <div className="rounded-lg bg-[rgba(10,132,255,0.12)] p-3 text-center">
+          <p className="text-xs text-[var(--mezon-accent)]">Расход/мес на ребёнка</p>
+          <p className="text-lg font-bold text-[var(--mezon-dark)]">{currency.format(data.totals.costPerChildMonthly)}</p>
         </div>
-        <div className="bg-emerald-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-emerald-500">Доход на ребёнка</p>
-          <p className="text-lg font-bold text-emerald-700">{currency.format(data.income.perChild)}</p>
+        <div className="rounded-lg bg-[rgba(52,199,89,0.14)] p-3 text-center">
+          <p className="text-xs text-[var(--macos-green)]">Доход на ребёнка</p>
+          <p className="text-lg font-bold text-[var(--mezon-dark)]">{currency.format(data.income.perChild)}</p>
         </div>
-        <div className={`${data.income.margin >= 0 ? "bg-emerald-50" : "bg-red-50"} rounded-lg p-3 text-center`}>
-          <p className={`text-xs ${data.income.margin >= 0 ? "text-emerald-500" : "text-red-500"}`}>Маржа</p>
-          <p className={`text-lg font-bold ${data.income.margin >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+        <div className={`${data.income.margin >= 0 ? "bg-[rgba(52,199,89,0.14)]" : "bg-[rgba(255,59,48,0.12)]"} rounded-lg p-3 text-center`}>
+          <p className={`text-xs ${data.income.margin >= 0 ? "text-[var(--macos-green)]" : "text-[var(--macos-red)]"}`}>Маржа</p>
+          <p className="text-lg font-bold text-[var(--mezon-dark)]">
             {currency.format(data.income.margin)}
           </p>
         </div>
-        <div className={`${data.income.marginPercent >= 0 ? "bg-emerald-50" : "bg-red-50"} rounded-lg p-3 text-center`}>
-          <p className={`text-xs ${data.income.marginPercent >= 0 ? "text-emerald-500" : "text-red-500"}`}>Маржа %</p>
-          <p className={`text-lg font-bold ${data.income.marginPercent >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+        <div className={`${data.income.marginPercent >= 0 ? "bg-[rgba(52,199,89,0.14)]" : "bg-[rgba(255,59,48,0.12)]"} rounded-lg p-3 text-center`}>
+          <p className={`text-xs ${data.income.marginPercent >= 0 ? "text-[var(--macos-green)]" : "text-[var(--macos-red)]"}`}>Маржа %</p>
+          <p className="text-lg font-bold text-[var(--mezon-dark)]">
             {data.income.marginPercent}%
           </p>
         </div>
@@ -290,15 +297,15 @@ function UnitEconomicsWidget() {
             const pct = data.totals.totalCost ? Math.round((Math.abs(row.total) / Math.abs(data.totals.totalCost)) * 100) : 0;
             return (
               <div key={row.label} className="flex items-center gap-3 text-sm">
-                <span className="w-24 text-gray-600 truncate">{row.label}</span>
-                <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                <span className="w-24 truncate text-[var(--mezon-text-secondary)]">{row.label}</span>
+                <div className="h-3 flex-1 overflow-hidden rounded-full bg-[rgba(60,60,67,0.08)]">
                   <div
-                    className="h-full bg-blue-500 rounded-full transition-all"
+                    className="h-full rounded-full bg-[var(--mezon-accent)] transition-all"
                     style={{ width: `${Math.min(pct, 100)}%` }}
                   />
                 </div>
-                <span className="w-28 text-right font-medium">{currency.format(Math.abs(row.total))}</span>
-                <span className="w-10 text-right text-gray-400">{pct}%</span>
+                <span className="w-28 text-right font-medium text-[var(--mezon-dark)]">{currency.format(Math.abs(row.total))}</span>
+                <span className="w-10 text-right text-[var(--mezon-text-soft)]">{pct}%</span>
               </div>
             );
           })}
@@ -327,34 +334,34 @@ function CashForecastWidget({ currentBalance }: { currentBalance: number }) {
   const hasGaps = data.summary.daysWithGaps > 0;
 
   return (
-    <Card className={`p-6 ${hasGaps ? "border-l-4 border-l-amber-400" : ""}`}>
+    <Card className={`p-6 ${hasGaps ? "border-l-4 border-l-[var(--macos-orange)]" : ""}`}>
       <div className="flex items-center gap-2 mb-4">
         {hasGaps ? (
-          <AlertTriangle className="h-5 w-5 text-amber-500" />
+          <AlertTriangle className="h-5 w-5 text-[var(--macos-orange)]" />
         ) : (
-          <TrendingUp className="h-5 w-5 text-emerald-500" />
+          <TrendingUp className="h-5 w-5 text-[var(--macos-green)]" />
         )}
-        <h3 className="font-semibold text-lg">Прогноз на 30 дней</h3>
+        <h3 className="text-lg font-semibold text-[var(--mezon-dark)]">Прогноз на 30 дней</h3>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500">Ожидаемый доход</p>
-          <p className="text-base font-bold text-emerald-600">{currency.format(data.summary.totalExpectedIncome)}</p>
+        <div className="rounded-lg bg-[rgba(255,255,255,0.5)] p-3 text-center">
+          <p className="text-xs text-[var(--mezon-text-secondary)]">Ожидаемый доход</p>
+          <p className="text-base font-bold text-[var(--macos-green)]">{currency.format(data.summary.totalExpectedIncome)}</p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500">Ожидаемый расход</p>
-          <p className="text-base font-bold text-red-600">{currency.format(data.summary.totalExpectedExpense)}</p>
+        <div className="rounded-lg bg-[rgba(255,255,255,0.5)] p-3 text-center">
+          <p className="text-xs text-[var(--mezon-text-secondary)]">Ожидаемый расход</p>
+          <p className="text-base font-bold text-[var(--macos-red)]">{currency.format(data.summary.totalExpectedExpense)}</p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500">Мин. баланс</p>
-          <p className={`text-base font-bold ${data.summary.minBalance >= 0 ? "text-gray-700" : "text-red-600"}`}>
+        <div className="rounded-lg bg-[rgba(255,255,255,0.5)] p-3 text-center">
+          <p className="text-xs text-[var(--mezon-text-secondary)]">Мин. баланс</p>
+          <p className={`text-base font-bold ${data.summary.minBalance >= 0 ? "text-[var(--mezon-dark)]" : "text-[var(--macos-red)]"}`}>
             {currency.format(data.summary.minBalance)}
           </p>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500">Дней с дефицитом</p>
-          <p className={`text-base font-bold ${hasGaps ? "text-amber-600" : "text-emerald-600"}`}>
+        <div className="rounded-lg bg-[rgba(255,255,255,0.5)] p-3 text-center">
+          <p className="text-xs text-[var(--mezon-text-secondary)]">Дней с дефицитом</p>
+          <p className={`text-base font-bold ${hasGaps ? "text-[var(--macos-orange)]" : "text-[var(--macos-green)]"}`}>
             {data.summary.daysWithGaps}
           </p>
         </div>
@@ -364,8 +371,8 @@ function CashForecastWidget({ currentBalance }: { currentBalance: number }) {
       {data.summary.recommendations?.length > 0 && (
         <div className="space-y-1">
           {data.summary.recommendations.map((rec: string, idx: number) => (
-            <p key={idx} className="text-sm text-gray-600 flex items-start gap-2">
-              <span className="text-amber-500 mt-0.5">•</span>
+            <p key={idx} className="flex items-start gap-2 text-sm text-[var(--mezon-text-secondary)]">
+              <span className="mt-0.5 text-[var(--macos-orange)]">•</span>
               {rec}
             </p>
           ))}
@@ -395,7 +402,7 @@ export default function DashboardView() {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />
+          <div key={i} className="h-32 animate-pulse rounded-[20px] bg-[rgba(255,255,255,0.58)]" />
         ))}
       </div>
     );
