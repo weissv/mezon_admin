@@ -7,10 +7,15 @@ import DoomGame from "../components/DoomGame";
 import { Toaster } from "sonner";
 import { useKonamiCode } from "../hooks/useKonamiCode";
 import { useAuth } from "../hooks/useAuth";
+import { ROLE_LABELS } from "../types/auth";
 
 export default function MainLayout() {
   const { user, isLoading } = useAuth();
   const [showDoom, setShowDoom] = useState(false);
+  const userName = user?.employee
+    ? [user.employee.firstName, user.employee.lastName].filter(Boolean).join(" ")
+    : user?.email;
+  const userRoleLabel = user ? ROLE_LABELS[user.role] ?? user.role : "";
 
   // Konami Code Easter Egg
   useKonamiCode(() => {
@@ -64,20 +69,30 @@ export default function MainLayout() {
       {showDoom && <DoomGame onClose={() => setShowDoom(false)} />}
       
       <header className="mezon-top-bar">
-        {/* Mobile menu button */}
-        <button 
-          className="mezon-mobile-menu-btn"
-          onClick={() => {
-            if (typeof window !== 'undefined' && (window as any).toggleMobileMenu) {
-              (window as any).toggleMobileMenu();
-            }
-          }}
-          aria-label="Toggle menu"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-        
-        <div className="mezon-top-bar__cluster">
+        <div className="mezon-top-bar__leading">
+          <button
+            className="mezon-mobile-menu-btn"
+            onClick={() => {
+              if (typeof window !== "undefined" && (window as { toggleMobileMenu?: () => void }).toggleMobileMenu) {
+                (window as { toggleMobileMenu?: () => void }).toggleMobileMenu?.();
+              }
+            }}
+            aria-label="Toggle menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+          <div className="mezon-window-controls" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className="mezon-top-bar__title">
+            <span>Mezon admin</span>
+            <strong>Единое рабочее пространство</strong>
+          </div>
+        </div>
+
+        <div className="mezon-top-bar__cluster mezon-top-bar__cluster--compact">
           {contacts.map(({ icon: Icon, label }) => (
             <span key={label} className="mezon-chip">
               <Icon className="h-4 w-4" />
@@ -86,9 +101,16 @@ export default function MainLayout() {
           ))}
         </div>
         <div className="mezon-top-bar__cluster">
+          {user && (
+            <span className="mezon-toolbar-pill">
+              <span className="mezon-toolbar-pill__dot" />
+              <span className="truncate max-w-[180px]">{userName}</span>
+              <span className="hidden text-[var(--mezon-text-soft)] sm:inline">· {userRoleLabel}</span>
+            </span>
+          )}
           <Link
             to="/lms"
-            className="mezon-chip mezon-chip--teal flex items-center gap-2 hover:bg-teal-600 transition-colors cursor-pointer"
+            className="mezon-chip mezon-chip--teal flex items-center gap-2 cursor-pointer"
           >
             <GraduationCap className="h-4 w-4" />
             Школьная LMS
@@ -102,7 +124,7 @@ export default function MainLayout() {
           </div>
         </div>
       </header>
-      <div className="flex">
+      <div className="mezon-shell">
         <SideNav />
         <main className="mezon-main">
           <Toaster position="top-right" richColors />

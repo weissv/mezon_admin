@@ -6,10 +6,12 @@
 :root {
   /* --- macOS Tahoe Core Palette --- */
   --mezon-bg: #F5F5F7;
+  --mezon-bg-layer: rgba(255, 255, 255, 0.68);
   --mezon-panel: rgba(255, 255, 255, 0.72);
   --mezon-panel-solid: #FFFFFF;
   --mezon-panel-muted: rgba(255, 255, 255, 0.56);
   --mezon-accent: #007AFF;
+  --mezon-accent-soft: rgba(10, 132, 255, 0.12);
   --mezon-accent-dark: #0056CC;
   --mezon-teal: #30B0C7;
   --mezon-sand: #FFD60A;
@@ -46,14 +48,25 @@
   /* --- Shadows --- */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.08);
   --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.12);
+  --shadow-floating: 0 18px 52px rgba(15, 23, 42, 0.12);
 
   /* --- Radius --- */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 18px;
+  --radius-2xl: 24px;
+
+  /* --- Layout --- */
+  --top-bar-height: 60px;
+  --shell-gap: 18px;
+  --content-max-width: 1680px;
+}
+html {
+  min-height: 100%;
+  color-scheme: light;
 }
 body {
   font-family: "Inter", "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -62,23 +75,85 @@ body {
   letter-spacing: -0.01em;
   line-height: 1.47;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  min-height: 100vh;
 }
 .mezon-app {
   min-height: 100vh;
   background: var(--mezon-bg);
-  background-image: var(--mezon-hero-glow);
+  background-image:
+    radial-gradient(circle at top left, rgba(10, 132, 255, 0.08), transparent 24rem),
+    radial-gradient(circle at top right, rgba(191, 90, 242, 0.08), transparent 18rem),
+    var(--mezon-hero-glow);
+  position: relative;
+}
+.mezon-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 22%);
+  z-index: 0;
 }
 /* --- macOS Tahoe Toolbar --- */
 .mezon-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  height: 52px;
+  gap: 16px;
+  padding: 0 18px;
+  min-height: var(--top-bar-height);
   border-bottom: 0.5px solid var(--mezon-separator);
-  background: var(--glass-bg-thick);
+  background: rgba(255, 255, 255, 0.82);
   -webkit-backdrop-filter: var(--glass-blur);
           backdrop-filter: var(--glass-blur);
+  box-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.8), 0 10px 32px rgba(15, 23, 42, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+.mezon-top-bar__leading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.mezon-window-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.mezon-window-controls span {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.8), 0 0 0 0.5px rgba(0, 0, 0, 0.12);
+}
+.mezon-window-controls span:nth-child(1) {
+  background: #ff5f57;
+}
+.mezon-window-controls span:nth-child(2) {
+  background: #febc2e;
+}
+.mezon-window-controls span:nth-child(3) {
+  background: #28c840;
+}
+.mezon-top-bar__title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mezon-top-bar__title strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--mezon-dark);
+}
+.mezon-top-bar__title span {
+  font-size: 11px;
+  color: var(--mezon-text-soft);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
 .mezon-top-bar__cluster {
   display: flex;
@@ -86,28 +161,55 @@ body {
   flex-wrap: wrap;
   align-items: center;
 }
+.mezon-top-bar__cluster--compact {
+  gap: 6px;
+}
 .mezon-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.04);
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 0.5px solid rgba(255, 255, 255, 0.7);
   color: var(--mezon-text-secondary);
   font-weight: 500;
   font-size: 12px;
   letter-spacing: -0.01em;
-  transition: background 0.15s ease;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(15, 23, 42, 0.04);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 .mezon-chip:hover {
-  background: rgba(0, 0, 0, 0.07);
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(10, 132, 255, 0.16);
+  transform: translateY(-1px);
 }
 .mezon-chip--teal {
-  background: rgba(0, 122, 255, 0.08);
+  background: rgba(10, 132, 255, 0.1);
   color: var(--macos-blue);
 }
 .mezon-chip--teal:hover {
-  background: rgba(0, 122, 255, 0.14);
+  background: rgba(10, 132, 255, 0.15);
+}
+.mezon-toolbar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 0.5px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 10px 24px rgba(15, 23, 42, 0.04);
+  font-size: 12px;
+  color: var(--mezon-text-secondary);
+}
+.mezon-toolbar-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--macos-green);
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.14);
 }
 .mezon-top-bar__social {
   display: inline-flex;
@@ -116,40 +218,59 @@ body {
 .mezon-top-bar__social a {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--mezon-text-soft);
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.56);
+  border: 0.5px solid rgba(255, 255, 255, 0.7);
   transition: all 0.15s ease;
 }
 .mezon-top-bar__social a:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.88);
   color: var(--mezon-dark);
+  transform: translateY(-1px);
 }
 /* --- macOS Tahoe Sidebar (Liquid Glass) --- */
+.mezon-shell {
+  display: flex;
+  gap: var(--shell-gap);
+  width: min(100%, var(--content-max-width));
+  margin: 0 auto;
+  padding: var(--shell-gap);
+  position: relative;
+  z-index: 1;
+}
 .mezon-sidenav {
-  width: 260px;
-  min-height: calc(100vh - 52px);
-  background: var(--glass-bg);
+  width: 280px;
+  min-height: calc(100vh - var(--top-bar-height) - (var(--shell-gap) * 2));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.76) 0%, rgba(255, 255, 255, 0.64) 100%);
   -webkit-backdrop-filter: var(--glass-blur);
           backdrop-filter: var(--glass-blur);
-  border-right: 0.5px solid var(--mezon-separator);
-  position: relative;
-  padding: 16px 12px;
+  border: 0.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-floating);
+  position: sticky;
+  top: calc(var(--top-bar-height) + var(--shell-gap));
+  padding: 16px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
 }
 .mezon-sidenav::before {
-  content: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent 38%);
+  pointer-events: none;
 }
 .mezon-sidenav__brand {
   position: relative;
   z-index: 1;
-  padding: 4px 8px 12px;
+  padding: 6px 10px 14px;
+  border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
 }
 .mezon-sidenav__brand img {
   width: 120px;
@@ -162,52 +283,74 @@ body {
   font-size: 11px;
   line-height: 1.4;
 }
+.mezon-sidenav__user {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.52);
+  border: 0.5px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+.mezon-sidenav__user strong {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.mezon-sidenav__user span {
+  font-size: 11px;
+  color: var(--mezon-text-soft);
+}
 .mezon-sidenav__nav {
   flex: 1;
   position: relative;
   z-index: 1;
   overflow-y: auto;
+  padding-right: 2px;
 }
 .mezon-nav-label {
   text-transform: uppercase;
   font-size: 11px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.08em;
   font-weight: 600;
   color: var(--mezon-text-soft);
-  padding: 4px 8px;
-  margin-bottom: 2px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
 }
 .mezon-nav-link {
   display: flex;
   align-items: center;
-  padding: 6px 8px;
-  border-radius: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
   font-weight: 500;
   font-size: 13px;
   color: var(--mezon-dark);
-  transition: background 0.12s ease, color 0.12s ease;
+  border: 0.5px solid transparent;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
   letter-spacing: -0.01em;
 }
 .mezon-nav-link:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.62);
   color: var(--mezon-dark);
-  transform: none;
+  border-color: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
 }
 .mezon-nav-link--active {
-  background: rgba(0, 122, 255, 0.12);
+  background: linear-gradient(180deg, rgba(10, 132, 255, 0.14), rgba(10, 132, 255, 0.1));
   color: var(--macos-blue);
-  box-shadow: none;
+  border-color: rgba(10, 132, 255, 0.18);
+  box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.05), 0 12px 28px rgba(10, 132, 255, 0.08);
   font-weight: 600;
 }
 .mezon-nav-link--active:hover {
-  background: rgba(0, 122, 255, 0.16);
+  background: linear-gradient(180deg, rgba(10, 132, 255, 0.18), rgba(10, 132, 255, 0.12));
   color: var(--macos-blue);
 }
 .mezon-sidenav__footer {
   position: relative;
   z-index: 1;
-  padding: 12px 8px 4px;
-  border-top: 0.5px solid var(--mezon-separator);
+  padding: 14px 10px 4px;
+  border-top: 0.5px solid rgba(60, 60, 67, 0.12);
 }
 .mezon-sidenav__footer p {
   font-size: 11px;
@@ -239,13 +382,16 @@ body {
 /* --- Main Content Area --- */
 .mezon-main {
   flex: 1;
-  padding: 24px 32px;
+  padding: 0;
   background: transparent;
   min-width: 0;
 }
 .mezon-main-inner {
-  min-height: calc(100vh - 52px);
+  min-height: calc(100vh - var(--top-bar-height) - (var(--shell-gap) * 2));
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 .mezon-section-title {
   font-size: clamp(1.5rem, 2.5vw, 2rem);
@@ -270,15 +416,16 @@ body {
 }
 /* --- Liquid Glass Cards --- */
 .mezon-card {
-  background: var(--glass-bg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(255, 255, 255, 0.7) 100%);
   -webkit-backdrop-filter: var(--glass-blur);
           backdrop-filter: var(--glass-blur);
-  border: 0.5px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow), var(--shadow-md);
-  padding: 20px;
+  border: 0.5px solid rgba(255, 255, 255, 0.78);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-shadow), var(--shadow-lg);
+  padding: 22px;
   position: relative;
   overflow: hidden;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 .mezon-card::after {
   content: "";
@@ -287,6 +434,10 @@ body {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 40%);
   pointer-events: none;
   border-radius: inherit;
+}
+.mezon-card:hover {
+  box-shadow: var(--glass-shadow), var(--shadow-floating);
+  border-color: rgba(255, 255, 255, 0.9);
 }
 .mezon-card--accent {
   background: linear-gradient(135deg, var(--macos-blue), #5856D6);
@@ -383,14 +534,19 @@ body {
 /* --- Responsive --- */
 @media (max-width: 1024px) {
   .mezon-top-bar {
-    height: auto;
+    min-height: auto;
     padding: 8px 12px;
     flex-wrap: wrap;
     gap: 6px;
   }
 
-  .mezon-main {
-    padding: 16px;
+  .mezon-shell {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .mezon-sidenav {
+    width: 256px;
   }
 }
 
@@ -450,6 +606,10 @@ body {
 
 /* --- Mobile responsive --- */
 @media (max-width: 768px) {
+  .mezon-top-bar__title span {
+    display: none;
+  }
+
   .mezon-mobile-menu-btn {
     display: flex;
   }
@@ -464,7 +624,7 @@ body {
 
   .mezon-top-bar {
     padding: 8px 12px;
-    height: auto;
+    min-height: auto;
     flex-wrap: wrap;
     gap: 4px;
   }
@@ -476,6 +636,19 @@ body {
     justify-content: center;
   }
 
+  .mezon-top-bar__leading {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .mezon-window-controls {
+    display: none;
+  }
+
+  .mezon-shell {
+    padding: 12px;
+  }
+
   .mezon-chip {
     font-size: 11px;
     padding: 3px 8px;
@@ -483,27 +656,21 @@ body {
 
   .mezon-sidenav {
     position: fixed;
-    top: 0;
+    top: 12px;
     left: 0;
-    height: 100vh;
+    height: calc(100vh - 24px);
     width: 280px;
     max-width: 85vw;
     z-index: 999;
     transform: translateX(-100%);
     transition: transform 0.25s ease;
-    box-shadow: none;
+    box-shadow: var(--shadow-floating);
     overflow-y: auto;
-    border-radius: 0;
+    border-radius: 0 var(--radius-2xl) var(--radius-2xl) 0;
   }
 
   .mezon-sidenav--mobile-open {
     transform: translateX(0);
-    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.1);
-  }
-
-  .mezon-main {
-    padding: 12px;
-    width: 100%;
   }
 
   .mezon-main-inner {
@@ -559,7 +726,7 @@ body {
     padding: 6px 8px;
   }
 
-  .mezon-main {
+  .mezon-shell {
     padding: 8px;
   }
 
@@ -588,6 +755,9 @@ body {
   .mezon-sidenav {
     width: 100%;
     max-width: 100vw;
+    top: 0;
+    height: 100vh;
+    border-radius: 0;
   }
 
   /* Make buttons full width on mobile */
