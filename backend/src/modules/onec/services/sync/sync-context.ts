@@ -2,10 +2,12 @@ import { createHash } from "node:crypto";
 import { AxiosInstance } from "axios";
 import { PrismaClient } from "@prisma/client";
 import type { OneCSyncResult as SyncResult } from "../contracts";
+import { logger } from "../../../../utils/logger";
 
 export type { SyncResult };
 
 const PAGE_SIZE = 500;
+const MAX_PAGES = 200;
 export const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 
 export class SyncContext {
@@ -21,6 +23,7 @@ export class SyncContext {
   ): Promise<T[]> {
     const results: T[] = [];
     let skip = 0;
+    let pageCount = 0;
 
     const params: Record<string, string> = {
       $format: "json",
@@ -29,7 +32,7 @@ export class SyncContext {
     if (filter) params.$filter = filter;
     if (select) params.$select = select;
 
-    while (true) {
+    while (pageCount < MAX_PAGES) {
       params.$skip = String(skip);
 
       const url = `/${encodeURIComponent(entity)}`;
@@ -40,6 +43,11 @@ export class SyncContext {
 
       if (items.length < PAGE_SIZE) break;
       skip += PAGE_SIZE;
+      pageCount++;
+    }
+
+    if (pageCount >= MAX_PAGES) {
+      logger.warn(`[1C-Sync] fetchAll hit MAX_PAGES (${MAX_PAGES}) for entity "${entity}" — data may be incomplete`);
     }
 
     return results;

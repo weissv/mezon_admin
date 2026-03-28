@@ -50,7 +50,14 @@ export function RegistersTab({ summary }: { summary: OneCSummary | null }) {
         key: "data",
         header: "Данные",
         cellClassName: "max-w-[320px] truncate text-xs text-gray-500",
-        render: (item) => (item.data ? JSON.stringify(item.data).slice(0, 120) : "—"),
+        render: (item) => {
+          if (!item.data) return "—";
+          try {
+            return JSON.stringify(item.data).slice(0, 120);
+          } catch {
+            return "—";
+          }
+        },
       },
     ],
     [],

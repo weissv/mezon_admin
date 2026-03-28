@@ -1,5 +1,6 @@
 import { EMPTY_GUID, type SyncContext, type SyncResult } from "./sync-context";
 import { MISSING_CATALOGS, CHART_ENTITIES, ALL_REGISTERS, EXTRA_REGISTERS } from "./entity-registry";
+import { logger } from "../../../../utils/logger";
 
 export async function syncUniversalCatalog(ctx: SyncContext, entityName: string): Promise<SyncResult> {
   const catalogType = entityName
@@ -42,6 +43,7 @@ export async function syncUniversalCatalog(ctx: SyncContext, entityName: string)
       upserted++;
     } catch (err) {
       errors++;
+      logger.error(`[1C-Sync] Catalog ${catalogType} upsert error for ${r.Ref_Key}:`, (err as Error).message);
     }
   }
   return { entity: entityName, fetched: rows.length, upserted, errors };
@@ -90,6 +92,7 @@ export async function syncUniversalRegister(ctx: SyncContext, entityName: string
       upserted++;
     } catch (err) {
       errors++;
+      logger.error(`[1C-Sync] Register ${registerType} upsert error for ${refKey}:`, (err as Error).message);
     }
   }
   return { entity: entityName, fetched: rows.length, upserted, errors };

@@ -1,6 +1,7 @@
 import { InvoiceDirection } from "@prisma/client";
 import type { SyncContext, SyncResult } from "./sync-context";
 import { resolveContractorId } from "./resolvers";
+import { logger } from "../../../../utils/logger";
 
 interface InvoiceSyncOptions {
   contractorRefExtractor?: (row: any) => string | null;
@@ -50,7 +51,7 @@ async function syncInvoiceDoc(
           externalId: r.Ref_Key,
           direction,
           documentNumber: r.Number ?? null,
-          date: new Date(r.Date),
+          date: r.Date ? new Date(r.Date) : new Date(),
           posted: r.Posted ?? false,
           operationType,
           contractorId,
@@ -60,7 +61,7 @@ async function syncInvoiceDoc(
         update: {
           direction,
           documentNumber: r.Number ?? null,
-          date: new Date(r.Date),
+          date: r.Date ? new Date(r.Date) : new Date(),
           posted: r.Posted ?? false,
           operationType,
           contractorId,
@@ -71,7 +72,7 @@ async function syncInvoiceDoc(
       upserted++;
     } catch (err) {
       errors++;
-      console.error(`[1C-Sync] ${label} upsert error:`, (err as Error).message);
+      logger.error(`[1C-Sync] ${label} upsert error:`, (err as Error).message);
     }
   }
 

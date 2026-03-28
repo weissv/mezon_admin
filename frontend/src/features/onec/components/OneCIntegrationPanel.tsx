@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Card } from "../../../components/Card";
 import { Button } from "../../../components/ui/button";
 import { useOneCSync } from "../hooks";
@@ -21,6 +21,10 @@ export function OneCIntegrationPanel() {
   const handleSync = useCallback(async () => {
     try {
       const report = await sync();
+      if (!report) {
+        toast.error("Синхронизация не вернула результат. Попробуйте повторить позже.");
+        return;
+      }
       setSyncLog((prev) => [
         { id: Date.now(), report, status: report.aborted ? "error" : "success" },
         ...prev,
@@ -34,16 +38,17 @@ export function OneCIntegrationPanel() {
       } else {
         toast.success(`Синхронизация завершена. Загружено ${totalUpserted} записей.`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       setSyncLog((prev) => [
         {
           id: Date.now(),
-          report: { startedAt: new Date().toISOString(), finishedAt: new Date().toISOString(), results: [], aborted: true, error: error?.message },
+          report: { startedAt: new Date().toISOString(), finishedAt: new Date().toISOString(), results: [], aborted: true, error: errorMessage },
           status: "error",
         },
         ...prev,
       ]);
-      toast.error("Ошибка синхронизации с 1С", { description: error?.message });
+      toast.error("Ошибка синхронизации с 1С", { description: errorMessage });
     }
   }, [sync]);
 
