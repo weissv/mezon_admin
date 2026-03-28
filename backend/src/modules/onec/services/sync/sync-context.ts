@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { AxiosInstance } from "axios";
 import { PrismaClient } from "@prisma/client";
 import type { OneCSyncResult as SyncResult } from "../contracts";
+import { logger } from "../../../../utils/logger";
 
 export type { SyncResult };
 
@@ -43,6 +44,10 @@ export class SyncContext {
       if (items.length < PAGE_SIZE) break;
       skip += PAGE_SIZE;
       pageCount++;
+    }
+
+    if (pageCount >= MAX_PAGES) {
+      logger.warn(`[1C-Sync] fetchAll hit MAX_PAGES (${MAX_PAGES}) for entity "${entity}" — data may be incomplete`);
     }
 
     return results;
