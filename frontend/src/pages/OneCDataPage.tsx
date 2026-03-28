@@ -55,7 +55,7 @@ export default function OneCDataPage() {
     try {
       const report = await sync();
       if (!report) {
-        toast.error("Синхронизация не завершена");
+        toast.error("Синхронизация не вернула результат. Попробуйте повторить позже.");
         return;
       }
       await refreshSummary();
