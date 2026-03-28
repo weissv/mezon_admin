@@ -87,7 +87,7 @@ export default function MainLayout() {
             <span />
           </div>
           <div className="mezon-top-bar__title">
-            <span>Mezon admin</span>
+            <span>Mezon Admin</span>
             <strong>Единое рабочее пространство</strong>
           </div>
         </div>
