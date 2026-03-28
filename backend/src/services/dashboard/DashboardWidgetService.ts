@@ -325,18 +325,16 @@ class DashboardWidgetServiceClass {
       const today = startOfDay();
       const tomorrow = endOfDay();
 
-      const [childrenPresent, childrenOnMeals, employeeRecords] = await Promise.all([
+      const [childrenPresent, employeeRecords] = await Promise.all([
         prisma.attendance.count({
           where: { date: { gte: today, lt: tomorrow }, isPresent: true, clubId: null },
-        }),
-        prisma.attendance.count({
-          where: { date: { gte: today, lt: tomorrow }, clubId: null, isPresent: true },
         }),
         prisma.employeeAttendance.findMany({
           where: { date: { gte: today, lt: tomorrow } },
           select: { status: true },
         }),
       ]);
+      const childrenOnMeals = childrenPresent; // Removed redundant identical query for childrenOnMeals
 
       const employeeStats = employeeRecords.reduce<Record<string, number>>((acc, r) => {
         acc[r.status] = (acc[r.status] || 0) + 1;
