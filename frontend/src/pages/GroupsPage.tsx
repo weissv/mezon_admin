@@ -36,6 +36,8 @@ interface Employee {
   position: string;
 }
 
+const selectClassName = 'mezon-field';
+
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -55,7 +57,6 @@ export default function GroupsPage() {
   const [formTeacherId, setFormTeacherId] = useState<number | ''>('');
   const [formCapacity, setFormCapacity] = useState<number>(30);
   const [formDescription, setFormDescription] = useState<string>('');
-  const selectClassName = 'min-h-[36px] w-full rounded-panel border border-black/10 bg-[rgba(255,255,255,0.82)] px-3.5 py-2 text-[13px] text-[var(--mezon-dark)] shadow-macos-input backdrop-blur-sm transition-all duration-200 focus-visible:border-[rgba(10,132,255,0.3)] focus-visible:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(10,132,255,0.14)]';
 
   const loadData = async () => {
     setLoading(true);
