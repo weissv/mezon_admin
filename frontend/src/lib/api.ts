@@ -1,7 +1,7 @@
 // src/lib/api.ts
 // Централизованный API клиент с улучшенной обработкой ошибок и типизацией
 
-const rawBaseUrl = (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
+const rawBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
 const normalizedHost = rawBaseUrl.replace(/\/+$/, "");
 const apiBase = normalizedHost.endsWith("/api") ? normalizedHost : `${normalizedHost}/api`;
 
