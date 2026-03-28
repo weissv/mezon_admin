@@ -2,7 +2,7 @@
 // Базовый HTTP-клиент для 1С OData с правильной кодировкой Basic Auth (UTF-8)
 
 import axios, { AxiosInstance, AxiosError } from "axios";
-import { config } from "../../config";
+import { config } from "../../../config";
 
 /**
  * Собирает Basic Auth заголовок с поддержкой кириллицы.

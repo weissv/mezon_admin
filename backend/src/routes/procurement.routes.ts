@@ -470,7 +470,7 @@ router.get(
   checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN", "ZAVHOZ"]),
   async (req, res) => {
     const page = Math.max(1, Number(req.query.page) || 1);
-    const pageSize = Math.min(100, Math.max(1, Number(req.query.pageSize) || 20));
+    const pageSize = Math.min(100, Math.max(1, Number(req.query.pageSize ?? req.query.limit) || 20));
     const skip = (page - 1) * pageSize;
 
     const where: any = { direction: "INCOMING" as const };
@@ -500,7 +500,17 @@ router.get(
       prisma.invoice.count({ where }),
     ]);
 
-    return res.json({ items, total });
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+    return res.json({
+      items,
+      total,
+      page,
+      pageSize,
+      totalPages,
+      limit: pageSize,
+      pages: totalPages,
+    });
   }
 );
 

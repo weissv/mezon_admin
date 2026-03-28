@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { checkRole } from "../middleware/checkRole";
-import { oneCAllowedRoles } from "../modules/onec/services/onec-data.service";
-import { oneCSyncService } from "../modules/onec/services/sync";
+import { checkRole } from "../../../middleware/checkRole";
+import { oneCAllowedRoles } from "../services/onec-data.service";
+import { oneCSyncService } from "../services/sync";
 
 const router = Router();
 

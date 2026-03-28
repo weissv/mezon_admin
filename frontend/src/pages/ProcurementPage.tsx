@@ -20,6 +20,7 @@ import {
 import type { Invoice } from '../types/finance';
 import { PurchaseOrderForm } from '../components/forms/PurchaseOrderForm';
 import { SupplierForm } from '../components/forms/SupplierForm';
+import { useOneCProcurementInvoices } from '../features/onec';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 
@@ -87,28 +88,7 @@ export default function ProcurementPage() {
 // Накладные от поставщиков (из 1С)
 // =====================================================
 function IncomingInvoicesView() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const pageSize = 20;
-
-  const fetchInvoices = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.get(`/api/procurement/invoices?page=${page}&pageSize=${pageSize}`);
-      setInvoices(data.items || []);
-      setTotal(data.total || 0);
-    } catch (error: any) {
-      toast.error('Ошибка загрузки накладных', { description: error?.message });
-    } finally {
-      setLoading(false);
-    }
-  }, [page]);
-
-  useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
-
-  const totalPages = Math.ceil(total / pageSize);
+  const { items: invoices, total, page, setPage, loading, totalPages } = useOneCProcurementInvoices(20);
 
   return (
     <div className="space-y-4">
@@ -151,11 +131,11 @@ function IncomingInvoicesView() {
           </div>
           {totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-4">
-              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
                 ← Назад
               </Button>
               <span className="py-2 px-3 text-sm text-gray-600">{page} / {totalPages}</span>
-              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
                 Вперёд →
               </Button>
             </div>

@@ -6,6 +6,12 @@ import { checkRole } from "../middleware/checkRole";
 import { validate } from "../middleware/validate";
 import { buildPagination, buildOrderBy, buildWhere } from "../utils/query";
 import {
+  getOneCBalances,
+  listOneCDebtors,
+  listOneCInvoices,
+  oneCFinanceAllowedRoles,
+} from "../modules/onec/services/onec-finance.service";
+import {
   listFinanceSchema,
   reportFinanceSchema,
   summaryFinanceSchema,
@@ -143,32 +149,10 @@ router.get(
 // GET /api/finance/invoices
 router.get(
   "/invoices",
-  checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]),
+  checkRole(oneCFinanceAllowedRoles),
   validate(listInvoicesSchema),
   async (req, res) => {
-    const query = req.query as ListInvoicesQuery;
-    const { skip, take } = buildPagination(query);
-    const orderBy = buildOrderBy(query, ["date", "totalAmount", "documentNumber", "id"]);
-    const where: any = {};
-
-    if (query.direction) where.direction = query.direction;
-    if (query.contractorId) where.contractorId = Number(query.contractorId);
-    if (query.posted !== undefined) where.posted = query.posted === "true";
-    appendDateRange(where, query.startDate, query.endDate);
-
-    const [items, total] = await Promise.all([
-      prisma.invoice.findMany({
-        where,
-        skip,
-        take,
-        orderBy,
-        include: {
-          contractor: { select: { id: true, name: true, inn: true } },
-        },
-      }),
-      prisma.invoice.count({ where }),
-    ]);
-    return res.json({ items, total });
+    return res.json(await listOneCInvoices(req.query as ListInvoicesQuery));
   }
 );
 
@@ -179,37 +163,10 @@ router.get(
 // GET /api/finance/balances
 router.get(
   "/balances",
-  checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]),
+  checkRole(oneCFinanceAllowedRoles),
   validate(listBalancesSchema),
   async (req, res) => {
-    const query = req.query as ListBalancesQuery;
-
-    // Получаем последние снимки по каждому типу
-    const latestDate = query.snapshotDate
-      ? new Date(query.snapshotDate)
-      : await prisma.balanceSnapshot
-          .findFirst({ orderBy: { snapshotDate: "desc" }, select: { snapshotDate: true } })
-          .then((r) => r?.snapshotDate ?? new Date());
-
-    const snapshots = await prisma.balanceSnapshot.findMany({
-      where: { snapshotDate: latestDate!, balanceType: { in: ["CASH", "BANK"] } },
-      select: {
-        id: true,
-        balanceType: true,
-        amount: true,
-        label: true,
-        snapshotDate: true,
-      },
-    });
-
-    return res.json({
-      snapshotDate: latestDate,
-      balances: snapshots.map((s) => ({
-        type: s.balanceType,
-        amount: Number(s.amount),
-        label: s.label,
-      })),
-    });
+    return res.json(await getOneCBalances(req.query as ListBalancesQuery));
   }
 );
 
@@ -220,50 +177,10 @@ router.get(
 // GET /api/finance/debtors
 router.get(
   "/debtors",
-  checkRole(["ACCOUNTANT", "DEPUTY", "ADMIN"]),
+  checkRole(oneCFinanceAllowedRoles),
   validate(listDebtorsSchema),
   async (req, res) => {
-    const query = req.query as ListDebtorsQuery;
-    const { skip, take } = buildPagination(query);
-
-    // Последняя дата снимка
-    const latestDate = await prisma.balanceSnapshot
-      .findFirst({
-        where: { balanceType: "CONTRACTOR_DEBT" },
-        orderBy: { snapshotDate: "desc" },
-        select: { snapshotDate: true },
-      })
-      .then((r) => r?.snapshotDate ?? null);
-
-    if (!latestDate) {
-      return res.json({ snapshotDate: null, items: [], total: 0 });
-    }
-
-    const where = { snapshotDate: latestDate, balanceType: "CONTRACTOR_DEBT" as const };
-
-    const [items, total] = await Promise.all([
-      prisma.balanceSnapshot.findMany({
-        where,
-        skip,
-        take,
-        orderBy: { amount: "desc" },
-        include: {
-          contractor: { select: { id: true, name: true, inn: true } },
-        },
-      }),
-      prisma.balanceSnapshot.count({ where }),
-    ]);
-
-    return res.json({
-      snapshotDate: latestDate,
-      items: items.map((s) => ({
-        contractorId: s.contractorId,
-        contractorName: s.contractor?.name ?? s.label,
-        contractorInn: s.contractor?.inn,
-        amount: Number(s.amount),
-      })),
-      total,
-    });
+    return res.json(await listOneCDebtors(req.query as ListDebtorsQuery));
   }
 );
 

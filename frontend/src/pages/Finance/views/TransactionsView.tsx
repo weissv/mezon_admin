@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useApi } from "../../../hooks/useApi";
 import { DataTable, Column } from "../../../components/DataTable/DataTable";
 import { Card } from "../../../components/Card";
 import { Button } from "../../../components/ui/button";
-import type { FinanceTransaction, ContractorRef, CashFlowArticleRef } from "../../../types/finance";
+import { useOneCContractors, useOneCTransactions } from "../../../features/onec";
+import type { FinanceTransaction } from "../../../types/finance";
 import { FINANCE_TYPES, FINANCE_CATEGORIES, TRANSACTION_CHANNELS } from "../../../lib/constants";
 import { api } from "../../../lib/api";
 import {
@@ -48,26 +48,20 @@ const defaultFilters: Filters = {
 export default function TransactionsView() {
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [showFilters, setShowFilters] = useState(false);
-  const [contractors, setContractors] = useState<ContractorRef[]>([]);
-
-  // Load contractor list for filter dropdown
-  useEffect(() => {
-    api.get("/api/finance/contractors").then(setContractors).catch(() => {});
-  }, []);
-
-  const extraParams = new URLSearchParams();
-  if (filters.channel) extraParams.set("channel", filters.channel);
-  if (filters.type) extraParams.set("type", filters.type);
-  if (filters.category) extraParams.set("category", filters.category);
-  if (filters.search) extraParams.set("search", filters.search);
-  if (filters.startDate) extraParams.set("startDate", filters.startDate);
-  if (filters.endDate) extraParams.set("endDate", filters.endDate);
-  if (filters.contractorId) extraParams.set("contractorId", filters.contractorId);
-
-  const { data: transactions, total, page, setPage } = useApi<FinanceTransaction>({
-    url: `/api/finance/transactions${extraParams.toString() ? `?${extraParams}` : ""}`,
-    initialPageSize: 20,
-  });
+  const { data: contractors } = useOneCContractors();
+  const transactionFilters = useMemo(
+    () => ({
+      channel: filters.channel as "" | "CASH" | "BANK",
+      type: filters.type as "" | "INCOME" | "EXPENSE",
+      category: filters.category as "" | "NUTRITION" | "CLUBS" | "MAINTENANCE" | "SALARY" | "OTHER",
+      search: filters.search,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+      contractorId: filters.contractorId,
+    }),
+    [filters],
+  );
+  const { items: transactions, total, page, setPage } = useOneCTransactions(transactionFilters, 20);
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
@@ -280,7 +274,7 @@ export default function TransactionsView() {
                 onChange={(e) => updateFilter("contractorId", e.target.value)}
               >
                 <option value="">Все</option>
-                {contractors.map((c) => (
+                {(contractors ?? []).map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>

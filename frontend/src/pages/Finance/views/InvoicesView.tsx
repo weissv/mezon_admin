@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useApi } from "../../../hooks/useApi";
 import { DataTable, Column } from "../../../components/DataTable/DataTable";
 import { Card } from "../../../components/Card";
+import { useOneCInvoices } from "../../../features/onec";
 import type { Invoice } from "../../../types/finance";
 import { INVOICE_DIRECTIONS } from "../../../lib/constants";
 import {
@@ -19,13 +19,10 @@ const currency = new Intl.NumberFormat("uz-UZ", {
 
 export default function InvoicesView() {
   const [direction, setDirection] = useState("");
-
-  const extra = direction ? `?direction=${direction}` : "";
-
-  const { data: invoices, total, page, setPage } = useApi<Invoice>({
-    url: `/api/finance/invoices${extra}`,
-    initialPageSize: 20,
-  });
+  const { items: invoices, total, page, setPage, pageSize } = useOneCInvoices(
+    direction ? { direction: direction as Invoice["direction"] } : {},
+    20,
+  );
 
   // Summary stats
   const incoming = invoices.filter((i) => i.direction === "INCOMING");
@@ -172,7 +169,7 @@ export default function InvoicesView() {
         columns={columns}
         data={invoices}
         page={page}
-        pageSize={20}
+        pageSize={pageSize}
         total={total}
         onPageChange={setPage}
       />
