@@ -6,6 +6,7 @@ const prisma_1 = require("../prisma");
 const checkRole_1 = require("../middleware/checkRole");
 const validate_1 = require("../middleware/validate");
 const query_1 = require("../utils/query");
+const onec_finance_service_1 = require("../services/onec/onec-finance.service");
 const finance_schema_1 = require("../schemas/finance.schema");
 const router = (0, express_1.Router)();
 const isValidDate = (value) => value instanceof Date && !Number.isNaN(value.getTime());
@@ -104,104 +105,22 @@ router.get("/cash-flow-articles", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEP
 // INVOICES — Товарные документы (Поступление / Реализация)
 // =====================================================
 // GET /api/finance/invoices
-router.get("/invoices", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.listInvoicesSchema), async (req, res) => {
-    const query = req.query;
-    const { skip, take } = (0, query_1.buildPagination)(query);
-    const orderBy = (0, query_1.buildOrderBy)(query, ["date", "totalAmount", "documentNumber", "id"]);
-    const where = {};
-    if (query.direction)
-        where.direction = query.direction;
-    if (query.contractorId)
-        where.contractorId = Number(query.contractorId);
-    if (query.posted !== undefined)
-        where.posted = query.posted === "true";
-    appendDateRange(where, query.startDate, query.endDate);
-    const [items, total] = await Promise.all([
-        prisma_1.prisma.invoice.findMany({
-            where,
-            skip,
-            take,
-            orderBy,
-            include: {
-                contractor: { select: { id: true, name: true, inn: true } },
-            },
-        }),
-        prisma_1.prisma.invoice.count({ where }),
-    ]);
-    return res.json({ items, total });
+router.get("/invoices", (0, checkRole_1.checkRole)(onec_finance_service_1.oneCFinanceAllowedRoles), (0, validate_1.validate)(finance_schema_1.listInvoicesSchema), async (req, res) => {
+    return res.json(await (0, onec_finance_service_1.listOneCInvoices)(req.query));
 });
 // =====================================================
 // BALANCES — Агрегированные остатки
 // =====================================================
 // GET /api/finance/balances
-router.get("/balances", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.listBalancesSchema), async (req, res) => {
-    const query = req.query;
-    // Получаем последние снимки по каждому типу
-    const latestDate = query.snapshotDate
-        ? new Date(query.snapshotDate)
-        : await prisma_1.prisma.balanceSnapshot
-            .findFirst({ orderBy: { snapshotDate: "desc" }, select: { snapshotDate: true } })
-            .then((r) => r?.snapshotDate ?? new Date());
-    const snapshots = await prisma_1.prisma.balanceSnapshot.findMany({
-        where: { snapshotDate: latestDate, balanceType: { in: ["CASH", "BANK"] } },
-        select: {
-            id: true,
-            balanceType: true,
-            amount: true,
-            label: true,
-            snapshotDate: true,
-        },
-    });
-    return res.json({
-        snapshotDate: latestDate,
-        balances: snapshots.map((s) => ({
-            type: s.balanceType,
-            amount: Number(s.amount),
-            label: s.label,
-        })),
-    });
+router.get("/balances", (0, checkRole_1.checkRole)(onec_finance_service_1.oneCFinanceAllowedRoles), (0, validate_1.validate)(finance_schema_1.listBalancesSchema), async (req, res) => {
+    return res.json(await (0, onec_finance_service_1.getOneCBalances)(req.query));
 });
 // =====================================================
 // DEBTORS — Топ-дебиторы (сальдо с контрагентами)
 // =====================================================
 // GET /api/finance/debtors
-router.get("/debtors", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.listDebtorsSchema), async (req, res) => {
-    const query = req.query;
-    const { skip, take } = (0, query_1.buildPagination)(query);
-    // Последняя дата снимка
-    const latestDate = await prisma_1.prisma.balanceSnapshot
-        .findFirst({
-        where: { balanceType: "CONTRACTOR_DEBT" },
-        orderBy: { snapshotDate: "desc" },
-        select: { snapshotDate: true },
-    })
-        .then((r) => r?.snapshotDate ?? null);
-    if (!latestDate) {
-        return res.json({ snapshotDate: null, items: [], total: 0 });
-    }
-    const where = { snapshotDate: latestDate, balanceType: "CONTRACTOR_DEBT" };
-    const [items, total] = await Promise.all([
-        prisma_1.prisma.balanceSnapshot.findMany({
-            where,
-            skip,
-            take,
-            orderBy: { amount: "desc" },
-            include: {
-                contractor: { select: { id: true, name: true, inn: true } },
-            },
-        }),
-        prisma_1.prisma.balanceSnapshot.count({ where }),
-    ]);
-    return res.json({
-        snapshotDate: latestDate,
-        items: items.map((s) => ({
-            contractorId: s.contractorId,
-            contractorName: s.contractor?.name ?? s.label,
-            contractorInn: s.contractor?.inn,
-            amount: Number(s.amount),
-        })),
-        total,
-    });
+router.get("/debtors", (0, checkRole_1.checkRole)(onec_finance_service_1.oneCFinanceAllowedRoles), (0, validate_1.validate)(finance_schema_1.listDebtorsSchema), async (req, res) => {
+    return res.json(await (0, onec_finance_service_1.listOneCDebtors)(req.query));
 });
 // GET /api/finance/reports?period=month&category=CLUBS&channel=CASH
 router.get("/reports", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY", "ADMIN"]), (0, validate_1.validate)(finance_schema_1.reportFinanceSchema), async (req, res) => {
@@ -229,8 +148,10 @@ router.get("/reports/summary", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY
     appendDateRange(where, startDate, endDate);
     if (channel)
         where.channel = String(channel);
+    const invoiceWhere = {};
+    appendDateRange(invoiceWhere, startDate, endDate);
     // Группировка по категории, типу, источнику, каналу
-    const [byCategory, byType, bySource, byChannel] = await Promise.all([
+    const [byCategory, byType, bySource, byChannel, totals, invoiceTotals] = await Promise.all([
         prisma_1.prisma.financeTransaction.groupBy({
             by: ["category"],
             _sum: { amount: true },
@@ -255,18 +176,25 @@ router.get("/reports/summary", (0, checkRole_1.checkRole)(["ACCOUNTANT", "DEPUTY
             _count: { id: true },
             where,
         }),
+        prisma_1.prisma.financeTransaction.aggregate({
+            _sum: { amount: true },
+            _count: { id: true },
+            where,
+        }),
+        prisma_1.prisma.invoice.aggregate({
+            _sum: { totalAmount: true },
+            _count: { id: true },
+            where: invoiceWhere,
+        }),
     ]);
-    // Общая статистика
-    const totals = await prisma_1.prisma.financeTransaction.aggregate({
-        _sum: { amount: true },
-        _count: { id: true },
-        where,
-    });
     return res.json({
         period: { startDate, endDate },
         totals: {
             totalAmount: totals._sum.amount || 0,
             totalTransactions: totals._count.id,
+            totalInvoices: invoiceTotals._count.id,
+            totalDocuments: totals._count.id + invoiceTotals._count.id,
+            totalInvoiceAmount: invoiceTotals._sum.totalAmount || 0,
         },
         byCategory,
         byType,

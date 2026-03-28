@@ -1,6 +1,6 @@
 import React from "react";
 import { Card } from "../../../components/Card";
-import { api } from "../../../lib/api";
+import { useOneCDebtors } from "../../../features/onec";
 import type { DebtorsResponse, DebtorItem } from "../../../types/finance";
 import { Users, AlertTriangle, TrendingUp } from "lucide-react";
 
@@ -11,16 +11,7 @@ const currency = new Intl.NumberFormat("uz-UZ", {
 });
 
 export default function DebtorsView() {
-  const [data, setData] = React.useState<DebtorsResponse | null>(null);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    api
-      .get("/api/finance/debtors?pageSize=50")
-      .then((res: DebtorsResponse) => setData(res))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { items, loading, snapshotDate } = useOneCDebtors(50);
 
   if (loading) {
     return (
@@ -30,7 +21,7 @@ export default function DebtorsView() {
     );
   }
 
-  if (!data || data.items.length === 0) {
+  if (items.length === 0) {
     return (
       <Card className="p-12 text-center">
         <Users className="mx-auto h-10 w-10 text-gray-300 mb-3" />
@@ -40,8 +31,8 @@ export default function DebtorsView() {
     );
   }
 
-  const totalDebt = data.items.reduce((s, d) => s + Number(d.amount), 0);
-  const maxDebt = Math.max(...data.items.map((d) => Math.abs(Number(d.amount))));
+  const totalDebt = items.reduce((sum, debtor) => sum + Number(debtor.amount), 0);
+  const maxDebt = Math.max(...items.map((debtor) => Math.abs(Number(debtor.amount))));
 
   return (
     <div className="space-y-6">
@@ -63,7 +54,7 @@ export default function DebtorsView() {
           </div>
           <div>
             <p className="text-xs text-gray-500">Дебиторов</p>
-            <p className="text-xl font-bold text-gray-800">{data.items.length}</p>
+            <p className="text-xl font-bold text-gray-800">{items.length}</p>
           </div>
         </Card>
 
@@ -78,15 +69,15 @@ export default function DebtorsView() {
         </Card>
       </div>
 
-      {data.snapshotDate && (
+      {snapshotDate && (
         <p className="text-xs text-gray-400">
-          Данные на: {new Date(data.snapshotDate).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
+          Данные на: {new Date(snapshotDate).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
         </p>
       )}
 
       {/* Debtor Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data.items
+        {items
           .sort((a, b) => Math.abs(Number(b.amount)) - Math.abs(Number(a.amount)))
           .map((item, idx) => (
             <DebtorCard key={item.contractorId ?? idx} item={item} maxDebt={maxDebt} />

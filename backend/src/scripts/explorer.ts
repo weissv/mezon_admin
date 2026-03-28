@@ -11,7 +11,7 @@ import {
   createOneCClient,
   getOneCApplicationBaseUrl,
   isNetworkError,
-} from "../services/onec/onec-client";
+} from "../modules/onec/services/onec-client";
 
 interface EntityInfo {
   name: string;

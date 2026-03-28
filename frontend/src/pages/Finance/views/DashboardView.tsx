@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Card } from "../../../components/Card";
+import { useOneCBalances } from "../../../features/onec";
 import { api } from "../../../lib/api";
 import { FINANCE_CATEGORIES, TRANSACTION_CHANNELS } from "../../../lib/constants";
 import type { BalancesResponse } from "../../../types/finance";
@@ -46,13 +47,7 @@ const shortCurrency = (v: number) => {
 const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
 
 // ── Balance Cards ──
-function BalanceCards() {
-  const [data, setData] = useState<BalancesResponse | null>(null);
-
-  useEffect(() => {
-    api.get("/api/finance/balances").then(setData).catch(() => {});
-  }, []);
-
+function BalanceCards({ data }: { data: BalancesResponse | null }) {
   if (!data || data.balances.length === 0) return null;
 
   const cash = data.balances.find((b) => b.type === "CASH");
@@ -383,23 +378,20 @@ function CashForecastWidget({ currentBalance }: { currentBalance: number }) {
 // ── Main Dashboard View ──
 export default function DashboardView() {
   const [summary, setSummary] = useState<any>(null);
-  const [balanceData, setBalanceData] = useState<BalancesResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const { data: balanceData, loading: balanceLoading } = useOneCBalances();
 
   useEffect(() => {
-    Promise.all([
-      api.get("/api/finance/reports/summary"),
-      api.get("/api/finance/balances"),
-    ])
-      .then(([s, b]) => {
-        setSummary(s);
-        setBalanceData(b);
+    api
+      .get("/api/finance/reports/summary")
+      .then((response) => {
+        setSummary(response);
       })
       .catch((err: any) => toast.error("Ошибка загрузки", { description: err?.message }))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
+  if (loading || balanceLoading) {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
@@ -416,7 +408,7 @@ export default function DashboardView() {
   return (
     <div className="space-y-6">
       {/* Balance Cards */}
-      <BalanceCards />
+      <BalanceCards data={balanceData} />
 
       {/* KPI Summary */}
       <SummarySection summary={summary} />

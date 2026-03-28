@@ -25,6 +25,26 @@ export const buildOrderBy = (q: ListQuery, allowed: string[] = ["id"]) => {
   return { [sortBy]: sortOrder } as Prisma.Enumerable<Record<string, Prisma.SortOrder>>;
 };
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  limit: number;
+  pages: number;
+}
+
+export function createPaginatedResponse<T>(
+  items: T[],
+  total: number,
+  page: number,
+  pageSize: number,
+): PaginatedResponse<T> {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  return { items, total, page, pageSize, totalPages, limit: pageSize, pages: totalPages };
+}
+
 // Простой конструктор where из query: eq-поиск по полям
 export const buildWhere = <T extends Record<string, any>>(q: ListQuery, allowed: string[]) => {
   const where: Record<string, any> = {};
