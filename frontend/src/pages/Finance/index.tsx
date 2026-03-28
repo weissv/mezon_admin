@@ -24,20 +24,29 @@ export default function FinancePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Финансы</h1>
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+          <LayoutDashboard className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="mezon-badge mb-2">Finance · обзор</div>
+          <h1 className="mezon-section-title mb-1">Финансы</h1>
+          <p className="mezon-subtitle">Ключевые показатели, транзакции, накладные и дебиторская задолженность в едином рабочем пространстве.</p>
+        </div>
+      </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Finance tabs">
+      <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-[var(--glass-border)] bg-[var(--mezon-panel-muted)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
+        <nav className="flex gap-1" aria-label="Finance tabs">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`${
                 activeTab === tab.id
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors`}
+                  ? "bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
+                  : "text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]"
+              } whitespace-nowrap rounded-[12px] px-4 py-2 text-sm font-medium flex items-center gap-2 transition-all`}
             >
               {tab.icon}
               {tab.label}
