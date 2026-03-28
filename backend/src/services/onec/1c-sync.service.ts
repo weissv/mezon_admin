@@ -997,7 +997,11 @@ export class OneCSyncService {
   // ── Universal catalog sync (OneCCatalog model) ─────────────
 
   private async syncUniversalCatalog(entityName: string): Promise<SyncResult> {
-    const catalogType = entityName.replace("Catalog_", "");
+    const catalogType = entityName
+      .replace(/^Catalog_/, "")
+      .replace(/^ChartOfAccounts_/, "ПланСчетов_")
+      .replace(/^ChartOfCalculationTypes_/, "ВидыРасчета_")
+      .replace(/^ChartOfCharacteristicTypes_/, "ВидыХарактеристик_");
     const filter = "DeletionMark eq false";
     const rows = await this.fetchAll(entityName, filter);
     let upserted = 0;
@@ -1041,8 +1045,14 @@ export class OneCSyncService {
   // ── Universal register sync (OneCRegister model) ────────────
 
   private async syncUniversalRegister(entityName: string): Promise<SyncResult> {
-    const registerType = entityName.replace(/^(InformationRegister_|AccumulationRegister_)/, "");
-    const registerKind = entityName.startsWith("AccumulationRegister_") ? "Accumulation" : "Information";
+    const registerType = entityName.replace(/^(InformationRegister_|AccumulationRegister_|AccountingRegister_|CalculationRegister_)/, "");
+    const registerKind = entityName.startsWith("AccumulationRegister_")
+      ? "Accumulation"
+      : entityName.startsWith("AccountingRegister_")
+        ? "Accounting"
+        : entityName.startsWith("CalculationRegister_")
+          ? "Calculation"
+          : "Information";
     const rows = await this.fetchAll(entityName);
     let upserted = 0;
     let errors = 0;
@@ -1164,6 +1174,22 @@ export class OneCSyncService {
     "Catalog_УдалитьТерриториальныеУсловияПФР",
     "Catalog_УчетныеЗаписиЭлектроннойПочты",
     "Catalog_uzbled_КлассификаторСтанций",
+  ];
+
+  // ── Charts of Accounts, Calculation Types, Characteristic Types ──
+
+  private static readonly CHART_ENTITIES = [
+    "ChartOfAccounts_Хозрасчетный",
+    "ChartOfCharacteristicTypes_ВидыСубконтоХозрасчетные",
+    "ChartOfCalculationTypes_Начисления",
+    "ChartOfCalculationTypes_Удержания",
+    "ChartOfCalculationTypes_УдалитьОсновныеНачисленияОрганизаций",
+  ];
+
+  // ── Accounting & Calculation registers ──────────────────────
+
+  private static readonly EXTRA_REGISTERS = [
+    "AccountingRegister_Хозрасчетный_RecordType",
   ];
 
   private static readonly ALL_REGISTERS = [
@@ -1361,8 +1387,20 @@ export class OneCSyncService {
       await run(() => this.syncUniversalRegister(reg));
     }
 
-    // Phase 10: Recalculate balance snapshots
-    if (!aborted) console.log("[1C-Sync] ═══ Phase 10: Balance Snapshots ═══");
+    // Phase 10: Charts of Accounts / Calculation Types / Characteristic Types → OneCCatalog
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 10: Charts (4) ═══");
+    for (const chart of OneCSyncService.CHART_ENTITIES) {
+      await run(() => this.syncUniversalCatalog(chart));
+    }
+
+    // Phase 11: Accounting & Calculation register entries → OneCRegister
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 11: Accounting Register (47k entries) ═══");
+    for (const reg of OneCSyncService.EXTRA_REGISTERS) {
+      await run(() => this.syncUniversalRegister(reg));
+    }
+
+    // Phase 12: Recalculate balance snapshots
+    if (!aborted) console.log("[1C-Sync] ═══ Phase 12: Balance Snapshots ═══");
     await run(() => this.syncBalanceSnapshots());
 
     const finishedAt = new Date();
