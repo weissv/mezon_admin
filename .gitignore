@@ -68,7 +68,13 @@ backups/
 # Тесты (Главный генератор мусора)
 cypress/videos/
 cypress/screenshots/
+cypress/downloads/
 coverage/
+
+# Генерируемые диагностические артефакты
+backend/1c_*.json
+backend/1c_*.xml
+backend/1c_*.txt
 
 # Секреты
 .env

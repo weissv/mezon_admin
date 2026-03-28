@@ -68,6 +68,7 @@ backups/
 # Тесты (Главный генератор мусора)
 cypress/videos/
 cypress/screenshots/
+cypress/downloads/
 coverage/
 
 # Секреты
