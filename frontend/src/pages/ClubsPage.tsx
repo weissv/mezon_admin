@@ -72,6 +72,8 @@ interface Child {
 }
 
 type TabType = 'clubs' | 'ratings' | 'reports';
+const selectClassName = 'mezon-field';
+const textareaClassName = 'mezon-field min-h-[96px] resize-y';
 
 export default function ClubsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('clubs');
@@ -321,9 +323,18 @@ export default function ClubsPage() {
   ];
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Кружки и секции</h1>
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(191,90,242,0.14)] text-[var(--macos-purple)] shadow-[0_10px_24px_rgba(191,90,242,0.12)]">
+            <Star className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="mezon-badge mb-2">Clubs · развитие</div>
+            <h1 className="mezon-section-title mb-1">Кружки и секции</h1>
+            <p className="mezon-subtitle">Каталог кружков, рейтинги детей и отчёты по загрузке и финансам в едином рабочем пространстве.</p>
+          </div>
+        </div>
         {activeTab === 'clubs' && (
           <Button onClick={handleCreate}>
             <PlusCircle className="mr-2 h-4 w-4" /> Добавить кружок
@@ -332,16 +343,16 @@ export default function ClubsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b mb-6">
-        <nav className="flex gap-4">
+      <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-[var(--glass-border)] bg-[var(--mezon-panel-muted)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
+        <nav className="flex gap-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
+              className={`flex items-center gap-2 rounded-[12px] px-4 py-2 text-sm font-medium transition-all ${
                 activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
+                  : 'text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]'
               }`}
             >
               <tab.icon className="h-4 w-4" />
@@ -367,18 +378,18 @@ export default function ClubsPage() {
       {activeTab === 'ratings' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1">
-            <h3 className="text-lg font-semibold p-4 border-b">Выберите кружок</h3>
-            <div className="divide-y max-h-[500px] overflow-auto">
+            <h3 className="border-b border-[rgba(60,60,67,0.12)] p-4 text-lg font-semibold text-[var(--mezon-dark)]">Выберите кружок</h3>
+            <div className="max-h-[500px] divide-y divide-[rgba(60,60,67,0.12)] overflow-auto">
               {clubs.map((club) => (
                 <button
                   key={club.id}
                   onClick={() => loadRatings(club)}
-                  className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
-                    selectedClubForRatings?.id === club.id ? 'bg-blue-50' : ''
+                  className={`w-full p-4 text-left transition-colors ${
+                    selectedClubForRatings?.id === club.id ? 'bg-[rgba(10,132,255,0.08)]' : 'hover:bg-[rgba(255,255,255,0.5)]'
                   }`}
                 >
-                  <div className="font-medium">{club.name}</div>
-                  <div className="text-sm text-gray-500">
+                  <div className="font-medium text-[var(--mezon-dark)]">{club.name}</div>
+                  <div className="text-sm text-[var(--mezon-text-secondary)]">
                     {club.teacher.firstName} {club.teacher.lastName}
                   </div>
                 </button>
@@ -388,23 +399,23 @@ export default function ClubsPage() {
 
           <Card className="lg:col-span-2">
             {!selectedClubForRatings ? (
-              <div className="p-8 text-center text-gray-500">
-                <Star className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="p-8 text-center text-[var(--mezon-text-secondary)]">
+                <Star className="mx-auto mb-4 h-12 w-12 text-[rgba(191,90,242,0.28)]" />
                 <p>Выберите кружок для просмотра рейтингов</p>
               </div>
             ) : ratingsLoading ? (
               <div className="p-8 text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-                <p className="mt-2 text-gray-500">Загрузка...</p>
+                <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--mezon-accent)]" />
+                <p className="mt-2 text-[var(--mezon-text-secondary)]">Загрузка...</p>
               </div>
             ) : (
               <div>
-                <div className="p-4 border-b flex justify-between items-center">
+                <div className="flex items-center justify-between border-b border-[rgba(60,60,67,0.12)] p-4">
                   <div>
-                    <h3 className="text-lg font-semibold">{selectedClubForRatings.name}</h3>
+                    <h3 className="text-lg font-semibold text-[var(--mezon-dark)]">{selectedClubForRatings.name}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       {renderStars(Math.round(avgRating))}
-                      <span className="text-gray-600">{avgRating.toFixed(1)} ({ratings.length} оценок)</span>
+                      <span className="text-[var(--mezon-text-secondary)]">{avgRating.toFixed(1)} ({ratings.length} оценок)</span>
                     </div>
                   </div>
                   <Button onClick={() => openAddRatingModal(selectedClubForRatings)}>
@@ -412,9 +423,9 @@ export default function ClubsPage() {
                   </Button>
                 </div>
                 
-                <div className="divide-y max-h-[400px] overflow-auto">
+                <div className="max-h-[400px] divide-y divide-[rgba(60,60,67,0.12)] overflow-auto">
                   {ratings.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">Нет оценок</div>
+                    <div className="p-8 text-center text-[var(--mezon-text-secondary)]">Нет оценок</div>
                   ) : (
                     ratings.map((rating) => (
                       <div key={rating.id} className="p-4 flex justify-between items-start">
@@ -426,7 +437,7 @@ export default function ClubsPage() {
                             {renderStars(rating.rating)}
                           </div>
                           {rating.comment && (
-                            <p className="text-sm text-gray-600 mt-2">{rating.comment}</p>
+                            <p className="mt-2 text-sm text-[var(--mezon-text-secondary)]">{rating.comment}</p>
                           )}
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => deleteRating(rating.id)}>
@@ -446,18 +457,18 @@ export default function ClubsPage() {
       {activeTab === 'reports' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1">
-            <h3 className="text-lg font-semibold p-4 border-b">Выберите кружок</h3>
-            <div className="divide-y max-h-[500px] overflow-auto">
+            <h3 className="border-b border-[rgba(60,60,67,0.12)] p-4 text-lg font-semibold text-[var(--mezon-dark)]">Выберите кружок</h3>
+            <div className="max-h-[500px] divide-y divide-[rgba(60,60,67,0.12)] overflow-auto">
               {clubs.map((club) => (
                 <button
                   key={club.id}
                   onClick={() => loadReport(club)}
-                  className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
-                    selectedClubForReport?.id === club.id ? 'bg-blue-50' : ''
+                  className={`w-full p-4 text-left transition-colors ${
+                    selectedClubForReport?.id === club.id ? 'bg-[rgba(10,132,255,0.08)]' : 'hover:bg-[rgba(255,255,255,0.5)]'
                   }`}
                 >
-                  <div className="font-medium">{club.name}</div>
-                  <div className="text-sm text-gray-500">
+                  <div className="font-medium text-[var(--mezon-dark)]">{club.name}</div>
+                  <div className="text-sm text-[var(--mezon-text-secondary)]">
                     {club.teacher.firstName} {club.teacher.lastName}
                   </div>
                 </button>
@@ -467,49 +478,49 @@ export default function ClubsPage() {
 
           <Card className="lg:col-span-2">
             {!selectedClubForReport ? (
-              <div className="p-8 text-center text-gray-500">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="p-8 text-center text-[var(--mezon-text-secondary)]">
+                <FileText className="mx-auto mb-4 h-12 w-12 text-[rgba(10,132,255,0.22)]" />
                 <p>Выберите кружок для просмотра отчёта</p>
               </div>
             ) : reportLoading ? (
               <div className="p-8 text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-                <p className="mt-2 text-gray-500">Загрузка...</p>
+                <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--mezon-accent)]" />
+                <p className="mt-2 text-[var(--mezon-text-secondary)]">Загрузка...</p>
               </div>
             ) : report ? (
               <div className="p-6 space-y-6">
-                <h3 className="text-xl font-semibold">{report.club.name}</h3>
-                <p className="text-gray-600">Педагог: {report.club.teacher}</p>
+                <h3 className="text-xl font-semibold text-[var(--mezon-dark)]">{report.club.name}</h3>
+                <p className="text-[var(--mezon-text-secondary)]">Педагог: {report.club.teacher}</p>
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <p className="text-sm text-blue-600">Активных записей</p>
-                    <p className="text-2xl font-bold text-blue-700">{report.enrollments.active}</p>
+                  <div className="rounded-lg bg-[rgba(10,132,255,0.12)] p-4">
+                    <p className="text-sm text-[var(--mezon-accent)]">Активных записей</p>
+                    <p className="text-2xl font-bold text-[var(--mezon-dark)]">{report.enrollments.active}</p>
                   </div>
-                  <div className="bg-yellow-50 rounded-lg p-4">
-                    <p className="text-sm text-yellow-600">В листе ожидания</p>
-                    <p className="text-2xl font-bold text-yellow-700">{report.enrollments.waiting}</p>
+                  <div className="rounded-lg bg-[rgba(255,204,0,0.12)] p-4">
+                    <p className="text-sm text-[var(--macos-orange)]">В листе ожидания</p>
+                    <p className="text-2xl font-bold text-[var(--mezon-dark)]">{report.enrollments.waiting}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600">Максимум</p>
-                    <p className="text-2xl font-bold">{report.club.maxStudents}</p>
+                  <div className="rounded-lg bg-[rgba(255,255,255,0.58)] p-4">
+                    <p className="text-sm text-[var(--mezon-text-secondary)]">Максимум</p>
+                    <p className="text-2xl font-bold text-[var(--mezon-dark)]">{report.club.maxStudents}</p>
                   </div>
                 </div>
 
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold mb-3">Финансы</h4>
+                <div className="border-t border-[rgba(60,60,67,0.12)] pt-4">
+                  <h4 className="mb-3 font-semibold text-[var(--mezon-dark)]">Финансы</h4>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <p className="text-sm text-green-600">Доходы</p>
-                      <p className="text-xl font-bold text-green-700">{currency.format(report.finances.income)}</p>
+                    <div className="rounded-lg bg-[rgba(52,199,89,0.14)] p-4">
+                      <p className="text-sm text-[var(--macos-green)]">Доходы</p>
+                      <p className="text-xl font-bold text-[var(--mezon-dark)]">{currency.format(report.finances.income)}</p>
                     </div>
-                    <div className="bg-red-50 rounded-lg p-4">
-                      <p className="text-sm text-red-600">Расходы</p>
-                      <p className="text-xl font-bold text-red-700">{currency.format(report.finances.expense)}</p>
+                    <div className="rounded-lg bg-[rgba(255,59,48,0.12)] p-4">
+                      <p className="text-sm text-[var(--macos-red)]">Расходы</p>
+                      <p className="text-xl font-bold text-[var(--mezon-dark)]">{currency.format(report.finances.expense)}</p>
                     </div>
-                    <div className={`rounded-lg p-4 ${report.finances.balance >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}>
-                      <p className="text-sm text-gray-600">Баланс</p>
-                      <p className={`text-xl font-bold ${report.finances.balance >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                    <div className={`rounded-lg p-4 ${report.finances.balance >= 0 ? 'bg-[rgba(52,199,89,0.14)]' : 'bg-[rgba(255,59,48,0.12)]'}`}>
+                      <p className="text-sm text-[var(--mezon-text-secondary)]">Баланс</p>
+                      <p className={`text-xl font-bold ${report.finances.balance >= 0 ? 'text-[var(--macos-green)]' : 'text-[var(--macos-red)]'}`}>
                         {currency.format(report.finances.balance)}
                       </p>
                     </div>
@@ -549,7 +560,7 @@ export default function ClubsPage() {
           <div>
             <label className="block text-sm font-medium mb-1">Педагог *</label>
             <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              className={selectClassName}
               value={formData.teacherId}
               onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
               required
@@ -613,7 +624,7 @@ export default function ClubsPage() {
           <div>
             <label className="block text-sm font-medium mb-1">Ребёнок *</label>
             <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2"
+              className={selectClassName}
               value={ratingFormData.childId}
               onChange={(e) => setRatingFormData({ ...ratingFormData, childId: e.target.value })}
               required
@@ -630,7 +641,7 @@ export default function ClubsPage() {
           <div>
             <label className="block text-sm font-medium mb-1">Оценка *</label>
             <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2"
+              className={selectClassName}
               value={ratingFormData.rating}
               onChange={(e) => setRatingFormData({ ...ratingFormData, rating: e.target.value })}
               required
@@ -644,7 +655,7 @@ export default function ClubsPage() {
           <div>
             <label className="block text-sm font-medium mb-1">Комментарий</label>
             <textarea
-              className="w-full rounded-md border border-gray-300 px-3 py-2"
+              className={textareaClassName}
               value={ratingFormData.comment}
               onChange={(e) => setRatingFormData({ ...ratingFormData, comment: e.target.value })}
               rows={3}
@@ -666,18 +677,18 @@ export default function ClubsPage() {
       {/* Delete confirmation modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
         <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-lg border border-[rgba(255,59,48,0.18)] bg-[rgba(255,59,48,0.08)] p-4">
+            <AlertTriangle className="mt-0.5 h-6 w-6 flex-shrink-0 text-[var(--macos-red)]" />
             <div>
-              <h4 className="font-semibold text-red-800">Внимание!</h4>
-              <p className="text-red-700 text-sm mt-1">
+              <h4 className="font-semibold text-[var(--macos-red)]">Внимание!</h4>
+              <p className="mt-1 text-sm text-[var(--macos-red)]">
                 Вы собираетесь удалить кружок. Это действие нельзя отменить. 
                 Все записи детей в этот кружок также будут удалены.
               </p>
             </div>
           </div>
           {deletingClub && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="rounded-lg bg-[rgba(255,255,255,0.58)] p-3">
               <p><strong>Название:</strong> {deletingClub.name}</p>
               <p><strong>Педагог:</strong> {deletingClub.teacher.firstName} {deletingClub.teacher.lastName}</p>
               <p><strong>Стоимость:</strong> {currency.format(deletingClub.cost)}/мес</p>
