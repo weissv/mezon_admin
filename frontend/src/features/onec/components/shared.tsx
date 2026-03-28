@@ -11,7 +11,9 @@ export type TableColumn<T> = {
 
 export function formatDate(value: string | null | undefined) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("ru-RU", {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("ru-RU", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -20,7 +22,9 @@ export function formatDate(value: string | null | undefined) {
 
 export function formatAmount(value: string | number | null | undefined) {
   if (value == null) return "—";
-  return Number(value).toLocaleString("ru-RU", {
+  const num = Number(value);
+  if (Number.isNaN(num)) return "—";
+  return num.toLocaleString("ru-RU", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -43,6 +47,7 @@ export function SearchInput({
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        aria-label={placeholder}
         className="w-full rounded-lg border py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
@@ -65,16 +70,18 @@ export function Pagination({
       <button
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
+        aria-label="Предыдущая страница"
         className="rounded border bg-white px-3 py-1.5 text-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Назад
       </button>
-      <span className="text-sm text-gray-600">
+      <span className="text-sm text-gray-600" aria-live="polite">
         {page} / {totalPages}
       </span>
       <button
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
+        aria-label="Следующая страница"
         className="rounded border bg-white px-3 py-1.5 text-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Вперёд
