@@ -82,7 +82,7 @@ export default function PersonalizationPanel({
             <Settings className="h-5 w-5 text-[var(--mezon-accent)]" />
             <h2 className="text-lg font-semibold text-[var(--mezon-dark)]">Настройка дашборда</h2>
           </div>
-          <button onClick={onClose} className="personalization-panel__close">
+          <button onClick={onClose} className="personalization-panel__close" aria-label="Закрыть">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -92,25 +92,31 @@ export default function PersonalizationPanel({
           <button
             className={`personalization-panel__tab ${activeTab === 'widgets' ? 'personalization-panel__tab--active' : ''}`}
             onClick={() => setActiveTab('widgets')}
+            aria-selected={activeTab === 'widgets'}
+            role="tab"
           >
             Виджеты
           </button>
           <button
             className={`personalization-panel__tab ${activeTab === 'views' ? 'personalization-panel__tab--active' : ''}`}
             onClick={() => setActiveTab('views')}
+            aria-selected={activeTab === 'views'}
+            role="tab"
           >
             Представления
           </button>
           <button
             className={`personalization-panel__tab ${activeTab === 'actions' ? 'personalization-panel__tab--active' : ''}`}
             onClick={() => setActiveTab('actions')}
+            aria-selected={activeTab === 'actions'}
+            role="tab"
           >
             Быстрые действия
           </button>
         </div>
 
         {/* Content */}
-        <div className="personalization-panel__body">
+        <div className="personalization-panel__body" role="tabpanel">
           {/* Widgets tab */}
           {activeTab === 'widgets' && (
             <div className="space-y-4">
@@ -126,6 +132,7 @@ export default function PersonalizationPanel({
                           className={`personalization-panel__widget-row ${isEnabled ? 'personalization-panel__widget-row--enabled' : ''}`}
                           onClick={() => w.canHide && onToggleWidget(w.id)}
                           disabled={!w.canHide}
+                          aria-pressed={isEnabled}
                         >
                           <div className="flex items-center gap-2">
                             {isEnabled ? <Eye className="h-4 w-4 text-green-500" /> : <EyeOff className="h-4 w-4 text-gray-400" />}
@@ -152,6 +159,7 @@ export default function PersonalizationPanel({
                   onChange={e => setNewViewName(e.target.value)}
                   placeholder="Название представления..."
                   className="personalization-panel__input"
+                  aria-label="Название представления"
                 />
                 <Button
                   variant="outline"
@@ -177,6 +185,7 @@ export default function PersonalizationPanel({
                       key={i}
                       className="personalization-panel__view-row"
                       onClick={() => onLoadView(view)}
+                      aria-label={`Загрузить представление ${view.name}`}
                     >
                       <Bookmark className="h-4 w-4 text-[var(--mezon-accent)]" />
                       <span className="text-sm font-medium">{view.name}</span>
@@ -205,6 +214,7 @@ export default function PersonalizationPanel({
                     key={action.id}
                     className={`personalization-panel__widget-row ${isPinned ? 'personalization-panel__widget-row--enabled' : ''}`}
                     onClick={() => onTogglePinnedAction(action.id)}
+                    aria-pressed={isPinned}
                   >
                     <div className="flex items-center gap-2">
                       {isPinned ? <Eye className="h-4 w-4 text-green-500" /> : <EyeOff className="h-4 w-4 text-gray-400" />}
