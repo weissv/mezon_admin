@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 # Multi-stage build for production
 
 FROM node:20 AS deps
@@ -5,16 +7,28 @@ ENV npm_config_fetch_retries=5 \
 	npm_config_fetch_retry_mintimeout=20000 \
 	npm_config_fetch_retry_maxtimeout=120000 \
 	npm_config_fetch_timeout=600000 \
+	npm_config_prefer_offline=true \
 	npm_config_progress=false \
 	npm_config_audit=false \
-	npm_config_fund=false
+	npm_config_fund=false \
+	CYPRESS_INSTALL_BINARY=0
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
 # Install only build/runtime dependencies to avoid pulling heavy test tooling in CI
-RUN npm ci --omit=dev
+RUN --mount=type=cache,target=/root/.npm \
+	set -eux; \
+	for attempt in 1 2 3; do \
+		npm ci --omit=dev --prefer-offline && exit 0; \
+		echo "npm ci failed on attempt ${attempt}; retrying after backoff..."; \
+		rm -rf node_modules; \
+		if [ "$attempt" -eq 3 ]; then \
+			exit 1; \
+		fi; \
+		sleep $((attempt * 15)); \
+	done
 
 # Stage 1: Development (for docker-compose)
 FROM deps AS development

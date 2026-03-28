@@ -42,44 +42,43 @@ export default function LoginPage() {
   ];
 
   return (
-    <div className="relative mx-auto flex min-h-[85vh] max-w-6xl flex-col justify-center px-6">
-      <div className="absolute inset-x-4 inset-y-8 -z-10 rounded-[48px] bg-white/40 blur-3xl" />
-      <div className="relative grid gap-10 rounded-[40px] bg-white/90 p-10 shadow-mezon lg:grid-cols-2">
+    <div className="relative mx-auto flex min-h-[85vh] max-w-5xl flex-col justify-center px-6">
+      <div className="relative grid gap-10 rounded-[18px] bg-white/72 backdrop-blur-[40px] saturate-[1.8] border border-white/50 shadow-[0_24px_80px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.06)] p-10 lg:grid-cols-2">
         <div className="flex flex-col justify-between">
           <div>
             <span className="mezon-badge">Mezon // inspired.School</span>
-            <h1 className="mezon-section-title text-4xl lg:text-5xl">
-              Управляйте школой <span>в стиле Mezon</span>
+            <h1 className="mt-4 text-[28px] lg:text-[34px] font-bold tracking-[-0.03em] text-[#1D1D1F] leading-tight">
+              Управляйте школой <span className="bg-gradient-to-r from-[#007AFF] to-[#BF5AF2] bg-clip-text text-transparent">в стиле Mezon</span>
             </h1>
-            <p className="mezon-subtitle text-lg">
-              Админ-панель повторяет эстетику маркетингового сайта: нежные переходы, акценты цвета фуксии и чувство заботы.
+            <p className="mt-3 text-[15px] text-[#86868B] max-w-md leading-relaxed">
+              Админ-панель с эстетикой macOS: прозрачные панели, чистая типографика и внимание к каждой детали.
             </p>
           </div>
-          <ul className="mt-8 space-y-4">
+          <ul className="mt-8 space-y-3">
             {sellingPoints.map((point) => (
-              <li key={point} className="flex items-center gap-3 text-[var(--mezon-dark)]">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(160,74,132,0.12)] text-[var(--mezon-accent)]">
-                  <Check className="h-4 w-4" />
+              <li key={point} className="flex items-center gap-3 text-[#1D1D1F]">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-[7px] bg-[rgba(0,122,255,0.08)] text-[#007AFF]">
+                  <Check className="h-3.5 w-3.5" />
                 </span>
-                <span className="font-medium">{point}</span>
+                <span className="text-[14px] font-medium">{point}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="mezon-card shadow-mezon">
+        <div className="rounded-[14px] bg-white/80 backdrop-blur-sm border border-[rgba(0,0,0,0.06)] shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-6">
           <div className="mb-6 text-center">
-            <p className="text-sm uppercase tracking-[0.35em] text-[var(--mezon-text-soft)]">Вход в ERP</p>
-            <p className="text-2xl font-semibold text-[var(--mezon-dark)]">Авторизация</p>
+            <p className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#86868B]">Вход в ERP</p>
+            <p className="text-[20px] font-semibold text-[#1D1D1F] tracking-[-0.02em] mt-1">Авторизация</p>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" autoComplete="off">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
             <div>
-              <label className="text-sm font-semibold text-[var(--mezon-dark)]" htmlFor="login">Логин</label>
+              <label className="text-[12px] font-medium text-[#6E6E73] mb-1 block" htmlFor="login">Логин</label>
               <Input id="login" type="text" autoComplete="off" {...register('login')} />
               <FormError message={errors.login?.message} />
             </div>
             <div>
-              <label className="text-sm font-semibold text-[var(--mezon-dark)]" htmlFor="password">Пароль</label>
+              <label className="text-[12px] font-medium text-[#6E6E73] mb-1 block" htmlFor="password">Пароль</label>
               <Input id="password" type="password" autoComplete="new-password" {...register('password')} />
               <FormError message={errors.password?.message} />
             </div>

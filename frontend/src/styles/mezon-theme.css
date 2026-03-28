@@ -1,200 +1,282 @@
+/* ============================================================================
+   macOS Tahoe — Liquid Glass Design System
+   Mezon ERP Theme
+   ============================================================================ */
+
 :root {
-  --mezon-bg: #fef9f4;
-  --mezon-panel: #ffffff;
-  --mezon-panel-muted: rgba(255, 255, 255, 0.92);
-  --mezon-accent: #a04a84;
-  --mezon-accent-dark: #8a3a70;
-  --mezon-teal: #00859e;
-  --mezon-sand: #fcd5a6;
-  --mezon-violet: #8f93c0;
-  --mezon-dark: #222222;
-  --mezon-text-soft: #727272;
-  --mezon-border: #f1e4da;
-  --mezon-gradient: linear-gradient(135deg, #fef3e6 0%, #f9e2f0 40%, #f0f6ff 100%);
-  --mezon-hero-glow: radial-gradient(circle at top, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+  /* --- macOS Tahoe Core Palette --- */
+  --mezon-bg: #F5F5F7;
+  --mezon-panel: rgba(255, 255, 255, 0.72);
+  --mezon-panel-solid: #FFFFFF;
+  --mezon-panel-muted: rgba(255, 255, 255, 0.56);
+  --mezon-accent: #007AFF;
+  --mezon-accent-dark: #0056CC;
+  --mezon-teal: #30B0C7;
+  --mezon-sand: #FFD60A;
+  --mezon-violet: #BF5AF2;
+  --mezon-dark: #1D1D1F;
+  --mezon-text-soft: #86868B;
+  --mezon-text-secondary: #6E6E73;
+  --mezon-border: rgba(0, 0, 0, 0.06);
+  --mezon-separator: rgba(60, 60, 67, 0.12);
+
+  /* --- Liquid Glass Properties --- */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-thick: rgba(255, 255, 255, 0.85);
+  --glass-bg-thin: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(40px) saturate(180%);
+  --glass-blur-lg: blur(60px) saturate(200%);
+
+  /* --- macOS System Colors --- */
+  --macos-blue: #007AFF;
+  --macos-green: #34C759;
+  --macos-red: #FF3B30;
+  --macos-orange: #FF9500;
+  --macos-yellow: #FFD60A;
+  --macos-purple: #BF5AF2;
+  --macos-pink: #FF2D55;
+  --macos-gray: #8E8E93;
+
+  /* --- Gradients --- */
+  --mezon-gradient: linear-gradient(180deg, #F5F5F7 0%, #E8E8ED 100%);
+  --mezon-hero-glow: radial-gradient(ellipse at top, rgba(0, 122, 255, 0.06), transparent 60%);
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.12);
+
+  /* --- Radius --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
 }
 body {
-  font-family: "Roboto", "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Inter", "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   background: var(--mezon-bg);
   color: var(--mezon-dark);
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
+  line-height: 1.47;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 .mezon-app {
   min-height: 100vh;
-  background-image: var(--mezon-gradient);
+  background: var(--mezon-bg);
+  background-image: var(--mezon-hero-glow);
 }
+/* --- macOS Tahoe Toolbar --- */
 .mezon-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 2.5rem;
-  border-bottom: 1px solid var(--mezon-border);
-  background: rgba(255, 255, 255, 0.7);
-  -webkit-backdrop-filter: blur(16px);
-          backdrop-filter: blur(16px);
+  padding: 0 20px;
+  height: 52px;
+  border-bottom: 0.5px solid var(--mezon-separator);
+  background: var(--glass-bg-thick);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
 }
 .mezon-top-bar__cluster {
   display: flex;
-  gap: 1rem;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
 }
 .mezon-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.9rem;
-  border-radius: 999px;
-  background: rgba(160, 74, 132, 0.08);
-  color: var(--mezon-accent);
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--mezon-text-secondary);
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  transition: background 0.15s ease;
+}
+.mezon-chip:hover {
+  background: rgba(0, 0, 0, 0.07);
 }
 .mezon-chip--teal {
-  background: rgba(0, 133, 158, 0.08);
-  color: var(--mezon-teal);
+  background: rgba(0, 122, 255, 0.08);
+  color: var(--macos-blue);
+}
+.mezon-chip--teal:hover {
+  background: rgba(0, 122, 255, 0.14);
 }
 .mezon-top-bar__social {
   display: inline-flex;
-  gap: 0.35rem;
+  gap: 2px;
 }
 .mezon-top-bar__social a {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: var(--mezon-dark);
-  background: var(--mezon-panel);
-  transition: all 0.2s ease;
+  color: var(--mezon-text-soft);
+  background: transparent;
+  border: none;
+  transition: all 0.15s ease;
 }
 .mezon-top-bar__social a:hover {
-  border-color: var(--mezon-accent);
-  color: var(--mezon-accent);
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--mezon-dark);
 }
+/* --- macOS Tahoe Sidebar (Liquid Glass) --- */
 .mezon-sidenav {
-  width: 270px;
-  min-height: calc(100vh - 64px);
-  background: #ffffff;
-  border-right: 1px solid var(--mezon-border);
+  width: 260px;
+  min-height: calc(100vh - 52px);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
+  border-right: 0.5px solid var(--mezon-separator);
   position: relative;
-  padding: 2rem 1.75rem 1.5rem;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 8px;
 }
 .mezon-sidenav::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(252, 213, 166, 0.35), rgba(255, 255, 255, 0));
-  pointer-events: none;
+  content: none;
 }
 .mezon-sidenav__brand {
   position: relative;
   z-index: 1;
+  padding: 4px 8px 12px;
 }
 .mezon-sidenav__brand img {
-  width: 140px;
+  width: 120px;
   -o-object-fit: contain;
      object-fit: contain;
 }
 .mezon-sidenav__brand p {
-  margin-top: 0.35rem;
+  margin-top: 4px;
   color: var(--mezon-text-soft);
-  font-size: 0.9rem;
+  font-size: 11px;
+  line-height: 1.4;
 }
 .mezon-sidenav__nav {
   flex: 1;
   position: relative;
   z-index: 1;
+  overflow-y: auto;
 }
 .mezon-nav-label {
   text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  font-weight: 600;
   color: var(--mezon-text-soft);
-  margin-bottom: 0.75rem;
+  padding: 4px 8px;
+  margin-bottom: 2px;
 }
 .mezon-nav-link {
   display: flex;
   align-items: center;
-  padding: 0.65rem 0.9rem;
-  border-radius: 12px;
+  padding: 6px 8px;
+  border-radius: 8px;
   font-weight: 500;
+  font-size: 13px;
   color: var(--mezon-dark);
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: background 0.12s ease, color 0.12s ease;
+  letter-spacing: -0.01em;
 }
 .mezon-nav-link:hover {
-  background: rgba(160, 74, 132, 0.08);
-  color: var(--mezon-accent);
-  transform: translateX(2px);
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--mezon-dark);
+  transform: none;
 }
 .mezon-nav-link--active {
-  background: rgba(160, 74, 132, 0.14);
-  color: var(--mezon-accent);
-  box-shadow: inset 0 0 0 1px rgba(160, 74, 132, 0.2);
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--macos-blue);
+  box-shadow: none;
+  font-weight: 600;
+}
+.mezon-nav-link--active:hover {
+  background: rgba(0, 122, 255, 0.16);
+  color: var(--macos-blue);
 }
 .mezon-sidenav__footer {
   position: relative;
   z-index: 1;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 12px 8px 4px;
+  border-top: 0.5px solid var(--mezon-separator);
 }
 .mezon-sidenav__footer p {
-  font-size: 0.85rem;
+  font-size: 11px;
   color: var(--mezon-text-soft);
-  margin-bottom: 0.6rem;
+  margin-bottom: 4px;
 }
 .mezon-left-rail {
-  width: 64px;
-  border-right: 1px solid var(--mezon-border);
-  background: var(--mezon-panel);
+  width: 56px;
+  border-right: 0.5px solid var(--mezon-separator);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1.5rem 0.5rem;
-  gap: 0.75rem;
+  padding: 12px 4px;
+  gap: 4px;
 }
 .mezon-left-rail a {
   color: var(--mezon-text-soft);
-  transition: color 0.2s ease;
+  transition: color 0.15s ease;
+  padding: 6px;
+  border-radius: 8px;
 }
 .mezon-left-rail a:hover {
   color: var(--mezon-accent);
+  background: rgba(0, 0, 0, 0.04);
 }
+/* --- Main Content Area --- */
 .mezon-main {
   flex: 1;
-  padding: 2rem 2.75rem;
+  padding: 24px 32px;
   background: transparent;
+  min-width: 0;
 }
 .mezon-main-inner {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 52px);
   position: relative;
 }
 .mezon-section-title {
-  font-size: clamp(2rem, 3vw, 3.25rem);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 700;
   color: var(--mezon-dark);
-  margin-bottom: 1rem;
+  margin-bottom: 4px;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 .mezon-section-title span {
-  background: var(--mezon-teal);
-  color: #fff;
-  padding: 0.2rem 0.6rem;
+  background: linear-gradient(135deg, var(--macos-blue), var(--macos-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding: 0;
 }
 .mezon-subtitle {
   color: var(--mezon-text-soft);
   max-width: 640px;
+  font-size: 15px;
+  line-height: 1.5;
 }
+/* --- Liquid Glass Cards --- */
 .mezon-card {
-  background: var(--mezon-panel-muted);
-  border: 1px solid var(--mezon-border);
-  border-radius: 24px;
-  box-shadow: 0 25px 60px rgba(34, 34, 34, 0.08);
-  padding: 1.5rem;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
+  border: 0.5px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow), var(--shadow-md);
+  padding: 20px;
   position: relative;
   overflow: hidden;
 }
@@ -202,41 +284,57 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(145deg, rgba(160, 74, 132, 0.08), rgba(255, 255, 255, 0));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 40%);
   pointer-events: none;
+  border-radius: inherit;
 }
 .mezon-card--accent {
-  background: linear-gradient(135deg, rgba(160, 74, 132, 0.95), rgba(0, 133, 158, 0.85));
+  background: linear-gradient(135deg, var(--macos-blue), #5856D6);
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
   color: #fff;
   border: none;
 }
 .mezon-grid {
   display: grid;
-  gap: 1.5rem;
+  gap: 16px;
 }
+/* --- macOS-style Buttons --- */
 .mezon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  font-weight: 600;
-  padding: 0.9rem 1.75rem;
-  border: 2px solid transparent;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 7px 16px;
+  border: none;
   color: #fff;
-  background: linear-gradient(120deg, var(--mezon-accent), var(--mezon-teal));
-  box-shadow: 0 15px 30px rgba(160, 74, 132, 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--macos-blue);
+  box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 122, 255, 0.12);
+  transition: all 0.12s ease;
+  letter-spacing: -0.01em;
+  cursor: pointer;
 }
 .mezon-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 25px 40px rgba(160, 74, 132, 0.35);
+  background: #0071EE;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 0 0.5px rgba(0, 122, 255, 0.15);
+  transform: none;
+}
+.mezon-btn:active {
+  background: #005EC4;
+  transform: scale(0.98);
 }
 .mezon-btn--outline {
-  background: transparent;
-  border-color: rgba(160, 74, 132, 0.5);
-  color: var(--mezon-accent);
-  box-shadow: none;
+  background: rgba(0, 0, 0, 0.04);
+  border: 0.5px solid var(--mezon-separator);
+  color: var(--mezon-dark);
+  box-shadow: var(--shadow-sm);
 }
+.mezon-btn--outline:hover {
+  background: rgba(0, 0, 0, 0.07);
+}
+/* --- Subtle shimmer (toned down for Tahoe) --- */
 .mezon-shine {
   position: relative;
   overflow: hidden;
@@ -244,90 +342,60 @@ body {
 .mezon-shine::before {
   content: "";
   position: absolute;
-  width: 140px;
+  width: 120px;
   height: 200%;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
   top: -50%;
   left: -60%;
   transform: rotate(25deg);
-  animation: mezon-shimmer 7s linear infinite;
+  animation: mezon-shimmer 8s linear infinite;
 }
 @keyframes mezon-shimmer {
   0% {
     transform: translateX(-150%) rotate(25deg);
   }
   100% {
-    transform: translateX(250%) rotate(25deg);
+    transform: translateX(300%) rotate(25deg);
   }
 }
 .mezon-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  background: rgba(0, 133, 158, 0.08);
-  color: var(--mezon-teal);
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  background: rgba(0, 122, 255, 0.08);
+  color: var(--macos-blue);
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
+/* --- Liquid Glass Hero Panel --- */
 .mezon-hero-panel {
-  border-radius: 32px;
-  padding: 2rem;
-  border: 1px solid var(--mezon-border);
-  background: var(--mezon-panel);
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  border: 0.5px solid var(--glass-border);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow), var(--shadow-lg);
 }
+/* --- Responsive --- */
 @media (max-width: 1024px) {
   .mezon-top-bar {
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
+    height: auto;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .mezon-main {
-    padding: 1.5rem;
+    padding: 16px;
   }
 }
 
-/* Mobile menu button - hidden on desktop, visible on mobile */
+/* --- Mobile menu button --- */
 .mezon-mobile-menu-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--mezon-panel);
-  border: 1px solid var(--mezon-border);
-  color: var(--mezon-dark);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.mezon-mobile-menu-btn:hover {
-  background: rgba(160, 74, 132, 0.08);
-  border-color: var(--mezon-accent);
-  color: var(--mezon-accent);
-}
-
-.mezon-mobile-menu-btn:active {
-  transform: scale(0.95);
-}
-
-/* Mobile overlay for sidenav */
-.mezon-mobile-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-  -webkit-backdrop-filter: blur(4px);
-          backdrop-filter: blur(4px);
-}
-
-/* Close button for mobile menu - hidden on desktop */
-.mezon-mobile-close {
   display: none;
   align-items: center;
   justify-content: center;
@@ -336,54 +404,83 @@ body {
   border-radius: 8px;
   background: transparent;
   border: none;
+  color: var(--mezon-dark);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mezon-mobile-menu-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.mezon-mobile-menu-btn:active {
+  transform: scale(0.95);
+}
+
+/* --- Mobile overlay --- */
+.mezon-mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 998;
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+}
+
+/* --- Close button for mobile --- */
+.mezon-mobile-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
   color: var(--mezon-text-soft);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .mezon-mobile-close:hover {
-  background: rgba(160, 74, 132, 0.08);
-  color: var(--mezon-accent);
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--mezon-dark);
 }
 
-/* Mobile responsive styles */
+/* --- Mobile responsive --- */
 @media (max-width: 768px) {
-  /* Show mobile menu button */
   .mezon-mobile-menu-btn {
     display: flex;
   }
 
-  /* Show mobile overlay when menu is open */
   .mezon-mobile-overlay {
     display: block;
   }
 
-  /* Show close button in mobile menu */
   .mezon-mobile-close {
     display: flex;
   }
 
-  /* Top bar adjustments */
   .mezon-top-bar {
-    padding: 0.75rem 1rem;
+    padding: 8px 12px;
+    height: auto;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 4px;
   }
 
   .mezon-top-bar__cluster {
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 4px;
     width: 100%;
     justify-content: center;
   }
 
-  /* Hide contact chips on very small screens */
   .mezon-chip {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.7rem;
+    font-size: 11px;
+    padding: 3px 8px;
   }
 
-  /* Sidenav mobile behavior */
   .mezon-sidenav {
     position: fixed;
     top: 0;
@@ -393,19 +490,19 @@ body {
     max-width: 85vw;
     z-index: 999;
     transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    transition: transform 0.25s ease;
+    box-shadow: none;
     overflow-y: auto;
+    border-radius: 0;
   }
 
   .mezon-sidenav--mobile-open {
     transform: translateX(0);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.1);
   }
 
-  /* Main content takes full width on mobile */
   .mezon-main {
-    padding: 1rem;
+    padding: 12px;
     width: 100%;
   }
 
@@ -413,88 +510,79 @@ body {
     min-height: auto;
   }
 
-  /* Section titles */
   .mezon-section-title {
-    font-size: clamp(1.5rem, 5vw, 2.5rem);
-    margin-bottom: 0.75rem;
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+    margin-bottom: 4px;
   }
 
-  /* Cards and grids */
   .mezon-card {
-    padding: 1rem;
-    border-radius: 16px;
+    padding: 16px;
+    border-radius: var(--radius-md);
   }
 
   .mezon-grid {
-    gap: 1rem;
+    gap: 12px;
   }
 
-  /* Hero panel */
   .mezon-hero-panel {
-    padding: 1.5rem;
-    border-radius: 24px;
+    padding: 16px;
+    border-radius: var(--radius-lg);
   }
 
-  /* Buttons */
   .mezon-btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.9rem;
+    padding: 8px 14px;
+    font-size: 13px;
   }
 
-  /* Navigation links with better touch targets */
   .mezon-nav-link {
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
+    padding: 8px 10px;
+    font-size: 14px;
   }
 
-  /* Chips adjustments */
   .mezon-chip--teal {
-    font-size: 0.75rem;
+    font-size: 11px;
   }
 
-  /* Social links container */
   .mezon-top-bar__social {
-    gap: 0.5rem;
+    gap: 2px;
   }
 
   .mezon-top-bar__social a {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
   }
 }
 
-/* Extra small devices */
+/* --- Extra small screens --- */
 @media (max-width: 480px) {
   .mezon-top-bar {
-    padding: 0.5rem;
+    padding: 6px 8px;
   }
 
   .mezon-main {
-    padding: 0.75rem;
+    padding: 8px;
   }
 
   .mezon-section-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
   .mezon-card {
-    padding: 0.875rem;
+    padding: 12px;
   }
 
-  /* Hide some contact info on very small screens */
   .mezon-top-bar__cluster .mezon-chip:nth-child(n+2) {
     display: none;
   }
 
-  /* Stack social and STEAM tag vertically */
   .mezon-top-bar__cluster:last-child {
     flex-direction: column;
     align-items: center;
   }
 
   .mezon-hero-panel {
-    padding: 1rem;
-    border-radius: 16px;
+    padding: 12px;
+    border-radius: var(--radius-md);
   }
 
   .mezon-sidenav {
