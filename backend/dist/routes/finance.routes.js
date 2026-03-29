@@ -6,7 +6,7 @@ const prisma_1 = require("../prisma");
 const checkRole_1 = require("../middleware/checkRole");
 const validate_1 = require("../middleware/validate");
 const query_1 = require("../utils/query");
-const onec_finance_service_1 = require("../services/onec/onec-finance.service");
+const onec_finance_service_1 = require("../modules/onec/services/onec-finance.service");
 const finance_schema_1 = require("../schemas/finance.schema");
 const router = (0, express_1.Router)();
 const isValidDate = (value) => value instanceof Date && !Number.isNaN(value.getTime());
