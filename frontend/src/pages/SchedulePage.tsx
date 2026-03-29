@@ -619,7 +619,7 @@ export default function SchedulePage() {
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div className="flex items-center gap-2">
           <Calendar className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Расписание</h1>
+          <h1 className="macos-text-title">Расписание</h1>
           {allConflicts.length > 0 && (
             <span className="ml-2 px-2 py-1 bg-[rgba(255,59,48,0.1)] text-[var(--color-red)] text-xs rounded-full flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
@@ -779,13 +779,13 @@ export default function SchedulePage() {
               <table className="w-full min-w-[800px]">
                 <thead>
                   <tr className="bg-[var(--fill-quaternary)]">
-                    <th className="p-3 text-left text-sm font-medium text-[var(--text-secondary)] border-b border-[var(--separator)] w-24">
+                    <th className="p-3 text-left macos-text-caption text-[var(--text-secondary)] border-b border-[var(--separator)] w-24">
                       Урок
                     </th>
                     {[1, 2, 3, 4, 5, 6].map((day) => (
                       <th
                         key={day}
-                        className="p-3 text-center text-sm font-medium text-[var(--text-secondary)] border-b border-[var(--separator)]"
+                        className="p-3 text-center macos-text-caption text-[var(--text-secondary)] border-b border-[var(--separator)]"
                       >
                         {DAY_NAMES[day]}
                       </th>
@@ -871,7 +871,7 @@ export default function SchedulePage() {
       {activeTab === "subjects" && (
         <Card className="p-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+            <h2 className="macos-text-callout flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
               Предметы ({subjects.length})
             </h2>
@@ -926,7 +926,7 @@ export default function SchedulePage() {
       {activeTab === "rooms" && (
         <Card className="p-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+            <h2 className="macos-text-callout flex items-center gap-2">
               <DoorOpen className="h-5 w-5" />
               Кабинеты ({rooms.length})
             </h2>
@@ -975,7 +975,7 @@ export default function SchedulePage() {
       {activeTab === "timeslots" && (
         <Card className="p-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+            <h2 className="macos-text-callout flex items-center gap-2">
               <Clock className="h-5 w-5" />
               Расписание звонков ({timeSlots.length})
             </h2>
@@ -1031,7 +1031,7 @@ export default function SchedulePage() {
       {activeTab === "conflicts" && (
         <Card className="p-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+            <h2 className="macos-text-callout flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-[var(--color-orange)]" />
               Конфликты в расписании
             </h2>
@@ -1094,7 +1094,7 @@ export default function SchedulePage() {
         <form onSubmit={handleSaveSlot} className="p-4 space-y-4">
           {formConflicts.length > 0 && (
             <div className="p-3 bg-[rgba(255,59,48,0.06)] border border-[rgba(255,59,48,0.15)] rounded-[var(--radius-md)]">
-              <p className="text-sm font-medium text-[var(--color-red)] mb-2">Обнаружены конфликты:</p>
+              <p className="macos-text-caption text-[var(--color-red)] mb-2">Обнаружены конфликты:</p>
               <ul className="text-sm text-[var(--color-red)] space-y-1">
                 {formConflicts.map((c, i) => (
                   <li key={i}>• {c.message}</li>

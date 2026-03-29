@@ -309,7 +309,7 @@ export default function ClubsPage() {
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+            className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-[var(--text-quaternary)]'}`}
           />
         ))}
       </div>
@@ -349,7 +349,7 @@ export default function ClubsPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 rounded-[12px] px-4 py-2 text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 rounded-[12px] px-4 py-2 macos-text-caption transition-all ${
                 activeTab === tab.id
                   ? 'bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
                   : 'text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]'
@@ -378,7 +378,7 @@ export default function ClubsPage() {
       {activeTab === 'ratings' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1">
-            <h3 className="border-b border-[rgba(60,60,67,0.12)] p-4 text-lg font-semibold text-[var(--mezon-dark)]">Выберите кружок</h3>
+            <h3 className="border-b border-[rgba(60,60,67,0.12)] p-4 macos-text-callout text-[var(--mezon-dark)]">Выберите кружок</h3>
             <div className="max-h-[500px] divide-y divide-[rgba(60,60,67,0.12)] overflow-auto">
               {clubs.map((club) => (
                 <button
@@ -412,7 +412,7 @@ export default function ClubsPage() {
               <div>
                 <div className="flex items-center justify-between border-b border-[rgba(60,60,67,0.12)] p-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-[var(--mezon-dark)]">{selectedClubForRatings.name}</h3>
+                    <h3 className="macos-text-callout text-[var(--mezon-dark)]">{selectedClubForRatings.name}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       {renderStars(Math.round(avgRating))}
                       <span className="text-[var(--mezon-text-secondary)]">{avgRating.toFixed(1)} ({ratings.length} оценок)</span>
@@ -457,7 +457,7 @@ export default function ClubsPage() {
       {activeTab === 'reports' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1">
-            <h3 className="border-b border-[rgba(60,60,67,0.12)] p-4 text-lg font-semibold text-[var(--mezon-dark)]">Выберите кружок</h3>
+            <h3 className="border-b border-[rgba(60,60,67,0.12)] p-4 macos-text-callout text-[var(--mezon-dark)]">Выберите кружок</h3>
             <div className="max-h-[500px] divide-y divide-[rgba(60,60,67,0.12)] overflow-auto">
               {clubs.map((club) => (
                 <button
@@ -495,15 +495,15 @@ export default function ClubsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="rounded-lg bg-[rgba(10,132,255,0.12)] p-4">
                     <p className="text-sm text-[var(--mezon-accent)]">Активных записей</p>
-                    <p className="text-2xl font-bold text-[var(--mezon-dark)]">{report.enrollments.active}</p>
+                    <p className="macos-text-title text-[var(--mezon-dark)]">{report.enrollments.active}</p>
                   </div>
                   <div className="rounded-lg bg-[rgba(255,204,0,0.12)] p-4">
                     <p className="text-sm text-[var(--macos-orange)]">В листе ожидания</p>
-                    <p className="text-2xl font-bold text-[var(--mezon-dark)]">{report.enrollments.waiting}</p>
+                    <p className="macos-text-title text-[var(--mezon-dark)]">{report.enrollments.waiting}</p>
                   </div>
                   <div className="rounded-lg bg-[rgba(255,255,255,0.58)] p-4">
                     <p className="text-sm text-[var(--mezon-text-secondary)]">Максимум</p>
-                    <p className="text-2xl font-bold text-[var(--mezon-dark)]">{report.club.maxStudents}</p>
+                    <p className="macos-text-title text-[var(--mezon-dark)]">{report.club.maxStudents}</p>
                   </div>
                 </div>
 
@@ -512,15 +512,15 @@ export default function ClubsPage() {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="rounded-lg bg-[rgba(52,199,89,0.14)] p-4">
                       <p className="text-sm text-[var(--macos-green)]">Доходы</p>
-                      <p className="text-xl font-bold text-[var(--mezon-dark)]">{currency.format(report.finances.income)}</p>
+                      <p className="macos-text-title text-[var(--mezon-dark)]">{currency.format(report.finances.income)}</p>
                     </div>
                     <div className="rounded-lg bg-[rgba(255,59,48,0.12)] p-4">
                       <p className="text-sm text-[var(--macos-red)]">Расходы</p>
-                      <p className="text-xl font-bold text-[var(--mezon-dark)]">{currency.format(report.finances.expense)}</p>
+                      <p className="macos-text-title text-[var(--mezon-dark)]">{currency.format(report.finances.expense)}</p>
                     </div>
                     <div className={`rounded-lg p-4 ${report.finances.balance >= 0 ? 'bg-[rgba(52,199,89,0.14)]' : 'bg-[rgba(255,59,48,0.12)]'}`}>
                       <p className="text-sm text-[var(--mezon-text-secondary)]">Баланс</p>
-                      <p className={`text-xl font-bold ${report.finances.balance >= 0 ? 'text-[var(--macos-green)]' : 'text-[var(--macos-red)]'}`}>
+                      <p className={`macos-text-title ${report.finances.balance >= 0 ? 'text-[var(--macos-green)]' : 'text-[var(--macos-red)]'}`}>
                         {currency.format(report.finances.balance)}
                       </p>
                     </div>
@@ -539,7 +539,7 @@ export default function ClubsPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Название *</label>
+            <label className="block macos-text-caption mb-1">Название *</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -549,7 +549,7 @@ export default function ClubsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Описание</label>
+            <label className="block macos-text-caption mb-1">Описание</label>
             <Input
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -558,7 +558,7 @@ export default function ClubsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Педагог *</label>
+            <label className="block macos-text-caption mb-1">Педагог *</label>
             <select
               className={selectClassName}
               value={formData.teacherId}
@@ -576,7 +576,7 @@ export default function ClubsPage() {
           </div>
 
           <div>
-              <label className="block text-sm font-medium mb-1">Стоимость (UZS/мес) *</label>
+              <label className="block macos-text-caption mb-1">Стоимость (UZS/мес) *</label>
             <Input
               type="number"
               value={formData.cost}
@@ -588,7 +588,7 @@ export default function ClubsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Максимум детей *</label>
+            <label className="block macos-text-caption mb-1">Максимум детей *</label>
             <Input
               type="number"
               value={formData.maxStudents}
@@ -622,7 +622,7 @@ export default function ClubsPage() {
       >
         <form onSubmit={handleRatingSubmit} className="space-y-4 p-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Ребёнок *</label>
+            <label className="block macos-text-caption mb-1">Ребёнок *</label>
             <select
               className={selectClassName}
               value={ratingFormData.childId}
@@ -639,7 +639,7 @@ export default function ClubsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Оценка *</label>
+            <label className="block macos-text-caption mb-1">Оценка *</label>
             <select
               className={selectClassName}
               value={ratingFormData.rating}
@@ -653,7 +653,7 @@ export default function ClubsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Комментарий</label>
+            <label className="block macos-text-caption mb-1">Комментарий</label>
             <textarea
               className={textareaClassName}
               value={ratingFormData.comment}

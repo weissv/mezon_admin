@@ -40,35 +40,35 @@ export function FeedbackResponseForm({ feedback, onSuccess, onCancel }: Feedback
 
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-gray-50 rounded-md">
+      <div className="p-4 bg-[var(--fill-quaternary)] rounded-md">
         <h3 className="font-medium mb-2">Исходное обращение:</h3>
-        <p className="text-sm text-gray-700 mb-2">
+        <p className="text-sm text-[var(--text-primary)] mb-2">
           <strong>От:</strong> {feedback.parentName} ({feedback.contactInfo})
         </p>
-        <p className="text-sm text-gray-700 mb-2">
+        <p className="text-sm text-[var(--text-primary)] mb-2">
           <strong>Тип:</strong> {feedback.type}
         </p>
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-[var(--text-primary)]">
           <strong>Сообщение:</strong> {feedback.message}
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Ответ</label>
+          <label className="block macos-text-caption mb-1">Ответ</label>
           <textarea
             {...register('response')}
             placeholder="Ваш ответ на обращение..."
-            className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-32 px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <FormError message={errors.response?.message} />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Статус</label>
+          <label className="block macos-text-caption mb-1">Статус</label>
           <select 
             {...register('status')} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="IN_PROGRESS">В работе</option>
             <option value="RESOLVED">Решено</option>

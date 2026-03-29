@@ -87,7 +87,7 @@ export default function CalendarPage() {
             variant="outline" 
             size="sm" 
             onClick={() => setDeleteConfirm(row)}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-[var(--color-red)] hover:text-[var(--color-red)] hover:bg-[rgba(255,59,48,0.06)]"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -99,28 +99,28 @@ export default function CalendarPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+        <h1 className="macos-text-title flex items-center gap-2">
           <Calendar className="h-6 w-6" />
           Календарь событий
         </h1>
-        <div className="flex bg-gray-100 p-1 rounded-lg">
+        <div className="flex bg-[var(--fill-tertiary)] p-1 rounded-lg">
             <button
                 onClick={() => setViewMode('calendar')}
-                className={`p-2 rounded-md transition-all ${viewMode === 'calendar' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`p-2 rounded-md transition-all ${viewMode === 'calendar' ? 'bg-white shadow text-[var(--color-blue)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                 title="Календарь"
             >
                 <Grid className="w-5 h-5" />
             </button>
             <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow text-[var(--color-blue)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                 title="Список"
             >
                 <List className="w-5 h-5" />
             </button>
             <button
                 onClick={() => setViewMode('planner')}
-                className={`p-2 rounded-md transition-all ${viewMode === 'planner' ? 'bg-white shadow text-pink-500' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`p-2 rounded-md transition-all ${viewMode === 'planner' ? 'bg-white shadow text-pink-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                 title="Планер для соцсетей"
             >
                 <Share2 className="w-5 h-5" />
@@ -176,20 +176,20 @@ export default function CalendarPage() {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление события">
         <div className="p-4">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,59,48,0.12)] rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-[var(--color-red)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить это событие?</p>
+              <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить это событие?</p>
               {deleteConfirm && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-md">
-                  <p className="text-sm font-medium">{deleteConfirm.title}</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-md">
+                  <p className="macos-text-caption">{deleteConfirm.title}</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">
                     {new Date(deleteConfirm.date).toLocaleDateString('ru-RU')}
                   </p>
                 </div>
               )}
-              <p className="text-sm text-gray-500 mt-2">Это действие нельзя отменить.</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-2">Это действие нельзя отменить.</p>
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-6">

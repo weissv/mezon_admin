@@ -46,17 +46,17 @@ export function DocumentTemplateForm({ initialData, onSuccess, onCancel }: Docum
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Название шаблона</label>
+        <label className="block macos-text-caption mb-1">Название шаблона</label>
         <Input {...register('name')} placeholder="Договор стандартный" />
         <FormError message={errors.name?.message} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Содержимое</label>
+        <label className="block macos-text-caption mb-1">Содержимое</label>
         <textarea
           {...register('content')}
           placeholder="Шаблон документа..."
-          className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full h-32 px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <FormError message={errors.content?.message} />
       </div>

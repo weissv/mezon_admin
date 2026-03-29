@@ -74,12 +74,12 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="mezon-section-title text-3xl">Посещаемость</h1>
+      <h1 className="macos-text-title">Посещаемость</h1>
 
-      <Card className="p-4">
+      <Card className="p-4 shadow-[var(--shadow-sm)]">
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <label htmlFor="date-select" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            <label htmlFor="date-select" className="block macos-text-caption mb-1">
               Дата
             </label>
             <input
@@ -91,7 +91,7 @@ export default function AttendancePage() {
             />
           </div>
           <div>
-            <label htmlFor="group-select" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            <label htmlFor="group-select" className="block macos-text-caption mb-1">
               Класс
             </label>
             <select
@@ -112,19 +112,19 @@ export default function AttendancePage() {
       </Card>
 
       {error && (
-        <div className="text-[var(--color-red)] bg-[rgba(255,59,48,0.06)] border border-[rgba(255,59,48,0.15)] p-3 rounded-[var(--radius-md)]">
+        <div className="macos-text-callout text-[var(--macos-red)] bg-[rgba(255,59,48,0.06)] border border-[rgba(255,59,48,0.15)] p-3 rounded-[var(--radius-md)]">
           {error}
         </div>
       )}
 
-      <Card>
+      <Card className="shadow-[var(--shadow-sm)]">
         {loading ? (
-          <div className="p-4 text-center text-[var(--text-tertiary)]">Загрузка...</div>
+          <div className="p-4 text-center macos-text-body text-[var(--text-tertiary)]">Загрузка...</div>
         ) : (
           <ul className="divide-y divide-[var(--separator)]">
             {children.map((child) => (
               <li key={child.id} className="p-4 flex justify-between items-center">
-                <span className="font-medium text-[var(--text-primary)]">{child.lastName} {child.firstName}</span>
+                <span className="macos-text-callout text-[var(--text-primary)]">{child.lastName} {child.firstName}</span>
                 <div className="flex gap-2">
                   <Button
                     onClick={() => handleSetPresence(child.id, true)}
@@ -150,7 +150,7 @@ export default function AttendancePage() {
               </li>
             ))}
             {children.length === 0 && !loading && (
-              <li className="p-4 text-center text-[var(--text-tertiary)]">В этом классе нет детей или класс не выбран.</li>
+              <li className="p-4 text-center macos-text-body text-[var(--text-tertiary)]">В этом классе нет детей или класс не выбран.</li>
             )}
           </ul>
         )}

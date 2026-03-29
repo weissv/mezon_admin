@@ -83,17 +83,17 @@ export function DishForm({ initialData, onSuccess, onCancel }: DishFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Название блюда *</label>
+        <label className="block macos-text-caption mb-1">Название блюда *</label>
         <Input {...register('name')} placeholder="Молочная каша" />
         <FormError message={errors.name?.message} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Категория *</label>
+          <label className="block macos-text-caption mb-1">Категория *</label>
           <select 
             {...register('category')} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Выберите категорию</option>
             <option value="Завтрак">Завтрак</option>
@@ -105,7 +105,7 @@ export function DishForm({ initialData, onSuccess, onCancel }: DishFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Время приготовления (мин)</label>
+          <label className="block macos-text-caption mb-1">Время приготовления (мин)</label>
           <Input type="number" {...register('preparationTime')} placeholder="30" />
           <FormError message={errors.preparationTime?.message} />
         </div>
@@ -128,7 +128,7 @@ export function DishForm({ initialData, onSuccess, onCancel }: DishFormProps) {
           <div key={field.id} className="flex gap-2 mb-2 items-start">
             <div className="flex-1">
               <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm"
                 {...register(`ingredients.${index}.ingredientId`, { valueAsNumber: true })}
                 disabled={isLoadingIngredients}
               >

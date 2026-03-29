@@ -367,7 +367,7 @@ export default function AiAssistantPage() {
           className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-colors ${
             activeTab === "chat"
               ? "bg-indigo-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              : "bg-[var(--fill-tertiary)] text-[var(--text-primary)] hover:bg-[var(--fill-secondary)]"
           }`}
         >
           <Bot className="h-4 w-4" />
@@ -378,7 +378,7 @@ export default function AiAssistantPage() {
           className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-colors ${
             activeTab === "knowledge"
               ? "bg-indigo-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              : "bg-[var(--fill-tertiary)] text-[var(--text-primary)] hover:bg-[var(--fill-secondary)]"
           }`}
         >
           <FileText className="h-4 w-4" />
@@ -389,11 +389,11 @@ export default function AiAssistantPage() {
       {activeTab === "chat" ? (
         <>
           {/* Chat Messages */}
-          <div className="min-h-[400px] rounded-lg border bg-gray-50 p-4">
+          <div className="min-h-[400px] rounded-lg border bg-[var(--fill-quaternary)] p-4">
             {messages.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center text-gray-500">
+              <div className="flex h-full flex-col items-center justify-center text-[var(--text-secondary)]">
                 <Sparkles className="mb-4 h-16 w-16 text-indigo-400" />
-                <h2 className="mb-2 text-xl font-semibold text-gray-700">
+                <h2 className="mb-2 text-xl font-semibold text-[var(--text-primary)]">
                   ИИ-Методист
                 </h2>
                 <p className="max-w-md text-center">
@@ -409,7 +409,7 @@ export default function AiAssistantPage() {
                     <button
                       key={prompt}
                       onClick={() => setInputValue(prompt)}
-                      className="rounded-full bg-white px-3 py-1.5 text-sm text-gray-600 shadow-sm hover:bg-gray-100"
+                      className="rounded-full bg-white px-3 py-1.5 text-sm text-[var(--text-secondary)] shadow-sm hover:bg-[var(--fill-tertiary)]"
                     >
                       {prompt}
                     </button>
@@ -476,14 +476,14 @@ export default function AiAssistantPage() {
                       )}
                       {message.sources && message.sources.length > 0 && (
                         <div className="mt-3 border-t pt-2">
-                          <p className="mb-1 text-xs font-medium text-gray-500">
+                          <p className="mb-1 text-xs font-medium text-[var(--text-secondary)]">
                             Источники из базы знаний:
                           </p>
                           <div className="space-y-1">
                             {message.sources.map((source, i) => (
                               <div
                                 key={i}
-                                className="rounded bg-gray-50 p-2 text-xs text-gray-600"
+                                className="rounded bg-[var(--fill-quaternary)] p-2 text-xs text-[var(--text-secondary)]"
                               >
                                 <span className="font-medium">
                                   {source.metadata?.title ||
@@ -491,7 +491,7 @@ export default function AiAssistantPage() {
                                     `Документ #${source.id}`}
                                 </span>
                                 {source.similarity && (
-                                  <span className="ml-2 text-gray-400">
+                                  <span className="ml-2 text-[var(--text-tertiary)]">
                                     (релевантность:{" "}
                                     {Math.round(source.similarity * 100)}%)
                                   </span>
@@ -516,7 +516,7 @@ export default function AiAssistantPage() {
                     </div>
                     <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm">
                       <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
-                      <span className="text-gray-500">Думаю...</span>
+                      <span className="text-[var(--text-secondary)]">Думаю...</span>
                     </div>
                   </div>
                 )}
@@ -552,7 +552,7 @@ export default function AiAssistantPage() {
           {(user?.role === 'ADMIN' || user?.role === 'DIRECTOR') && (
             <div className="mt-4 border-t pt-4">
               <details className="group">
-                <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-gray-700 hover:text-indigo-600">
+                <summary className="flex items-center justify-between cursor-pointer macos-text-caption text-[var(--text-primary)] hover:text-indigo-600">
                   <span className="flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -565,7 +565,7 @@ export default function AiAssistantPage() {
                   </svg>
                 </summary>
                 <div className="mt-3 space-y-3">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Здесь вы можете настроить поведение и инструкции для ИИ-методиста. Изменения будут применены ко всем новым диалогам.
                   </p>
                   <textarea
@@ -580,7 +580,7 @@ export default function AiAssistantPage() {
                     <button
                       onClick={() => setResetPromptConfirmOpen(true)}
                       disabled={isSavingPrompt}
-                      className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                      className="px-3 py-1.5 text-sm rounded-lg border border-[rgba(0,0,0,0.12)] text-[var(--text-secondary)] hover:bg-[var(--fill-quaternary)] disabled:opacity-50 transition-colors"
                     >
                       Сбросить к стандартному
                     </button>
@@ -606,8 +606,8 @@ export default function AiAssistantPage() {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <FolderOpen className="h-5 w-5 text-yellow-500" />
-                  <h2 className="text-lg font-semibold text-gray-800">
+                  <FolderOpen className="h-5 w-5 text-[var(--color-orange)]" />
+                  <h2 className="macos-text-callout text-gray-800">
                     Google Drive - Учебные материалы
                   </h2>
                 </div>
@@ -616,7 +616,7 @@ export default function AiAssistantPage() {
                     <button
                       onClick={() => setSyncConfirmOpen(true)}
                       disabled={isSyncing}
-                      className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+                      className="flex items-center gap-1 text-sm bg-[var(--color-green)] text-white px-3 py-1.5 rounded-lg hover:bg-[var(--color-green)] disabled:bg-gray-400"
                     >
                       {isSyncing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -645,7 +645,7 @@ export default function AiAssistantPage() {
                   allow="autoplay"
                 />
               </div>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-[var(--text-secondary)]">
                 💡 Нажмите "Синхронизировать" чтобы загрузить документы из Google Drive в базу знаний RAG
               </p>
             </div>
@@ -656,7 +656,7 @@ export default function AiAssistantPage() {
             {/* Local Documents Section */}
             <div>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-800">
+                <h2 className="macos-text-callout text-gray-800">
                   Локальные документы ({documents.length})
                 </h2>
                 {canManageDocuments && (
@@ -675,7 +675,7 @@ export default function AiAssistantPage() {
                   <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
                 </div>
               ) : documents.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                <div className="flex flex-col items-center justify-center py-8 text-[var(--text-secondary)]">
                   <FileText className="mb-4 h-12 w-12" />
                   <p>Локальные документы не добавлены</p>
                   {canManageDocuments && (
@@ -696,21 +696,21 @@ export default function AiAssistantPage() {
                           <h3 className="font-medium text-gray-800">
                             {doc.metadata?.title || `Документ #${doc.id}`}
                           </h3>
-                          <div className="mt-1 flex gap-2 text-xs text-gray-500">
+                          <div className="mt-1 flex gap-2 text-xs text-[var(--text-secondary)]">
                             {doc.metadata?.subject && (
-                              <span className="rounded bg-blue-100 px-2 py-0.5 text-blue-700">
+                              <span className="rounded bg-[rgba(0,122,255,0.12)] px-2 py-0.5 text-[var(--color-blue)]">
                                 {doc.metadata.subject}
                               </span>
                             )}
                             {doc.metadata?.grade && (
-                              <span className="rounded bg-green-100 px-2 py-0.5 text-green-700">
+                              <span className="rounded bg-[rgba(52,199,89,0.12)] px-2 py-0.5 text-[var(--color-green)]">
                                 {doc.metadata.grade}
                               </span>
                             )}
                             {Array.isArray(doc.metadata?.tags) && doc.metadata.tags.map((tag, i) => (
                               <span
                                 key={i}
-                                className="rounded bg-gray-100 px-2 py-0.5 text-gray-600"
+                                className="rounded bg-[var(--fill-tertiary)] px-2 py-0.5 text-[var(--text-secondary)]"
                               >
                                 {tag}
                               </span>
@@ -720,16 +720,16 @@ export default function AiAssistantPage() {
                         {canManageDocuments && (
                           <button
                             onClick={() => setDeleteConfirm(doc)}
-                            className="text-gray-400 hover:text-red-500"
+                            className="text-[var(--text-tertiary)] hover:text-[var(--color-red)]"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
                         )}
                       </div>
-                      <p className="line-clamp-3 text-sm text-gray-600">
+                      <p className="line-clamp-3 text-sm text-[var(--text-secondary)]">
                         {doc.content}
                       </p>
-                      <p className="mt-2 text-xs text-gray-400">
+                      <p className="mt-2 text-xs text-[var(--text-tertiary)]">
                         Добавлен:{" "}
                         {new Date(doc.createdAt).toLocaleDateString("ru-RU")}
                       </p>
@@ -751,14 +751,14 @@ export default function AiAssistantPage() {
             </h2>
             
             {/* Hint about Google Drive */}
-            <div className="mb-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
+            <div className="mb-4 rounded-lg bg-[rgba(0,122,255,0.06)] border border-blue-200 p-3">
               <p className="text-sm text-blue-800">
                 <strong>💡 Совет:</strong> Откройте документ в{" "}
                 <a 
                   href={GOOGLE_DRIVE_LINK} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="underline hover:text-blue-600"
+                  className="underline hover:text-[var(--color-blue)]"
                 >
                   Google Drive
                 </a>
@@ -769,7 +769,7 @@ export default function AiAssistantPage() {
 
             <div className="mb-4 grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block macos-text-caption text-[var(--text-primary)]">
                   Название *
                 </label>
                 <input
@@ -783,7 +783,7 @@ export default function AiAssistantPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block macos-text-caption text-[var(--text-primary)]">
                   Предмет
                 </label>
                 <input
@@ -797,7 +797,7 @@ export default function AiAssistantPage() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block macos-text-caption text-[var(--text-primary)]">
                   Класс/Возраст
                 </label>
                 <input
@@ -813,7 +813,7 @@ export default function AiAssistantPage() {
             </div>
 
             <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block macos-text-caption text-[var(--text-primary)]">
                 Содержимое документа *
               </label>
               <textarea
@@ -822,7 +822,7 @@ export default function AiAssistantPage() {
                 className="h-64 w-full rounded-lg border p-3 font-mono text-sm"
                 placeholder="Вставьте текст учебной программы, методических рекомендаций или других материалов...&#10;&#10;Скопируйте содержимое документа из Google Drive и вставьте сюда."
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-[var(--text-secondary)]">
                 {newDocContent.length > 0 
                   ? `${newDocContent.length} символов • ~${Math.ceil(newDocContent.length / 3000)} частей`
                   : "Минимум 10 символов"
@@ -837,7 +837,7 @@ export default function AiAssistantPage() {
                   setNewDocContent("");
                   setNewDocMetadata({ title: "", subject: "", grade: "", tags: "" });
                 }}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
+                className="rounded-lg bg-[var(--fill-tertiary)] px-4 py-2 text-[var(--text-primary)] hover:bg-[var(--fill-secondary)]"
               >
                 Отмена
               </button>
@@ -857,20 +857,20 @@ export default function AiAssistantPage() {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление документа">
         <div className="p-4">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,59,48,0.12)] rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-[var(--color-red)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить этот документ из базы знаний?</p>
+              <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить этот документ из базы знаний?</p>
               {deleteConfirm && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-md">
-                  <p className="text-sm font-medium">{deleteConfirm.metadata?.title || `Документ #${deleteConfirm.id}`}</p>
+                <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-md">
+                  <p className="macos-text-caption">{deleteConfirm.metadata?.title || `Документ #${deleteConfirm.id}`}</p>
                   {deleteConfirm.metadata?.subject && (
-                    <p className="text-xs text-gray-500 mt-1">Предмет: {deleteConfirm.metadata.subject}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1">Предмет: {deleteConfirm.metadata.subject}</p>
                   )}
                 </div>
               )}
-              <p className="text-sm text-gray-500 mt-2">Это действие нельзя отменить.</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-2">Это действие нельзя отменить.</p>
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-6">
@@ -888,12 +888,12 @@ export default function AiAssistantPage() {
       <Modal isOpen={syncConfirmOpen} onClose={() => setSyncConfirmOpen(false)} title="Синхронизация с Google Drive">
         <div className="p-4">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <RefreshCw className="h-5 w-5 text-blue-600" />
+            <div className="flex-shrink-0 w-10 h-10 bg-[rgba(0,122,255,0.12)] rounded-full flex items-center justify-center">
+              <RefreshCw className="h-5 w-5 text-[var(--color-blue)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Синхронизировать документы из Google Drive?</p>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="font-medium text-[var(--text-primary)]">Синхронизировать документы из Google Drive?</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-2">
                 Это может занять некоторое время в зависимости от количества документов.
               </p>
             </div>
@@ -915,14 +915,14 @@ export default function AiAssistantPage() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
-                <RefreshCw className="h-6 w-6 text-blue-600 animate-spin" />
+                <RefreshCw className="h-6 w-6 text-[var(--color-blue)] animate-spin" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-[var(--text-primary)]">
                   {syncStatus ? 'Синхронизация...' : 'Запуск синхронизации...'}
                 </p>
                 {syncStatus?.currentFile && (
-                  <p className="text-sm text-gray-500 truncate mt-1" title={syncStatus.currentFile}>
+                  <p className="text-sm text-[var(--text-secondary)] truncate mt-1" title={syncStatus.currentFile}>
                     {syncStatus.currentFile}
                   </p>
                 )}
@@ -932,15 +932,15 @@ export default function AiAssistantPage() {
             {syncStatus && syncStatus.total > 0 && (
               <>
                 {/* Progress bar */}
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-[var(--fill-secondary)] rounded-full h-3 overflow-hidden">
                   <div 
-                    className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                    className="bg-[var(--color-blue)] h-3 rounded-full transition-all duration-300"
                     style={{ width: `${Math.round((syncStatus.current / syncStatus.total) * 100)}%` }}
                   />
                 </div>
                 
                 {/* Progress text */}
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-[var(--text-secondary)]">
                   <span>
                     Файл {syncStatus.current} из {syncStatus.total}
                   </span>
@@ -951,21 +951,21 @@ export default function AiAssistantPage() {
                 
                 {/* Statistics */}
                 <div className="grid grid-cols-4 gap-2 text-center text-xs mt-2">
-                  <div className="bg-green-50 rounded p-2">
-                    <div className="font-semibold text-green-700">{syncStatus.synced}</div>
-                    <div className="text-green-600">Добавлено</div>
+                  <div className="bg-[rgba(52,199,89,0.06)] rounded p-2">
+                    <div className="font-semibold text-[var(--color-green)]">{syncStatus.synced}</div>
+                    <div className="text-[var(--color-green)]">Добавлено</div>
                   </div>
-                  <div className="bg-blue-50 rounded p-2">
-                    <div className="font-semibold text-blue-700">{syncStatus.updated}</div>
-                    <div className="text-blue-600">Обновлено</div>
+                  <div className="bg-[rgba(0,122,255,0.06)] rounded p-2">
+                    <div className="font-semibold text-[var(--color-blue)]">{syncStatus.updated}</div>
+                    <div className="text-[var(--color-blue)]">Обновлено</div>
                   </div>
-                  <div className="bg-gray-50 rounded p-2">
-                    <div className="font-semibold text-gray-700">{syncStatus.skipped}</div>
-                    <div className="text-gray-600">Пропущено</div>
+                  <div className="bg-[var(--fill-quaternary)] rounded p-2">
+                    <div className="font-semibold text-[var(--text-primary)]">{syncStatus.skipped}</div>
+                    <div className="text-[var(--text-secondary)]">Пропущено</div>
                   </div>
-                  <div className="bg-red-50 rounded p-2">
-                    <div className="font-semibold text-red-700">{syncStatus.errors}</div>
-                    <div className="text-red-600">Ошибок</div>
+                  <div className="bg-[rgba(255,59,48,0.06)] rounded p-2">
+                    <div className="font-semibold text-[var(--color-red)]">{syncStatus.errors}</div>
+                    <div className="text-[var(--color-red)]">Ошибок</div>
                   </div>
                 </div>
               </>
@@ -978,12 +978,12 @@ export default function AiAssistantPage() {
       <Modal isOpen={resetPromptConfirmOpen} onClose={() => setResetPromptConfirmOpen(false)} title="Сброс системного промта">
         <div className="p-4">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,204,0,0.12)] rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-[var(--color-orange)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Сбросить системный промт к значению по умолчанию?</p>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="font-medium text-[var(--text-primary)]">Сбросить системный промт к значению по умолчанию?</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-2">
                 Все ваши настройки промта будут потеряны.
               </p>
             </div>

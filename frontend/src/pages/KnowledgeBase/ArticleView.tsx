@@ -31,21 +31,21 @@ function renderMarkdown(md: string): string {
     // Блоки кода
     .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto my-4 text-sm"><code>$2</code></pre>')
     // Инлайн-код
-    .replace(/`([^`]+)`/g, '<code class="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm">$1</code>')
+    .replace(/`([^`]+)`/g, '<code class="bg-[var(--fill-tertiary)] text-[var(--color-red)] px-1.5 py-0.5 rounded text-sm">$1</code>')
     // Заголовки
-    .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-6 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-8 mb-3">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
+    .replace(/^### (.+)$/gm, '<h3 class="macos-text-callout mt-6 mb-2">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="macos-text-title mt-8 mb-3">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="macos-text-title mt-8 mb-4">$1</h1>')
     // Жирный + курсив
     .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     // Цитаты
-    .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-blue-400 pl-4 py-1 my-3 text-gray-600 italic">$1</blockquote>')
+    .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-blue-400 pl-4 py-1 my-3 text-[var(--text-secondary)] italic">$1</blockquote>')
     // Горизонтальная линия
-    .replace(/^---$/gm, '<hr class="my-6 border-gray-200" />')
+    .replace(/^---$/gm, '<hr class="my-6 border-[rgba(0,0,0,0.08)]" />')
     // Ссылки
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="text-blue-600 hover:underline">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="text-[var(--color-blue)] hover:underline">$1</a>')
     // Маркированные списки
     .replace(/^[\-\*] (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
     // Нумерованные списки
@@ -176,7 +176,7 @@ export default function ArticleView() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate("/knowledge-base")}
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors"
+          className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-gray-800 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Назад к списку
@@ -187,7 +187,7 @@ export default function ArticleView() {
             <Button variant="outline" size="sm" onClick={startEditing}>
               <Edit className="mr-1 h-4 w-4" /> Редактировать
             </Button>
-            <Button variant="outline" size="sm" onClick={handleDelete} className="text-red-600 hover:text-red-700">
+            <Button variant="outline" size="sm" onClick={handleDelete} className="text-[var(--color-red)] hover:text-[var(--color-red)]">
               <Trash2 className="mr-1 h-4 w-4" /> Удалить
             </Button>
           </div>
@@ -208,22 +208,22 @@ export default function ArticleView() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* ===== Основной контент ===== */}
         <div className="flex-1 min-w-0">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 lg:p-8">
+          <div className="bg-white rounded-xl border border-[rgba(0,0,0,0.08)] p-6 lg:p-8">
             {isEditing ? (
               /* Режим редактирования */
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Заголовок</label>
+                  <label className="block macos-text-caption mb-1">Заголовок</label>
                   <input
                     type="text"
                     value={editForm.title || ""}
                     onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg font-semibold"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none macos-text-callout"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Содержимое (Markdown)</label>
+                  <label className="block macos-text-caption mb-1">Содержимое (Markdown)</label>
                   <textarea
                     value={editForm.content || ""}
                     onChange={(e) => setEditForm((p) => ({ ...p, content: e.target.value }))}
@@ -233,7 +233,7 @@ export default function ArticleView() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Теги</label>
+                  <label className="block macos-text-caption mb-1">Теги</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -252,10 +252,10 @@ export default function ArticleView() {
                       {editForm.tags!.map((tag) => (
                         <span
                           key={tag}
-                          className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center gap-1"
+                          className="px-2 py-1 bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)] text-xs rounded-full flex items-center gap-1"
                         >
                           {tag}
-                          <button onClick={() => removeEditTag(tag)} className="hover:text-red-500">×</button>
+                          <button onClick={() => removeEditTag(tag)} className="hover:text-[var(--color-red)]">×</button>
                         </span>
                       ))}
                     </div>
@@ -268,7 +268,7 @@ export default function ArticleView() {
                 <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
 
                 {/* Мета-информация */}
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6 pb-4 border-b border-gray-100">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-secondary)] mb-6 pb-4 border-b border-[rgba(0,0,0,0.04)]">
                   {article.author && (
                     <span className="flex items-center gap-1">
                       <User className="h-4 w-4" />
@@ -292,7 +292,7 @@ export default function ArticleView() {
                       <Link
                         key={tag}
                         to={`/knowledge-base?tags=${tag}`}
-                        className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full hover:bg-blue-100 transition-colors flex items-center gap-1"
+                        className="px-3 py-1 bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)] text-sm rounded-full hover:bg-[rgba(0,122,255,0.12)] transition-colors flex items-center gap-1"
                       >
                         <Tag className="h-3 w-3" />
                         {tag}
@@ -314,8 +314,8 @@ export default function ArticleView() {
         {/* ===== Сайдбар: Похожие статьи ===== */}
         {!isEditing && related.length > 0 && (
           <aside className="lg:w-80 flex-shrink-0">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-6">
-              <h3 className="font-semibold text-sm text-gray-700 mb-4 flex items-center gap-2">
+            <div className="bg-white rounded-xl border border-[rgba(0,0,0,0.08)] p-5 sticky top-6">
+              <h3 className="font-semibold text-sm text-[var(--text-primary)] mb-4 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-blue-500" />
                 Похожие статьи
               </h3>
@@ -325,10 +325,10 @@ export default function ArticleView() {
                   <Link
                     key={rel.id}
                     to={`/knowledge-base/${rel.slug}`}
-                    className="block p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+                    className="block p-3 rounded-lg hover:bg-[var(--fill-quaternary)] transition-colors border border-transparent hover:border-[rgba(0,0,0,0.08)]"
                   >
                     <h4 className="font-medium text-sm mb-1 line-clamp-2">{rel.title}</h4>
-                    <p className="text-xs text-gray-500 line-clamp-2">{rel.summary}</p>
+                    <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{rel.summary}</p>
                     {rel.similarity !== undefined && rel.similarity !== null && (
                       <span className="text-xs text-blue-500 mt-1 inline-block">
                         {(rel.similarity * 100).toFixed(0)}% сходство

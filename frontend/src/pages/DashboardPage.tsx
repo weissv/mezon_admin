@@ -109,8 +109,8 @@ export default function DashboardPage() {
 
   if (error || !bootstrap || !preferences) {
     return (
-      <div className="mezon-card text-center py-12">
-        <p className="text-red-500 mb-4">{error ?? 'Не удалось загрузить дашборд'}</p>
+      <div className="mezon-card text-center py-12 shadow-[var(--shadow-sm)]">
+        <p className="macos-text-callout text-[var(--macos-red)] mb-4">{error ?? 'Не удалось загрузить дашборд'}</p>
         <Button onClick={refetch}>Повторить</Button>
       </div>
     );
@@ -121,20 +121,20 @@ export default function DashboardPage() {
       {/* ---- Header ---- */}
       <header className="dashboard-page-header">
         <div className="dashboard-page-header__main">
-          <span className="mezon-badge">Mezon ERP</span>
-          <h1 className="mezon-section-title text-3xl mt-1">Дашборд</h1>
-          <p className="dashboard-page-header__subtitle">
+          <span className="mezon-badge macos-badge-neutral">Mezon ERP</span>
+          <h1 className="macos-text-title mt-2">Дашборд</h1>
+          <p className="macos-text-subtitle mt-1 text-[var(--text-secondary)]">
             Единая рабочая поверхность для метрик, сигналов и быстрых действий по операционному контуру.
           </p>
-          <div className="dashboard-page-header__meta">
-            <span className="dashboard-page-header__meta-item">
+          <div className="dashboard-page-header__meta mt-3">
+            <span className="macos-text-caption">
               Виджетов: {bootstrap.overview.visibleWidgetCount}
             </span>
-            <span className="dashboard-page-header__meta-item">
+            <span className="macos-text-caption ml-3">
               Действий: {bootstrap.overview.quickActionCount}
             </span>
             {activeView && (
-              <span className="dashboard-page-header__meta-item dashboard-page-header__meta-item--accent">
+              <span className="macos-text-caption ml-3 text-[var(--color-blue)]">
                 Вид: {activeView.name}
               </span>
             )}

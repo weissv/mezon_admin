@@ -102,7 +102,7 @@ export const UkiyoeCalendar: React.FC<UkiyoeCalendarProps> = ({ events, onEdit, 
                         <div 
                             key={event.id}
                             onClick={() => onEdit(event)}
-                            className="text-xs p-1.5 rounded cursor-pointer border-l-2 shadow-sm hover:shadow-md transition-all font-serif group/event flex justify-between items-center bg-white border-l-[#1d3b56] text-[#2c2c2c] hover:bg-gray-50"
+                            className="text-xs p-1.5 rounded cursor-pointer border-l-2 shadow-sm hover:shadow-md transition-all font-serif group/event flex justify-between items-center bg-white border-l-[#1d3b56] text-[#2c2c2c] hover:bg-[var(--fill-quaternary)]"
                             title={`${event.title}${event.group ? ` (${event.group.name})` : ''}\nОрганизатор: ${event.organizer}${event.performers?.length ? `\nИсполнители: ${event.performers.join(', ')}` : ''}`}
                         >
                             <span className="truncate flex-1">{event.title}</span>
@@ -111,7 +111,7 @@ export const UkiyoeCalendar: React.FC<UkiyoeCalendarProps> = ({ events, onEdit, 
                                     e.stopPropagation();
                                     onDelete(event);
                                 }}
-                                className="opacity-0 group-hover/event:opacity-100 p-0.5 hover:bg-red-100 rounded text-red-500 transition-opacity"
+                                className="opacity-0 group-hover/event:opacity-100 p-0.5 hover:bg-[rgba(255,59,48,0.12)] rounded text-[var(--color-red)] transition-opacity"
                             >
                                 <Trash2 className="w-3 h-3" />
                             </button>

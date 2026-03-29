@@ -37,7 +37,7 @@ export default function MenuTodayWidget({ data }: { data: MenuTodayData | undefi
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
         <div className="flex items-center gap-1">
           <Users className="h-3 w-3" />
           <span>{data.childrenOnMeals} / {data.totalChildren} на питании</span>
@@ -47,7 +47,7 @@ export default function MenuTodayWidget({ data }: { data: MenuTodayData | undefi
 
       {grouped.map(group => (
         <div key={group.type}>
-          <p className="text-xs font-semibold text-gray-600 mb-1">{group.label}</p>
+          <p className="text-xs font-semibold text-[var(--text-secondary)] mb-1">{group.label}</p>
           <div className="flex flex-wrap gap-1">
             {group.items.map((item, i) => (
               <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">
@@ -60,7 +60,7 @@ export default function MenuTodayWidget({ data }: { data: MenuTodayData | undefi
       ))}
 
       {grouped.length === 0 && (
-        <p className="text-sm text-gray-400 text-center py-2">Меню не задано</p>
+        <p className="text-sm text-[var(--text-tertiary)] text-center py-2">Меню не задано</p>
       )}
     </div>
   );

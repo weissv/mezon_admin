@@ -28,15 +28,15 @@ const statusLabel = (s: string) => {
 
 const statusColor = (s: string) => {
   switch (s) {
-    case 'ACTIVE': return 'bg-green-100 text-green-800';
-    case 'LEFT': return 'bg-yellow-100 text-yellow-800';
-    case 'ARCHIVED': return 'bg-gray-100 text-gray-600';
-    default: return 'bg-gray-100 text-gray-600';
+    case 'ACTIVE': return 'bg-[rgba(52,199,89,0.12)] text-green-800';
+    case 'LEFT': return 'bg-[rgba(255,204,0,0.12)] text-yellow-800';
+    case 'ARCHIVED': return 'bg-[var(--fill-tertiary)] text-[var(--text-secondary)]';
+    default: return 'bg-[var(--fill-tertiary)] text-[var(--text-secondary)]';
   }
 };
 
 function HealthBlock({ info }: { info: HealthInfo | null | undefined }) {
-  if (!info) return <p className="text-sm text-gray-400">Не указана</p>;
+  if (!info) return <p className="text-sm text-[var(--text-tertiary)]">Не указана</p>;
   return (
     <div className="text-sm space-y-1">
       {info.allergies?.length ? <p><span className="font-medium">Аллергии:</span> {info.allergies.join(', ')}</p> : null}
@@ -58,13 +58,13 @@ export default function ChildDetailPage() {
   const [showAbsences, setShowAbsences] = useState(false);
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-[200px] text-gray-500">Загрузка...</div>;
+    return <div className="flex items-center justify-center min-h-[200px] text-[var(--text-secondary)]">Загрузка...</div>;
   }
 
   if (error || !child) {
     return (
       <div className="p-6 text-center">
-        <p className="text-red-600 mb-3">Ребёнок не найден</p>
+        <p className="text-[var(--color-red)] mb-3">Ребёнок не найден</p>
         <Button variant="outline" onClick={() => navigate('/children')}>
           <ArrowLeft className="mr-2 h-4 w-4" /> К списку
         </Button>
@@ -83,12 +83,12 @@ export default function ChildDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold">{fullName}</h1>
+            <h1 className="text-xl sm:macos-text-title">{fullName}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor(child.status)}`}>
                 {statusLabel(child.status)}
               </span>
-              <span className="text-sm text-gray-500">{child.group.name}</span>
+              <span className="text-sm text-[var(--text-secondary)]">{child.group.name}</span>
             </div>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function ChildDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Основные данные */}
         <Card className="p-4">
-          <h3 className="font-semibold text-sm text-gray-700 mb-3">Основные данные</h3>
+          <h3 className="font-semibold text-sm text-[var(--text-primary)] mb-3">Основные данные</h3>
           <dl className="space-y-2 text-sm">
             <Row label="Дата рождения" value={new Date(child.birthDate).toLocaleDateString('ru-RU')} />
             <Row label="Пол" value={genderLabel(child.gender as Gender)} />
@@ -131,27 +131,27 @@ export default function ChildDetailPage() {
 
         {/* Родители */}
         <Card className="p-4">
-          <h3 className="font-semibold text-sm text-gray-700 mb-3 flex items-center gap-1">
+          <h3 className="font-semibold text-sm text-[var(--text-primary)] mb-3 flex items-center gap-1">
             <Users className="h-4 w-4" /> Родители / Опекуны
           </h3>
           {child.parents && child.parents.length > 0 ? (
             <div className="space-y-3">
               {child.parents.map((p) => (
                 <div key={p.id} className="border-b pb-2 last:border-b-0 last:pb-0">
-                  <p className="font-medium text-sm">{p.fullName} <span className="text-gray-500 font-normal">({p.relation})</span></p>
-                  {p.phone && <p className="text-xs text-gray-500">{p.phone}</p>}
-                  {p.email && <p className="text-xs text-gray-500">{p.email}</p>}
-                  {p.workplace && <p className="text-xs text-gray-400">{p.workplace}</p>}
+                  <p className="font-medium text-sm">{p.fullName} <span className="text-[var(--text-secondary)] font-normal">({p.relation})</span></p>
+                  {p.phone && <p className="text-xs text-[var(--text-secondary)]">{p.phone}</p>}
+                  {p.email && <p className="text-xs text-[var(--text-secondary)]">{p.email}</p>}
+                  {p.workplace && <p className="text-xs text-[var(--text-tertiary)]">{p.workplace}</p>}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-tertiary)]">
               {child.fatherName || child.motherName
                 ? <>
                     {child.fatherName && <span className="block">Отец: {child.fatherName}</span>}
                     {child.motherName && <span className="block">Мать: {child.motherName}</span>}
-                    {child.parentPhone && <span className="block text-xs text-gray-500">Тел: {child.parentPhone}</span>}
+                    {child.parentPhone && <span className="block text-xs text-[var(--text-secondary)]">Тел: {child.parentPhone}</span>}
                   </>
                 : 'Не указана'}
             </p>
@@ -160,7 +160,7 @@ export default function ChildDetailPage() {
 
         {/* Договор */}
         <Card className="p-4">
-          <h3 className="font-semibold text-sm text-gray-700 mb-3">Договор</h3>
+          <h3 className="font-semibold text-sm text-[var(--text-primary)] mb-3">Договор</h3>
           <dl className="space-y-2 text-sm">
             <Row label="№ договора" value={child.contractNumber || '—'} />
             <Row label="Дата договора" value={child.contractDate ? new Date(child.contractDate).toLocaleDateString('ru-RU') : '—'} />
@@ -169,19 +169,19 @@ export default function ChildDetailPage() {
 
         {/* Мед. сведения */}
         <Card className="p-4">
-          <h3 className="font-semibold text-sm text-gray-700 mb-3">Медицинские сведения</h3>
+          <h3 className="font-semibold text-sm text-[var(--text-primary)] mb-3">Медицинские сведения</h3>
           <HealthBlock info={child.healthInfo as HealthInfo | null} />
         </Card>
 
         {/* Кружки */}
         {child.enrollments && child.enrollments.length > 0 && (
           <Card className="p-4 md:col-span-2">
-            <h3 className="font-semibold text-sm text-gray-700 mb-3 flex items-center gap-1">
+            <h3 className="font-semibold text-sm text-[var(--text-primary)] mb-3 flex items-center gap-1">
               <BookOpen className="h-4 w-4" /> Кружки
             </h3>
             <div className="flex flex-wrap gap-2">
               {child.enrollments.map((e) => (
-                <span key={e.id} className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                <span key={e.id} className="inline-block bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)] text-xs px-2 py-1 rounded-full">
                   {e.club.name}
                 </span>
               ))}
@@ -192,7 +192,7 @@ export default function ChildDetailPage() {
         {/* Последние отсутствия */}
         {child.temporaryAbsences && child.temporaryAbsences.length > 0 && (
           <Card className="p-4 md:col-span-2">
-            <h3 className="font-semibold text-sm text-gray-700 mb-3 flex items-center gap-1">
+            <h3 className="font-semibold text-sm text-[var(--text-primary)] mb-3 flex items-center gap-1">
               <CalendarX className="h-4 w-4" /> Последние отсутствия
             </h3>
             <div className="space-y-1">
@@ -201,7 +201,7 @@ export default function ChildDetailPage() {
                   <span className="font-medium">
                     {new Date(a.startDate).toLocaleDateString('ru-RU')} &mdash; {new Date(a.endDate).toLocaleDateString('ru-RU')}
                   </span>
-                  {a.reason && <span className="text-gray-500">— {a.reason}</span>}
+                  {a.reason && <span className="text-[var(--text-secondary)]">— {a.reason}</span>}
                 </div>
               ))}
             </div>
@@ -229,7 +229,7 @@ export default function ChildDetailPage() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between">
-      <dt className="text-gray-500">{label}</dt>
+      <dt className="text-[var(--text-secondary)]">{label}</dt>
       <dd className="font-medium text-right">{value}</dd>
     </div>
   );

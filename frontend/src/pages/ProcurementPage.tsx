@@ -34,19 +34,19 @@ export default function ProcurementPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
-            <ShoppingCart className="h-6 w-6 text-blue-600" />
+          <h1 className="macos-text-title flex items-center gap-2 text-gray-800">
+            <ShoppingCart className="h-6 w-6 text-[var(--color-blue)]" />
             Закупки
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">Управление заказами, поставщиками и накладными</p>
+          <p className="text-sm text-[var(--text-secondary)] mt-0.5">Управление заказами, поставщиками и накладными</p>
         </div>
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex gap-1 bg-[var(--fill-tertiary)] p-1 rounded-lg">
           <button
             onClick={() => setViewMode('orders')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption transition-all ${
               viewMode === 'orders'
-                ? 'bg-white text-blue-700 shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'bg-white text-[var(--color-blue)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-gray-800'
             }`}
           >
             <Package className="h-4 w-4" />
@@ -54,10 +54,10 @@ export default function ProcurementPage() {
           </button>
           <button
             onClick={() => setViewMode('suppliers')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption transition-all ${
               viewMode === 'suppliers'
-                ? 'bg-white text-blue-700 shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'bg-white text-[var(--color-blue)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-gray-800'
             }`}
           >
             <Users className="h-4 w-4" />
@@ -65,10 +65,10 @@ export default function ProcurementPage() {
           </button>
           <button
             onClick={() => setViewMode('invoices')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption transition-all ${
               viewMode === 'invoices'
-                ? 'bg-white text-blue-700 shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'bg-white text-[var(--color-blue)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-gray-800'
             }`}
           >
             <FileText className="h-4 w-4" />
@@ -92,21 +92,21 @@ function IncomingInvoicesView() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
+      <div className="bg-[rgba(0,122,255,0.06)] border border-blue-200 rounded-lg p-3 text-sm text-[var(--color-blue)]">
         <FileText className="inline h-4 w-4 mr-1" />
         Поступления от поставщиков, импортированные из 1С. Только для просмотра.
       </div>
 
       {loading ? (
-        <div className="p-4 text-center text-gray-500">Загрузка...</div>
+        <div className="p-4 text-center text-[var(--text-secondary)]">Загрузка...</div>
       ) : invoices.length === 0 ? (
-        <div className="p-8 text-center text-gray-500">Накладные не найдены</div>
+        <div className="p-8 text-center text-[var(--text-secondary)]">Накладные не найдены</div>
       ) : (
         <>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="bg-gray-50 text-left">
+                <tr className="bg-[var(--fill-quaternary)] text-left">
                   <th className="p-3 font-medium">Дата</th>
                   <th className="p-3 font-medium">№ документа</th>
                   <th className="p-3 font-medium">Контрагент</th>
@@ -117,13 +117,13 @@ function IncomingInvoicesView() {
               </thead>
               <tbody>
                 {invoices.map(inv => (
-                  <tr key={inv.id} className="border-b hover:bg-gray-50">
+                  <tr key={inv.id} className="border-b hover:bg-[var(--fill-quaternary)]">
                     <td className="p-3">{new Date(inv.date).toLocaleDateString()}</td>
                     <td className="p-3 font-mono text-xs">{inv.documentNumber || '—'}</td>
                     <td className="p-3">{inv.contractor?.name || '—'}</td>
                     <td className="p-3 font-medium">{currency.format(Number(inv.totalAmount))}</td>
-                    <td className="p-3">{inv.posted ? <Check className="h-4 w-4 text-green-600" /> : '—'}</td>
-                    <td className="p-3 text-gray-500 truncate max-w-[200px]">{inv.comment || '—'}</td>
+                    <td className="p-3">{inv.posted ? <Check className="h-4 w-4 text-[var(--color-green)]" /> : '—'}</td>
+                    <td className="p-3 text-[var(--text-secondary)] truncate max-w-[200px]">{inv.comment || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -134,7 +134,7 @@ function IncomingInvoicesView() {
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
                 ← Назад
               </Button>
-              <span className="py-2 px-3 text-sm text-gray-600">{page} / {totalPages}</span>
+              <span className="py-2 px-3 text-sm text-[var(--text-secondary)]">{page} / {totalPages}</span>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
                 Вперёд →
               </Button>
@@ -288,7 +288,7 @@ function OrdersView() {
   };
 
   const getStatusBadge = (status: PurchaseOrderStatus) => (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${purchaseOrderStatusColors[status] || 'bg-gray-100'}`}>
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${purchaseOrderStatusColors[status] || 'bg-[var(--fill-tertiary)]'}`}>
       {purchaseOrderStatusLabels[status] || status}
     </span>
   );
@@ -307,7 +307,7 @@ function OrdersView() {
     // DRAFT -> Отправить на одобрение
     if (order.status === 'DRAFT' && canCreate) {
       actions.push(
-        <Button key="submit" variant="outline" size="sm" className="text-blue-600" onClick={() => performAction(order.id, 'submit')}>
+        <Button key="submit" variant="outline" size="sm" className="text-[var(--color-blue)]" onClick={() => performAction(order.id, 'submit')}>
           <Send className="h-4 w-4 mr-1" /> На одобрение
         </Button>
       );
@@ -316,12 +316,12 @@ function OrdersView() {
     // PENDING -> Одобрить / Отклонить (только DIRECTOR/DEPUTY)
     if (order.status === 'PENDING' && canApprove) {
       actions.push(
-        <Button key="approve" variant="outline" size="sm" className="text-green-600" onClick={() => performAction(order.id, 'approve')}>
+        <Button key="approve" variant="outline" size="sm" className="text-[var(--color-green)]" onClick={() => performAction(order.id, 'approve')}>
           <Check className="h-4 w-4 mr-1" /> Одобрить
         </Button>
       );
       actions.push(
-        <Button key="reject" variant="outline" size="sm" className="text-red-600" onClick={() => { setActionOrder(order); setRejectModalOpen(true); }}>
+        <Button key="reject" variant="outline" size="sm" className="text-[var(--color-red)]" onClick={() => { setActionOrder(order); setRejectModalOpen(true); }}>
           <X className="h-4 w-4 mr-1" /> Отклонить
         </Button>
       );
@@ -330,7 +330,7 @@ function OrdersView() {
     // APPROVED -> Заказано
     if (order.status === 'APPROVED' && canCreate) {
       actions.push(
-        <Button key="order" variant="outline" size="sm" className="text-blue-600" onClick={() => performAction(order.id, 'order')}>
+        <Button key="order" variant="outline" size="sm" className="text-[var(--color-blue)]" onClick={() => performAction(order.id, 'order')}>
           <Truck className="h-4 w-4 mr-1" /> Заказано
         </Button>
       );
@@ -366,7 +366,7 @@ function OrdersView() {
     // Отменить (не RECEIVED и не CANCELLED)
     if (!['RECEIVED', 'CANCELLED'].includes(order.status) && canApprove) {
       actions.push(
-        <Button key="cancel" variant="ghost" size="sm" className="text-gray-500" onClick={() => performAction(order.id, 'cancel')}>
+        <Button key="cancel" variant="ghost" size="sm" className="text-[var(--text-secondary)]" onClick={() => performAction(order.id, 'cancel')}>
           <Ban className="h-4 w-4" />
         </Button>
       );
@@ -375,7 +375,7 @@ function OrdersView() {
     // Удалить (DRAFT, CANCELLED)
     if ((order.status === 'DRAFT' || order.status === 'CANCELLED') && ['DEVELOPER', 'DIRECTOR', 'ADMIN'].includes(userRole)) {
       actions.push(
-        <Button key="delete" variant="ghost" size="sm" className="text-red-500" onClick={() => { setDeletingOrder(order); setDeleteModalOpen(true); }}>
+        <Button key="delete" variant="ghost" size="sm" className="text-[var(--color-red)]" onClick={() => { setDeletingOrder(order); setDeleteModalOpen(true); }}>
           <Trash2 className="h-4 w-4" />
         </Button>
       );
@@ -389,52 +389,52 @@ function OrdersView() {
       {/* Статистика (мини-дашборд) */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-blue-50">
-              <Package className="h-5 w-5 text-blue-600" />
+          <div className="bg-white border border-[rgba(0,0,0,0.08)] rounded-xl p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-[rgba(0,122,255,0.06)]">
+              <Package className="h-5 w-5 text-[var(--color-blue)]" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-800">{stats.total}</p>
-              <p className="text-xs text-gray-500">Всего заказов</p>
+              <p className="macos-text-title text-gray-800">{stats.total}</p>
+              <p className="text-xs text-[var(--text-secondary)]">Всего заказов</p>
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-yellow-50">
-              <Clock className="h-5 w-5 text-yellow-600" />
+          <div className="bg-white border border-[rgba(0,0,0,0.08)] rounded-xl p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-[rgba(255,204,0,0.06)]">
+              <Clock className="h-5 w-5 text-[var(--color-orange)]" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-800">{(stats.byStatus?.['PENDING'] || 0) + (stats.byStatus?.['DRAFT'] || 0)}</p>
-              <p className="text-xs text-gray-500">На рассмотрении</p>
+              <p className="macos-text-title text-gray-800">{(stats.byStatus?.['PENDING'] || 0) + (stats.byStatus?.['DRAFT'] || 0)}</p>
+              <p className="text-xs text-[var(--text-secondary)]">На рассмотрении</p>
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-green-50">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+          <div className="bg-white border border-[rgba(0,0,0,0.08)] rounded-xl p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-[rgba(52,199,89,0.06)]">
+              <TrendingUp className="h-5 w-5 text-[var(--color-green)]" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-800">{(stats.byStatus?.['ORDERED'] || 0) + (stats.byStatus?.['DELIVERED'] || 0)}</p>
-              <p className="text-xs text-gray-500">В процессе</p>
+              <p className="macos-text-title text-gray-800">{(stats.byStatus?.['ORDERED'] || 0) + (stats.byStatus?.['DELIVERED'] || 0)}</p>
+              <p className="text-xs text-[var(--text-secondary)]">В процессе</p>
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+          <div className="bg-white border border-[rgba(0,0,0,0.08)] rounded-xl p-4 flex items-center gap-3">
             <div className="p-2.5 rounded-lg bg-emerald-50">
               <DollarSign className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
               <p className="text-lg font-bold text-gray-800">{currency.format(stats.totalSpent || 0)}</p>
-              <p className="text-xs text-gray-500">Общие расходы</p>
+              <p className="text-xs text-[var(--text-secondary)]">Общие расходы</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Фильтры */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
+      <div className="bg-white border border-[rgba(0,0,0,0.08)] rounded-xl p-4 mb-4">
         <div className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-[220px]">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Поиск</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Поиск</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-tertiary)]" />
               <Input
                 placeholder="Поиск по номеру, названию..."
                 value={searchQuery}
@@ -444,8 +444,8 @@ function OrdersView() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Статус</label>
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Статус</label>
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 mezon-field rounded-[8px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Все статусы</option>
               {Object.entries(purchaseOrderStatusLabels).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
@@ -453,8 +453,8 @@ function OrdersView() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Тип</label>
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Тип</label>
+            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="px-3 py-2 mezon-field rounded-[8px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Все типы</option>
               <option value="PLANNED">Плановая</option>
               <option value="OPERATIONAL">Оперативная</option>
@@ -468,10 +468,10 @@ function OrdersView() {
 
           {canCreate && (
             <div className="flex gap-2 ml-auto">
-              <Button onClick={() => handleCreate('PLANNED')} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
+              <Button onClick={() => handleCreate('PLANNED')} className="bg-[var(--color-blue)] hover:bg-blue-700 shadow-sm">
                 <PlusCircle className="mr-2 h-4 w-4" /> Плановая закупка
               </Button>
-              <Button onClick={() => handleCreate('OPERATIONAL')} className="bg-red-600 hover:bg-red-700 shadow-sm">
+              <Button onClick={() => handleCreate('OPERATIONAL')} className="bg-[var(--color-red)] hover:bg-red-700 shadow-sm">
                 <PlusCircle className="mr-2 h-4 w-4" /> Оперативная
               </Button>
             </div>
@@ -483,30 +483,30 @@ function OrdersView() {
       {loading ? (
         <div className="text-center py-16">
           <RefreshCw className="h-8 w-8 animate-spin text-blue-400 mx-auto mb-3" />
-          <p className="text-gray-500">Загрузка заказов...</p>
+          <p className="text-[var(--text-secondary)]">Загрузка заказов...</p>
         </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-gray-200 rounded-xl">
-          <Archive className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 font-medium">Заказов пока нет</p>
-          <p className="text-sm text-gray-400 mt-1">Создайте первый заказ на закупку</p>
+        <div className="text-center py-16 bg-white border border-[rgba(0,0,0,0.08)] rounded-xl">
+          <Archive className="h-12 w-12 text-[var(--text-quaternary)] mx-auto mb-3" />
+          <p className="text-[var(--text-secondary)] font-medium">Заказов пока нет</p>
+          <p className="text-sm text-[var(--text-tertiary)] mt-1">Создайте первый заказ на закупку</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-white border border-[rgba(0,0,0,0.08)] rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b bg-gray-50/80">
-                  <th className="text-left p-3 font-semibold text-gray-600">№</th>
-                  <th className="text-left p-3 font-semibold text-gray-600">Тип</th>
-                  <th className="text-left p-3 font-semibold text-gray-600">Название</th>
-                  <th className="text-left p-3 font-semibold text-gray-600">Поставщик</th>
-                  <th className="text-left p-3 font-semibold text-gray-600">Дата</th>
-                  <th className="text-right p-3 font-semibold text-gray-600">Сумма</th>
-                  <th className="text-left p-3 font-semibold text-gray-600">Приоритет</th>
-                  <th className="text-left p-3 font-semibold text-gray-600">Статус</th>
-                  <th className="text-left p-3 font-semibold text-gray-600">Склад</th>
-                  <th className="text-left p-3 font-semibold text-gray-600">Действия</th>
+                <tr className="border-b bg-[var(--fill-quaternary)]/80">
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">№</th>
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">Тип</th>
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">Название</th>
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">Поставщик</th>
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">Дата</th>
+                  <th className="text-right p-3 font-semibold text-[var(--text-secondary)]">Сумма</th>
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">Приоритет</th>
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">Статус</th>
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">Склад</th>
+                  <th className="text-left p-3 font-semibold text-[var(--text-secondary)]">Действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -515,31 +515,31 @@ function OrdersView() {
                   const allLinked = order.items?.length > 0 && order.items.every(i => i.inventoryItemId);
                   
                   return (
-                    <tr key={order.id} className="border-b hover:bg-gray-50/50 transition-colors">
-                      <td className="p-3 font-mono text-xs text-gray-500">{order.orderNumber}</td>
+                    <tr key={order.id} className="border-b hover:bg-[var(--fill-quaternary)]/50 transition-colors">
+                      <td className="p-3 font-mono text-xs text-[var(--text-secondary)]">{order.orderNumber}</td>
                       <td className="p-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${purchaseOrderTypeColors[order.type]}`}>
                           {purchaseOrderTypeLabels[order.type]}
                         </span>
                       </td>
                       <td className="p-3 font-medium max-w-[200px] truncate text-gray-800">{order.title}</td>
-                      <td className="p-3 text-gray-600">{order.supplier?.name || <span className="text-gray-400 italic">—</span>}</td>
-                      <td className="p-3 text-xs whitespace-nowrap text-gray-500">{new Date(order.orderDate).toLocaleDateString('ru-RU')}</td>
+                      <td className="p-3 text-[var(--text-secondary)]">{order.supplier?.name || <span className="text-[var(--text-tertiary)] italic">—</span>}</td>
+                      <td className="p-3 text-xs whitespace-nowrap text-[var(--text-secondary)]">{new Date(order.orderDate).toLocaleDateString('ru-RU')}</td>
                       <td className="p-3 text-right whitespace-nowrap font-semibold text-gray-800">{currency.format(order.totalAmount)}</td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${priorityColors[order.priority] || 'bg-gray-100'}`}>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${priorityColors[order.priority] || 'bg-[var(--fill-tertiary)]'}`}>
                           {priorityLabels[order.priority] || 'Обычный'}
                         </span>
                       </td>
                       <td className="p-3">{getStatusBadge(order.status)}</td>
                       <td className="p-3">
                         {hasInventoryLinks ? (
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${allLinked ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${allLinked ? 'bg-[rgba(52,199,89,0.12)] text-[var(--color-green)]' : 'bg-[rgba(255,204,0,0.12)] text-[var(--color-orange)]'}`}>
                             <Link2 className="h-3 w-3" />
                             {allLinked ? 'Связан' : 'Частично'}
                           </span>
                         ) : (
-                          <span className="text-gray-400 text-xs">—</span>
+                          <span className="text-[var(--text-tertiary)] text-xs">—</span>
                         )}
                       </td>
                       <td className="p-3">{renderActions(order)}</td>
@@ -549,9 +549,9 @@ function OrdersView() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t bg-gray-50/50 text-xs text-gray-500 flex justify-between items-center">
+          <div className="px-4 py-3 border-t bg-[var(--fill-quaternary)]/50 text-xs text-[var(--text-secondary)] flex justify-between items-center">
             <span>Показано {orders.length} заказ(ов)</span>
-            <span>Общая сумма: <strong className="text-gray-700">{currency.format(orders.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0))}</strong></span>
+            <span>Общая сумма: <strong className="text-[var(--text-primary)]">{currency.format(orders.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0))}</strong></span>
           </div>
         </div>
       )}
@@ -575,79 +575,79 @@ function OrdersView() {
           <div className="space-y-5 p-2 max-h-[75vh] overflow-y-auto">
             {/* Шапка с ключевой информацией */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-1">Тип закупки</p>
+              <div className="bg-[var(--fill-quaternary)] rounded-lg p-3">
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Тип закупки</p>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${purchaseOrderTypeColors[viewOrder.type]}`}>{purchaseOrderTypeLabels[viewOrder.type]}</span>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-1">Статус</p>
+              <div className="bg-[var(--fill-quaternary)] rounded-lg p-3">
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Статус</p>
                 {getStatusBadge(viewOrder.status)}
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-1">Приоритет</p>
+              <div className="bg-[var(--fill-quaternary)] rounded-lg p-3">
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Приоритет</p>
                 <span className={`px-2 py-0.5 rounded text-xs font-medium ${priorityColors[viewOrder.priority]}`}>{priorityLabels[viewOrder.priority]}</span>
               </div>
-              <div className="bg-blue-50 rounded-lg p-3">
-                <p className="text-xs text-blue-600 mb-1">Итого</p>
-                <p className="text-lg font-bold text-blue-700">{currency.format(viewOrder.totalAmount)}</p>
+              <div className="bg-[rgba(0,122,255,0.06)] rounded-lg p-3">
+                <p className="text-xs text-[var(--color-blue)] mb-1">Итого</p>
+                <p className="text-lg font-bold text-[var(--color-blue)]">{currency.format(viewOrder.totalAmount)}</p>
               </div>
             </div>
 
             {/* Детали */}
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between py-1.5 border-b border-gray-100">
-                <span className="text-gray-500">Поставщик</span>
-                <span className="font-medium">{viewOrder.supplier?.name || <span className="text-gray-400 italic">Не указан</span>}</span>
+              <div className="flex justify-between py-1.5 border-b border-[rgba(0,0,0,0.04)]">
+                <span className="text-[var(--text-secondary)]">Поставщик</span>
+                <span className="font-medium">{viewOrder.supplier?.name || <span className="text-[var(--text-tertiary)] italic">Не указан</span>}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-gray-100">
-                <span className="text-gray-500">Дата заказа</span>
+              <div className="flex justify-between py-1.5 border-b border-[rgba(0,0,0,0.04)]">
+                <span className="text-[var(--text-secondary)]">Дата заказа</span>
                 <span>{new Date(viewOrder.orderDate).toLocaleDateString('ru-RU')}</span>
               </div>
               {viewOrder.expectedDeliveryDate && (
-                <div className="flex justify-between py-1.5 border-b border-gray-100">
-                  <span className="text-gray-500">Ожид. доставка</span>
+                <div className="flex justify-between py-1.5 border-b border-[rgba(0,0,0,0.04)]">
+                  <span className="text-[var(--text-secondary)]">Ожид. доставка</span>
                   <span>{new Date(viewOrder.expectedDeliveryDate).toLocaleDateString('ru-RU')}</span>
                 </div>
               )}
               {viewOrder.actualDeliveryDate && (
-                <div className="flex justify-between py-1.5 border-b border-gray-100">
-                  <span className="text-gray-500">Факт. доставка</span>
-                  <span className="text-green-600">{new Date(viewOrder.actualDeliveryDate).toLocaleDateString('ru-RU')}</span>
+                <div className="flex justify-between py-1.5 border-b border-[rgba(0,0,0,0.04)]">
+                  <span className="text-[var(--text-secondary)]">Факт. доставка</span>
+                  <span className="text-[var(--color-green)]">{new Date(viewOrder.actualDeliveryDate).toLocaleDateString('ru-RU')}</span>
                 </div>
               )}
               {viewOrder.budgetSource && (
-                <div className="flex justify-between py-1.5 border-b border-gray-100">
-                  <span className="text-gray-500">Источник</span>
+                <div className="flex justify-between py-1.5 border-b border-[rgba(0,0,0,0.04)]">
+                  <span className="text-[var(--text-secondary)]">Источник</span>
                   <span>{viewOrder.budgetSource}</span>
                 </div>
               )}
-              <div className="flex justify-between py-1.5 border-b border-gray-100">
-                <span className="text-gray-500">Создатель</span>
+              <div className="flex justify-between py-1.5 border-b border-[rgba(0,0,0,0.04)]">
+                <span className="text-[var(--text-secondary)]">Создатель</span>
                 <span>{viewOrder.createdBy ? `${viewOrder.createdBy.firstName} ${viewOrder.createdBy.lastName}` : '—'}</span>
               </div>
               {viewOrder.approvedBy && (
-                <div className="flex justify-between py-1.5 border-b border-gray-100">
-                  <span className="text-gray-500">Одобрил</span>
+                <div className="flex justify-between py-1.5 border-b border-[rgba(0,0,0,0.04)]">
+                  <span className="text-[var(--text-secondary)]">Одобрил</span>
                   <span>{viewOrder.approvedBy.firstName} {viewOrder.approvedBy.lastName} {viewOrder.approvedAt ? `(${new Date(viewOrder.approvedAt).toLocaleDateString('ru-RU')})` : ''}</span>
                 </div>
               )}
               {viewOrder.receivedBy && (
-                <div className="flex justify-between py-1.5 border-b border-gray-100">
-                  <span className="text-gray-500">Принял на склад</span>
-                  <span className="text-green-600">{viewOrder.receivedBy.firstName} {viewOrder.receivedBy.lastName}</span>
+                <div className="flex justify-between py-1.5 border-b border-[rgba(0,0,0,0.04)]">
+                  <span className="text-[var(--text-secondary)]">Принял на склад</span>
+                  <span className="text-[var(--color-green)]">{viewOrder.receivedBy.firstName} {viewOrder.receivedBy.lastName}</span>
                 </div>
               )}
             </div>
 
             {viewOrder.description && (
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-1">Обоснование</p>
+              <div className="bg-[var(--fill-quaternary)] rounded-lg p-3">
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Обоснование</p>
                 <p className="text-sm">{viewOrder.description}</p>
               </div>
             )}
 
             {viewOrder.rejectionReason && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div className="p-3 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg text-sm text-[var(--color-red)]">
                 <div className="flex items-center gap-1.5 mb-1 font-medium">
                   <AlertCircle className="h-4 w-4" />
                   Причина отклонения
@@ -657,7 +657,7 @@ function OrdersView() {
             )}
 
             {viewOrder.receiveNote && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700">
+              <div className="bg-[rgba(52,199,89,0.06)] border border-green-200 rounded-lg p-3 text-sm text-[var(--color-green)]">
                 <p className="font-medium mb-0.5">Примечание приёмки</p>
                 {viewOrder.receiveNote}
               </div>
@@ -669,17 +669,17 @@ function OrdersView() {
                 <Package className="h-4 w-4" />
                 Позиции заказа ({viewOrder.items?.length || 0})
               </h4>
-              <div className="rounded-lg border border-gray-200 overflow-hidden">
+              <div className="rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
                 <table className="w-full text-sm border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 border-b">
-                      <th className="p-2.5 text-left text-xs font-semibold text-gray-500">Наименование</th>
-                      <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Заказано</th>
-                      <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Принято</th>
-                      <th className="p-2.5 text-left text-xs font-semibold text-gray-500">Ед.</th>
-                      <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Цена</th>
-                      <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Сумма</th>
-                      <th className="p-2.5 text-center text-xs font-semibold text-gray-500">Склад</th>
+                    <tr className="bg-[var(--fill-quaternary)] border-b">
+                      <th className="p-2.5 text-left text-xs font-semibold text-[var(--text-secondary)]">Наименование</th>
+                      <th className="p-2.5 text-right text-xs font-semibold text-[var(--text-secondary)]">Заказано</th>
+                      <th className="p-2.5 text-right text-xs font-semibold text-[var(--text-secondary)]">Принято</th>
+                      <th className="p-2.5 text-left text-xs font-semibold text-[var(--text-secondary)]">Ед.</th>
+                      <th className="p-2.5 text-right text-xs font-semibold text-[var(--text-secondary)]">Цена</th>
+                      <th className="p-2.5 text-right text-xs font-semibold text-[var(--text-secondary)]">Сумма</th>
+                      <th className="p-2.5 text-center text-xs font-semibold text-[var(--text-secondary)]">Склад</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -689,30 +689,30 @@ function OrdersView() {
                         <td className="p-2.5 text-right">{item.quantity}</td>
                         <td className="p-2.5 text-right">
                           {item.receivedQuantity != null ? (
-                            <span className={item.receivedQuantity < item.quantity ? 'text-orange-600' : 'text-green-600'}>
+                            <span className={item.receivedQuantity < item.quantity ? 'text-orange-600' : 'text-[var(--color-green)]'}>
                               {item.receivedQuantity}
                             </span>
                           ) : '—'}
                         </td>
-                        <td className="p-2.5 text-gray-500">{item.unit}</td>
+                        <td className="p-2.5 text-[var(--text-secondary)]">{item.unit}</td>
                         <td className="p-2.5 text-right">{currency.format(item.price)}</td>
                         <td className="p-2.5 text-right font-medium">{currency.format(item.totalPrice)}</td>
                         <td className="p-2.5 text-center">
                           {item.inventoryItemId ? (
-                            <span className="inline-flex items-center gap-0.5 text-green-600" title={`Связан с складским товаром #${item.inventoryItemId}`}>
+                            <span className="inline-flex items-center gap-0.5 text-[var(--color-green)]" title={`Связан с складским товаром #${item.inventoryItemId}`}>
                               <Link2 className="h-3.5 w-3.5" />
                             </span>
                           ) : (
-                            <span className="text-gray-400">—</span>
+                            <span className="text-[var(--text-tertiary)]">—</span>
                           )}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 font-bold bg-blue-50/50">
-                      <td colSpan={5} className="p-2.5 text-right text-gray-600">Итого:</td>
-                      <td className="p-2.5 text-right text-blue-700">{currency.format(viewOrder.totalAmount)}</td>
+                    <tr className="border-t-2 font-bold bg-[rgba(0,122,255,0.06)]/50">
+                      <td colSpan={5} className="p-2.5 text-right text-[var(--text-secondary)]">Итого:</td>
+                      <td className="p-2.5 text-right text-[var(--color-blue)]">{currency.format(viewOrder.totalAmount)}</td>
                       <td></td>
                     </tr>
                   </tfoot>
@@ -726,7 +726,7 @@ function OrdersView() {
       {/* Модал отклонения */}
       <Modal isOpen={rejectModalOpen} onClose={() => { setRejectModalOpen(false); setRejectReason(''); setActionOrder(null); }} title="Отклонить закупку">
         <div className="space-y-4 p-2">
-          <p className="text-sm text-gray-600">Укажите причину отклонения для заказа <strong>{actionOrder?.orderNumber}</strong>:</p>
+          <p className="text-sm text-[var(--text-secondary)]">Укажите причину отклонения для заказа <strong>{actionOrder?.orderNumber}</strong>:</p>
           <textarea
             className="w-full p-2 border rounded text-sm"
             rows={3}
@@ -756,14 +756,14 @@ function OrdersView() {
                 Следующие товары будут добавлены на склад. Если товар привязан к складской позиции — количество обновится автоматически. Если нет — будет создана новая складская позиция.
               </p>
             </div>
-            <div className="rounded-lg border border-gray-200 overflow-hidden">
+            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
               <table className="w-full text-sm border-collapse">
                 <thead>
-                  <tr className="bg-gray-50 border-b">
-                    <th className="p-2.5 text-left text-xs font-semibold text-gray-500">Товар</th>
-                    <th className="p-2.5 text-right text-xs font-semibold text-gray-500">Кол-во</th>
-                    <th className="p-2.5 text-left text-xs font-semibold text-gray-500">Ед.</th>
-                    <th className="p-2.5 text-center text-xs font-semibold text-gray-500">Склад</th>
+                  <tr className="bg-[var(--fill-quaternary)] border-b">
+                    <th className="p-2.5 text-left text-xs font-semibold text-[var(--text-secondary)]">Товар</th>
+                    <th className="p-2.5 text-right text-xs font-semibold text-[var(--text-secondary)]">Кол-во</th>
+                    <th className="p-2.5 text-left text-xs font-semibold text-[var(--text-secondary)]">Ед.</th>
+                    <th className="p-2.5 text-center text-xs font-semibold text-[var(--text-secondary)]">Склад</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -771,14 +771,14 @@ function OrdersView() {
                     <tr key={item.id} className="border-b last:border-b-0">
                       <td className="p-2.5 font-medium">{item.name}</td>
                       <td className="p-2.5 text-right font-semibold text-emerald-700">+{item.quantity}</td>
-                      <td className="p-2.5 text-gray-500">{item.unit}</td>
+                      <td className="p-2.5 text-[var(--text-secondary)]">{item.unit}</td>
                       <td className="p-2.5 text-center">
                         {item.inventoryItemId ? (
-                          <span className="inline-flex items-center gap-1 text-green-600 text-xs">
+                          <span className="inline-flex items-center gap-1 text-[var(--color-green)] text-xs">
                             <Link2 className="h-3 w-3" /> Обновится
                           </span>
                         ) : (
-                          <span className="text-yellow-600 text-xs">Новый товар</span>
+                          <span className="text-[var(--color-orange)] text-xs">Новый товар</span>
                         )}
                       </td>
                     </tr>
@@ -787,8 +787,8 @@ function OrdersView() {
               </table>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Примечание (необязательно)</label>
-              <textarea className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows={2} value={receiveNote} onChange={(e) => setReceiveNote(e.target.value)} placeholder="Примечание при приёмке..." />
+              <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Примечание (необязательно)</label>
+              <textarea className="w-full p-2.5 mezon-field rounded-[8px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows={2} value={receiveNote} onChange={(e) => setReceiveNote(e.target.value)} placeholder="Примечание при приёмке..." />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setReceiveModalOpen(false)} disabled={actionLoading}>Отмена</Button>
@@ -803,15 +803,15 @@ function OrdersView() {
       {/* Модал удаления */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
         <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-[var(--color-red)] flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-red-800">Внимание!</h4>
-              <p className="text-red-700 text-sm mt-1">Вы собираетесь удалить заказ на закупку. Это действие нельзя отменить.</p>
+              <p className="text-[var(--color-red)] text-sm mt-1">Вы собираетесь удалить заказ на закупку. Это действие нельзя отменить.</p>
             </div>
           </div>
           {deletingOrder && (
-            <div className="bg-gray-50 p-3 rounded-lg text-sm">
+            <div className="bg-[var(--fill-quaternary)] p-3 rounded-lg text-sm">
               <p><strong>№:</strong> {deletingOrder.orderNumber}</p>
               <p><strong>Название:</strong> {deletingOrder.title}</p>
               <p><strong>Сумма:</strong> {currency.format(deletingOrder.totalAmount)}</p>
@@ -889,12 +889,12 @@ function SuppliersView() {
 
   return (
     <>
-      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
+      <div className="bg-white border border-[rgba(0,0,0,0.08)] rounded-xl p-4 mb-4">
         <div className="flex gap-3 items-end">
           <div className="flex-1 min-w-[220px]">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Поиск поставщика</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Поиск поставщика</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-tertiary)]" />
               <Input
                 placeholder="Название, телефон, контакты..."
                 value={searchQuery}
@@ -914,59 +914,59 @@ function SuppliersView() {
       {loading ? (
         <div className="text-center py-16">
           <RefreshCw className="h-8 w-8 animate-spin text-blue-400 mx-auto mb-3" />
-          <p className="text-gray-500">Загрузка поставщиков...</p>
+          <p className="text-[var(--text-secondary)]">Загрузка поставщиков...</p>
         </div>
       ) : filteredSuppliers.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-gray-200 rounded-xl">
-          <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 font-medium">{searchQuery ? 'Поставщики не найдены' : 'Поставщиков пока нет'}</p>
-          <p className="text-sm text-gray-400 mt-1">{searchQuery ? 'Попробуйте изменить поиск' : 'Добавьте первого поставщика'}</p>
+        <div className="text-center py-16 bg-white border border-[rgba(0,0,0,0.08)] rounded-xl">
+          <Users className="h-12 w-12 text-[var(--text-quaternary)] mx-auto mb-3" />
+          <p className="text-[var(--text-secondary)] font-medium">{searchQuery ? 'Поставщики не найдены' : 'Поставщиков пока нет'}</p>
+          <p className="text-sm text-[var(--text-tertiary)] mt-1">{searchQuery ? 'Попробуйте изменить поиск' : 'Добавьте первого поставщика'}</p>
         </div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {filteredSuppliers.map((s) => (
-            <div key={s.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+            <div key={s.id} className="bg-white border border-[rgba(0,0,0,0.08)] rounded-xl p-4 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${s.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  <div className={`w-2 h-2 rounded-full ${s.isActive ? 'bg-[rgba(52,199,89,0.06)]0' : 'bg-gray-400'}`} />
                   <h3 className="font-semibold text-gray-800">{s.name}</h3>
                 </div>
                 {canManage && (
                   <div className="flex gap-1">
                     <Button variant="ghost" size="sm" onClick={() => { setEditingSupplier(s); setIsModalOpen(true); }} className="h-8 w-8 p-0">
-                      <Edit className="h-3.5 w-3.5 text-gray-500" />
+                      <Edit className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-400 hover:text-red-600" onClick={() => { setDeletingSupplier(s); setDeleteModalOpen(true); }}>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-400 hover:text-[var(--color-red)]" onClick={() => { setDeletingSupplier(s); setDeleteModalOpen(true); }}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 )}
               </div>
-              <div className="space-y-1.5 text-sm text-gray-600">
+              <div className="space-y-1.5 text-sm text-[var(--text-secondary)]">
                 {s.phone && (
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">📞</span> {s.phone}
+                    <span className="text-[var(--text-tertiary)]">📞</span> {s.phone}
                   </div>
                 )}
                 {s.email && (
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">✉️</span> {s.email}
+                    <span className="text-[var(--text-tertiary)]">✉️</span> {s.email}
                   </div>
                 )}
                 {s.inn && (
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">🏢</span> <span className="font-mono text-xs">{s.inn}</span>
+                    <span className="text-[var(--text-tertiary)]">🏢</span> <span className="font-mono text-xs">{s.inn}</span>
                   </div>
                 )}
                 {s.contactInfo && (
-                  <div className="text-xs text-gray-500 mt-1 line-clamp-2">{s.contactInfo}</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-2">{s.contactInfo}</div>
                 )}
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+              <div className="mt-3 pt-3 border-t border-[rgba(0,0,0,0.04)] flex justify-between items-center">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.isActive ? 'bg-[rgba(52,199,89,0.12)] text-[var(--color-green)]' : 'bg-[var(--fill-tertiary)] text-[var(--text-secondary)]'}`}>
                   {s.isActive ? 'Активен' : 'Неактивен'}
                 </span>
-                <span className="text-xs text-gray-500">{s._count?.orders ?? 0} заказ(ов)</span>
+                <span className="text-xs text-[var(--text-secondary)]">{s._count?.orders ?? 0} заказ(ов)</span>
               </div>
             </div>
           ))}
@@ -979,15 +979,15 @@ function SuppliersView() {
 
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
         <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-[var(--color-red)] flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-red-800">Внимание!</h4>
-              <p className="text-red-700 text-sm mt-1">Удаление поставщика невозможно если у него есть заказы.</p>
+              <p className="text-[var(--color-red)] text-sm mt-1">Удаление поставщика невозможно если у него есть заказы.</p>
             </div>
           </div>
           {deletingSupplier && (
-            <div className="bg-gray-50 p-3 rounded-lg text-sm">
+            <div className="bg-[var(--fill-quaternary)] p-3 rounded-lg text-sm">
               <p><strong>Название:</strong> {deletingSupplier.name}</p>
               <p><strong>Контакты:</strong> {deletingSupplier.contactInfo || '—'}</p>
             </div>

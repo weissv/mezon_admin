@@ -32,8 +32,8 @@ function KPICard({
     <div className="mezon-card">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-[var(--mezon-text-secondary)]">{title}</p>
-          <h3 className="mt-1 text-2xl font-bold text-[var(--mezon-dark)]">{value}</h3>
+          <p className="macos-text-caption text-[var(--mezon-text-secondary)]">{title}</p>
+          <h3 className="mt-1 macos-text-title text-[var(--mezon-dark)]">{value}</h3>
           {subtitle && <p className="mt-1 text-xs text-[var(--mezon-text-soft)]">{subtitle}</p>}
         </div>
         <div className={`p-3 rounded-xl ${colorClasses}`}>
@@ -127,7 +127,7 @@ export default function LmsSchoolDashboard() {
         {/* Recent Activity / Grades */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-[var(--mezon-dark)]">Последние оценки</h2>
+            <h2 className="macos-text-callout text-[var(--mezon-dark)]">Последние оценки</h2>
             <Link to="/lms/school/gradebook" className="text-sm text-[var(--mezon-accent)] hover:underline">Все оценки</Link>
           </div>
           
@@ -176,7 +176,7 @@ export default function LmsSchoolDashboard() {
         {/* Upcoming Homework / Events */}
          <div className="space-y-6">
             <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-[var(--mezon-dark)]">Ближайшие события</h2>
+            <h2 className="macos-text-callout text-[var(--mezon-dark)]">Ближайшие события</h2>
           </div>
           
           <div className="mezon-card">

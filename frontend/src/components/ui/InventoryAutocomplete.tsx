@@ -128,7 +128,7 @@ export function InventoryAutocomplete({
 
       {/* Выпадающий список предложений */}
       {isOpen && suggestions.length > 0 && (
-        <ul className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul className="absolute z-50 w-full mt-1 bg-white border border-[rgba(0,0,0,0.08)] rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {suggestions.map((item, index) => (
             <li
               key={`${item.name}-${item.id}`}
@@ -137,10 +137,10 @@ export function InventoryAutocomplete({
             >
               <span className="font-medium text-gray-800">{item.name}</span>
               <div className="flex items-center gap-2">
-                <span className={`text-xs px-1.5 py-0.5 rounded ${item.quantity > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <span className={`text-xs px-1.5 py-0.5 rounded ${item.quantity > 0 ? 'bg-[rgba(52,199,89,0.12)] text-green-700' : 'bg-[rgba(255,59,48,0.12)] text-red-700'}`}>
                   {item.quantity} {item.unit}
                 </span>
-                <span className="text-gray-500 text-xs bg-gray-100 px-2 py-0.5 rounded">
+                <span className="text-[var(--text-secondary)] text-xs bg-[var(--fill-tertiary)] px-2 py-0.5 rounded">
                   {item.unit}
                 </span>
               </div>

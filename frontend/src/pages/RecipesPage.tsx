@@ -16,7 +16,7 @@ export default function RecipesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+        <h1 className="macos-text-title flex items-center gap-2">
           <ChefHat className="h-6 w-6" />
           Рецепты и ингредиенты
         </h1>
@@ -172,20 +172,20 @@ function DishesView() {
             <h3 className="font-semibold text-lg">{nutritionData.dishName}</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-orange-50 rounded-md">
-                <div className="text-sm text-gray-600">Калорийность</div>
-                <div className="text-2xl font-bold">{nutritionData.calories.toFixed(1)} ккал</div>
+                <div className="text-sm text-[var(--text-secondary)]">Калорийность</div>
+                <div className="macos-text-title">{nutritionData.calories.toFixed(1)} ккал</div>
               </div>
-              <div className="p-3 bg-blue-50 rounded-md">
-                <div className="text-sm text-gray-600">Белки</div>
-                <div className="text-2xl font-bold">{nutritionData.protein.toFixed(1)} г</div>
+              <div className="p-3 bg-[rgba(0,122,255,0.06)] rounded-md">
+                <div className="text-sm text-[var(--text-secondary)]">Белки</div>
+                <div className="macos-text-title">{nutritionData.protein.toFixed(1)} г</div>
               </div>
-              <div className="p-3 bg-yellow-50 rounded-md">
-                <div className="text-sm text-gray-600">Жиры</div>
-                <div className="text-2xl font-bold">{nutritionData.fat.toFixed(1)} г</div>
+              <div className="p-3 bg-[rgba(255,204,0,0.06)] rounded-md">
+                <div className="text-sm text-[var(--text-secondary)]">Жиры</div>
+                <div className="macos-text-title">{nutritionData.fat.toFixed(1)} г</div>
               </div>
-              <div className="p-3 bg-green-50 rounded-md">
-                <div className="text-sm text-gray-600">Углеводы</div>
-                <div className="text-2xl font-bold">{nutritionData.carbs.toFixed(1)} г</div>
+              <div className="p-3 bg-[rgba(52,199,89,0.06)] rounded-md">
+                <div className="text-sm text-[var(--text-secondary)]">Углеводы</div>
+                <div className="macos-text-title">{nutritionData.carbs.toFixed(1)} г</div>
               </div>
             </div>
           </div>
@@ -195,17 +195,17 @@ function DishesView() {
       {/* Delete confirmation modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
         <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-[var(--color-red)] flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-red-800">Внимание!</h4>
-              <p className="text-red-700 text-sm mt-1">
+              <p className="text-[var(--color-red)] text-sm mt-1">
                 Вы собираетесь удалить блюдо. Это действие нельзя отменить.
               </p>
             </div>
           </div>
           {deletingDish && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-[var(--fill-quaternary)] p-3 rounded-lg">
               <p><strong>Название:</strong> {deletingDish.name}</p>
               <p><strong>Категория:</strong> {deletingDish.category || '—'}</p>
               <p><strong>Ингредиентов:</strong> {deletingDish.ingredients?.length || 0}</p>
@@ -346,18 +346,18 @@ function IngredientsView() {
       {/* Delete confirmation modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
         <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-[var(--color-red)] flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-red-800">Внимание!</h4>
-              <p className="text-red-700 text-sm mt-1">
+              <p className="text-[var(--color-red)] text-sm mt-1">
                 Вы собираетесь удалить ингредиент. Это действие нельзя отменить.
                 Если ингредиент используется в блюдах, удаление может не сработать.
               </p>
             </div>
           </div>
           {deletingIngredient && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-[var(--fill-quaternary)] p-3 rounded-lg">
               <p><strong>Название:</strong> {deletingIngredient.name}</p>
               <p><strong>Единица:</strong> {deletingIngredient.unit}</p>
               <p><strong>Калории:</strong> {deletingIngredient.calories} ккал</p>

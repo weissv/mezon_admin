@@ -45,12 +45,12 @@ const statusLabel = (s: string) => {
 
 const statusBadge = (s: string) => {
   const colors: Record<string, string> = {
-    ACTIVE: 'bg-[rgba(52,199,89,0.14)] text-[var(--macos-green)]',
-    LEFT: 'bg-[rgba(255,204,0,0.12)] text-[var(--macos-orange)]',
-    ARCHIVED: 'bg-[rgba(60,60,67,0.1)] text-[var(--mezon-text-secondary)]',
+    ACTIVE: 'macos-badge-success',
+    LEFT: 'macos-badge-warning',
+    ARCHIVED: 'macos-badge-neutral',
   };
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colors[s] ?? 'bg-[rgba(60,60,67,0.1)] text-[var(--mezon-text-secondary)]'}`}>
+    <span className={`mezon-badge ${colors[s] ?? 'macos-badge-neutral'}`}>
       {statusLabel(s)}
     </span>
   );
@@ -149,7 +149,7 @@ export default function ChildrenPage() {
       header: 'ФИО',
       render: (row) => (
         <button
-          className="text-left text-blue-600 hover:underline font-medium"
+          className="text-left text-[var(--color-blue)] hover:underline font-medium"
           onClick={() => navigate(`/children/${row.id}`)}
         >
           {row.lastName} {row.firstName} {row.middleName || ''}
@@ -199,7 +199,7 @@ export default function ChildrenPage() {
               <Archive className="h-4 w-4" />
             </Button>
           )}
-          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => setDeleteConfirm(row)} title="Удалить">
+          <Button variant="ghost" size="sm" className="text-[var(--color-red)]" onClick={() => setDeleteConfirm(row)} title="Удалить">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -211,22 +211,22 @@ export default function ChildrenPage() {
     <div>
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-[rgba(0,122,255,0.08)] text-[var(--color-blue)]">
             <Users className="h-5 w-5" />
           </div>
           <div>
-            <div className="mezon-badge mb-2">Children · контингент</div>
-            <h1 className="mezon-section-title mb-1">Управление контингентом детей</h1>
-            <p className="mezon-subtitle">Профили учеников, статусы, родители и массовый импорт в одном рабочем пространстве.</p>
+            <div className="mezon-badge macos-badge-neutral mb-1">Children · контингент</div>
+            <h1 className="macos-text-title">Управление контингентом детей</h1>
+            <p className="macos-text-subtitle mt-1">Профили учеников, статусы, родители и массовый импорт в одном рабочем пространстве.</p>
           </div>
         </div>
       </div>
 
       {/* Import/Export Card */}
-      <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-[var(--shadow-sm)]">
         <div>
-          <p className="font-semibold text-[var(--mezon-dark)]">Массовая загрузка списков</p>
-          <p className="text-sm text-[var(--mezon-text-secondary)]">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон для кураторов.</p>
+          <p className="macos-text-callout">Массовая загрузка списков</p>
+          <p className="macos-text-body text-[var(--text-secondary)] mt-1">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={handleExport} disabled={isExporting}>
@@ -271,10 +271,10 @@ export default function ChildrenPage() {
 
       {/* Filters panel */}
       {showFilters && (
-        <Card className="mb-4 p-4">
+        <Card className="mb-4 p-4 shadow-[var(--shadow-sm)]">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="mb-1 block text-sm text-[var(--mezon-text-secondary)]">Статус</label>
+              <label className="mb-1 block macos-text-caption">Статус</label>
               <select
                 className={selectClassName}
                 value={filters.status ?? ''}
@@ -290,7 +290,7 @@ export default function ChildrenPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm text-[var(--mezon-text-secondary)]">Класс</label>
+              <label className="mb-1 block macos-text-caption">Класс</label>
               <select
                 className={selectClassName}
                 value={filters.groupId ?? ''}
@@ -306,7 +306,7 @@ export default function ChildrenPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm text-[var(--mezon-text-secondary)]">Пол</label>
+              <label className="mb-1 block macos-text-caption">Пол</label>
               <select
                 className={selectClassName}
                 value={filters.gender ?? ''}
@@ -351,16 +351,16 @@ export default function ChildrenPage() {
       {/* Delete Confirmation */}
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление ученика">
         <div className="p-4">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="rounded-full bg-[rgba(255,59,48,0.12)] p-2">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="rounded-[8px] bg-[rgba(255,59,48,0.12)] p-2">
               <AlertCircle className="h-6 w-6 text-[var(--macos-red)]" />
             </div>
             <div>
-              <p className="font-medium text-[var(--mezon-dark)]">Вы уверены, что хотите удалить ученика?</p>
-              <p className="mt-1 text-sm text-[var(--mezon-text-secondary)]">
+              <p className="macos-text-callout">Вы уверены, что хотите удалить ученика?</p>
+              <p className="mt-1 macos-text-body text-[var(--text-secondary)]">
                 <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.group?.name})
               </p>
-              <p className="mt-2 text-sm text-[var(--macos-red)]">
+              <p className="mt-2 macos-text-caption text-[var(--macos-red)]">
                 Все связанные данные (посещаемость, отсутствия, записи в кружки) будут удалены.
               </p>
             </div>

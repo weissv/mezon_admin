@@ -115,15 +115,15 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Login/Email */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Логин</label>
+        <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Логин</label>
         <Input {...register('email')} placeholder="Введите логин для входа" />
         <FormError message={errors.email?.message} />
       </div>
 
       {/* Password */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Пароль {isEditing && <span className="text-gray-500 font-normal">(оставьте пустым, чтобы не менять)</span>}
+        <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+          Пароль {isEditing && <span className="text-[var(--text-secondary)] font-normal">(оставьте пустым, чтобы не менять)</span>}
         </label>
         <div className="relative">
           <Input
@@ -133,7 +133,7 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
           />
           <button
             type="button"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -144,10 +144,10 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
 
       {/* Role */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Роль</label>
+        <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Роль</label>
         <select
           {...register('role')}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         >
           {ROLES.map((role) => (
             <option key={role.value} value={role.value}>
@@ -161,9 +161,9 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
       {/* Employee Select - only for new users */}
       {!isEditing && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Сотрудник</label>
+          <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Сотрудник</label>
           {isLoadingEmployees ? (
-            <div className="text-sm text-gray-500">Загрузка списка сотрудников...</div>
+            <div className="text-sm text-[var(--text-secondary)]">Загрузка списка сотрудников...</div>
           ) : availableEmployees.length === 0 ? (
             <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
               Нет доступных сотрудников без учётной записи. Сначала добавьте сотрудника в разделе «Сотрудники».
@@ -171,7 +171,7 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
           ) : (
             <select
               {...register('employeeId' as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             >
               <option value="">Выберите сотрудника</option>
               {availableEmployees.map((emp) => (
@@ -187,9 +187,9 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
 
       {/* Current Employee Info - for editing */}
       {isEditing && initialData.employee && (
-        <div className="bg-gray-50 p-3 rounded-md">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Привязанный сотрудник</label>
-          <p className="text-sm text-gray-600">
+        <div className="bg-[var(--fill-quaternary)] p-3 rounded-md">
+          <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Привязанный сотрудник</label>
+          <p className="text-sm text-[var(--text-secondary)]">
             {initialData.employee.lastName} {initialData.employee.firstName} — {initialData.employee.position}
           </p>
         </div>
@@ -198,24 +198,24 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
       {/* Telegram Connect - for editing */}
       {isEditing && (
         <div className="border border-blue-200 bg-blue-50 p-4 rounded-md">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block macos-text-caption text-[var(--text-primary)] mb-2">
             <MessageCircle className="inline-block w-4 h-4 mr-1 text-blue-500" />
             Telegram уведомления
           </label>
           {(initialData as any).telegramChatId ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-green-600 font-medium">✓ Telegram подключён</span>
+              <span className="text-sm text-[var(--color-green)] font-medium">✓ Telegram подключён</span>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-[var(--text-secondary)]">
                 Подключите Telegram для получения уведомлений о заявках
               </p>
               <a
                 href={`https://t.me/${TELEGRAM_BOT_NAME}?start=${initialData.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white macos-text-caption rounded-md transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
                 Подключить Telegram

@@ -246,7 +246,7 @@ export default function StaffingPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+        <h1 className="macos-text-title flex items-center gap-2">
           <Users className="h-6 w-6" />
           Штатное расписание
         </h1>
@@ -267,38 +267,38 @@ export default function StaffingPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <div className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Users className="h-6 w-6 text-blue-600" />
+            <div className="p-3 bg-[rgba(0,122,255,0.12)] rounded-full">
+              <Users className="h-6 w-6 text-[var(--color-blue)]" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">По штату</p>
-              <p className="text-2xl font-bold">{summary.totalRequired.toFixed(1)} ставок</p>
+              <p className="text-sm text-[var(--text-secondary)]">По штату</p>
+              <p className="macos-text-title">{summary.totalRequired.toFixed(1)} ставок</p>
             </div>
           </div>
         </Card>
         <Card>
           <div className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-green-100 rounded-full">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
+            <div className="p-3 bg-[rgba(52,199,89,0.12)] rounded-full">
+              <CheckCircle2 className="h-6 w-6 text-[var(--color-green)]" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Фактически</p>
-              <p className="text-2xl font-bold">{summary.totalCurrent.toFixed(1)} ставок</p>
+              <p className="text-sm text-[var(--text-secondary)]">Фактически</p>
+              <p className="macos-text-title">{summary.totalCurrent.toFixed(1)} ставок</p>
             </div>
           </div>
         </Card>
         <Card>
           <div className="p-4 flex items-center gap-4">
-            <div className={`p-3 rounded-full ${summary.totalDeficit > 0 ? 'bg-red-100' : 'bg-green-100'}`}>
+            <div className={`p-3 rounded-full ${summary.totalDeficit > 0 ? 'bg-[rgba(255,59,48,0.12)]' : 'bg-[rgba(52,199,89,0.12)]'}`}>
               {summary.totalDeficit > 0 ? (
-                <TrendingDown className="h-6 w-6 text-red-600" />
+                <TrendingDown className="h-6 w-6 text-[var(--color-red)]" />
               ) : (
-                <TrendingUp className="h-6 w-6 text-green-600" />
+                <TrendingUp className="h-6 w-6 text-[var(--color-green)]" />
               )}
             </div>
             <div>
-              <p className="text-sm text-gray-500">Дефицит</p>
-              <p className={`text-2xl font-bold ${summary.totalDeficit > 0 ? 'text-red-600' : 'text-green-600'}`}>
+              <p className="text-sm text-[var(--text-secondary)]">Дефицит</p>
+              <p className={`macos-text-title ${summary.totalDeficit > 0 ? 'text-[var(--color-red)]' : 'text-[var(--color-green)]'}`}>
                 {summary.totalDeficit > 0 ? `-${summary.totalDeficit.toFixed(1)}` : '0'} ставок
               </p>
             </div>
@@ -331,7 +331,7 @@ export default function StaffingPage() {
           </Button>
         </div>
         <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-tertiary)]" />
           <Input
             type="text"
             placeholder="Поиск по должности..."
@@ -347,7 +347,7 @@ export default function StaffingPage() {
         <div className="space-y-6">
           {filteredTables.length === 0 ? (
             <Card>
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-[var(--text-secondary)]">
                 {searchQuery ? 'Позиции не найдены' : 'Штатное расписание пусто. Добавьте первую позицию.'}
               </div>
             </Card>
@@ -360,41 +360,41 @@ export default function StaffingPage() {
                   const deficit = reportItem?.deficit || item.requiredRate;
                   
                   return (
-                    <div key={item.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                    <div key={item.id} className="p-4 flex items-center justify-between hover:bg-[var(--fill-quaternary)]">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <p className="font-medium">{item.position}</p>
                           {deficit > 0 && (
-                            <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">
+                            <span className="inline-flex items-center px-2 py-0.5 bg-[rgba(255,59,48,0.12)] text-[var(--color-red)] rounded text-xs">
                               -{deficit}
                             </span>
                           )}
                           {deficit < 0 && (
-                            <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                            <span className="inline-flex items-center px-2 py-0.5 bg-[rgba(0,122,255,0.12)] text-[var(--color-blue)] rounded text-xs">
                               +{Math.abs(deficit)}
                             </span>
                           )}
                           {deficit === 0 && currentRate > 0 && (
-                            <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">
+                            <span className="inline-flex items-center px-2 py-0.5 bg-[rgba(52,199,89,0.12)] text-[var(--color-green)] rounded text-xs">
                               <CheckCircle2 className="h-3 w-3 mr-1" />
                               Укомплектовано
                             </span>
                           )}
                         </div>
                         <div className="flex gap-4 mt-1">
-                          <p className="text-sm text-gray-500">
-                            Требуется: <span className="font-medium text-gray-700">{item.requiredRate}</span> ставок
+                          <p className="text-sm text-[var(--text-secondary)]">
+                            Требуется: <span className="font-medium text-[var(--text-primary)]">{item.requiredRate}</span> ставок
                           </p>
-                          <p className="text-sm text-gray-500">
-                            Фактически: <span className="font-medium text-gray-700">{currentRate}</span> ставок
+                          <p className="text-sm text-[var(--text-secondary)]">
+                            Фактически: <span className="font-medium text-[var(--text-primary)]">{currentRate}</span> ставок
                           </p>
                         </div>
                         {/* Progress bar */}
-                        <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden w-48">
+                        <div className="mt-2 h-2 bg-[var(--fill-secondary)] rounded-full overflow-hidden w-48">
                           <div 
                             className={`h-full transition-all ${
-                              currentRate >= item.requiredRate ? 'bg-green-500' : 
-                              currentRate >= item.requiredRate * 0.7 ? 'bg-yellow-500' : 'bg-red-500'
+                              currentRate >= item.requiredRate ? 'bg-[rgba(52,199,89,0.06)]0' : 
+                              currentRate >= item.requiredRate * 0.7 ? 'bg-[rgba(255,204,0,0.06)]0' : 'bg-[rgba(255,59,48,0.06)]0'
                             }`}
                             style={{ width: `${Math.min(100, (currentRate / item.requiredRate) * 100)}%` }}
                           />
@@ -415,7 +415,7 @@ export default function StaffingPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-[var(--color-red)] hover:text-[var(--color-red)] hover:bg-[rgba(255,59,48,0.06)]"
                           onClick={() => openDeleteConfirm(item)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -432,7 +432,7 @@ export default function StaffingPage() {
         <div className="space-y-6">
           {filteredReport.length === 0 ? (
             <Card>
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-[var(--text-secondary)]">
                 {searchQuery ? 'Позиции не найдены' : 'Нет данных для отчёта. Добавьте штатные позиции.'}
               </div>
             </Card>
@@ -440,7 +440,7 @@ export default function StaffingPage() {
             <Card>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 text-sm">
+                  <thead className="bg-[var(--fill-quaternary)] text-sm">
                     <tr>
                       <th className="px-4 py-3 text-left">Должность</th>
                       <th className="px-4 py-3 text-center">По штату</th>
@@ -456,10 +456,10 @@ export default function StaffingPage() {
                         ? Math.round((item.currentRate / item.requiredRate) * 100) 
                         : 0;
                       return (
-                        <tr key={idx} className="hover:bg-gray-50">
+                        <tr key={idx} className="hover:bg-[var(--fill-quaternary)]">
                           <td className="px-4 py-3">
                             <button 
-                              className="font-medium hover:text-blue-600 hover:underline text-left"
+                              className="font-medium hover:text-[var(--color-blue)] hover:underline text-left"
                               onClick={() => setSelectedPosition(item.position)}
                             >
                               {item.position}
@@ -468,37 +468,37 @@ export default function StaffingPage() {
                           <td className="px-4 py-3 text-center">{item.requiredRate}</td>
                           <td className="px-4 py-3 text-center">{item.currentRate}</td>
                           <td className="px-4 py-3 text-center">
-                            <span className={item.deficit > 0 ? 'text-red-600 font-medium' : item.deficit < 0 ? 'text-blue-600 font-medium' : 'text-green-600'}>
+                            <span className={item.deficit > 0 ? 'text-[var(--color-red)] font-medium' : item.deficit < 0 ? 'text-[var(--color-blue)] font-medium' : 'text-[var(--color-green)]'}>
                               {item.deficit > 0 ? `-${item.deficit}` : item.deficit < 0 ? `+${Math.abs(item.deficit)}` : '0'}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="flex-1 h-2 bg-[var(--fill-secondary)] rounded-full overflow-hidden">
                                 <div 
                                   className={`h-full transition-all ${
-                                    percentage >= 100 ? 'bg-green-500' : 
-                                    percentage >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                                    percentage >= 100 ? 'bg-[rgba(52,199,89,0.06)]0' : 
+                                    percentage >= 70 ? 'bg-[rgba(255,204,0,0.06)]0' : 'bg-[rgba(255,59,48,0.06)]0'
                                   }`}
                                   style={{ width: `${Math.min(100, percentage)}%` }}
                                 />
                               </div>
-                              <span className="text-sm text-gray-600 w-12 text-right">{percentage}%</span>
+                              <span className="text-sm text-[var(--text-secondary)] w-12 text-right">{percentage}%</span>
                             </div>
                           </td>
                           <td className="px-4 py-3 text-center">
                             {item.deficit > 0 ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-[rgba(255,59,48,0.12)] text-[var(--color-red)] rounded-full text-xs">
                                 <AlertTriangle className="h-3 w-3" />
                                 Недостаток
                               </span>
                             ) : item.deficit < 0 ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-[rgba(0,122,255,0.12)] text-[var(--color-blue)] rounded-full text-xs">
                                 <TrendingUp className="h-3 w-3" />
                                 Избыток
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-[rgba(52,199,89,0.12)] text-[var(--color-green)] rounded-full text-xs">
                                 <CheckCircle2 className="h-3 w-3" />
                                 Укомплектовано
                               </span>
@@ -518,7 +518,7 @@ export default function StaffingPage() {
         <div className="space-y-6">
           {tables.length === 0 ? (
             <Card>
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-[var(--text-secondary)]">
                 Добавьте штатные позиции для просмотра сотрудников.
               </div>
             </Card>
@@ -535,32 +535,32 @@ export default function StaffingPage() {
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-semibold">{item.position}</h3>
                         {deficit > 0 && (
-                          <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">
+                          <span className="inline-flex items-center px-2 py-0.5 bg-[rgba(255,59,48,0.12)] text-[var(--color-red)] rounded text-xs">
                             -{deficit}
                           </span>
                         )}
                         {deficit < 0 && (
-                          <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                          <span className="inline-flex items-center px-2 py-0.5 bg-[rgba(0,122,255,0.12)] text-[var(--color-blue)] rounded text-xs">
                             +{Math.abs(deficit)}
                           </span>
                         )}
                         {deficit === 0 && currentRate > 0 && (
-                          <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">
+                          <span className="inline-flex items-center px-2 py-0.5 bg-[rgba(52,199,89,0.12)] text-[var(--color-green)] rounded text-xs">
                             <CheckCircle2 className="h-3 w-3" />
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 mb-3">
+                      <p className="text-sm text-[var(--text-secondary)] mb-3">
                         {currentRate} из {item.requiredRate} ставок
                       </p>
                       {positionEmployees.length === 0 ? (
-                        <p className="text-sm text-gray-400 italic">Нет сотрудников</p>
+                        <p className="text-sm text-[var(--text-tertiary)] italic">Нет сотрудников</p>
                       ) : (
                         <div className="space-y-2">
                           {positionEmployees.map((emp) => (
-                            <div key={emp.id} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                            <div key={emp.id} className="flex items-center justify-between text-sm p-2 bg-[var(--fill-quaternary)] rounded">
                               <span>{emp.lastName} {emp.firstName}</span>
-                              <span className="text-gray-500">{emp.rate} ст.</span>
+                              <span className="text-[var(--text-secondary)]">{emp.rate} ст.</span>
                             </div>
                           ))}
                         </div>
@@ -582,7 +582,7 @@ export default function StaffingPage() {
       >
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Должность *</label>
+            <label className="block macos-text-caption mb-1">Должность *</label>
             <Input
               value={formData.position}
               onChange={(e) => setFormData({ ...formData, position: e.target.value })}
@@ -591,7 +591,7 @@ export default function StaffingPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Кол-во ставок *</label>
+            <label className="block macos-text-caption mb-1">Кол-во ставок *</label>
             <Input
               type="number"
               step="0.1"
@@ -616,17 +616,17 @@ export default function StaffingPage() {
       {/* Delete Confirmation Modal */}
       <Modal isOpen={deleteConfirm.open} onClose={() => setDeleteConfirm({ open: false, item: null })} title="Подтверждение удаления">
         <div className="p-4 space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
+            <AlertTriangle className="h-6 w-6 text-[var(--color-red)] flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-red-800">Внимание!</h4>
-              <p className="text-red-700 text-sm mt-1">
+              <p className="text-[var(--color-red)] text-sm mt-1">
                 Вы собираетесь удалить позицию из штатного расписания. Это действие нельзя отменить.
               </p>
             </div>
           </div>
           {deleteConfirm.item && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-[var(--fill-quaternary)] p-3 rounded-lg">
               <p><strong>Должность:</strong> {deleteConfirm.item.position}</p>
               <p><strong>Ставок:</strong> {deleteConfirm.item.requiredRate}</p>
             </div>
@@ -660,25 +660,25 @@ export default function StaffingPage() {
                 
                 return (
                   <>
-                    <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-4 p-3 bg-[var(--fill-quaternary)] rounded-lg">
                       <div>
-                        <p className="text-sm text-gray-500">Укомплектованность</p>
+                        <p className="text-sm text-[var(--text-secondary)]">Укомплектованность</p>
                         <p className="text-lg font-bold">{currentRate} / {requiredRate} ставок</p>
                       </div>
                       {deficit > 0 && (
-                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-[rgba(255,59,48,0.12)] text-[var(--color-red)] rounded-full macos-text-caption">
                           <AlertTriangle className="h-4 w-4" />
                           Не хватает {deficit}
                         </span>
                       )}
                       {deficit < 0 && (
-                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-[rgba(0,122,255,0.12)] text-[var(--color-blue)] rounded-full macos-text-caption">
                           <TrendingUp className="h-4 w-4" />
                           Избыток {Math.abs(deficit)}
                         </span>
                       )}
                       {deficit === 0 && currentRate > 0 && (
-                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-[rgba(52,199,89,0.12)] text-[var(--color-green)] rounded-full macos-text-caption">
                           <CheckCircle2 className="h-4 w-4" />
                           Укомплектовано
                         </span>
@@ -686,26 +686,26 @@ export default function StaffingPage() {
                     </div>
                     
                     {positionEmployees.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <Users className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                      <div className="text-center py-8 text-[var(--text-secondary)]">
+                        <Users className="h-12 w-12 mx-auto mb-2 text-[var(--text-quaternary)]" />
                         <p>На этой должности нет сотрудников</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         {positionEmployees.map((emp) => (
-                          <div key={emp.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                          <div key={emp.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-[var(--fill-quaternary)]">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span className="text-blue-600 font-medium">
+                              <div className="w-10 h-10 bg-[rgba(0,122,255,0.12)] rounded-full flex items-center justify-center">
+                                <span className="text-[var(--color-blue)] font-medium">
                                   {emp.firstName[0]}{emp.lastName[0]}
                                 </span>
                               </div>
                               <div>
                                 <p className="font-medium">{emp.lastName} {emp.firstName}</p>
-                                <p className="text-sm text-gray-500">{emp.position}</p>
+                                <p className="text-sm text-[var(--text-secondary)]">{emp.position}</p>
                               </div>
                             </div>
-                            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm font-medium">
+                            <span className="px-3 py-1 bg-[var(--fill-tertiary)] rounded-full macos-text-caption">
                               {emp.rate} ставки
                             </span>
                           </div>

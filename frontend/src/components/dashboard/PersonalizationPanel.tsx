@@ -80,7 +80,7 @@ export default function PersonalizationPanel({
         <div className="personalization-panel__header">
           <div className="flex items-center gap-2">
             <Settings className="h-5 w-5 text-[var(--mezon-accent)]" />
-            <h2 className="text-lg font-semibold text-[var(--mezon-dark)]">Настройка дашборда</h2>
+            <h2 className="macos-text-callout text-[var(--mezon-dark)]">Настройка дашборда</h2>
           </div>
           <button onClick={onClose} className="personalization-panel__close" aria-label="Закрыть">
             <X className="h-5 w-5" />
@@ -135,10 +135,10 @@ export default function PersonalizationPanel({
                           aria-pressed={isEnabled}
                         >
                           <div className="flex items-center gap-2">
-                            {isEnabled ? <Eye className="h-4 w-4 text-green-500" /> : <EyeOff className="h-4 w-4 text-gray-400" />}
-                            <span className="text-sm font-medium">{w.title}</span>
+                            {isEnabled ? <Eye className="h-4 w-4 text-[var(--color-green)]" /> : <EyeOff className="h-4 w-4 text-[var(--text-tertiary)]" />}
+                            <span className="macos-text-caption">{w.title}</span>
                           </div>
-                          <span className="text-xs text-gray-400">{w.description}</span>
+                          <span className="text-xs text-[var(--text-tertiary)]">{w.description}</span>
                         </button>
                       );
                     })}
@@ -188,13 +188,13 @@ export default function PersonalizationPanel({
                       aria-label={`Загрузить представление ${view.name}`}
                     >
                       <Bookmark className="h-4 w-4 text-[var(--mezon-accent)]" />
-                      <span className="text-sm font-medium">{view.name}</span>
-                      <span className="text-xs text-gray-400">{view.enabledWidgets.length} виджетов</span>
+                      <span className="macos-text-caption">{view.name}</span>
+                      <span className="text-xs text-[var(--text-tertiary)]">{view.enabledWidgets.length} виджетов</span>
                     </button>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-400 text-center py-4">Нет сохранённых представлений</p>
+                <p className="text-sm text-[var(--text-tertiary)] text-center py-4">Нет сохранённых представлений</p>
               )}
 
               <Button variant="outline" className="w-full" onClick={onResetDefaults}>
@@ -217,8 +217,8 @@ export default function PersonalizationPanel({
                     aria-pressed={isPinned}
                   >
                     <div className="flex items-center gap-2">
-                      {isPinned ? <Eye className="h-4 w-4 text-green-500" /> : <EyeOff className="h-4 w-4 text-gray-400" />}
-                      <span className="text-sm font-medium">{action.label}</span>
+                      {isPinned ? <Eye className="h-4 w-4 text-[var(--color-green)]" /> : <EyeOff className="h-4 w-4 text-[var(--text-tertiary)]" />}
+                      <span className="macos-text-caption">{action.label}</span>
                     </div>
                   </button>
                 );

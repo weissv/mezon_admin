@@ -16,10 +16,10 @@ interface MaintenanceQueueData {
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
-  urgent: 'bg-red-100 text-red-700',
+  urgent: 'bg-[rgba(255,59,48,0.12)] text-red-700',
   high: 'bg-orange-100 text-orange-700',
   medium: 'bg-amber-100 text-amber-700',
-  low: 'bg-gray-100 text-gray-600',
+  low: 'bg-[var(--fill-tertiary)] text-[var(--text-secondary)]',
 };
 
 const STATUS_ICONS: Record<string, typeof Clock> = {
@@ -38,14 +38,14 @@ export default function MaintenanceQueueWidget({ data }: { data: MaintenanceQueu
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <AlertCircle className="h-4 w-4 text-amber-500" />
-        <span className="text-sm font-medium">{data.totalOpen ?? 0} открытых заявок</span>
+        <span className="macos-text-caption">{data.totalOpen ?? 0} открытых заявок</span>
       </div>
 
       <div className="flex gap-2">
         {byStatus.map(s => (
-          <div key={s.status} className="flex-1 text-center p-1.5 bg-gray-50 rounded text-xs">
+          <div key={s.status} className="flex-1 text-center p-1.5 bg-[var(--fill-quaternary)] rounded text-xs">
             <p className="font-bold">{s.count}</p>
-            <p className="text-gray-400 capitalize">{s.status.replace('_', ' ')}</p>
+            <p className="text-[var(--text-tertiary)] capitalize">{s.status.replace('_', ' ')}</p>
           </div>
         ))}
       </div>
@@ -55,7 +55,7 @@ export default function MaintenanceQueueWidget({ data }: { data: MaintenanceQueu
           const Icon = STATUS_ICONS[req.status] ?? Clock;
           return (
             <div key={req.id} className="flex items-center gap-2 text-xs">
-              <Icon className="h-3 w-3 flex-shrink-0 text-gray-400" />
+              <Icon className="h-3 w-3 flex-shrink-0 text-[var(--text-tertiary)]" />
               <span className="truncate flex-1">{req.title}</span>
               <span className={`px-1.5 py-0.5 rounded text-[10px] ${PRIORITY_COLORS[req.priority] ?? PRIORITY_COLORS.low}`}>
                 {req.priority}

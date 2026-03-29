@@ -244,19 +244,19 @@ export default function MenuPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-[rgba(255,149,0,0.08)] rounded-[var(--radius-md)]">
                 <div className="text-sm text-[var(--text-secondary)]">Калорийность</div>
-                <div className="text-2xl font-bold text-[var(--text-primary)]">{kbzhuData.kbju?.calories?.toFixed(1) || 0} ккал</div>
+                <div className="macos-text-title text-[var(--text-primary)]">{kbzhuData.kbju?.calories?.toFixed(1) || 0} ккал</div>
               </div>
               <div className="p-3 bg-[rgba(0,122,255,0.06)] rounded-[var(--radius-md)]">
                 <div className="text-sm text-[var(--text-secondary)]">Белки</div>
-                <div className="text-2xl font-bold text-[var(--text-primary)]">{kbzhuData.kbju?.protein?.toFixed(1) || 0} г</div>
+                <div className="macos-text-title text-[var(--text-primary)]">{kbzhuData.kbju?.protein?.toFixed(1) || 0} г</div>
               </div>
               <div className="p-3 bg-[rgba(255,204,0,0.08)] rounded-[var(--radius-md)]">
                 <div className="text-sm text-[var(--text-secondary)]">Жиры</div>
-                <div className="text-2xl font-bold text-[var(--text-primary)]">{kbzhuData.kbju?.fat?.toFixed(1) || 0} г</div>
+                <div className="macos-text-title text-[var(--text-primary)]">{kbzhuData.kbju?.fat?.toFixed(1) || 0} г</div>
               </div>
               <div className="p-3 bg-[rgba(52,199,89,0.08)] rounded-[var(--radius-md)]">
                 <div className="text-sm text-[var(--text-secondary)]">Углеводы</div>
-                <div className="text-2xl font-bold text-[var(--text-primary)]">{kbzhuData.kbju?.carbs?.toFixed(1) || 0} г</div>
+                <div className="macos-text-title text-[var(--text-primary)]">{kbzhuData.kbju?.carbs?.toFixed(1) || 0} г</div>
               </div>
             </div>
             <p className="text-sm text-[var(--text-tertiary)]">
@@ -349,7 +349,7 @@ export default function MenuPage() {
               <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить это меню?</p>
               {deleteConfirm && (
                 <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-[var(--radius-md)]">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="macos-text-caption text-[var(--text-primary)]">
                     {new Date(deleteConfirm.date).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}
                   </p>
                   <p className="text-xs text-[var(--text-tertiary)] mt-1">

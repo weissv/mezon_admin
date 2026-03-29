@@ -329,7 +329,7 @@ export default function InventoryPage() {
               </div>
               <div>
                 <span className="text-sm text-[var(--mezon-text-secondary)]">{label}</span>
-                <p className={`mt-1 text-2xl font-bold ${type === 'ALL' ? 'text-[var(--mezon-dark)]' : accent}`}>{count}</p>
+                <p className={`mt-1 macos-text-title ${type === 'ALL' ? 'text-[var(--mezon-dark)]' : accent}`}>{count}</p>
               </div>
             </button>
           </Card>
@@ -444,7 +444,7 @@ export default function InventoryPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Наименование *</label>
+            <label className="block macos-text-caption mb-1">Наименование *</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -454,7 +454,7 @@ export default function InventoryPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Тип товара *</label>
+            <label className="block macos-text-caption mb-1">Тип товара *</label>
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value as InventoryType })}
@@ -468,7 +468,7 @@ export default function InventoryPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Количество *</label>
+            <label className="block macos-text-caption mb-1">Количество *</label>
             <Input
               type="number"
               value={formData.quantity}
@@ -480,7 +480,7 @@ export default function InventoryPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Единица измерения *</label>
+            <label className="block macos-text-caption mb-1">Единица измерения *</label>
             <Input
               value={formData.unit}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
@@ -490,7 +490,7 @@ export default function InventoryPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Срок годности</label>
+            <label className="block macos-text-caption mb-1">Срок годности</label>
             <Input
               type="date"
               value={formData.expiryDate}
@@ -502,7 +502,7 @@ export default function InventoryPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Мин. остаток (для уведомлений)</label>
+            <label className="block macos-text-caption mb-1">Мин. остаток (для уведомлений)</label>
             <Input
               type="number"
               value={formData.minQuantity}
@@ -617,7 +617,7 @@ export default function InventoryPage() {
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium mb-1">Количество для списания *</label>
+            <label className="block macos-text-caption mb-1">Количество для списания *</label>
             <Input
               type="number"
               value={writeOffData.quantity}
@@ -628,7 +628,7 @@ export default function InventoryPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Причина списания</label>
+            <label className="block macos-text-caption mb-1">Причина списания</label>
             <Input
               value={writeOffData.reason}
               onChange={(e) => setWriteOffData({ ...writeOffData, reason: e.target.value })}
@@ -654,7 +654,7 @@ export default function InventoryPage() {
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium mb-1">Количество прихода *</label>
+            <label className="block macos-text-caption mb-1">Количество прихода *</label>
             <Input
               type="number"
               value={receiveData.quantity}
@@ -664,7 +664,7 @@ export default function InventoryPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Комментарий</label>
+            <label className="block macos-text-caption mb-1">Комментарий</label>
             <Input
               value={receiveData.reason}
               onChange={(e) => setReceiveData({ ...receiveData, reason: e.target.value })}

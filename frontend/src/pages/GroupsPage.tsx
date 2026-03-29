@@ -176,12 +176,12 @@ export default function GroupsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-[rgba(0,122,255,0.08)] text-[var(--color-blue)]">
             <Users className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="mezon-section-title mb-1">Управление классами</h1>
-            <p className="text-sm text-[var(--mezon-text-secondary)]">
+            <h1 className="macos-text-title mb-1">Управление классами</h1>
+            <p className="macos-text-subtitle mt-1 text-[var(--text-secondary)]">
               Классы синхронизированы с LMS
             </p>
           </div>
@@ -208,7 +208,7 @@ export default function GroupsPage() {
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([grade, gradeGroups]) => (
               <div key={grade}>
-                <h2 className="mb-3 text-lg font-semibold text-[var(--mezon-dark)]">
+                <h2 className="mb-3 macos-text-callout text-[var(--text-primary)]">
                   {grade} класс
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -219,8 +219,8 @@ export default function GroupsPage() {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <p className="text-lg font-semibold text-[var(--mezon-dark)]">{group.name}</p>
-                          <div className="mt-2 space-y-1 text-sm text-[var(--mezon-text-secondary)]">
+                          <p className="macos-text-callout text-[var(--text-primary)]">{group.name}</p>
+                          <div className="mt-2 space-y-1 macos-text-body text-[var(--text-secondary)]">
                             <div className="flex items-center gap-1">
                               <Users className="h-4 w-4" />
                               <span>{group._count?.children || 0} учеников</span>
@@ -234,7 +234,7 @@ export default function GroupsPage() {
                               </div>
                             )}
                             {group.academicYear && (
-                              <p className="text-xs text-[var(--mezon-text-soft)]">
+                              <p className="macos-text-caption text-[var(--text-tertiary)]">
                                 {group.academicYear}
                               </p>
                             )}
@@ -275,7 +275,7 @@ export default function GroupsPage() {
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block font-medium text-[var(--mezon-dark)]">
+              <label className="mb-1 block macos-text-caption">
                 Класс (номер)
               </label>
               <select
@@ -321,7 +321,7 @@ export default function GroupsPage() {
           </div>
 
           <div>
-            <label className="mb-1 block font-medium text-[var(--mezon-dark)]">
+            <label className="mb-1 block macos-text-caption">
               Классный руководитель
             </label>
             <select
@@ -394,18 +394,18 @@ export default function GroupsPage() {
       >
         <div className="p-4">
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(255,59,48,0.12)]">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[8px] bg-[rgba(255,59,48,0.12)]">
               <AlertTriangle className="h-5 w-5 text-[var(--macos-red)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-[var(--mezon-dark)]">
+              <p className="macos-text-callout text-[var(--text-primary)]">
                 Вы уверены, что хотите удалить этот класс?
               </p>
               {deleteConfirm && (
-                <div className="mt-2 rounded-[12px] bg-[rgba(255,255,255,0.62)] p-3">
-                  <p className="text-sm font-medium">{deleteConfirm.name}</p>
+                <div className="mt-2 rounded-[8px] border border-[rgba(0,0,0,0.05)] bg-[rgba(0,0,0,0.03)] p-3">
+                  <p className="macos-text-body text-[var(--text-primary)]">{deleteConfirm.name}</p>
                   {deleteConfirm._count && deleteConfirm._count.children > 0 && (
-                    <p className="mt-1 text-xs text-[var(--macos-red)]">
+                    <p className="mt-1 macos-text-caption text-[var(--macos-red)]">
                       В классе {deleteConfirm._count.children} учеников!
                     </p>
                   )}

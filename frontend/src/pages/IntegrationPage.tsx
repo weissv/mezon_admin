@@ -161,7 +161,7 @@ export default function IntegrationPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Импорт / Экспорт данных</h1>
-        <p className="text-gray-600">Скачайте актуальные шаблоны, отредактируйте их в Excel или Google Sheets и загрузите обратно в систему.</p>
+        <p className="text-[var(--text-secondary)]">Скачайте актуальные шаблоны, отредактируйте их в Excel или Google Sheets и загрузите обратно в систему.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -177,7 +177,7 @@ export default function IntegrationPage() {
             <Card className="space-y-4">
               <div>
                 <h2 className="text-xl font-semibold">{entity.label}</h2>
-                <p className="text-sm text-gray-500">{entity.description}</p>
+                <p className="text-sm text-[var(--text-secondary)]">{entity.description}</p>
               </div>
 
               <div className="flex flex-wrap gap-3">
@@ -214,7 +214,7 @@ export default function IntegrationPage() {
               <div
                 className={clsx(
                   "border-2 border-dashed rounded-lg p-4 text-center transition-all cursor-pointer",
-                  dragActive[entity.key] ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400",
+                  dragActive[entity.key] ? "border-blue-500 bg-[rgba(0,122,255,0.06)]" : "border-[rgba(0,0,0,0.12)] hover:border-blue-400",
                   importing[entity.key] && "opacity-50 pointer-events-none"
                 )}
                 onClick={() => handleManualUpload(entity.key)}
@@ -224,19 +224,19 @@ export default function IntegrationPage() {
                 onDrop={(event) => handleDrop(entity.key, event)}
               >
                 <div className="flex flex-col items-center gap-2">
-                  <UploadCloud className="h-6 w-6 text-gray-500" />
+                  <UploadCloud className="h-6 w-6 text-[var(--text-secondary)]" />
                   <p className="font-medium">Перетащите XLSX-файл сюда</p>
-                  <p className="text-sm text-gray-500">или нажмите, чтобы выбрать файл в проводнике</p>
+                  <p className="text-sm text-[var(--text-secondary)]">или нажмите, чтобы выбрать файл в проводнике</p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Google Sheets (публичная ссылка на CSV)</label>
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Google Sheets (публичная ссылка на CSV)</label>
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <input
                     type="url"
                     placeholder="https://docs.google.com/spreadsheets/..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                    className="flex-1 px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md"
                     value={sheetUrls[entity.key]}
                     onChange={(event) => setSheetUrls((prev) => ({ ...prev, [entity.key]: event.target.value }))}
                   />

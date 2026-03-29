@@ -69,9 +69,9 @@ export default function FeedbackPage() {
 
   const getStatusBadge = (status: FeedbackStatus) => {
     const styles = {
-      NEW: 'bg-blue-100 text-blue-800',
-      IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
-      RESOLVED: 'bg-green-100 text-green-800',
+      NEW: 'bg-[rgba(0,122,255,0.12)] text-blue-800',
+      IN_PROGRESS: 'bg-[rgba(255,204,0,0.12)] text-yellow-800',
+      RESOLVED: 'bg-[rgba(52,199,89,0.12)] text-green-800',
     };
     const labels = {
       NEW: 'Новое',
@@ -142,20 +142,20 @@ export default function FeedbackPage() {
           <Bug className='h-7 w-7 text-rose-600' />
           Баг-репорт
         </h1>
-        <p className='max-w-3xl text-gray-600'>
+        <p className='max-w-3xl text-[var(--text-secondary)]'>
           Сообщите о проблеме в системе. Новый репорт сохраняется в ERP и сразу отправляется разработчику в Telegram через тот же бот, который уже рассылает служебные заявки.
         </p>
       </div>
 
       <div className='grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]'>
-        <div className='rounded-2xl border border-gray-200 bg-white p-6 shadow-sm'>
+        <div className='rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-6 shadow-sm'>
           <div className='mb-5 flex items-start gap-3'>
             <div className='rounded-xl bg-rose-50 p-3 text-rose-600'>
               <MessageCircleWarning className='h-5 w-5' />
             </div>
             <div>
               <h2 className='text-xl font-semibold'>Новый баг-репорт</h2>
-              <p className='text-sm text-gray-500'>
+              <p className='text-sm text-[var(--text-secondary)]'>
                 Чем точнее сценарий и ожидаемое поведение, тем быстрее получится воспроизвести и исправить проблему.
               </p>
             </div>
@@ -193,7 +193,7 @@ export default function FeedbackPage() {
           <div className='flex items-center justify-between'>
             <div>
               <h2 className='text-xl font-semibold'>Журнал баг-репортов</h2>
-              <p className='text-sm text-gray-500'>Административный обзор отправленных сообщений для разбора и ответа.</p>
+              <p className='text-sm text-[var(--text-secondary)]'>Административный обзор отправленных сообщений для разбора и ответа.</p>
             </div>
           </div>
 
@@ -226,17 +226,17 @@ export default function FeedbackPage() {
       {/* Delete confirmation modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title='Подтверждение удаления'>
         <div className='space-y-4 p-4'>
-          <div className='flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4'>
-            <AlertTriangle className='mt-0.5 h-6 w-6 flex-shrink-0 text-red-600' />
+          <div className='flex items-start gap-3 rounded-lg border border-red-200 bg-[rgba(255,59,48,0.06)] p-4'>
+            <AlertTriangle className='mt-0.5 h-6 w-6 flex-shrink-0 text-[var(--color-red)]' />
             <div>
               <h4 className='font-semibold text-red-800'>Внимание!</h4>
-              <p className='mt-1 text-sm text-red-700'>
+              <p className='mt-1 text-sm text-[var(--color-red)]'>
                 Вы собираетесь удалить баг-репорт. Это действие нельзя отменить.
               </p>
             </div>
           </div>
           {deletingFeedback && (
-            <div className='rounded-lg bg-gray-50 p-3'>
+            <div className='rounded-lg bg-[var(--fill-quaternary)] p-3'>
               <p><strong>Родитель:</strong> {deletingFeedback.parentName}</p>
               <p><strong>Тип:</strong> {deletingFeedback.type}</p>
               <p><strong>Статус:</strong> {getStatusBadge(deletingFeedback.status)}</p>

@@ -140,9 +140,9 @@ export function UsersDirectoryView() {
       <Card className="p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-[var(--mezon-accent)]">Пользователи ERP</p>
+            <p className="macos-text-caption text-[var(--mezon-accent)]">Пользователи ERP</p>
             <h2 className="text-xl font-semibold">Учётные записи сотрудников</h2>
-            <p className="text-sm text-gray-600">Управляйте жизненным циклом учётных записей, не теряя историю действий и привязку к сотруднику.</p>
+            <p className="text-sm text-[var(--text-secondary)]">Управляйте жизненным циклом учётных записей, не теряя историю действий и привязку к сотруднику.</p>
           </div>
           <Button onClick={() => { setEditingUser(null); setIsModalOpen(true); }}>
             <UserPlus className="mr-2 h-4 w-4" /> Добавить пользователя
@@ -151,24 +151,24 @@ export function UsersDirectoryView() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="p-4"><p className="text-sm text-gray-500">На странице</p><p className="mt-1 text-2xl font-semibold">{data.length}</p></Card>
-        <Card className="p-4"><p className="text-sm text-gray-500">Активные</p><p className="mt-1 text-2xl font-semibold">{counts.active}</p></Card>
-        <Card className="p-4"><p className="text-sm text-gray-500">Деактивированные</p><p className="mt-1 text-2xl font-semibold">{counts.inactive}</p></Card>
+        <Card className="p-4"><p className="text-sm text-[var(--text-secondary)]">На странице</p><p className="mt-1 text-2xl font-semibold">{data.length}</p></Card>
+        <Card className="p-4"><p className="text-sm text-[var(--text-secondary)]">Активные</p><p className="mt-1 text-2xl font-semibold">{counts.active}</p></Card>
+        <Card className="p-4"><p className="text-sm text-[var(--text-secondary)]">Деактивированные</p><p className="mt-1 text-2xl font-semibold">{counts.inactive}</p></Card>
       </div>
 
       <Card className="p-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_220px_220px]">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-tertiary)]" />
             <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Поиск по логину, ФИО или должности" className="pl-10" />
           </div>
-          <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+          <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)} className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
             <option value="">Все роли</option>
             {Object.entries(ROLE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
           </select>
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as 'ACTIVE' | 'INACTIVE' | 'ALL')} className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as 'ACTIVE' | 'INACTIVE' | 'ALL')} className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
             <option value="ACTIVE">Только активные</option>
             <option value="INACTIVE">Только деактивированные</option>
             <option value="ALL">Все статусы</option>
@@ -176,7 +176,7 @@ export function UsersDirectoryView() {
         </div>
       </Card>
 
-      {loading && <div className="text-sm text-gray-500">Загрузка пользователей...</div>}
+      {loading && <div className="text-sm text-[var(--text-secondary)]">Загрузка пользователей...</div>}
 
       <DataTable columns={columns} data={data} page={page} pageSize={10} total={total} onPageChange={setPage} />
 
@@ -194,9 +194,9 @@ export function UsersDirectoryView() {
 
       <Modal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Деактивировать пользователя?">
         <div className="space-y-4">
-          <p className="text-gray-600">Учётная запись <span className="font-semibold">{deleteTarget?.email}</span> будет отключена, но история действий и связь с сотрудником сохранятся.</p>
+          <p className="text-[var(--text-secondary)]">Учётная запись <span className="font-semibold">{deleteTarget?.email}</span> будет отключена, но история действий и связь с сотрудником сохранятся.</p>
           {deleteTarget?.employee && (
-            <div className="rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
+            <div className="rounded-lg bg-[var(--fill-quaternary)] p-3 text-sm text-[var(--text-secondary)]">
               {deleteTarget.employee.lastName} {deleteTarget.employee.firstName} — {deleteTarget.employee.position}
             </div>
           )}

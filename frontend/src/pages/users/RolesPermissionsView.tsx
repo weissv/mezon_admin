@@ -86,30 +86,30 @@ export function RolesPermissionsView() {
   return (
     <div className="space-y-6">
       <Card className="p-5">
-        <p className="text-sm font-medium text-[var(--mezon-accent)]">Роли и права</p>
+        <p className="macos-text-caption text-[var(--mezon-accent)]">Роли и права</p>
         <h2 className="mt-1 text-xl font-semibold">Матрица доступа к модулям</h2>
-        <p className="mt-2 text-sm text-gray-600">Управляйте доступом по ролям отдельно от учётных записей. Защищённые роли можно просматривать, но не изменять без повышенных прав.</p>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">Управляйте доступом по ролям отдельно от учётных записей. Защищённые роли можно просматривать, но не изменять без повышенных прав.</p>
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="p-4"><p className="text-sm text-gray-500">Всего ролей</p><p className="mt-1 text-2xl font-semibold">{summary.roles}</p></Card>
-        <Card className="p-4"><p className="text-sm text-gray-500">Редактируемые</p><p className="mt-1 text-2xl font-semibold">{summary.editable}</p></Card>
-        <Card className="p-4"><p className="text-sm text-gray-500">Полный доступ</p><p className="mt-1 text-2xl font-semibold">{summary.fullAccess}</p></Card>
+        <Card className="p-4"><p className="text-sm text-[var(--text-secondary)]">Всего ролей</p><p className="mt-1 text-2xl font-semibold">{summary.roles}</p></Card>
+        <Card className="p-4"><p className="text-sm text-[var(--text-secondary)]">Редактируемые</p><p className="mt-1 text-2xl font-semibold">{summary.editable}</p></Card>
+        <Card className="p-4"><p className="text-sm text-[var(--text-secondary)]">Полный доступ</p><p className="mt-1 text-2xl font-semibold">{summary.fullAccess}</p></Card>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
         <Card className="overflow-hidden p-0">
           <div className="border-b px-4 py-3">
             <p className="font-medium">Роли системы</p>
-            <p className="text-sm text-gray-500">Выберите роль, чтобы посмотреть или изменить её матрицу доступа.</p>
+            <p className="text-sm text-[var(--text-secondary)]">Выберите роль, чтобы посмотреть или изменить её матрицу доступа.</p>
           </div>
           {loading ? (
-            <div className="p-6 text-sm text-gray-500">Загрузка прав ролей...</div>
+            <div className="p-6 text-sm text-[var(--text-secondary)]">Загрузка прав ролей...</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 text-left">
+                  <tr className="bg-[var(--fill-quaternary)] text-left">
                     <th className="px-4 py-3">Роль</th>
                     <th className="px-4 py-3 text-center">Модули</th>
                     <th className="px-4 py-3 text-center">CRUD</th>
@@ -119,7 +119,7 @@ export function RolesPermissionsView() {
                 </thead>
                 <tbody>
                   {permissions.map((permission) => (
-                    <tr key={permission.role} className="border-t hover:bg-gray-50">
+                    <tr key={permission.role} className="border-t hover:bg-[var(--fill-quaternary)]">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           {permission.isFullAccess && <Lock className="h-4 w-4 text-amber-500" />}
@@ -129,8 +129,8 @@ export function RolesPermissionsView() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">{permission.isFullAccess ? 'Все' : `${permission.modules.length} / ${PERMISSION_MODULES.length}`}</td>
-                      <td className="px-4 py-3 text-center">{permission.canCreate && permission.canEdit && permission.canDelete ? <Check className="mx-auto h-4 w-4 text-green-600" /> : <ShieldAlert className="mx-auto h-4 w-4 text-amber-500" />}</td>
-                      <td className="px-4 py-3 text-center">{permission.canExport ? <Check className="mx-auto h-4 w-4 text-green-600" /> : <X className="mx-auto h-4 w-4 text-red-400" />}</td>
+                      <td className="px-4 py-3 text-center">{permission.canCreate && permission.canEdit && permission.canDelete ? <Check className="mx-auto h-4 w-4 text-[var(--color-green)]" /> : <ShieldAlert className="mx-auto h-4 w-4 text-amber-500" />}</td>
+                      <td className="px-4 py-3 text-center">{permission.canExport ? <Check className="mx-auto h-4 w-4 text-[var(--color-green)]" /> : <X className="mx-auto h-4 w-4 text-red-400" />}</td>
                       <td className="px-4 py-3 text-right">
                         <Button variant="outline" size="sm" onClick={() => setSelectedRole(permission)}>
                           <Edit3 className="mr-2 h-4 w-4" /> {permission.canBeEdited ? 'Настроить' : 'Посмотреть'}
@@ -146,7 +146,7 @@ export function RolesPermissionsView() {
 
         <Card className="p-5">
           {!selectedRole ? (
-            <div className="text-sm text-gray-500">Выберите роль из списка слева.</div>
+            <div className="text-sm text-[var(--text-secondary)]">Выберите роль из списка слева.</div>
           ) : (
             <div className="space-y-6">
               <div className="space-y-2">
@@ -156,7 +156,7 @@ export function RolesPermissionsView() {
                     {ROLE_LABELS[selectedRole.role]}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">{selectedRole.canBeEdited ? 'Настройте доступ к операциям и модулям для выбранной роли.' : 'Эта роль защищена. Её права доступны только для просмотра.'}</p>
+                <p className="text-sm text-[var(--text-secondary)]">{selectedRole.canBeEdited ? 'Настройте доступ к операциям и модулям для выбранной роли.' : 'Эта роль защищена. Её права доступны только для просмотра.'}</p>
               </div>
 
               <div>
@@ -186,7 +186,7 @@ export function RolesPermissionsView() {
                 </div>
                 <div className="grid max-h-[420px] gap-2 overflow-y-auto rounded-xl border p-3 sm:grid-cols-2">
                   {PERMISSION_MODULES.map((module) => (
-                    <label key={module.id} className="flex items-center gap-2 rounded-lg p-2 text-sm hover:bg-gray-50">
+                    <label key={module.id} className="flex items-center gap-2 rounded-lg p-2 text-sm hover:bg-[var(--fill-quaternary)]">
                       <input type="checkbox" checked={selectedRole.modules.includes(module.id)} disabled={!selectedRole.canBeEdited} onChange={() => toggleModule(module.id)} />
                       <span>{module.label}</span>
                     </label>
