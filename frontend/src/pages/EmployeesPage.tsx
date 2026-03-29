@@ -92,7 +92,7 @@ export default function EmployeesPage() {
     { key: 'birthDate', header: 'Дата рождения', render: (row) => row.birthDate ? new Date(row.birthDate).toLocaleDateString('ru-RU') : '—' },
     { key: 'position', header: 'Должность' },
     { key: 'rate', header: 'Ставка' },
-    { key: 'user', header: 'Аккаунт', render: (row) => row.user ? <span className="text-green-600">{row.user.email}</span> : <span className="text-gray-400">Нет</span> },
+    { key: 'user', header: 'Аккаунт', render: (row) => row.user ? <span className="text-[var(--color-green)]">{row.user.email}</span> : <span className="text-[var(--text-quaternary)]">Нет</span> },
     {
       key: 'actions',
       header: 'Действия',
@@ -111,12 +111,12 @@ export default function EmployeesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Управление сотрудниками</h1>
+      <h1 className="mezon-section-title text-2xl mb-4">Управление сотрудниками</h1>
 
       <Card className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-semibold">Быстрый обмен данными HR</p>
-          <p className="text-sm text-gray-600">Выгрузите текущий штат в Excel или перейдите к импорту для массовых обновлений.</p>
+          <p className="font-semibold text-[var(--text-primary)]">Быстрый обмен данными HR</p>
+          <p className="text-sm text-[var(--text-secondary)]">Выгрузите текущий штат в Excel или перейдите к импорту для массовых обновлений.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={handleEmployeesExport} disabled={isExporting}>
@@ -130,18 +130,18 @@ export default function EmployeesPage() {
 
       {/* Reminders Widget */}
       {reminders && (reminders.medicalCheckups.length > 0 || reminders.attestations.length > 0) && (
-        <Card className="mb-6 p-4 bg-orange-50 border-orange-200">
+        <Card className="mb-6 p-4 bg-[rgba(255,149,0,0.06)] border-[rgba(255,149,0,0.2)]">
           <div className="flex items-start">
-            <AlertCircle className="h-5 w-5 text-orange-500 mr-3 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-[var(--color-orange)] mr-3 mt-0.5" />
             <div className="flex-1">
-              <h3 className="font-semibold text-orange-900 mb-2">Напоминания</h3>
+              <h3 className="font-semibold text-[var(--color-orange)] mb-2">Напоминания</h3>
               
               {reminders.medicalCheckups.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-orange-800 mb-1">
+                  <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
                     Медосмотры ({reminders.medicalCheckups.length}):
                   </p>
-                  <ul className="text-sm text-orange-700 space-y-1">
+                  <ul className="text-sm text-[var(--text-secondary)] space-y-1">
                     {reminders.medicalCheckups.map((emp: any) => (
                       <li key={emp.id}>
                         {emp.firstName} {emp.lastName} ({emp.position}) - через {emp.daysUntil} дн.
@@ -153,10 +153,10 @@ export default function EmployeesPage() {
 
               {reminders.attestations.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium text-orange-800 mb-1">
+                  <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
                     Аттестации ({reminders.attestations.length}):
                   </p>
-                  <ul className="text-sm text-orange-700 space-y-1">
+                  <ul className="text-sm text-[var(--text-secondary)] space-y-1">
                     {reminders.attestations.map((emp: any) => (
                       <li key={emp.id}>
                         {emp.firstName} {emp.lastName} ({emp.position}) - через {emp.daysUntil} дн.
@@ -203,20 +203,20 @@ export default function EmployeesPage() {
       >
         <div className="p-4">
           <div className="flex items-start gap-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-full">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+            <div className="p-2 bg-[rgba(255,59,48,0.12)] rounded-full">
+              <AlertCircle className="h-6 w-6 text-[var(--color-red)]" />
             </div>
             <div>
-              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить сотрудника?</p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить сотрудника?</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
                 <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.position})
               </p>
               {deleteConfirm?.user && (
-                <p className="text-sm text-orange-600 mt-2">
+                <p className="text-sm text-[var(--color-orange)] mt-2">
                   ⚠️ У сотрудника есть привязанный аккаунт ({deleteConfirm.user.email}), он тоже будет удалён.
                 </p>
               )}
-              <p className="text-sm text-red-600 mt-2">
+              <p className="text-sm text-[var(--color-red)] mt-2">
                 Это действие нельзя отменить!
               </p>
             </div>

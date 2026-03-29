@@ -169,7 +169,7 @@ export default function MenuPage() {
           <h3 className="font-bold text-lg">{date.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
           {menuForDay ? (
             <div className="mt-2">
-              <p className="font-semibold text-sm text-gray-600">{menuForDay.ageGroup}</p>
+              <p className="font-semibold text-sm text-[var(--text-secondary)]">{menuForDay.ageGroup}</p>
               <ul className="mt-1 list-disc list-inside">
                 {menuForDay.meals.map((meal: any, i: number) => (
                   <li key={i}><strong>{meal.name}:</strong> {meal.dish} ({meal.calories} ккал)</li>
@@ -196,14 +196,14 @@ export default function MenuPage() {
                   size="sm" 
                   variant="outline"
                   onClick={() => setDeleteConfirm(menuForDay)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-[var(--color-red)] hover:text-[var(--color-red)] hover:bg-[rgba(255,59,48,0.06)]"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
             </div>
           ) : (
-            <p className="text-gray-500 mt-2">Меню не составлено</p>
+            <p className="text-[var(--text-tertiary)] mt-2">Меню не составлено</p>
           )}
           <Button onClick={() => handleOpenModal(date)} className="mt-4 w-full">
             {menuForDay ? 'Редактировать' : 'Создать'}
@@ -223,7 +223,7 @@ export default function MenuPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Меню на неделю</h1>
+        <h1 className="mezon-section-title text-2xl">Меню на неделю</h1>
         <div className="flex items-center gap-2">
           <Button onClick={() => changeWeek(-7)}>Пред. неделя</Button>
           <span className="font-semibold">
@@ -242,24 +242,24 @@ export default function MenuPage() {
         {kbzhuData && (
           <div className="p-4 space-y-3">
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-3 bg-orange-50 rounded-md">
-                <div className="text-sm text-gray-600">Калорийность</div>
-                <div className="text-2xl font-bold">{kbzhuData.kbju?.calories?.toFixed(1) || 0} ккал</div>
+              <div className="p-3 bg-[rgba(255,149,0,0.08)] rounded-[var(--radius-md)]">
+                <div className="text-sm text-[var(--text-secondary)]">Калорийность</div>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">{kbzhuData.kbju?.calories?.toFixed(1) || 0} ккал</div>
               </div>
-              <div className="p-3 bg-blue-50 rounded-md">
-                <div className="text-sm text-gray-600">Белки</div>
-                <div className="text-2xl font-bold">{kbzhuData.kbju?.protein?.toFixed(1) || 0} г</div>
+              <div className="p-3 bg-[rgba(0,122,255,0.06)] rounded-[var(--radius-md)]">
+                <div className="text-sm text-[var(--text-secondary)]">Белки</div>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">{kbzhuData.kbju?.protein?.toFixed(1) || 0} г</div>
               </div>
-              <div className="p-3 bg-yellow-50 rounded-md">
-                <div className="text-sm text-gray-600">Жиры</div>
-                <div className="text-2xl font-bold">{kbzhuData.kbju?.fat?.toFixed(1) || 0} г</div>
+              <div className="p-3 bg-[rgba(255,204,0,0.08)] rounded-[var(--radius-md)]">
+                <div className="text-sm text-[var(--text-secondary)]">Жиры</div>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">{kbzhuData.kbju?.fat?.toFixed(1) || 0} г</div>
               </div>
-              <div className="p-3 bg-green-50 rounded-md">
-                <div className="text-sm text-gray-600">Углеводы</div>
-                <div className="text-2xl font-bold">{kbzhuData.kbju?.carbs?.toFixed(1) || 0} г</div>
+              <div className="p-3 bg-[rgba(52,199,89,0.08)] rounded-[var(--radius-md)]">
+                <div className="text-sm text-[var(--text-secondary)]">Углеводы</div>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">{kbzhuData.kbju?.carbs?.toFixed(1) || 0} г</div>
               </div>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-[var(--text-tertiary)]">
               Возрастная группа: {kbzhuData.ageGroup}
             </p>
           </div>
@@ -270,22 +270,22 @@ export default function MenuPage() {
       <Modal isOpen={!!shoppingList} onClose={() => setShoppingList(null)} title="Список покупок">
         {shoppingList && (
           <div className="p-4">
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-[var(--text-secondary)] mb-4">
               Порций: {shoppingList.portions} | Дата: {shoppingList.date && new Date(shoppingList.date).toLocaleDateString('ru-RU')}
             </p>
             <div className="space-y-2">
               {shoppingList.items?.map((item: any, idx: number) => (
-                <div key={idx} className="flex justify-between p-2 border rounded">
-                  <span className="font-medium">{item.ingredientName}</span>
+                <div key={idx} className="flex justify-between p-2 border border-[var(--separator)] rounded-[var(--radius-md)]">
+                  <span className="font-medium text-[var(--text-primary)]">{item.ingredientName}</span>
                   <div className="text-right">
                     <div className="text-sm">
                       Нужно: <span className="font-semibold">{item.requiredQty} {item.unit}</span>
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-[var(--text-secondary)]">
                       На складе: {item.inStock} {item.unit}
                     </div>
                     {item.toBuy > 0 && (
-                      <div className="text-sm font-bold text-red-600">
+                      <div className="text-sm font-bold text-[var(--color-red)]">
                         Купить: {item.toBuy} {item.unit}
                       </div>
                     )}
@@ -302,7 +302,7 @@ export default function MenuPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="p-4">
             <div className="mb-4">
               <label htmlFor="ageGroup" className="block mb-1">Возрастная группа</label>
-              <select {...register('ageGroup')} id="ageGroup" className="w-full p-2 border rounded">
+              <select {...register('ageGroup')} id="ageGroup" className="mezon-field w-full">
                 <option>1-3 года</option>
                 <option>3-7 лет</option>
               </select>
@@ -311,7 +311,7 @@ export default function MenuPage() {
 
             <h3 className="font-semibold mb-2">Приемы пищи</h3>
             {fields.map((field, index) => (
-              <div key={field.id} className="flex gap-2 items-start mb-2 border p-2 rounded">
+              <div key={field.id} className="flex gap-2 items-start mb-2 border border-[var(--separator)] p-2 rounded-[var(--radius-md)]">
                 <div className="flex-1">
                   <Input {...register(`meals.${index}.name`)} placeholder="Название (напр. Завтрак)" />
                   {errors.meals?.[index]?.name && <FormError message={errors.meals[index]?.name?.message} />}
@@ -342,22 +342,22 @@ export default function MenuPage() {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление меню">
         <div className="p-4">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,59,48,0.12)] rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-[var(--color-red)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить это меню?</p>
+              <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить это меню?</p>
               {deleteConfirm && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-md">
-                  <p className="text-sm font-medium">
+                <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-[var(--radius-md)]">
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
                     {new Date(deleteConfirm.date).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-[var(--text-tertiary)] mt-1">
                     Возрастная группа: {deleteConfirm.ageGroup}
                   </p>
                 </div>
               )}
-              <p className="text-sm text-gray-500 mt-2">Это действие нельзя отменить.</p>
+              <p className="text-sm text-[var(--text-tertiary)] mt-2">Это действие нельзя отменить.</p>
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-6">
