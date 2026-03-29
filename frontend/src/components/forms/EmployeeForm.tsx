@@ -55,32 +55,32 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Имя *</label>
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Имя *</label>
                 <Input {...register('firstName')} placeholder="Введите имя"/>
                 <FormError message={errors.firstName?.message} />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Фамилия *</label>
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Фамилия *</label>
                 <Input {...register('lastName')} placeholder="Введите фамилию"/>
                 <FormError message={errors.lastName?.message} />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Дата рождения</label>
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Дата рождения</label>
                 <Input type="date" {...register('birthDate')} />
                 <FormError message={errors.birthDate?.message} />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Должность *</label>
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Должность *</label>
                 <Input {...register('position')} placeholder="Например: Учитель"/>
                 <FormError message={errors.position?.message} />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ставка *</label>
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Ставка *</label>
                 <Input type="number" step="0.1" {...register('rate')} placeholder="1.0"/>
                 <FormError message={errors.rate?.message} />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Дата приёма *</label>
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Дата приёма *</label>
                 <Input type="date" {...register('hireDate')} />
                 <FormError message={errors.hireDate?.message} />
             </div>

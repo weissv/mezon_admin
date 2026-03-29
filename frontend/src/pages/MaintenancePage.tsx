@@ -488,7 +488,7 @@ export default function MaintenancePage() {
         <div>
           <div className="font-medium">{row.title}</div>
           {row.type === 'ISSUE' && row.items && row.items.length > 0 && (
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="text-sm text-[var(--text-secondary)] mt-1">
               {row.items.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2">
                   <span className={`inline-block w-2 h-2 rounded-full ${
@@ -502,7 +502,7 @@ export default function MaintenancePage() {
                   )}
                   {/* Показываем остаток на складе */}
                   {item.inventoryItem && row.status !== 'DONE' && (
-                    <span className={`text-xs ${item.inventoryItem.quantity < item.quantity ? 'text-red-500' : 'text-green-600'}`}>
+                    <span className={`text-xs ${item.inventoryItem.quantity < item.quantity ? 'text-[var(--color-red)]' : 'text-[var(--color-green)]'}`}>
                       [на складе: {item.inventoryItem.quantity} {item.inventoryItem.unit}]
                     </span>
                   )}
@@ -518,7 +518,7 @@ export default function MaintenancePage() {
       key: 'itemsCount' as keyof MaintenanceRequest,
       header: 'Позиции',
       render: (row) => row.type === 'ISSUE' && row.items ? (
-        <span className="px-2 py-1 rounded text-sm bg-gray-100 text-gray-800">
+        <span className="px-2 py-1 rounded text-sm bg-[var(--fill-tertiary)] text-gray-800">
           {row.items.length} шт
         </span>
       ) : '—',
@@ -575,7 +575,7 @@ export default function MaintenancePage() {
                 }}
                 title="Одобрить"
               >
-                <Check className="h-4 w-4 text-green-600" />
+                <Check className="h-4 w-4 text-[var(--color-green)]" />
               </Button>
               <Button 
                 variant="outline" 
@@ -586,7 +586,7 @@ export default function MaintenancePage() {
                 }}
                 title="Отклонить"
               >
-                <X className="h-4 w-4 text-red-600" />
+                <X className="h-4 w-4 text-[var(--color-red)]" />
               </Button>
             </>
           )}
@@ -629,7 +629,7 @@ export default function MaintenancePage() {
     <div className="space-y-6">
       {/* Header with tabs */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+        <h1 className="macos-text-title flex items-center gap-2">
           <ClipboardList className="h-6 w-6" />
           Техобслуживание
         </h1>
@@ -651,7 +651,7 @@ export default function MaintenancePage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-[rgba(0,0,0,0.08)]">
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -661,8 +661,8 @@ export default function MaintenancePage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-[var(--color-blue)]'
+                    : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[rgba(0,0,0,0.12)]'
                 }`}
               >
                 <Icon className="h-5 w-5" />
@@ -682,8 +682,8 @@ export default function MaintenancePage() {
               className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === '' && filterType === '' ? 'ring-2 ring-blue-500' : ''}`}
               onClick={() => { setFilterStatus(''); setFilterType(''); }}
             >
-              <p className="text-sm text-gray-500">Всего</p>
-              <p className="text-2xl font-bold">{stats.total}</p>
+              <p className="text-sm text-[var(--text-secondary)]">Всего</p>
+              <p className="macos-text-title">{stats.total}</p>
             </div>
             
             {/* Для Директора/Завуча/Разработчика показываем Ожидают одобрения */}
@@ -692,8 +692,8 @@ export default function MaintenancePage() {
                 className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'PENDING' ? 'ring-2 ring-yellow-500' : ''}`}
                 onClick={() => { setFilterStatus(filterStatus === 'PENDING' ? '' : 'PENDING'); setFilterType(''); }}
               >
-                <p className="text-sm text-gray-500">Ожидают</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                <p className="text-sm text-[var(--text-secondary)]">Ожидают</p>
+                <p className="macos-text-title text-[var(--color-orange)]">{stats.pending}</p>
               </div>
             )}
             
@@ -703,8 +703,8 @@ export default function MaintenancePage() {
                 className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'APPROVED' ? 'ring-2 ring-green-500' : ''}`}
                 onClick={() => { setFilterStatus(filterStatus === 'APPROVED' ? '' : 'APPROVED'); setFilterType(''); }}
               >
-                <p className="text-sm text-gray-500">{isZavhoz ? 'Новые' : 'Одобренные'}</p>
-                <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
+                <p className="text-sm text-[var(--text-secondary)]">{isZavhoz ? 'Новые' : 'Одобренные'}</p>
+                <p className="macos-text-title text-[var(--color-green)]">{stats.approved}</p>
               </div>
             )}
             
@@ -712,16 +712,16 @@ export default function MaintenancePage() {
               className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'IN_PROGRESS' ? 'ring-2 ring-blue-500' : ''}`}
               onClick={() => { setFilterStatus(filterStatus === 'IN_PROGRESS' ? '' : 'IN_PROGRESS'); setFilterType(''); }}
             >
-              <p className="text-sm text-gray-500">В работе</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
+              <p className="text-sm text-[var(--text-secondary)]">В работе</p>
+              <p className="macos-text-title text-[var(--color-blue)]">{stats.inProgress}</p>
             </div>
             
             <div 
               className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterStatus === 'DONE' ? 'ring-2 ring-gray-500' : ''}`}
               onClick={() => { setFilterStatus(filterStatus === 'DONE' ? '' : 'DONE'); setFilterType(''); }}
             >
-              <p className="text-sm text-gray-500">Выполнено</p>
-              <p className="text-2xl font-bold text-gray-600">{stats.done}</p>
+              <p className="text-sm text-[var(--text-secondary)]">Выполнено</p>
+              <p className="macos-text-title text-[var(--text-secondary)]">{stats.done}</p>
             </div>
           </div>
           
@@ -733,25 +733,25 @@ export default function MaintenancePage() {
             >
               <div className="flex items-center gap-2">
                 <Wrench className="h-4 w-4 text-orange-600" />
-                <p className="text-sm text-gray-500">Ремонт</p>
+                <p className="text-sm text-[var(--text-secondary)]">Ремонт</p>
               </div>
-              <p className="text-2xl font-bold">{stats.repair}</p>
+              <p className="macos-text-title">{stats.repair}</p>
             </div>
             <div 
               className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${filterType === 'ISSUE' ? 'ring-2 ring-blue-500' : ''}`}
               onClick={() => { setFilterType(filterType === 'ISSUE' ? '' : 'ISSUE'); setFilterStatus(''); }}
             >
               <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-purple-600" />
-                <p className="text-sm text-gray-500">Выдача</p>
+                <Package className="h-4 w-4 text-[var(--color-purple)]" />
+                <p className="text-sm text-[var(--text-secondary)]">Выдача</p>
               </div>
-              <p className="text-2xl font-bold">{stats.issue}</p>
+              <p className="macos-text-title">{stats.issue}</p>
             </div>
           </div>
 
           {/* Активный фильтр */}
           {(filterStatus || filterType) && (
-            <div className="flex items-center gap-2 text-sm bg-blue-50 text-blue-700 px-3 py-2 rounded-lg">
+            <div className="flex items-center gap-2 text-sm bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)] px-3 py-2 rounded-lg">
               <Filter className="h-4 w-4" />
               <span>
                 Фильтр: {filterStatus && maintenanceStatusLabels[filterStatus]} {filterType && maintenanceTypeLabels[filterType]}
@@ -769,10 +769,10 @@ export default function MaintenancePage() {
             {loading ? (
               <div className="p-8 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-gray-500">Загрузка...</p>
+                <p className="mt-2 text-[var(--text-secondary)]">Загрузка...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-[var(--text-secondary)]">
                 {filterStatus || filterType ? 'Нет заявок по выбранному фильтру' : 'Нет заявок. Создайте первую заявку.'}
               </div>
             ) : (
@@ -787,26 +787,26 @@ export default function MaintenancePage() {
         <Card>
           {cleaningLoading ? (
             <div className="p-8 text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-              <p className="mt-2 text-gray-500">Загрузка...</p>
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-[var(--color-blue)]" />
+              <p className="mt-2 text-[var(--text-secondary)]">Загрузка...</p>
             </div>
           ) : cleaningSchedules.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <Sparkles className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+            <div className="p-8 text-center text-[var(--text-secondary)]">
+              <Sparkles className="h-12 w-12 mx-auto mb-3 text-[var(--text-quaternary)]" />
               <p>Нет графиков уборки. Добавьте первую зону.</p>
             </div>
           ) : (
             <div className="divide-y">
               {cleaningSchedules.map((schedule) => (
-                <div key={schedule.id} className="p-4 flex justify-between items-center hover:bg-gray-50">
+                <div key={schedule.id} className="p-4 flex justify-between items-center hover:bg-[var(--fill-quaternary)]">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium">{schedule.area}</h3>
-                      <span className="px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-600">
+                      <span className="px-2 py-0.5 text-xs rounded bg-[var(--fill-tertiary)] text-[var(--text-secondary)]">
                         {frequencyMapping[schedule.frequency] || schedule.frequency}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                    <div className="flex items-center gap-4 mt-1 text-sm text-[var(--text-secondary)]">
                       {schedule.assignedTo && (
                         <span>Ответственный: {schedule.assignedTo.lastName} {schedule.assignedTo.firstName}</span>
                       )}
@@ -820,7 +820,7 @@ export default function MaintenancePage() {
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => logCleaning(schedule.id)} title="Зафиксировать уборку">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <CheckCircle className="h-4 w-4 text-[var(--color-green)]" />
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => openCleaningModal(schedule)}>
                       <Edit className="h-4 w-4" />
@@ -841,24 +841,24 @@ export default function MaintenancePage() {
         <Card>
           {equipmentLoading ? (
             <div className="p-8 text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-              <p className="mt-2 text-gray-500">Загрузка...</p>
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-[var(--color-blue)]" />
+              <p className="mt-2 text-[var(--text-secondary)]">Загрузка...</p>
             </div>
           ) : equipment.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <Settings className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+            <div className="p-8 text-center text-[var(--text-secondary)]">
+              <Settings className="h-12 w-12 mx-auto mb-3 text-[var(--text-quaternary)]" />
               <p>Нет оборудования. Добавьте первое оборудование.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-[var(--fill-quaternary)]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Название</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Расположение</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Последняя проверка</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Следующая проверка</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Название</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Расположение</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Последняя проверка</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Следующая проверка</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Действия</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -867,12 +867,12 @@ export default function MaintenancePage() {
                     const isOverdue = nextCheckupDate < new Date();
                     const isUpcoming = nextCheckupDate < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
                     return (
-                      <tr key={item.id} className={isOverdue ? 'bg-red-50' : isUpcoming ? 'bg-yellow-50' : ''}>
+                      <tr key={item.id} className={isOverdue ? 'bg-[rgba(255,59,48,0.06)]' : isUpcoming ? 'bg-[rgba(255,204,0,0.06)]' : ''}>
                         <td className="px-4 py-3 font-medium">{item.name}</td>
-                        <td className="px-4 py-3 text-gray-500">{item.location || '—'}</td>
+                        <td className="px-4 py-3 text-[var(--text-secondary)]">{item.location || '—'}</td>
                         <td className="px-4 py-3">{new Date(item.lastCheckup).toLocaleDateString('ru-RU')}</td>
                         <td className="px-4 py-3">
-                          <span className={isOverdue ? 'text-red-600 font-medium' : isUpcoming ? 'text-yellow-600' : ''}>
+                          <span className={isOverdue ? 'text-[var(--color-red)] font-medium' : isUpcoming ? 'text-[var(--color-orange)]' : ''}>
                             {nextCheckupDate.toLocaleDateString('ru-RU')}
                             {isOverdue && <span className="ml-1">(просрочено)</span>}
                           </span>
@@ -880,7 +880,7 @@ export default function MaintenancePage() {
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
                             <Button size="sm" variant="outline" onClick={() => logCheckup(item.id)} title="Зафиксировать проверку">
-                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <CheckCircle className="h-4 w-4 text-[var(--color-green)]" />
                             </Button>
                             <Button size="sm" variant="outline" onClick={() => openEquipmentModal(item)}>
                               <Edit className="h-4 w-4" />
@@ -921,14 +921,14 @@ export default function MaintenancePage() {
           {watchType === 'ISSUE' && (
             <>
               <div>
-                <label htmlFor="title" className="block mb-1 font-medium">Название заявки <span className="text-red-500">*</span></label>
+                <label htmlFor="title" className="block mb-1 font-medium">Название заявки <span className="text-[var(--color-red)]">*</span></label>
                 <Input {...register('title')} id="title" placeholder="Например: Канцтовары для 3А класса" disabled={editingRequest !== null && userRole === 'ZAVHOZ'} />
                 {errors.title && <FormError message={errors.title.message} />}
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="font-medium">Позиции заявки <span className="text-red-500">*</span></label>
+                  <label className="font-medium">Позиции заявки <span className="text-[var(--color-red)]">*</span></label>
                   {!(editingRequest !== null && userRole === 'ZAVHOZ') && (
                     <Button
                       type="button"
@@ -947,16 +947,16 @@ export default function MaintenancePage() {
 
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                   {fields.map((field, index) => (
-                    <div key={field.id} className="p-3 bg-gray-50 rounded-lg border">
+                    <div key={field.id} className="p-3 bg-[var(--fill-quaternary)] rounded-lg border">
                       <div className="flex justify-between items-start mb-2">
-                        <span className="text-sm font-medium text-gray-600">Позиция {index + 1}</span>
+                        <span className="macos-text-caption text-[var(--text-secondary)]">Позиция {index + 1}</span>
                         {fields.length > 1 && !(editingRequest !== null && userRole === 'ZAVHOZ') && (
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             onClick={() => remove(index)}
-                            className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                            className="text-[var(--color-red)] hover:text-[var(--color-red)] h-6 w-6 p-0"
                           >
                             <MinusCircle className="h-4 w-4" />
                           </Button>
@@ -1030,7 +1030,7 @@ export default function MaintenancePage() {
           {/* Поля для заявки на РЕМОНТ */}
           {watchType === 'REPAIR' && (
             <div>
-              <label htmlFor="title" className="block mb-1 font-medium">Тема <span className="text-red-500">*</span></label>
+              <label htmlFor="title" className="block mb-1 font-medium">Тема <span className="text-[var(--color-red)]">*</span></label>
               <Input {...register('title')} id="title" placeholder="Кратко опишите проблему" disabled={editingRequest !== null && userRole === 'ZAVHOZ'} />
               {errors.title && <FormError message={errors.title.message} />}
             </div>
@@ -1044,14 +1044,14 @@ export default function MaintenancePage() {
           {/* Завхоз может менять статус APPROVED -> IN_PROGRESS -> DONE */}
           {userRole === 'ZAVHOZ' && editingRequest && (editingRequest.status === 'APPROVED' || editingRequest.status === 'IN_PROGRESS' || editingRequest.status === 'DONE') && (
             <div>
-              <label htmlFor="status" className="block mb-1 font-medium">Статус заявки <span className="text-red-500">*</span></label>
+              <label htmlFor="status" className="block mb-1 font-medium">Статус заявки <span className="text-[var(--color-red)]">*</span></label>
               <select {...register('status')} id="status" className="w-full p-2 border rounded">
                 <option value="APPROVED">Одобрено</option>
                 <option value="IN_PROGRESS">В работе</option>
                 <option value="DONE">Выполнено</option>
               </select>
               {errors.status && <FormError message={errors.status.message} />}
-              <p className="text-sm text-gray-500 mt-1">Вы можете изменять только статус выполнения заявки</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">Вы можете изменять только статус выполнения заявки</p>
             </div>
           )}
 
@@ -1066,13 +1066,13 @@ export default function MaintenancePage() {
       <Modal isOpen={approveModalOpen} onClose={() => setApproveModalOpen(false)} title="Одобрение заявки">
         <div className="p-4">
           <div className="flex items-start gap-3 mb-4">
-            <div className="p-2 bg-green-100 rounded-full">
-              <Check className="h-6 w-6 text-green-600" />
+            <div className="p-2 bg-[rgba(52,199,89,0.12)] rounded-full">
+              <Check className="h-6 w-6 text-[var(--color-green)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Вы уверены, что хотите одобрить эту заявку?</p>
+              <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите одобрить эту заявку?</p>
               {actionRequest && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm space-y-1">
+                <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-lg text-sm space-y-1">
                   <p><strong>Наименование:</strong> {actionRequest.title}</p>
                   <p><strong>Тип:</strong> {maintenanceTypeLabels[actionRequest.type]}</p>
                   {actionRequest.type === 'ISSUE' && actionRequest.items && actionRequest.items.length > 0 && (
@@ -1094,12 +1094,12 @@ export default function MaintenancePage() {
                   {actionRequest.description && <p><strong>Описание:</strong> {actionRequest.description}</p>}
                 </div>
               )}
-              <p className="text-sm text-gray-600 mt-2">После одобрения заявка будет доступна завхозу для обработки.</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-2">После одобрения заявка будет доступна завхозу для обработки.</p>
             </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setApproveModalOpen(false)} disabled={actionLoading}>Отмена</Button>
-            <Button onClick={handleApprove} disabled={actionLoading} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={handleApprove} disabled={actionLoading} className="bg-[var(--color-green)] hover:bg-[var(--color-green)]">
               {actionLoading ? 'Одобрение...' : 'Одобрить'}
             </Button>
           </div>
@@ -1110,13 +1110,13 @@ export default function MaintenancePage() {
       <Modal isOpen={rejectModalOpen} onClose={() => setRejectModalOpen(false)} title="Отклонение заявки">
         <div className="p-4">
           <div className="flex items-start gap-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-full">
-              <X className="h-6 w-6 text-red-600" />
+            <div className="p-2 bg-[rgba(255,59,48,0.12)] rounded-full">
+              <X className="h-6 w-6 text-[var(--color-red)]" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Вы уверены, что хотите отклонить эту заявку?</p>
+              <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите отклонить эту заявку?</p>
               {actionRequest && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm space-y-1">
+                <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-lg text-sm space-y-1">
                   <p><strong>Наименование:</strong> {actionRequest.title}</p>
                   <p><strong>Тип:</strong> {maintenanceTypeLabels[actionRequest.type]}</p>
                   {actionRequest.type === 'ISSUE' && actionRequest.items && actionRequest.items.length > 0 && (
@@ -1164,20 +1164,20 @@ export default function MaintenancePage() {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление заявки">
         <div className="p-4">
           <div className="flex items-start gap-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-full">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+            <div className="p-2 bg-[rgba(255,59,48,0.12)] rounded-full">
+              <AlertCircle className="h-6 w-6 text-[var(--color-red)]" />
             </div>
             <div>
-              <p className="font-medium text-gray-900">Вы уверены, что хотите удалить эту заявку?</p>
+              <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить эту заявку?</p>
               {deleteConfirm && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+                <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-lg text-sm">
                   <p><strong>Тема:</strong> {deleteConfirm.title}</p>
                   <p><strong>Тип:</strong> {maintenanceTypeLabels[deleteConfirm.type]}</p>
                   <p><strong>Статус:</strong> {maintenanceStatusLabels[deleteConfirm.status]}</p>
                   {deleteConfirm.description && <p><strong>Описание:</strong> {deleteConfirm.description}</p>}
                 </div>
               )}
-              <p className="text-sm text-red-600 mt-2">Это действие нельзя отменить!</p>
+              <p className="text-sm text-[var(--color-red)] mt-2">Это действие нельзя отменить!</p>
             </div>
           </div>
           <div className="flex justify-end gap-2">

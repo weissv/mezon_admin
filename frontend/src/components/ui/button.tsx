@@ -21,43 +21,43 @@ const base = [
 
 const variants: Record<ButtonVariant, string> = {
   default: [
-    "bg-[#007AFF] text-white rounded-[8px]",
-    "shadow-[0_0.5px_1px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,122,255,0.12)]",
-    "hover:bg-[#0A84FF] hover:shadow-[0_1px_3px_rgba(0,0,0,0.15)]",
-    "active:bg-[#0066D6]",
-    "focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.20)]",
+    "bg-[var(--color-blue)] text-white rounded-[6px]",
+    "shadow-[0_0.5px_1px_rgba(0,0,0,0.12)] border border-[rgba(0,0,0,0.04)]",
+    "hover:brightness-110",
+    "active:brightness-95",
+    "focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]",
   ].join(" "),
   outline: [
-    "bg-[rgba(255,255,255,0.78)] text-[#1D1D1F] rounded-[8px]",
+    "bg-[rgba(255,255,255,0.78)] text-[var(--text-primary)] rounded-[6px]",
     "border border-[rgba(0,0,0,0.10)]",
-    "shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.05)]",
+    "shadow-[0_1px_2px_rgba(0,0,0,0.05)]",
     "backdrop-blur-sm",
-    "hover:bg-white hover:border-[rgba(0,122,255,0.18)]",
-    "focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.14)]",
+    "hover:bg-[rgba(255,255,255,0.95)] hover:border-[rgba(0,0,0,0.15)]",
+    "focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]",
   ].join(" "),
   ghost: [
-    "text-[#007AFF] rounded-[8px]",
-    "hover:bg-[rgba(0,122,255,0.08)]",
-    "focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.14)]",
+    "text-[var(--color-blue)] rounded-[6px]",
+    "hover:bg-[var(--fill-tertiary)]",
+    "focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]",
   ].join(" "),
   secondary: [
-    "bg-[rgba(0,0,0,0.05)] text-[#1D1D1F] rounded-[8px]",
-    "hover:bg-[rgba(0,0,0,0.08)]",
-    "focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.14)]",
+    "bg-[var(--fill-tertiary)] text-[var(--text-primary)] rounded-[6px]",
+    "hover:bg-[var(--fill-secondary)]",
+    "focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]",
   ].join(" "),
   destructive: [
-    "bg-[#FF3B30] text-white rounded-[8px]",
+    "bg-[var(--color-red)] text-white rounded-[6px]",
     "shadow-[0_0.5px_1px_rgba(0,0,0,0.12)]",
-    "hover:bg-[#E6352B]",
-    "active:bg-[#C92A21]",
-    "focus-visible:ring-4 focus-visible:ring-[rgba(255,59,48,0.20)]",
+    "hover:brightness-110",
+    "active:brightness-95",
+    "focus-visible:ring-4 focus-visible:ring-[rgba(255,59,48,0.3)]",
   ].join(" "),
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "text-[12px] px-3 py-1.5 min-h-[30px]",
-  md: "text-[13px] px-4 py-2 min-h-[36px]",
-  lg: "text-[14px] px-5 py-2.5 min-h-[42px]",
+  sm: "text-[12px] px-2 py-1 min-h-[24px]",
+  md: "text-[13px] px-3 py-1.5 min-h-[28px]",
+  lg: "text-[14px] px-4 py-2 min-h-[32px]",
 };
 
 export function Button({ className, variant = "default", size = "md", ...props }: ButtonProps) {

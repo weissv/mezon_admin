@@ -111,12 +111,12 @@ export default function EmployeesPage() {
 
   return (
     <div>
-      <h1 className="mezon-section-title text-2xl mb-4">Управление сотрудниками</h1>
+      <h1 className="macos-text-title mb-4">Управление сотрудниками</h1>
 
-      <Card className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-[var(--shadow-sm)]">
         <div>
-          <p className="font-semibold text-[var(--text-primary)]">Быстрый обмен данными HR</p>
-          <p className="text-sm text-[var(--text-secondary)]">Выгрузите текущий штат в Excel или перейдите к импорту для массовых обновлений.</p>
+          <p className="macos-text-callout">Быстрый обмен данными HR</p>
+          <p className="macos-text-body text-[var(--text-secondary)] mt-1">Выгрузите текущий штат в Excel или перейдите к импорту для массовых обновлений.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={handleEmployeesExport} disabled={isExporting}>
@@ -130,18 +130,18 @@ export default function EmployeesPage() {
 
       {/* Reminders Widget */}
       {reminders && (reminders.medicalCheckups.length > 0 || reminders.attestations.length > 0) && (
-        <Card className="mb-6 p-4 bg-[rgba(255,149,0,0.06)] border-[rgba(255,149,0,0.2)]">
+        <Card className="mb-6 p-4 bg-[rgba(255,149,0,0.06)] border-[rgba(255,149,0,0.2)] shadow-[var(--shadow-sm)]">
           <div className="flex items-start">
             <AlertCircle className="h-5 w-5 text-[var(--color-orange)] mr-3 mt-0.5" />
             <div className="flex-1">
-              <h3 className="font-semibold text-[var(--color-orange)] mb-2">Напоминания</h3>
+              <h3 className="macos-text-callout text-[var(--color-orange)] mb-2">Напоминания</h3>
               
               {reminders.medicalCheckups.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                  <p className="macos-text-caption text-[var(--text-primary)] mb-1">
                     Медосмотры ({reminders.medicalCheckups.length}):
                   </p>
-                  <ul className="text-sm text-[var(--text-secondary)] space-y-1">
+                  <ul className="macos-text-body text-[var(--text-secondary)] space-y-1">
                     {reminders.medicalCheckups.map((emp: any) => (
                       <li key={emp.id}>
                         {emp.firstName} {emp.lastName} ({emp.position}) - через {emp.daysUntil} дн.
@@ -153,10 +153,10 @@ export default function EmployeesPage() {
 
               {reminders.attestations.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                  <p className="macos-text-caption text-[var(--text-primary)] mb-1">
                     Аттестации ({reminders.attestations.length}):
                   </p>
-                  <ul className="text-sm text-[var(--text-secondary)] space-y-1">
+                  <ul className="macos-text-body text-[var(--text-secondary)] space-y-1">
                     {reminders.attestations.map((emp: any) => (
                       <li key={emp.id}>
                         {emp.firstName} {emp.lastName} ({emp.position}) - через {emp.daysUntil} дн.
@@ -202,21 +202,21 @@ export default function EmployeesPage() {
         title="Удаление сотрудника"
       >
         <div className="p-4">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="p-2 bg-[rgba(255,59,48,0.12)] rounded-full">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="p-2 bg-[rgba(255,59,48,0.12)] rounded-[8px]">
               <AlertCircle className="h-6 w-6 text-[var(--color-red)]" />
             </div>
             <div>
-              <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить сотрудника?</p>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">
+              <p className="macos-text-callout text-[var(--text-primary)]">Вы уверены, что хотите удалить сотрудника?</p>
+              <p className="macos-text-body text-[var(--text-secondary)] mt-1">
                 <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.position})
               </p>
               {deleteConfirm?.user && (
-                <p className="text-sm text-[var(--color-orange)] mt-2">
+                <p className="macos-text-caption text-[var(--color-orange)] mt-2">
                   ⚠️ У сотрудника есть привязанный аккаунт ({deleteConfirm.user.email}), он тоже будет удалён.
                 </p>
               )}
-              <p className="text-sm text-[var(--color-red)] mt-2">
+              <p className="macos-text-caption text-[var(--color-red)] mt-2">
                 Это действие нельзя отменить!
               </p>
             </div>

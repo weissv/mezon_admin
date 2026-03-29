@@ -25,8 +25,8 @@ export default function DoomGame({ onClose }: DoomGameProps) {
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent p-4">
           <div className="text-white">
-            <h2 className="text-2xl font-bold text-red-500">Contra</h2>
-            <p className="text-sm text-gray-300">Easter Egg Activated! 🎮</p>
+            <h2 className="macos-text-title text-[var(--color-red)]">Contra</h2>
+            <p className="text-sm text-[var(--text-quaternary)]">Easter Egg Activated! 🎮</p>
           </div>
           <Button
             variant="outline"

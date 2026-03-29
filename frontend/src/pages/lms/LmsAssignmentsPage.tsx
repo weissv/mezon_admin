@@ -61,30 +61,30 @@ export default function LmsAssignmentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[var(--mezon-dark)]">Домашние задания</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="macos-text-title text-[var(--mezon-dark)]">Домашние задания</h1>
+        <p className="text-[var(--text-secondary)] mt-1">
           Текущие и выполненные задания
         </p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-4">
+      <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--text-tertiary)]" />
           <input
             type="text"
             placeholder="Поиск по предмету или названию..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)] focus:border-transparent"
           />
         </div>
       </div>
 
       {filteredHomework.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <ClipboardList className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Заданий нет</h3>
-          <p className="text-gray-500">
+        <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-12 text-center">
+          <ClipboardList className="h-16 w-16 mx-auto mb-4 text-[var(--text-quaternary)]" />
+          <h3 className="macos-text-callout text-[var(--text-primary)] mb-2">Заданий нет</h3>
+          <p className="text-[var(--text-secondary)]">
             На данный момент у вас нет активных домашних заданий.
           </p>
         </div>
@@ -96,10 +96,10 @@ export default function LmsAssignmentsPage() {
             return (
               <div
                 key={h.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition group cursor-pointer"
+                className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] border border-[rgba(0,0,0,0.04)] p-4 hover:shadow-md transition group cursor-pointer"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-100 text-blue-600">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-[rgba(0,122,255,0.12)] text-[var(--color-blue)]">
                     <FileText className="h-6 w-6" />
                   </div>
 
@@ -107,26 +107,26 @@ export default function LmsAssignmentsPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--fill-tertiary)] text-[var(--text-secondary)]">
                             {h.subject?.name || "Предмет"}
                           </span>
                           {isOverdue && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-600">
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-[8px] bg-[rgba(255,59,48,0.12)] text-[var(--color-red)]">
                               Просрочено
                             </span>
                           )}
                         </div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-teal-700 transition-colors">
+                        <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-[var(--color-blue)] transition-colors">
                           {h.title}
                         </h3>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                        <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">
                           {h.description}
                         </p>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                      <ChevronRight className="h-5 w-5 text-[var(--text-tertiary)]" />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500">
+                    <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-[var(--text-secondary)]">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         Срок: {formatDate(h.dueDate)}

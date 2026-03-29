@@ -233,7 +233,7 @@ export default function SecurityPage() {
               </div>
               <div>
                 <p className="text-sm text-[var(--mezon-text-secondary)]">{label}</p>
-                <p className="text-xl font-bold text-[var(--mezon-dark)]">{stats[key] || 0}</p>
+                <p className="macos-text-title text-[var(--mezon-dark)]">{stats[key] || 0}</p>
               </div>
             </button>
           </Card>
@@ -337,7 +337,7 @@ export default function SecurityPage() {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление записи">
         <div className="p-4">
           <div className="flex items-start gap-3 mb-4">
-            <div className="rounded-full bg-[rgba(255,59,48,0.12)] p-2">
+            <div className="rounded-[8px] bg-[rgba(255,59,48,0.12)] p-2">
               <AlertCircle className="h-6 w-6 text-[var(--macos-red)]" />
             </div>
             <div>

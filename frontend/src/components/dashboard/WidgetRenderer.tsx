@@ -93,7 +93,7 @@ export default function WidgetRenderer({
   if (!Component) {
     return (
       <WidgetChrome title={definition.title} category={definition.category}>
-        <p className="text-sm text-gray-400">Виджет «{definition.title}» ещё не реализован</p>
+        <p className="text-sm text-[var(--text-tertiary)]">Виджет «{definition.title}» ещё не реализован</p>
       </WidgetChrome>
     );
   }

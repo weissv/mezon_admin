@@ -8,7 +8,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
       <input
         ref={ref}
         className={clsx(
-          "mezon-field touch-manipulation placeholder:text-[#86868B]",
+          "mezon-field touch-manipulation placeholder:text-[var(--text-tertiary)]",
           className
         )}
         {...props}

@@ -77,7 +77,7 @@ function BalanceCards({ data }: { data: BalancesResponse | null }) {
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm text-[var(--mezon-text-secondary)]">{c.label}</p>
-              <p className="truncate text-xl font-bold text-[var(--mezon-dark)]">{currency.format(c.amount)}</p>
+              <p className="truncate macos-text-title text-[var(--mezon-dark)]">{currency.format(c.amount)}</p>
             </div>
           </div>
         </Card>
@@ -146,7 +146,7 @@ function SummarySection({ summary }: { summary: any }) {
                 <k.icon className={`h-4 w-4 ${k.color}`} />
               </div>
             </div>
-            <p className={`text-xl font-bold ${k.color}`}>
+            <p className={`macos-text-title ${k.color}`}>
               {k.isCurrency === false ? k.value : currency.format(k.value)}
             </p>
             {k.hint && <p className="mt-1 text-xs text-[var(--mezon-text-soft)]">{k.hint}</p>}
@@ -169,7 +169,7 @@ function CategoryChart({ summary }: { summary: any }) {
 
   return (
     <Card className="p-6">
-      <h3 className="mb-4 text-lg font-semibold text-[var(--mezon-dark)]">Распределение по категориям</h3>
+      <h3 className="mb-4 macos-text-callout text-[var(--mezon-dark)]">Распределение по категориям</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ left: 10, right: 20 }}>
@@ -203,7 +203,7 @@ function ChannelChart({ summary }: { summary: any }) {
 
   return (
     <Card className="p-6">
-      <h3 className="mb-4 text-lg font-semibold text-[var(--mezon-dark)]">По каналам (касса / банк)</h3>
+      <h3 className="mb-4 macos-text-callout text-[var(--mezon-dark)]">По каналам (касса / банк)</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -260,7 +260,7 @@ function UnitEconomicsWidget() {
     <Card className="p-6">
       <div className="flex items-center gap-2 mb-4">
         <Calculator className="h-5 w-5 text-[var(--mezon-accent)]" />
-        <h3 className="text-lg font-semibold text-[var(--mezon-dark)]">Unit-экономика</h3>
+        <h3 className="macos-text-callout text-[var(--mezon-dark)]">Unit-экономика</h3>
         <span className="ml-auto text-xs text-[var(--mezon-text-soft)]">
           {data.period.workingDays} раб. дн. · {data.children.total} детей
         </span>
@@ -341,7 +341,7 @@ function CashForecastWidget({ currentBalance }: { currentBalance: number }) {
         ) : (
           <TrendingUp className="h-5 w-5 text-[var(--macos-green)]" />
         )}
-        <h3 className="text-lg font-semibold text-[var(--mezon-dark)]">Прогноз на 30 дней</h3>
+        <h3 className="macos-text-callout text-[var(--mezon-dark)]">Прогноз на 30 дней</h3>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">

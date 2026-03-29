@@ -11,7 +11,7 @@ interface UnitEcon {
 const fmt = (n: number) =>
   new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0 }).format(n);
 
-const BAR_COLORS = ['bg-pink-500', 'bg-teal-500', 'bg-amber-500', 'bg-indigo-500', 'bg-emerald-500', 'bg-rose-400'];
+const BAR_COLORS = ['bg-pink-500', 'bg-[rgba(0,122,255,0.06)]0', 'bg-amber-500', 'bg-indigo-500', 'bg-emerald-500', 'bg-rose-400'];
 
 export default function UnitEconomicsWidget({ data }: { data: UnitEcon | undefined }) {
   if (!data) return null;
@@ -25,10 +25,10 @@ export default function UnitEconomicsWidget({ data }: { data: UnitEcon | undefin
           <Calculator className="h-5 w-5 text-pink-600" />
         </div>
         <div>
-          <p className="text-xl font-bold">{fmt(data.costPerChild ?? 0)}</p>
-          <p className="text-xs text-gray-500">на 1 ребёнка / мес</p>
+          <p className="macos-text-title">{fmt(data.costPerChild ?? 0)}</p>
+          <p className="text-xs text-[var(--text-secondary)]">на 1 ребёнка / мес</p>
         </div>
-        <div className="ml-auto text-right text-xs text-gray-400">
+        <div className="ml-auto text-right text-xs text-[var(--text-tertiary)]">
           <Users className="h-3 w-3 inline mr-1" />
           {data.childCount} детей
         </div>
@@ -39,9 +39,9 @@ export default function UnitEconomicsWidget({ data }: { data: UnitEcon | undefin
           <div key={i}>
             <div className="flex justify-between text-xs mb-0.5">
               <span>{item.label}</span>
-              <span className="text-gray-500">{item.pct}%</span>
+              <span className="text-[var(--text-secondary)]">{item.pct}%</span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-[var(--fill-tertiary)] rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${BAR_COLORS[i % BAR_COLORS.length]}`}
                 style={{ width: `${item.pct}%` }}

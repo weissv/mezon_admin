@@ -15,9 +15,9 @@ interface SecuritySummaryData {
 }
 
 const EVENT_ICONS: Record<string, { icon: typeof Eye; color: string }> = {
-  entry: { icon: DoorOpen, color: 'text-green-500' },
+  entry: { icon: DoorOpen, color: 'text-[var(--color-green)]' },
   exit: { icon: DoorOpen, color: 'text-blue-500' },
-  alert: { icon: AlertTriangle, color: 'text-red-500' },
+  alert: { icon: AlertTriangle, color: 'text-[var(--color-red)]' },
   visitor: { icon: Eye, color: 'text-amber-500' },
 };
 
@@ -31,14 +31,14 @@ export default function SecuritySummaryWidget({ data }: { data: SecuritySummaryD
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Shield className="h-4 w-4 text-teal-600" />
-          <span className="text-sm font-medium">Сегодня: {data.todayCount ?? 0} событий</span>
+          <Shield className="h-4 w-4 text-[var(--color-blue)]" />
+          <span className="macos-text-caption">Сегодня: {data.todayCount ?? 0} событий</span>
         </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
         {last30Days.map(s => (
-          <div key={s.type} className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded text-xs">
+          <div key={s.type} className="flex items-center gap-1 px-2 py-1 bg-[var(--fill-quaternary)] rounded text-xs">
             <span className="capitalize">{s.type}</span>
             <span className="font-bold">{s.count}</span>
           </div>
@@ -53,7 +53,7 @@ export default function SecuritySummaryWidget({ data }: { data: SecuritySummaryD
             <div key={ev.id} className="flex items-center gap-2 text-xs">
               <Icon className={`h-3 w-3 flex-shrink-0 ${cfg.color}`} />
               <span className="truncate flex-1">{ev.description}</span>
-              <span className="text-gray-400 whitespace-nowrap">
+              <span className="text-[var(--text-tertiary)] whitespace-nowrap">
                 {new Date(ev.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>

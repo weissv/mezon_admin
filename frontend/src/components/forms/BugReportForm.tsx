@@ -97,28 +97,28 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
       <div className='grid gap-4 md:grid-cols-2'>
         <div className='rounded-xl border border-slate-200 bg-slate-50 p-4'>
           <p className='text-xs font-semibold uppercase tracking-wide text-slate-500'>Отправитель</p>
-          <p className='mt-1 text-sm font-medium text-slate-900'>{reporterName}</p>
+          <p className='mt-1 macos-text-caption text-slate-900'>{reporterName}</p>
           <p className='text-sm text-slate-600'>{user?.email}</p>
         </div>
         <div className='rounded-xl border border-emerald-200 bg-emerald-50 p-4'>
           <p className='text-xs font-semibold uppercase tracking-wide text-emerald-700'>Маршрут доставки</p>
-          <p className='mt-1 text-sm font-medium text-emerald-900'>Telegram-бот разработчика</p>
+          <p className='mt-1 macos-text-caption text-emerald-900'>Telegram-бот разработчика</p>
           <p className='text-sm text-emerald-700'>Репорт сразу уходит в тот же бот, который уже рассылает служебные заявки.</p>
         </div>
       </div>
 
       <div>
-        <label className='mb-1 block text-sm font-medium'>Краткий заголовок</label>
+        <label className='mb-1 block macos-text-caption'>Краткий заголовок</label>
         <Input {...register('title')} placeholder='Например: не открывается карточка ребёнка после сохранения' />
         <FormError message={errors.title?.message} />
       </div>
 
       <div className='grid gap-4 md:grid-cols-[220px_1fr]'>
         <div>
-          <label className='mb-1 block text-sm font-medium'>Критичность</label>
+          <label className='mb-1 block macos-text-caption'>Критичность</label>
           <select
             {...register('severity')}
-            className='w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className='w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
           >
             {severityOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -129,7 +129,7 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
           <FormError message={errors.severity?.message} />
         </div>
         <div>
-          <label className='mb-1 block text-sm font-medium'>Страница / маршрут</label>
+          <label className='mb-1 block macos-text-caption'>Страница / маршрут</label>
           <Input {...register('pageUrl')} placeholder='/children/123' />
           <FormError message={errors.pageUrl?.message} />
         </div>
@@ -145,31 +145,31 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
       </div>
 
       <div>
-        <label className='mb-1 block text-sm font-medium'>Что произошло</label>
+        <label className='mb-1 block macos-text-caption'>Что произошло</label>
         <textarea
           {...register('actualBehavior')}
           placeholder='Опишите фактическое поведение системы, сообщение об ошибке, что именно сломалось.'
-          className='min-h-32 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+          className='min-h-32 w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
         />
         <FormError message={errors.actualBehavior?.message} />
       </div>
 
       <div>
-        <label className='mb-1 block text-sm font-medium'>Как должно было быть</label>
+        <label className='mb-1 block macos-text-caption'>Как должно было быть</label>
         <textarea
           {...register('expectedBehavior')}
           placeholder='Опишите ожидаемый результат.'
-          className='min-h-24 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+          className='min-h-24 w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
         />
         <FormError message={errors.expectedBehavior?.message} />
       </div>
 
       <div>
-        <label className='mb-1 block text-sm font-medium'>Шаги для воспроизведения</label>
+        <label className='mb-1 block macos-text-caption'>Шаги для воспроизведения</label>
         <textarea
           {...register('stepsToReproduce')}
           placeholder='1. Открыть модуль...&#10;2. Нажать...&#10;3. Получить ошибку...'
-          className='min-h-28 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+          className='min-h-28 w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
         />
         <FormError message={errors.stepsToReproduce?.message} />
       </div>

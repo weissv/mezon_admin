@@ -54,41 +54,41 @@ export function IngredientForm({ initialData, onSuccess, onCancel }: IngredientF
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Название ингредиента</label>
+        <label className="block macos-text-caption mb-1">Название ингредиента</label>
         <Input {...register('name')} placeholder="Картофель" />
         <FormError message={errors.name?.message} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Единица измерения</label>
+        <label className="block macos-text-caption mb-1">Единица измерения</label>
         <Input {...register('unit')} placeholder="кг" />
         <FormError message={errors.unit?.message} />
-        <p className="text-xs text-gray-500 mt-1">Например: кг, л, шт</p>
+        <p className="text-xs text-[var(--text-secondary)] mt-1">Например: кг, л, шт</p>
       </div>
 
       <div className="border-t pt-4">
         <h3 className="font-medium mb-3">Пищевая ценность на 1 {initialData?.unit || 'единицу'}</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Калорийность (ккал)</label>
+            <label className="block macos-text-caption mb-1">Калорийность (ккал)</label>
             <Input type="number" step="0.1" {...register('calories')} placeholder="77" />
             <FormError message={errors.calories?.message} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Белки (г)</label>
+            <label className="block macos-text-caption mb-1">Белки (г)</label>
             <Input type="number" step="0.1" {...register('protein')} placeholder="2.0" />
             <FormError message={errors.protein?.message} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Жиры (г)</label>
+            <label className="block macos-text-caption mb-1">Жиры (г)</label>
             <Input type="number" step="0.1" {...register('fat')} placeholder="0.1" />
             <FormError message={errors.fat?.message} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Углеводы (г)</label>
+            <label className="block macos-text-caption mb-1">Углеводы (г)</label>
             <Input type="number" step="0.1" {...register('carbs')} placeholder="17.0" />
             <FormError message={errors.carbs?.message} />
           </div>

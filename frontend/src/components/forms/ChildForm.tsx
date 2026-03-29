@@ -168,26 +168,26 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
       {/* ===== Секция 1: Основные данные ===== */}
       <fieldset>
-        <legend className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1 w-full">Основные данные</legend>
+        <legend className="text-sm font-semibold text-[var(--text-primary)] mb-2 border-b pb-1 w-full">Основные данные</legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-sm text-gray-600">Фамилия *</label>
+            <label className="text-sm text-[var(--text-secondary)]">Фамилия *</label>
             <Input {...register('lastName')} />
             <FormError message={errors.lastName?.message} />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Имя *</label>
+            <label className="text-sm text-[var(--text-secondary)]">Имя *</label>
             <Input {...register('firstName')} />
             <FormError message={errors.firstName?.message} />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Отчество</label>
+            <label className="text-sm text-[var(--text-secondary)]">Отчество</label>
             <Input {...register('middleName')} />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Класс *</label>
+            <label className="text-sm text-[var(--text-secondary)]">Класс *</label>
             <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 text-sm"
               disabled={isLoadingGroups}
               {...register('groupId', { valueAsNumber: true })}
             >
@@ -199,14 +199,14 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
             <FormError message={errors.groupId?.message} />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Дата рождения *</label>
+            <label className="text-sm text-[var(--text-secondary)]">Дата рождения *</label>
             <Input type="date" {...register('birthDate')} />
             <FormError message={errors.birthDate?.message} />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Пол</label>
+            <label className="text-sm text-[var(--text-secondary)]">Пол</label>
             <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 text-sm"
               {...register('gender')}
             >
               <option value="">Не указан</option>
@@ -215,44 +215,44 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
             </select>
           </div>
           <div>
-            <label className="text-sm text-gray-600">Национальность</label>
+            <label className="text-sm text-[var(--text-secondary)]">Национальность</label>
             <Input {...register('nationality')} placeholder="узбек, русский и т.д." />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Номер метрики</label>
+            <label className="text-sm text-[var(--text-secondary)]">Номер метрики</label>
             <Input {...register('birthCertificateNumber')} placeholder="I-TN № 0000000" />
           </div>
         </div>
         <div className="mt-3">
-          <label className="text-sm text-gray-600">Адрес проживания</label>
+          <label className="text-sm text-[var(--text-secondary)]">Адрес проживания</label>
           <Input {...register('address')} placeholder="Район, улица, дом, квартира" />
         </div>
       </fieldset>
 
       {/* ===== Секция 2: Родители ===== */}
       <fieldset>
-        <legend className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1 w-full">Родители / Опекуны</legend>
+        <legend className="text-sm font-semibold text-[var(--text-primary)] mb-2 border-b pb-1 w-full">Родители / Опекуны</legend>
         {parentFields.map((field, index) => (
-          <div key={field.id} className="border rounded-md p-3 mb-3 bg-gray-50 relative">
+          <div key={field.id} className="border rounded-md p-3 mb-3 bg-[var(--fill-quaternary)] relative">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="absolute top-2 right-2 text-red-500 h-7 w-7 p-0"
+              className="absolute top-2 right-2 text-[var(--color-red)] h-7 w-7 p-0"
               onClick={() => remove(index)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-sm text-gray-600">ФИО *</label>
+                <label className="text-sm text-[var(--text-secondary)]">ФИО *</label>
                 <Input {...register(`parents.${index}.fullName`)} />
                 <FormError message={errors.parents?.[index]?.fullName?.message} />
               </div>
               <div>
-                <label className="text-sm text-gray-600">Отношение *</label>
+                <label className="text-sm text-[var(--text-secondary)]">Отношение *</label>
                 <select
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 text-sm"
                   {...register(`parents.${index}.relation`)}
                 >
                   <option value="">Выберите</option>
@@ -264,16 +264,16 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
                 <FormError message={errors.parents?.[index]?.relation?.message} />
               </div>
               <div>
-                <label className="text-sm text-gray-600">Телефон</label>
+                <label className="text-sm text-[var(--text-secondary)]">Телефон</label>
                 <Input {...register(`parents.${index}.phone`)} placeholder="+998 90 000 00 00" />
               </div>
               <div>
-                <label className="text-sm text-gray-600">Email</label>
+                <label className="text-sm text-[var(--text-secondary)]">Email</label>
                 <Input type="email" {...register(`parents.${index}.email`)} />
                 <FormError message={errors.parents?.[index]?.email?.message} />
               </div>
               <div className="sm:col-span-2">
-                <label className="text-sm text-gray-600">Место работы</label>
+                <label className="text-sm text-[var(--text-secondary)]">Место работы</label>
                 <Input {...register(`parents.${index}.workplace`)} />
               </div>
             </div>
@@ -291,14 +291,14 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
 
       {/* ===== Секция 3: Договор ===== */}
       <fieldset>
-        <legend className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1 w-full">Договор</legend>
+        <legend className="text-sm font-semibold text-[var(--text-primary)] mb-2 border-b pb-1 w-full">Договор</legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-sm text-gray-600">№ Договора</label>
+            <label className="text-sm text-[var(--text-secondary)]">№ Договора</label>
             <Input {...register('contractNumber')} />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Дата договора</label>
+            <label className="text-sm text-[var(--text-secondary)]">Дата договора</label>
             <Input type="date" {...register('contractDate')} />
           </div>
         </div>
@@ -306,22 +306,22 @@ export function ChildForm({ initialData, onSuccess, onCancel }: ChildFormProps) 
 
       {/* ===== Секция 4: Мед. сведения ===== */}
       <fieldset>
-        <legend className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1 w-full">Медицинские сведения</legend>
+        <legend className="text-sm font-semibold text-[var(--text-primary)] mb-2 border-b pb-1 w-full">Медицинские сведения</legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-sm text-gray-600">Аллергии (через запятую)</label>
+            <label className="text-sm text-[var(--text-secondary)]">Аллергии (через запятую)</label>
             <Input {...register('healthAllergies')} placeholder="молоко, орехи" />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Особые условия</label>
+            <label className="text-sm text-[var(--text-secondary)]">Особые условия</label>
             <Input {...register('healthConditions')} placeholder="астма, диабет" />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Медикаменты</label>
+            <label className="text-sm text-[var(--text-secondary)]">Медикаменты</label>
             <Input {...register('healthMedications')} placeholder="ингалятор" />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Примечания</label>
+            <label className="text-sm text-[var(--text-secondary)]">Примечания</label>
             <Input {...register('healthNotes')} />
           </div>
         </div>

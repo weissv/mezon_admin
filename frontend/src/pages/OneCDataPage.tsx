@@ -85,17 +85,17 @@ export default function OneCDataPage() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Database className="h-8 w-8 text-blue-600" />
+            <Database className="h-8 w-8 text-[var(--color-blue)]" />
             Данные 1С
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
             {summaryLoading ? "Загрузка..." : `${totalRecords.toLocaleString("ru-RU")} записей синхронизировано`}
           </p>
         </div>
         <button
           onClick={handleSync}
           disabled={syncing}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-blue)] text-white macos-text-caption rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
           <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
           {syncing ? "Синхронизация..." : "Синхронизировать"}
@@ -106,16 +106,16 @@ export default function OneCDataPage() {
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="rounded-lg border bg-white p-4 animate-pulse">
-              <div className="h-3 w-16 rounded bg-gray-200" />
-              <div className="mt-2 h-7 w-12 rounded bg-gray-200" />
-              <div className="mt-1 h-3 w-20 rounded bg-gray-200" />
+              <div className="h-3 w-16 rounded bg-[var(--fill-secondary)]" />
+              <div className="mt-2 h-7 w-12 rounded bg-[var(--fill-secondary)]" />
+              <div className="mt-1 h-3 w-20 rounded bg-[var(--fill-secondary)]" />
             </div>
           ))}
         </div>
       )}
       {summary && <OneCSummaryCards summary={summary} />}
 
-      <div className="border-b border-gray-200">
+      <div className="border-b border-[rgba(0,0,0,0.08)]">
         <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="1C Data tabs">
           {tabs.map((tab) => (
             <button
@@ -123,8 +123,8 @@ export default function OneCDataPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`${
                 activeTab === tab.id
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  ? "border-blue-500 text-[var(--color-blue)]"
+                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[rgba(0,0,0,0.12)]"
               } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors`}
             >
               {tab.icon}

@@ -170,20 +170,20 @@ export function DocumentForm({ initialData, onSuccess, onCancel }: DocumentFormP
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Название документа</label>
+        <label className="block macos-text-caption mb-1">Название документа</label>
         <Input {...register('name')} placeholder="Договор №123" />
         <FormError message={errors.name?.message} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Ссылка на файл</label>
+        <label className="block macos-text-caption mb-1">Ссылка на файл</label>
         <Input {...register('fileUrl')} placeholder="/uploads/document.pdf" />
         <FormError message={errors.fileUrl?.message} />
         <div className="mt-3 space-y-2">
           <div
             className={clsx(
               'border-2 border-dashed rounded-lg p-4 text-center transition-all cursor-pointer',
-              dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400',
+              dragActive ? 'border-blue-500 bg-blue-50' : 'border-[rgba(0,0,0,0.12)] hover:border-blue-400',
               uploading && 'opacity-60 pointer-events-none'
             )}
             onClick={handleManualUpload}
@@ -193,11 +193,11 @@ export function DocumentForm({ initialData, onSuccess, onCancel }: DocumentFormP
             onDrop={handleDrop}
           >
             <div className="flex flex-col items-center gap-2">
-              <UploadCloud className="h-6 w-6 text-gray-500" />
+              <UploadCloud className="h-6 w-6 text-[var(--text-secondary)]" />
               <p className="font-medium">Перетащите файл или нажмите для выбора</p>
-              <p className="text-sm text-gray-500">Поддерживаются PDF, DOCX, изображения и другие форматы</p>
+              <p className="text-sm text-[var(--text-secondary)]">Поддерживаются PDF, DOCX, изображения и другие форматы</p>
               {uploadedFileName && (
-                <p className="text-xs text-gray-600">{uploading ? 'Обработка...' : uploadedFileName}</p>
+                <p className="text-xs text-[var(--text-secondary)]">{uploading ? 'Обработка...' : uploadedFileName}</p>
               )}
             </div>
           </div>
@@ -217,9 +217,9 @@ export function DocumentForm({ initialData, onSuccess, onCancel }: DocumentFormP
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Шаблон (опционально)</label>
+        <label className="block macos-text-caption mb-1">Шаблон (опционально)</label>
         <select
-          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           {...register('templateId', { valueAsNumber: true })}
           disabled={isLoading}
         >
@@ -232,9 +232,9 @@ export function DocumentForm({ initialData, onSuccess, onCancel }: DocumentFormP
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Сотрудник (опционально)</label>
+        <label className="block macos-text-caption mb-1">Сотрудник (опционально)</label>
         <select
-          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           {...register('employeeId', { valueAsNumber: true })}
           disabled={isLoading}
         >
@@ -247,9 +247,9 @@ export function DocumentForm({ initialData, onSuccess, onCancel }: DocumentFormP
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Ученик (опционально)</label>
+        <label className="block macos-text-caption mb-1">Ученик (опционально)</label>
         <select
-          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           {...register('childId', { valueAsNumber: true })}
           disabled={isLoading}
         >

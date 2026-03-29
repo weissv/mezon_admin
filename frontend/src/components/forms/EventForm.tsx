@@ -98,22 +98,22 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Тема (название)</label>
+        <label className="block macos-text-caption mb-1">Тема (название)</label>
         <Input {...register('title')} placeholder="День открытых дверей" />
         <FormError message={errors.title?.message} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Дата</label>
+        <label className="block macos-text-caption mb-1">Дата</label>
         <Input type="datetime-local" {...register('date')} />
         <FormError message={errors.date?.message} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Класс</label>
+        <label className="block macos-text-caption mb-1">Класс</label>
         <select
           {...register('groupId')}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">-- Не выбран --</option>
           {groups.map((g) => (
@@ -123,13 +123,13 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Организатор</label>
+        <label className="block macos-text-caption mb-1">Организатор</label>
         <Input {...register('organizer')} placeholder="Иванов И.И." />
         <FormError message={errors.organizer?.message} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Исполнители</label>
+        <label className="block macos-text-caption mb-1">Исполнители</label>
         <div className="flex gap-2">
           <Input
             value={performerInput}
@@ -142,9 +142,9 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
         {performers.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {performers.map((p, idx) => (
-              <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+              <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-[rgba(0,122,255,0.12)] text-blue-800 rounded-full text-sm">
                 {p}
-                <button type="button" onClick={() => removePerformer(idx)} className="hover:text-red-600">
+                <button type="button" onClick={() => removePerformer(idx)} className="hover:text-[var(--color-red)]">
                   <X className="h-3 w-3" />
                 </button>
               </span>

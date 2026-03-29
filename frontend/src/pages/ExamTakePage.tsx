@@ -158,7 +158,7 @@ export default function ExamTakePage() {
   // Экран загрузки
   if (loading && !exam) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--fill-quaternary)]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
       </div>
     );
@@ -167,11 +167,11 @@ export default function ExamTakePage() {
   // Экран ошибки
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white rounded-xl shadow-sm p-8 max-w-md text-center">
-          <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Контрольная недоступна</h1>
-          <p className="text-gray-500">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--fill-quaternary)] p-4">
+        <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-8 max-w-md text-center">
+          <AlertTriangle className="h-16 w-16 text-[var(--color-orange)] mx-auto mb-4" />
+          <h1 className="macos-text-title text-[var(--text-primary)] mb-2">Контрольная недоступна</h1>
+          <p className="text-[var(--text-secondary)]">{error}</p>
         </div>
       </div>
     );
@@ -180,34 +180,34 @@ export default function ExamTakePage() {
   // Начальный экран
   if (stage === "intro" && exam) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen bg-[var(--fill-quaternary)] py-8 px-4">
         <div className="max-w-xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm p-8">
+          <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-8">
             <div className="text-center mb-8">
-              <FileText className="h-16 w-16 text-teal-600 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">{exam.title}</h1>
-              {exam.subject && <p className="text-teal-600 font-medium">{exam.subject}</p>}
+              <FileText className="h-16 w-16 text-[var(--color-blue)] mx-auto mb-4" />
+              <h1 className="macos-text-title text-[var(--text-primary)] mb-2">{exam.title}</h1>
+              {exam.subject && <p className="text-[var(--color-blue)] font-medium">{exam.subject}</p>}
             </div>
 
             {exam.description && (
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <p className="text-gray-600">{exam.description}</p>
+              <div className="bg-[var(--fill-quaternary)] rounded-lg p-4 mb-6">
+                <p className="text-[var(--text-secondary)]">{exam.description}</p>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-4 mb-8 text-sm">
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <p className="text-gray-500">Вопросов</p>
-                <p className="text-2xl font-bold text-gray-900">{exam.totalQuestions}</p>
+              <div className="bg-[var(--fill-quaternary)] rounded-lg p-4 text-center">
+                <p className="text-[var(--text-secondary)]">Вопросов</p>
+                <p className="macos-text-title text-[var(--text-primary)]">{exam.totalQuestions}</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <p className="text-gray-500">Всего баллов</p>
-                <p className="text-2xl font-bold text-gray-900">{exam.totalPoints}</p>
+              <div className="bg-[var(--fill-quaternary)] rounded-lg p-4 text-center">
+                <p className="text-[var(--text-secondary)]">Всего баллов</p>
+                <p className="macos-text-title text-[var(--text-primary)]">{exam.totalPoints}</p>
               </div>
               {exam.timeLimit && (
-                <div className="col-span-2 bg-yellow-50 rounded-lg p-4 text-center">
-                  <Clock className="h-5 w-5 text-yellow-600 mx-auto mb-1" />
-                  <p className="text-yellow-700 font-medium">
+                <div className="col-span-2 bg-[rgba(255,204,0,0.06)] rounded-lg p-4 text-center">
+                  <Clock className="h-5 w-5 text-[var(--color-orange)] mx-auto mb-1" />
+                  <p className="text-[var(--color-orange)] font-medium">
                     Ограничение времени: {exam.timeLimit} минут
                   </p>
                 </div>
@@ -216,19 +216,19 @@ export default function ExamTakePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ваше имя <span className="text-red-500">*</span>
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+                  Ваше имя <span className="text-[var(--color-red)]">*</span>
                 </label>
                 <input
                   type="text"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
                   placeholder="Иванов Иван"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-4 py-3 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
                   Класс / Группа
                 </label>
                 <input
@@ -236,7 +236,7 @@ export default function ExamTakePage() {
                   value={studentClass}
                   onChange={(e) => setStudentClass(e.target.value)}
                   placeholder="10-А"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-4 py-3 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
                 />
               </div>
             </div>
@@ -244,7 +244,7 @@ export default function ExamTakePage() {
             <button
               onClick={handleStart}
               disabled={loading || !studentName.trim()}
-              className="w-full mt-6 px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full mt-6 px-6 py-3 bg-[var(--color-blue)] text-white rounded-lg font-medium hover:bg-[var(--color-blue)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? "Загрузка..." : "Начать контрольную"}
             </button>
@@ -260,24 +260,24 @@ export default function ExamTakePage() {
     const progress = Object.keys(answers).length;
 
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-[var(--fill-quaternary)] flex flex-col">
         {/* Шапка с таймером */}
         <header className="bg-white shadow-sm py-4 px-6 sticky top-0 z-10">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div>
-              <h1 className="font-semibold text-gray-900 truncate">{exam.title}</h1>
-              <p className="text-sm text-gray-500">
+              <h1 className="font-semibold text-[var(--text-primary)] truncate">{exam.title}</h1>
+              <p className="text-sm text-[var(--text-secondary)]">
                 Вопрос {currentQuestion + 1} из {exam.totalQuestions}
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-[var(--text-secondary)]">
                 Отвечено: {progress}/{exam.totalQuestions}
               </span>
               {timeLeft !== null && (
                 <div
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-                    timeLeft < 300 ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-700"
+                    timeLeft < 300 ? "bg-[rgba(255,59,48,0.12)] text-[var(--color-red)]" : "bg-[var(--fill-tertiary)] text-[var(--text-primary)]"
                   }`}
                 >
                   <Clock className="h-4 w-4" />
@@ -298,10 +298,10 @@ export default function ExamTakePage() {
                   onClick={() => setCurrentQuestion(i)}
                   className={`min-w-[32px] h-8 text-xs font-medium rounded ${
                     i === currentQuestion
-                      ? "bg-teal-600 text-white"
+                      ? "bg-[var(--color-blue)] text-white"
                       : answers[q.id]
-                      ? "bg-teal-100 text-teal-700"
-                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                      ? "bg-[rgba(0,122,255,0.1)] text-[var(--color-blue)]"
+                      : "bg-[var(--fill-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--fill-secondary)]"
                   }`}
                 >
                   {i + 1}
@@ -328,7 +328,7 @@ export default function ExamTakePage() {
             <button
               onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
               disabled={currentQuestion === 0}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-[var(--text-primary)] bg-[var(--fill-tertiary)] rounded-lg hover:bg-[var(--fill-secondary)] disabled:opacity-50"
             >
               <ChevronLeft className="h-5 w-5" />
               Назад
@@ -337,7 +337,7 @@ export default function ExamTakePage() {
             {currentQuestion < exam.totalQuestions - 1 ? (
               <button
                 onClick={() => setCurrentQuestion(currentQuestion + 1)}
-                className="flex items-center gap-2 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700"
+                className="flex items-center gap-2 px-4 py-2 text-white bg-[var(--color-blue)] rounded-lg hover:bg-[var(--color-blue)]"
               >
                 Далее
                 <ChevronRight className="h-5 w-5" />
@@ -346,7 +346,7 @@ export default function ExamTakePage() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2 text-white bg-[var(--color-green)] rounded-lg hover:bg-[var(--color-green)] disabled:opacity-50"
               >
                 <Send className="h-5 w-5" />
                 {loading ? "Отправка..." : "Завершить и отправить"}
@@ -361,39 +361,39 @@ export default function ExamTakePage() {
   // Экран результатов
   if (stage === "completed" && result) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen bg-[var(--fill-quaternary)] py-8 px-4">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm p-8 text-center mb-6">
+          <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-8 text-center mb-6">
             <Award
               className={`h-20 w-20 mx-auto mb-4 ${
-                result.result?.passed ? "text-green-500" : "text-yellow-500"
+                result.result?.passed ? "text-[var(--color-green)]" : "text-[var(--color-orange)]"
               }`}
             />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="macos-text-title text-[var(--text-primary)] mb-2">
               {result.result?.passed ? "Поздравляем!" : "Контрольная завершена"}
             </h1>
-            <p className="text-gray-500 mb-6">{result.message}</p>
+            <p className="text-[var(--text-secondary)] mb-6">{result.message}</p>
 
             {result.result && (
               <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Набрано баллов</p>
-                  <p className="text-3xl font-bold text-gray-900">
+                <div className="bg-[var(--fill-quaternary)] rounded-lg p-4">
+                  <p className="text-sm text-[var(--text-secondary)]">Набрано баллов</p>
+                  <p className="text-3xl font-bold text-[var(--text-primary)]">
                     {result.result.totalScore}
-                    <span className="text-lg text-gray-400">/{result.result.maxScore}</span>
+                    <span className="text-lg text-[var(--text-tertiary)]">/{result.result.maxScore}</span>
                   </p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Процент</p>
-                  <p className="text-3xl font-bold text-gray-900">
+                <div className="bg-[var(--fill-quaternary)] rounded-lg p-4">
+                  <p className="text-sm text-[var(--text-secondary)]">Процент</p>
+                  <p className="text-3xl font-bold text-[var(--text-primary)]">
                     {Math.round(result.result.percentage)}%
                   </p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Результат</p>
+                <div className="bg-[var(--fill-quaternary)] rounded-lg p-4">
+                  <p className="text-sm text-[var(--text-secondary)]">Результат</p>
                   <p
-                    className={`text-xl font-bold ${
-                      result.result.passed ? "text-green-600" : "text-red-600"
+                    className={`macos-text-title ${
+                      result.result.passed ? "text-[var(--color-green)]" : "text-[var(--color-red)]"
                     }`}
                   >
                     {result.result.passed ? "Зачёт" : "Незачёт"}
@@ -403,7 +403,7 @@ export default function ExamTakePage() {
             )}
 
             {result.pendingAiReview && (
-              <div className="bg-yellow-50 text-yellow-700 rounded-lg p-4 text-sm">
+              <div className="bg-[rgba(255,204,0,0.06)] text-[var(--color-orange)] rounded-lg p-4 text-sm">
                 <AlertTriangle className="h-5 w-5 inline-block mr-2" />
                 Некоторые ответы ожидают проверки AI. Результат может измениться.
               </div>
@@ -412,9 +412,9 @@ export default function ExamTakePage() {
 
           {/* Детальные результаты */}
           {result.result?.answers && (
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="p-4 border-b bg-gray-50">
-                <h2 className="font-semibold text-gray-900">Детальные результаты</h2>
+            <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] overflow-hidden">
+              <div className="p-4 border-b bg-[var(--fill-quaternary)]">
+                <h2 className="font-semibold text-[var(--text-primary)]">Детальные результаты</h2>
               </div>
               <div className="divide-y">
                 {result.result.answers.map((answer, i) => (
@@ -423,10 +423,10 @@ export default function ExamTakePage() {
                       <span
                         className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full ${
                           answer.isCorrect === true
-                            ? "bg-green-100 text-green-600"
+                            ? "bg-[rgba(52,199,89,0.12)] text-[var(--color-green)]"
                             : answer.isCorrect === false
-                            ? "bg-red-100 text-red-600"
-                            : "bg-yellow-100 text-yellow-600"
+                            ? "bg-[rgba(255,59,48,0.12)] text-[var(--color-red)]"
+                            : "bg-[rgba(255,204,0,0.12)] text-[var(--color-orange)]"
                         }`}
                       >
                         {answer.isCorrect === true ? (
@@ -438,25 +438,25 @@ export default function ExamTakePage() {
                         )}
                       </span>
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900 mb-1">
+                        <p className="font-medium text-[var(--text-primary)] mb-1">
                           {i + 1}. {answer.content}
                         </p>
-                        <p className="text-sm text-gray-500 mb-1">
+                        <p className="text-sm text-[var(--text-secondary)] mb-1">
                           Ваш ответ: {String(answer.yourAnswer || "—")}
                         </p>
                         <p className="text-sm">
-                          <span className="text-gray-500">Баллы: </span>
+                          <span className="text-[var(--text-secondary)]">Баллы: </span>
                           <span className="font-medium">
                             {answer.score}/{answer.maxScore}
                           </span>
                         </p>
                         {answer.needsAiReview && (
-                          <p className="text-sm text-yellow-600 mt-1">
+                          <p className="text-sm text-[var(--color-orange)] mt-1">
                             ⏳ Ожидает проверки AI
                           </p>
                         )}
                         {answer.explanation && (
-                          <p className="text-sm text-gray-600 mt-2 bg-gray-50 p-2 rounded">
+                          <p className="text-sm text-[var(--text-secondary)] mt-2 bg-[var(--fill-quaternary)] p-2 rounded">
                             💡 {answer.explanation}
                           </p>
                         )}
@@ -486,14 +486,14 @@ function QuestionView({
   onChange: (value: any) => void;
 }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-        <span className="px-2 py-1 bg-gray-100 rounded">
+    <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-6">
+      <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] mb-4">
+        <span className="px-2 py-1 bg-[var(--fill-tertiary)] rounded">
           {question.points} {question.points === 1 ? "балл" : "баллов"}
         </span>
       </div>
 
-      <h2 className="text-lg font-medium text-gray-900 mb-6">{question.content}</h2>
+      <h2 className="macos-text-callout text-[var(--text-primary)] mb-6">{question.content}</h2>
 
       {question.imageUrl && (
         <img
@@ -511,8 +511,8 @@ function QuestionView({
               key={i}
               className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
                 value === option
-                  ? "border-teal-500 bg-teal-50"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-teal-500 bg-[rgba(0,122,255,0.06)]"
+                  : "border-[rgba(0,0,0,0.08)] hover:border-[rgba(0,0,0,0.12)]"
               }`}
             >
               <input
@@ -521,9 +521,9 @@ function QuestionView({
                 value={option}
                 checked={value === option}
                 onChange={() => onChange(option)}
-                className="text-teal-600 focus:ring-teal-500"
+                className="text-[var(--color-blue)] focus:ring-[rgba(0,122,255,0.3)]"
               />
-              <span className="text-gray-700">{option}</span>
+              <span className="text-[var(--text-primary)]">{option}</span>
             </label>
           ))}
         </div>
@@ -539,8 +539,8 @@ function QuestionView({
                 key={i}
                 className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
                   selected
-                    ? "border-teal-500 bg-teal-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-teal-500 bg-[rgba(0,122,255,0.06)]"
+                    : "border-[rgba(0,0,0,0.08)] hover:border-[rgba(0,0,0,0.12)]"
                 }`}
               >
                 <input
@@ -554,9 +554,9 @@ function QuestionView({
                       onChange(current.filter((v: string) => v !== option));
                     }
                   }}
-                  className="rounded text-teal-600 focus:ring-teal-500"
+                  className="rounded text-[var(--color-blue)] focus:ring-[rgba(0,122,255,0.3)]"
                 />
-                <span className="text-gray-700">{option}</span>
+                <span className="text-[var(--text-primary)]">{option}</span>
               </label>
             );
           })}
@@ -572,8 +572,8 @@ function QuestionView({
               onClick={() => onChange(option)}
               className={`p-4 border rounded-lg font-medium transition-colors ${
                 value === option
-                  ? "border-teal-500 bg-teal-50 text-teal-700"
-                  : "border-gray-200 text-gray-700 hover:border-gray-300"
+                  ? "border-teal-500 bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)]"
+                  : "border-[rgba(0,0,0,0.08)] text-[var(--text-primary)] hover:border-[rgba(0,0,0,0.12)]"
               }`}
             >
               {option}
@@ -589,7 +589,7 @@ function QuestionView({
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Введите ваш ответ..."
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full px-4 py-3 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)] focus:border-transparent"
         />
       )}
 
@@ -604,7 +604,7 @@ function QuestionView({
               : "Введите развёрнутый ответ..."
           }
           rows={8}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full px-4 py-3 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)] focus:border-transparent"
         />
       )}
     </div>
