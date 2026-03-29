@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildWhere = exports.buildOrderBy = exports.buildPagination = void 0;
+exports.createPaginatedResponse = createPaginatedResponse;
 const buildPagination = (q) => {
     const page = Math.max(parseInt(q.page || "1", 10), 1);
     const pageSize = Math.min(Math.max(parseInt(q.pageSize || "20", 10), 1), 200);
@@ -17,6 +18,10 @@ const buildOrderBy = (q, allowed = ["id"]) => {
     return { [sortBy]: sortOrder };
 };
 exports.buildOrderBy = buildOrderBy;
+function createPaginatedResponse(items, total, page, pageSize) {
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    return { items, total, page, pageSize, totalPages, limit: pageSize, pages: totalPages };
+}
 // Простой конструктор where из query: eq-поиск по полям
 const buildWhere = (q, allowed) => {
     const where = {};
