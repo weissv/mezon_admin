@@ -97,10 +97,10 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-4 animate-pulse">
-        <div className="h-10 bg-gray-100 rounded-lg w-1/3" />
+        <div className="h-10 rounded-lg w-1/3 dashboard-skeleton" />
         <div className="grid grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-40 bg-gray-100 rounded-xl" />
+            <div key={i} className="h-40 rounded-xl dashboard-skeleton" />
           ))}
         </div>
       </div>

@@ -21,8 +21,7 @@ export default function SideNav() {
   const userName = user?.employee
     ? [user.employee.firstName, user.employee.lastName].filter(Boolean).join(" ")
     : user?.email ?? "Пользователь";
-  
-  // Получаем ссылки на основе прав из БД
+
   const links = getLinksWithPermissions(
     role,
     permissions?.modules || [],
@@ -33,50 +32,25 @@ export default function SideNav() {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    (window as { toggleMobileMenu?: () => void }).toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
-
-    return () => {
-      delete (window as { toggleMobileMenu?: () => void }).toggleMobileMenu;
-    };
+    if (typeof window === "undefined") return;
+    (window as any).toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
+    return () => { delete (window as any).toggleMobileMenu; };
   }, []);
 
   useEffect(() => {
-    return () => {
-      if (clickTimeoutRef.current) {
-        clearTimeout(clickTimeoutRef.current);
-      }
-    };
+    return () => { if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current); };
   }, []);
 
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    
-    const newClickCount = logoClicks + 1;
-    setLogoClicks(newClickCount);
-
-    // Clear existing timeout
-    if (clickTimeoutRef.current) {
-      clearTimeout(clickTimeoutRef.current);
-    }
-
-    // Reset clicks after 2 seconds of no clicking
-    clickTimeoutRef.current = setTimeout(() => {
-      setLogoClicks(0);
-    }, 2000);
-
-    // Trigger spin animation on 10th click
-    if (newClickCount === 10) {
+    const newCount = logoClicks + 1;
+    setLogoClicks(newCount);
+    if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+    clickTimeoutRef.current = setTimeout(() => setLogoClicks(0), 2000);
+    if (newCount === 10) {
       setIsLogoSpinning(true);
       setLogoClicks(0);
-      
-      // Reset spinning state after animation completes
-      setTimeout(() => {
-        setIsLogoSpinning(false);
-      }, 1000);
+      setTimeout(() => setIsLogoSpinning(false), 1000);
     }
   };
 
@@ -90,94 +64,91 @@ export default function SideNav() {
     <>
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className="mezon-mobile-overlay" 
-          onClick={closeMobileMenu}
-        />
+        <div className="mezon-mobile-overlay" onClick={closeMobileMenu} />
       )}
-      
+
       <aside className={clsx("mezon-sidenav", isMobileMenuOpen && "mezon-sidenav--mobile-open")}>
-      <div className="mezon-sidenav__brand">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={handleLogoClick}>
-            <img 
-              src="/logo.png" 
-              alt="Mezon"
-              className={clsx(
-                "transition-transform duration-1000",
-                isLogoSpinning && "animate-spin-flip"
-              )}
-              style={{
-                transformStyle: 'preserve-3d',
-              }}
-            />
+        {/* Brand */}
+        <div className="mezon-sidenav__brand">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={handleLogoClick}>
+              <img
+                src="/logo.png"
+                alt="Mezon"
+                className={clsx(
+                  "transition-transform duration-1000",
+                  isLogoSpinning && "animate-spin-flip"
+                )}
+                style={{ transformStyle: 'preserve-3d' }}
+              />
+            </div>
+            <button
+              className="mezon-mobile-close"
+              onClick={closeMobileMenu}
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          {/* Close button for mobile */}
-          <button 
-            className="mezon-mobile-close" 
-            onClick={closeMobileMenu}
-            aria-label="Close menu"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <p>Управление школой из одного окна</p>
         </div>
-        <p>Управление школой из одного окна</p>
-      </div>
 
-      <div className="mezon-sidenav__user">
-        <strong>{userName}</strong>
-        <span>{ROLE_LABELS[role] ?? role}{permissionsLoading ? " · загрузка прав…" : ""}</span>
-      </div>
+        {/* User card */}
+        <div className="mezon-sidenav__user">
+          <strong>{userName}</strong>
+          <span>{ROLE_LABELS[role] ?? role}{permissionsLoading ? " · загрузка прав…" : ""}</span>
+        </div>
 
-      <div className="mezon-sidenav__nav">
-        <p className="mezon-nav-label">Модули</p>
-        <div className="flex flex-col gap-1">
-          {links.map((l) => {
-            const isActive = loc.pathname === l.path || loc.pathname.startsWith(`${l.path}/`);
-            
-            // Для внешних ссылок (LMS) используем обычный <a> с target
-            if (l.isExternal) {
+        {/* Navigation */}
+        <div className="mezon-sidenav__nav">
+          <p className="mezon-nav-label">Модули</p>
+          <div className="flex flex-col gap-0.5">
+            {links.map((l) => {
+              const isActive = loc.pathname === l.path || loc.pathname.startsWith(`${l.path}/`);
+
+              if (l.isExternal) {
+                return (
+                  <a
+                    key={l.path}
+                    href={l.path}
+                    className="mezon-nav-link"
+                    onClick={closeMobileMenu}
+                  >
+                    {l.label}
+                  </a>
+                );
+              }
+
               return (
-                <a 
-                  key={l.path} 
-                  href={l.path} 
-                  className={clsx("mezon-nav-link")}
+                <Link
+                  key={l.path}
+                  to={l.path}
+                  className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}
                   onClick={closeMobileMenu}
-                > 
+                >
                   {l.label}
-                </a>
+                </Link>
               );
-            }
-            
-            return (
-              <Link 
-                key={l.path} 
-                to={l.path} 
-                className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}
-                onClick={closeMobileMenu}
-              > 
-                {l.label}
-              </Link>
-            );
-          })}
+            })}
+          </div>
         </div>
-      </div>
 
-      <div className="mezon-sidenav__footer">
-        <p>Есть вопрос? Свяжитесь:</p>
-        <p className="font-semibold text-[#007AFF] text-[12px]">+ 71 // 207 17 30</p>
-        <div className="mt-1.5 mezon-top-bar__social">
-          {socialLinks.map(({ icon: Icon, href }) => (
-            <a key={href} href={href} target="_blank" rel="noreferrer">
-              <Icon className="h-3.5 w-3.5" />
-            </a>
-          ))}
+        {/* Footer */}
+        <div className="mezon-sidenav__footer">
+          <p>Есть вопрос? Свяжитесь:</p>
+          <p className="font-semibold text-[#007AFF] text-[12px]">+ 71 // 207 17 30</p>
+          <div className="mt-1.5 mezon-top-bar__social">
+            {socialLinks.map(({ icon: Icon, href }) => (
+              <a key={href} href={href} target="_blank" rel="noreferrer">
+                <Icon className="h-3.5 w-3.5" />
+              </a>
+            ))}
+          </div>
+          <Button type="button" className="mt-3 w-full" variant="outline" size="sm" onClick={logout}>
+            Выйти
+          </Button>
         </div>
-        <Button type="button" className="mt-3 w-full" variant="outline" size="sm" onClick={logout}>
-          Выйти
-        </Button>
-      </div>
-    </aside>
+      </aside>
     </>
   );
 }

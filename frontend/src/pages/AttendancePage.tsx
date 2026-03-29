@@ -3,7 +3,6 @@ import { api } from "../lib/api";
 import { Card } from "../components/Card";
 import { Button } from "../components/ui/button";
 
-// Типы для данных, чтобы TypeScript не ругался
 interface Child {
   id: number;
   firstName: string;
@@ -15,11 +14,9 @@ interface Group {
   name: string;
 }
 
-// Используем Map для более эффективного хранения и обновления статусов
 type AttendanceState = Map<number, boolean>;
 
 export default function AttendancePage() {
-  // Состояния компонента
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
@@ -28,9 +25,8 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Загрузка списка групп при первом рендере
   useEffect(() => {
-    api.get("/api/groups") // Предполагаем, что такой эндпоинт есть или будет
+    api.get("/api/groups")
       .then((data) => {
         setGroups(data || []);
         if (data && data.length > 0) {
@@ -40,7 +36,6 @@ export default function AttendancePage() {
       .catch(() => setError("Не удалось загрузить список групп."));
   }, []);
 
-  // Загрузка списка детей при смене группы
   useEffect(() => {
     if (!selectedGroupId) {
       setChildren([]);
@@ -48,19 +43,16 @@ export default function AttendancePage() {
     }
     setLoading(true);
     setError(null);
-    api.get(`/api/children?groupId=${selectedGroupId}&pageSize=200`) // Загружаем всех детей группы
+    api.get(`/api/children?groupId=${selectedGroupId}&pageSize=200`)
       .then((data) => {
         setChildren(data.items || []);
-        // Сбрасываем статусы при смене группы
         setAttendance(new Map());
       })
       .catch(() => setError("Не удалось загрузить список детей."))
       .finally(() => setLoading(false));
   }, [selectedGroupId]);
 
-  // Функция для отметки посещаемости
   const handleSetPresence = useCallback(async (childId: number, isPresent: boolean) => {
-    // Оптимистичное обновление UI
     setAttendance(prev => new Map(prev).set(childId, isPresent));
 
     try {
@@ -68,11 +60,10 @@ export default function AttendancePage() {
         date,
         childId,
         isPresent,
-        clubId: null, // Мы работаем с группами, а не кружками
+        clubId: null,
       });
     } catch (err) {
       setError(`Ошибка сохранения для ребенка с ID ${childId}`);
-      // Откатываем изменение в UI в случае ошибки
       setAttendance(prev => {
         const newMap = new Map(prev);
         newMap.delete(childId);
@@ -83,12 +74,12 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Посещаемость</h1>
+      <h1 className="mezon-section-title text-3xl">Посещаемость</h1>
 
       <Card className="p-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <label htmlFor="date-select" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="date-select" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
               Дата
             </label>
             <input
@@ -96,18 +87,18 @@ export default function AttendancePage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md"
+              className="mezon-field"
             />
           </div>
           <div>
-            <label htmlFor="group-select" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="group-select" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
               Класс
             </label>
             <select
               id="group-select"
               value={selectedGroupId}
               onChange={(e) => setSelectedGroupId(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md"
+              className="mezon-field"
               disabled={groups.length === 0}
             >
               {groups.map((group) => (
@@ -120,26 +111,38 @@ export default function AttendancePage() {
         </div>
       </Card>
 
-      {error && <div className="text-red-600 bg-red-100 p-3 rounded-md">{error}</div>}
+      {error && (
+        <div className="text-[var(--color-red)] bg-[rgba(255,59,48,0.06)] border border-[rgba(255,59,48,0.15)] p-3 rounded-[var(--radius-md)]">
+          {error}
+        </div>
+      )}
 
       <Card>
         {loading ? (
-          <div className="p-4 text-center">Загрузка...</div>
+          <div className="p-4 text-center text-[var(--text-tertiary)]">Загрузка...</div>
         ) : (
-          <ul className="divide-y divide-gray-200">
+          <ul className="divide-y divide-[var(--separator)]">
             {children.map((child) => (
               <li key={child.id} className="p-4 flex justify-between items-center">
-                <span className="font-medium">{child.lastName} {child.firstName}</span>
+                <span className="font-medium text-[var(--text-primary)]">{child.lastName} {child.firstName}</span>
                 <div className="flex gap-2">
                   <Button
                     onClick={() => handleSetPresence(child.id, true)}
-                    className={`!px-3 !py-1 text-sm ${attendance.get(child.id) === true ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    className={`!px-3 !py-1 text-sm ${
+                      attendance.get(child.id) === true
+                        ? '!bg-[var(--color-green)] hover:!bg-[var(--color-green)] !text-white'
+                        : '!bg-[var(--fill-quaternary)] hover:!bg-[var(--fill-tertiary)] !text-[var(--text-secondary)]'
+                    }`}
                   >
                     Присутствует
                   </Button>
                   <Button
                     onClick={() => handleSetPresence(child.id, false)}
-                    className={`!px-3 !py-1 text-sm ${attendance.get(child.id) === false ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    className={`!px-3 !py-1 text-sm ${
+                      attendance.get(child.id) === false
+                        ? '!bg-[var(--color-red)] hover:!bg-[var(--color-red)] !text-white'
+                        : '!bg-[var(--fill-quaternary)] hover:!bg-[var(--fill-tertiary)] !text-[var(--text-secondary)]'
+                    }`}
                   >
                     Отсутствует
                   </Button>
@@ -147,7 +150,7 @@ export default function AttendancePage() {
               </li>
             ))}
             {children.length === 0 && !loading && (
-              <li className="p-4 text-center text-gray-500">В этом классе нет детей или класс не выбран.</li>
+              <li className="p-4 text-center text-[var(--text-tertiary)]">В этом классе нет детей или класс не выбран.</li>
             )}
           </ul>
         )}

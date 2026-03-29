@@ -1,6 +1,4 @@
 // src/components/ui/EmptyState.tsx
-// Компоненты для отображения пустых состояний
-
 import React from 'react';
 import { LucideIcon, Inbox, Search, FileQuestion, AlertCircle, Plus } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -58,7 +56,8 @@ export function EmptyState({
     <div className={cn('text-center', sizes.container, className)}>
       <div
         className={cn(
-          'mx-auto bg-[rgba(0,0,0,0.04)] rounded-[12px] flex items-center justify-center mb-4',
+          'mx-auto rounded-[12px] flex items-center justify-center mb-4',
+          'bg-[rgba(0,0,0,0.04)]',
           sizes.iconWrapper
         )}
       >
@@ -68,13 +67,13 @@ export function EmptyState({
         {title}
       </h3>
       {description && (
-        <p className={cn('text-[#86868B] mb-4', sizes.description)}>
+        <p className={cn('text-[#86868B] mb-4 max-w-sm mx-auto', sizes.description)}>
           {description}
         </p>
       )}
       {action && (
-        <Button onClick={action.onClick}>
-          <ActionIcon className="w-4 h-4 mr-2" />
+        <Button onClick={action.onClick} size="sm">
+          <ActionIcon className="w-4 h-4 mr-1.5" />
           {action.label}
         </Button>
       )}
@@ -82,10 +81,7 @@ export function EmptyState({
   );
 }
 
-// ============================================================================
-// ПРЕДУСТАНОВЛЕННЫЕ ПУСТЫЕ СОСТОЯНИЯ
-// ============================================================================
-
+/* ── Presets ── */
 interface PresetEmptyStateProps {
   onAction?: () => void;
   className?: string;
@@ -126,14 +122,14 @@ export function NotFoundState({ onAction, className }: PresetEmptyStateProps) {
   );
 }
 
-export function ErrorState({ 
-  message, 
-  onRetry, 
-  className 
-}: { 
-  message?: string; 
-  onRetry?: () => void; 
-  className?: string 
+export function ErrorState({
+  message,
+  onRetry,
+  className,
+}: {
+  message?: string;
+  onRetry?: () => void;
+  className?: string;
 }) {
   return (
     <EmptyState
@@ -146,31 +142,27 @@ export function ErrorState({
   );
 }
 
-// ============================================================================
-// СОСТОЯНИЕ ДЛЯ СПИСКОВ
-// ============================================================================
-
-interface ListEmptyStateProps {
-  itemName: string;
-  itemNamePlural?: string;
-  onAdd?: () => void;
-  className?: string;
-}
-
-export function ListEmptyState({
-  itemName,
-  itemNamePlural,
-  onAdd,
+/* ── List empty state ── */
+export function EmptyListState({
+  title = 'Список пуст',
+  description,
+  onAction,
+  actionLabel = 'Добавить',
   className,
-}: ListEmptyStateProps) {
-  const plural = itemNamePlural || `${itemName}ы`;
-  
+}: {
+  title?: string;
+  description?: string;
+  onAction?: () => void;
+  actionLabel?: string;
+  className?: string;
+}) {
   return (
     <EmptyState
       icon={Inbox}
-      title={`${plural} не найдены`}
-      description={`Добавьте ${itemName.toLowerCase()}, чтобы начать работу`}
-      action={onAdd ? { label: `Добавить ${itemName.toLowerCase()}`, onClick: onAdd } : undefined}
+      title={title}
+      description={description}
+      action={onAction ? { label: actionLabel, onClick: onAction } : undefined}
+      size="sm"
       className={className}
     />
   );
