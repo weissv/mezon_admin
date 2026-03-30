@@ -392,7 +392,7 @@ export default function StaffingPage() {
  {/* Progress bar */}
  <div className="mt-2 h-2 bg-[var(--fill-secondary)] rounded-full overflow-hidden w-48">
  <div 
- className={`h-full macos-macos-transition ${
+ className={`h-full macos-transition ${
  currentRate >= item.requiredRate ? 'bg-[rgba(52,199,89,0.06)]0' : 
  currentRate >= item.requiredRate * 0.7 ? 'bg-[rgba(255,204,0,0.06)]0' : 'bg-[rgba(255,59,48,0.06)]0'
 }`}
@@ -476,7 +476,7 @@ export default function StaffingPage() {
  <div className="flex items-center gap-2">
  <div className="flex-1 h-2 bg-[var(--fill-secondary)] rounded-full overflow-hidden">
  <div 
- className={`h-full macos-macos-transition ${
+ className={`h-full macos-transition ${
  percentage >= 100 ? 'bg-[rgba(52,199,89,0.06)]0' : 
  percentage >= 70 ? 'bg-[rgba(255,204,0,0.06)]0' : 'bg-[rgba(255,59,48,0.06)]0'
 }`}

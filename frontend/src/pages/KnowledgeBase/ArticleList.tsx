@@ -194,7 +194,7 @@ export default function ArticleList() {
  <div
  key={article.id}
  onClick={() => navigate(`/knowledge-base/${article.slug}`)}
- className="border border-[rgba(0,0,0,0.08)] rounded-xl p-5 hover:shadow-md hover:border-blue-300 macos-macos-transition cursor-pointer group bg-white"
+ className="border border-[rgba(0,0,0,0.08)] rounded-xl p-5 hover:shadow-md hover:border-blue-300 macos-transition cursor-pointer group bg-white"
  >
  {/* Скор сходства (при семантическом поиске) */}
  {article.similarity !== undefined && article.similarity !== null && (
@@ -204,7 +204,7 @@ export default function ArticleList() {
  </div>
  )}
 
- <h3 className="font-semibold text-lg mb-2 group-hover:text-[var(--color-blue)] macos-macos-transition line-clamp-2">
+ <h3 className="font-semibold text-lg mb-2 group-hover:text-[var(--color-blue)] macos-transition line-clamp-2">
  {article.title}
  </h3>
 

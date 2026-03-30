@@ -1,53 +1,76 @@
 // src/components/Modal.tsx
-import { ReactNode, useEffect} from"react";
+import { ReactNode, useEffect } from "react";
+import clsx from "clsx";
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+  size?: "sm" | "md" | "lg" | "xl";
+}
+
+const sizeClasses: Record<string, string> = {
+  sm: "max-w-sm",
+  md: "max-w-lg",
+  lg: "max-w-2xl",
+  xl: "max-w-4xl",
+};
 
 export function Modal({
- isOpen,
- onClose,
- title,
- children,
-}: {
- isOpen: boolean;
- onClose: () => void;
- title: string;
- children: ReactNode;
-}) {
- useEffect(() => {
- if (!isOpen) return;
- const handler = (e: KeyboardEvent) => {
- if (e.key ==="Escape") onClose();
-};
- document.addEventListener("keydown", handler);
- return () => document.removeEventListener("keydown", handler);
-}, [isOpen, onClose]);
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = "md",
+}: ModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isOpen, onClose]);
 
- if (!isOpen) return null;
+  if (!isOpen) return null;
 
- return (
- <div
- className="fixed inset-0 z-50 flex items-center justify-center p-4"
- onClick={(e) => { if (e.target === e.currentTarget) onClose();}}
- >
- {/* Backdrop */}
- <div className="absolute inset-0 bg-black/20 backdrop-blur-[6px] macos-animate-fade-in"/>
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-[6px] macos-animate-fade-in" />
 
- {/* Sheet */}
- <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-[14px] bg-white/92 backdrop-blur-[40px] saturate-[1.8] border border-white/50 shadow-[0_24px_80px_rgba(0,0,0,0.14),0_0_0_0.5px_rgba(0,0,0,0.06)] p-6 macos-animate-scale-in">
- {/* Inner glow */}
- <div className="absolute inset-0 rounded-[14px] pointer-events-none bg-gradient-to-b from-white/30 to-transparent"style={{ height: '40%'}} />
+      {/* Sheet */}
+      <div
+        className={clsx(
+          "relative w-full max-h-[85vh] overflow-y-auto",
+          "rounded-[var(--radius-sheet)] bg-[var(--surface-overlay)]",
+          "border border-[var(--border-card)]",
+          "shadow-[var(--shadow-floating)]",
+          "p-6 macos-animate-scale-in",
+          sizeClasses[size]
+        )}
+      >
+        {/* Header */}
+        <div className="mb-4 flex items-center justify-between pb-3 border-b border-[var(--separator)]">
+          <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+            {title}
+          </h2>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-full bg-[var(--fill-quaternary)] hover:bg-[var(--fill-tertiary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] macos-transition text-sm leading-none"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
 
- <div className="relative mb-4 flex items-center justify-between">
- <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-[#1D1D1F]">{title}</h2>
- <button
- onClick={onClose}
- className="w-7 h-7 rounded-full bg-[rgba(0,0,0,0.06)] hover:bg-[rgba(0,0,0,0.10)] flex items-center justify-center text-[#86868B] hover:text-[#1D1D1F] macos-macos-transition text-sm leading-none"
- aria-label="Close"
- >
- &times;
- </button>
- </div>
- <div className="relative">{children}</div>
- </div>
- </div>
- );
+        {/* Content */}
+        <div className="relative">{children}</div>
+      </div>
+    </div>
+  );
 }

@@ -43,7 +43,7 @@ export default function ProcurementPage() {
  <div className="flex gap-1 bg-[var(--fill-tertiary)] p-1 rounded-lg">
  <button
  onClick={() => setViewMode('orders')}
- className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption macos-macos-transition ${
+ className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption macos-transition ${
  viewMode === 'orders'
  ? 'bg-white text-[var(--color-blue)] shadow-sm'
  : 'text-[var(--text-secondary)] hover:text-gray-800'
@@ -54,7 +54,7 @@ export default function ProcurementPage() {
  </button>
  <button
  onClick={() => setViewMode('suppliers')}
- className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption macos-macos-transition ${
+ className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption macos-transition ${
  viewMode === 'suppliers'
  ? 'bg-white text-[var(--color-blue)] shadow-sm'
  : 'text-[var(--text-secondary)] hover:text-gray-800'
@@ -65,7 +65,7 @@ export default function ProcurementPage() {
  </button>
  <button
  onClick={() => setViewMode('invoices')}
- className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption macos-macos-transition ${
+ className={`flex items-center gap-2 px-4 py-2 rounded-md macos-text-caption macos-transition ${
  viewMode === 'invoices'
  ? 'bg-white text-[var(--color-blue)] shadow-sm'
  : 'text-[var(--text-secondary)] hover:text-gray-800'
@@ -515,7 +515,7 @@ function OrdersView() {
  const allLinked = order.items?.length > 0 && order.items.every(i => i.inventoryItemId);
  
  return (
- <tr key={order.id} className="border-b hover:bg-[var(--fill-quaternary)]/50 macos-macos-transition">
+ <tr key={order.id} className="border-b hover:bg-[var(--fill-quaternary)]/50 macos-transition">
  <td className="p-3 font-mono text-xs text-[var(--text-secondary)]">{order.orderNumber}</td>
  <td className="p-3">
  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${purchaseOrderTypeColors[order.type]}`}>

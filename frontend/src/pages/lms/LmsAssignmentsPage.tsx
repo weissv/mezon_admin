@@ -116,7 +116,7 @@ export default function LmsAssignmentsPage() {
  </span>
  )}
  </div>
- <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-[var(--color-blue)] macos-macos-transition">
+ <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-[var(--color-blue)] macos-transition">
  {h.title}
  </h3>
  <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">

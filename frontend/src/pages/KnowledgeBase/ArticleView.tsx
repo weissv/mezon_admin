@@ -176,7 +176,7 @@ export default function ArticleView() {
  <div className="flex items-center justify-between mb-6">
  <button
  onClick={() => navigate("/knowledge-base")}
- className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-gray-800 macos-macos-transition"
+ className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-gray-800 macos-transition"
  >
  <ArrowLeft className="h-4 w-4"/>
  Назад к списку
@@ -292,7 +292,7 @@ export default function ArticleView() {
  <Link
  key={tag}
  to={`/knowledge-base?tags=${tag}`}
- className="px-3 py-1 bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)] text-sm rounded-full hover:bg-[rgba(0,122,255,0.12)] macos-macos-transition flex items-center gap-1"
+ className="px-3 py-1 bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)] text-sm rounded-full hover:bg-[rgba(0,122,255,0.12)] macos-transition flex items-center gap-1"
  >
  <Tag className="h-3 w-3"/>
  {tag}
@@ -325,7 +325,7 @@ export default function ArticleView() {
  <Link
  key={rel.id}
  to={`/knowledge-base/${rel.slug}`}
- className="block p-3 rounded-lg hover:bg-[var(--fill-quaternary)] macos-macos-transition border border-transparent hover:border-[rgba(0,0,0,0.08)]"
+ className="block p-3 rounded-lg hover:bg-[var(--fill-quaternary)] macos-transition border border-transparent hover:border-[rgba(0,0,0,0.08)]"
  >
  <h4 className="font-medium text-sm mb-1 line-clamp-2">{rel.title}</h4>
  <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{rel.summary}</p>

@@ -1,6 +1,6 @@
 /* ============================================================================
-   macOS Tahoe — Liquid Glass Design System
-   Mezon ERP · Built from Apple macOS 26 UI Kit & HIG
+   macOS Sequoia — Design System
+   Mezon ERP · Clean Surfaces, Warm Neutrals, Professional Depth
    ============================================================================ */
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -18,7 +18,13 @@
   --color-teal:    #5AC8FA;
   --color-indigo:  #5856D6;
 
-  /* ── Neutrals ── */
+  /* Hover tints */
+  --color-blue-hover:   #0071EE;
+  --color-blue-active:  #005EC4;
+  --color-red-hover:    #E8342A;
+  --color-red-active:   #C5221F;
+
+  /* ── Neutrals (Warm Sequoia Palette) ── */
   --gray-1: #8E8E93;
   --gray-2: #AEAEB2;
   --gray-3: #C7C7CC;
@@ -26,25 +32,15 @@
   --gray-5: #E5E5EA;
   --gray-6: #F2F2F7;
 
-  /* ── Semantic Background ── */
+  /* ── Semantic Surfaces ── */
   --bg-canvas:     #F5F5F7;
   --bg-grouped:    #F2F2F7;
   --bg-elevated:   #FFFFFF;
+  --bg-inset:      #F0F0F4;
 
-  /* ── Liquid Glass Materials ── */
-  --glass-ultra-thin:  rgba(255,255,255,0.30);
-  --glass-thin:        rgba(255,255,255,0.50);
-  --glass-medium:      rgba(255,255,255,0.65);
-  --glass-thick:       rgba(255,255,255,0.78);
-  --glass-ultra-thick: rgba(255,255,255,0.88);
-  --glass-bg:          rgba(255,255,255,0.72);
-  --glass-border:      rgba(255,255,255,0.55);
-
-  /* ── Glass Blur ── */
-  --blur-sm:  blur(20px) saturate(150%);
-  --blur-md:  blur(40px) saturate(180%);
-  --blur-lg:  blur(60px) saturate(200%);
-  --glass-blur: blur(40px) saturate(180%);
+  --surface-primary:  #FFFFFF;
+  --surface-secondary: rgba(255, 255, 255, 0.92);
+  --surface-overlay:   rgba(255, 255, 255, 0.97);
 
   /* ── Text Colors ── */
   --text-primary:    #1D1D1F;
@@ -53,17 +49,15 @@
   --text-quaternary: #AEAEB2;
   --text-on-accent:  #FFFFFF;
 
-  /* legacy aliases used by components */
+  /* Legacy aliases (backward compat) */
   --mezon-dark:           var(--text-primary);
   --mezon-text-soft:      var(--text-tertiary);
   --mezon-text-secondary: var(--text-secondary);
   --mezon-accent:         var(--color-blue);
   --mezon-teal:           var(--color-teal);
   --mezon-bg:             var(--bg-canvas);
-  --mezon-panel-muted:    rgba(255,255,255,0.72);
-  --mezon-separator:      rgba(60,60,67,0.12);
-
-  /* macOS shorthand aliases */
+  --mezon-panel-muted:    var(--surface-primary);
+  --mezon-separator:      var(--separator);
   --macos-blue:   var(--color-blue);
   --macos-green:  var(--color-green);
   --macos-red:    var(--color-red);
@@ -74,28 +68,46 @@
   --macos-teal:   var(--color-teal);
 
   /* ── Fill ── */
-  --fill-primary:    rgba(120,120,128,0.20);
-  --fill-secondary:  rgba(120,120,128,0.16);
-  --fill-tertiary:   rgba(120,120,128,0.12);
-  --fill-quaternary: rgba(120,120,128,0.08);
+  --fill-primary:    rgba(120, 120, 128, 0.20);
+  --fill-secondary:  rgba(120, 120, 128, 0.16);
+  --fill-tertiary:   rgba(120, 120, 128, 0.12);
+  --fill-quaternary: rgba(120, 120, 128, 0.08);
+
+  /* ── Accent tints ── */
+  --tint-blue:   rgba(0, 122, 255, 0.08);
+  --tint-green:  rgba(52, 199, 89, 0.08);
+  --tint-red:    rgba(255, 59, 48, 0.08);
+  --tint-orange: rgba(255, 149, 0, 0.08);
+  --tint-purple: rgba(175, 82, 222, 0.08);
 
   /* ── Separators ── */
-  --separator:        rgba(60,60,67,0.12);
+  --separator:        rgba(60, 60, 67, 0.12);
   --separator-opaque: #C6C6C8;
+  --border-card:      rgba(0, 0, 0, 0.06);
+  --border-field:     rgba(0, 0, 0, 0.12);
 
-  /* ── Shadows ── */
-  --shadow-xs:      0 0.5px 1px rgba(0,0,0,0.04);
-  --shadow-sm:      0 1px 3px rgba(0,0,0,0.06), 0 0.5px 0 rgba(0,0,0,0.04);
-  --shadow-md:      0 4px 12px rgba(0,0,0,0.08), 0 0.5px 0 rgba(0,0,0,0.04);
-  --shadow-lg:      0 8px 32px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
-  --shadow-xl:      0 16px 48px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-window:  0 24px 80px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.05);
-  --shadow-floating: 0 22px 70px rgba(0,0,0,0.16), 0 2px 12px rgba(0,0,0,0.06);
-  --glass-shadow:   0 0 0 0.5px rgba(0,0,0,0.06);
+  /* ── Shadows – 3-level depth system ── */
+  --shadow-subtle:   0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.03);
+  --shadow-card:     0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-floating: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  /* Legacy shadow aliases */
+  --shadow-xs:      var(--shadow-subtle);
+  --shadow-sm:      var(--shadow-subtle);
+  --shadow-md:      var(--shadow-card);
+  --shadow-lg:      var(--shadow-floating);
+  --shadow-xl:      var(--shadow-floating);
+  --shadow-window:  var(--shadow-floating);
+  --glass-shadow:   0 0 0 0.5px rgba(0, 0, 0, 0.04);
+
+  /* Legacy glass aliases */
+  --glass-bg:      var(--surface-primary);
+  --glass-border:  var(--border-card);
+  --glass-blur:    blur(40px) saturate(180%);
 
   /* ── Focus ring ── */
-  --ring-accent: 0 0 0 4px rgba(0,122,255,0.3);
-  --ring-danger: 0 0 0 4px rgba(255,59,48,0.3);
+  --ring-accent: 0 0 0 3px rgba(0, 122, 255, 0.25);
+  --ring-danger: 0 0 0 3px rgba(255, 59, 48, 0.25);
 
   /* ── Border Radii ── */
   --radius-xs:     4px;
@@ -106,46 +118,70 @@
   --radius-2xl:    18px;
   --radius-3xl:    24px;
   --radius-window: 16px;
-  --radius-sheet:  26px;
+  --radius-sheet:  20px;
   --radius-pill:   999px;
 
   /* ── Typography ── */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
   --font-mono: "SF Mono", "Fira Code", "JetBrains Mono", ui-monospace, monospace;
+
+  /* ── Spacing (4px grid) ── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
 
   /* ── Layout ── */
   --top-bar-height:      52px;
-  --sidebar-w:           260px;
+  --sidebar-w:           256px;
   --sidebar-collapsed-w: 68px;
   --shell-gap:           16px;
   --content-max-width:   1600px;
 
-  /* ── Gradients ── */
-  --mezon-hero-glow: linear-gradient(135deg, rgba(10,132,255,0.04) 0%, transparent 50%);
-
   /* ── Animations (HIG) ── */
-  --macos-ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
-  --macos-ease-out: cubic-bezier(0.2, 0, 0, 1);
-  --macos-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --macos-duration-fast: 150ms;
-  --macos-duration-normal: 250ms;
-  --macos-duration-slow: 400ms;
+  --ease-spring:    cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out:       cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast:   150ms;
+  --duration-normal: 250ms;
+  --duration-slow:   400ms;
+
+  /* Legacy animation aliases */
+  --macos-ease-spring:    var(--ease-spring);
+  --macos-ease-out:       var(--ease-out);
+  --macos-ease-in-out:    var(--ease-in-out);
+  --macos-duration-fast:  var(--duration-fast);
+  --macos-duration-normal: var(--duration-normal);
+  --macos-duration-slow:  var(--duration-slow);
+
+  /* ── Gradients ── */
+  --mezon-hero-glow: linear-gradient(135deg, rgba(10, 132, 255, 0.03) 0%, transparent 50%);
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    2. BASE
    ───────────────────────────────────────────────────────────────────────────── */
-html { min-height: 100vh; color-scheme: light; }
+html {
+  min-height: 100vh;
+  color-scheme: light;
+}
 
 body {
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 14px;
   background: var(--bg-canvas);
   color: var(--text-primary);
-  letter-spacing: -0.01em;
-  line-height: 1.47;
-  font-feature-settings: "cv02","cv03","cv04","cv11";
+  letter-spacing: -0.006em;
+  line-height: 1.5;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -153,20 +189,20 @@ body {
 
 /* macOS Scrollbars */
 ::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  border: 4px solid transparent;
+  border: 3px solid transparent;
+  background-color: rgba(0, 0, 0, 0.15);
   background-clip: padding-box;
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.3);
 }
 ::-webkit-scrollbar-corner {
   background: transparent;
@@ -179,18 +215,7 @@ body {
 .mezon-app {
   min-height: 100vh;
   background: var(--bg-canvas);
-  background-image:
-    radial-gradient(circle at 15% 0%, rgba(10,132,255,0.06), transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(175,82,222,0.05), transparent 35%);
   position: relative;
-}
-.mezon-app::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255,255,255,0.30), transparent 18%);
-  z-index: 0;
 }
 
 
@@ -201,90 +226,140 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 0 16px;
-  min-height: 52px;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
-  background: rgba(246,246,246,0.65);
-  -webkit-backdrop-filter: blur(50px) saturate(180%);
-          backdrop-filter: blur(50px) saturate(180%);
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+  min-height: var(--top-bar-height);
+  border-bottom: 0.5px solid var(--separator);
+  background: rgba(245, 245, 247, 0.8);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+          backdrop-filter: blur(40px) saturate(180%);
   position: sticky;
   top: 0;
   z-index: 40;
 }
+
 .mezon-top-bar__leading {
-  display: flex; align-items: center; gap: 14px; min-width: 0; z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  z-index: 10;
 }
+
 .mezon-window-controls {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: var(--space-2);
 }
 .mezon-window-controls span {
-  width: 12px; height: 12px; border-radius: var(--radius-pill);
-  box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.1);
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1);
   display: inline-block;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
-.mezon-window-controls span:nth-child(1) { background: #FF5E57; }
+.mezon-window-controls span:nth-child(1) { background: #FF5F57; }
 .mezon-window-controls span:nth-child(2) { background: #FEBC2E; }
 .mezon-window-controls span:nth-child(3) { background: #28C840; }
 
-.mezon-top-bar__title { 
-  display: flex; 
-  flex-direction: column; 
+.mezon-top-bar__title {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  font-weight: 600;
-  color: var(--text-primary);
 }
 .mezon-top-bar__title span {
-  font-size: 11px; color: var(--text-tertiary);
-  letter-spacing: 0.02em; font-weight: 500;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  line-height: 1.3;
 }
 .mezon-top-bar__title strong {
-  font-size: 14px; font-weight: 600; line-height: 1.2;
-  letter-spacing: -0.01em; color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
-.mezon-top-bar__cluster { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.mezon-top-bar__cluster {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
 .mezon-top-bar__cluster--compact { gap: 6px; }
 
 /* Chips / Pills */
 .mezon-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 5px 10px; border-radius: var(--radius-pill);
-  background: var(--glass-thick); border: 0.5px solid var(--glass-border);
-  color: var(--text-secondary); font-weight: 500; font-size: 12px;
-  letter-spacing: -0.01em; box-shadow: var(--shadow-xs);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--fill-quaternary);
+  border: 0.5px solid var(--separator);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  transition: all var(--duration-fast) var(--ease-out);
 }
 .mezon-chip:hover {
-  background: var(--glass-ultra-thick); border-color: rgba(10,132,255,0.15);
+  background: var(--fill-tertiary);
 }
 .mezon-chip--teal {
-  background: rgba(0,122,255,0.08); color: var(--color-blue);
-  border-color: rgba(0,122,255,0.12);
+  background: var(--tint-blue);
+  color: var(--color-blue);
+  border-color: rgba(0, 122, 255, 0.12);
 }
-.mezon-chip--teal:hover { background: rgba(0,122,255,0.14); }
+.mezon-chip--teal:hover {
+  background: rgba(0, 122, 255, 0.14);
+}
 
 .mezon-toolbar-pill {
-  display: inline-flex; align-items: center; gap: 8px;
-  min-height: 34px; padding: 6px 12px; border-radius: var(--radius-pill);
-  background: var(--glass-thick); border: 0.5px solid var(--glass-border);
-  box-shadow: var(--shadow-xs); font-size: 12px; color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-primary);
+  border: 0.5px solid var(--separator);
+  box-shadow: var(--shadow-subtle);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 .mezon-toolbar-pill__dot {
-  width: 8px; height: 8px; border-radius: var(--radius-pill);
-  background: var(--color-green); box-shadow: 0 0 0 3px rgba(52,199,89,0.18);
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.18);
 }
-.mezon-top-bar__social { display: inline-flex; gap: 2px; }
+
+.mezon-top-bar__social {
+  display: inline-flex;
+  gap: 2px;
+}
 .mezon-top-bar__social a {
-  width: 32px; height: 32px; border-radius: var(--radius-md);
-  display: inline-flex; align-items: center; justify-content: center;
-  color: var(--text-tertiary); transition: all 0.15s ease;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  transition: all var(--duration-fast) var(--ease-out);
 }
 .mezon-top-bar__social a:hover {
-  background: rgba(0,0,0,0.04); color: var(--text-primary);
+  background: var(--fill-quaternary);
+  color: var(--text-primary);
 }
 
 
@@ -292,129 +367,256 @@ body {
    5. SIDEBAR
    ───────────────────────────────────────────────────────────────────────────── */
 .mezon-shell {
-  display: flex; gap: var(--shell-gap);
+  display: flex;
+  gap: var(--shell-gap);
   width: min(100%, var(--content-max-width));
-  margin: 0 auto; padding: var(--shell-gap);
-  position: relative; z-index: 1;
+  margin: 0 auto;
+  padding: var(--shell-gap);
+  position: relative;
+  z-index: 1;
 }
+
 .mezon-sidenav {
-  width: 260px;
-  min-height: calc(100vh - var(--top-bar-height) - var(--shell-gap)*2);
-  background: rgba(235, 235, 240, 0.45);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
-  border: 0.5px solid rgba(0,0,0,0.08);
-  box-shadow: var(--shadow-sm);
+  width: var(--sidebar-w);
+  min-height: calc(100vh - var(--top-bar-height) - var(--shell-gap) * 2);
+  background: var(--surface-primary);
+  border: 0.5px solid var(--border-card);
+  box-shadow: var(--shadow-card);
   position: sticky;
   top: calc(var(--top-bar-height) + var(--shell-gap));
-  padding: 16px 12px; display: flex; flex-direction: column; gap: 10px;
-  border-radius: var(--radius-2xl); overflow: hidden;
+  padding: var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
 }
-.mezon-sidenav::before {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.35), transparent 30%);
-  pointer-events: none;
-}
+
 .mezon-sidenav__brand {
-  position: relative; z-index: 1; padding: 6px 10px 14px;
+  position: relative;
+  z-index: 1;
+  padding: 6px 10px 14px;
   border-bottom: 0.5px solid var(--separator);
 }
-.mezon-sidenav__brand img { width: 120px; object-fit: contain; }
-.mezon-sidenav__brand p {
-  margin-top: 4px; color: var(--text-tertiary); font-size: 11px; line-height: 1.4;
+.mezon-sidenav__brand img {
+  width: 120px;
+  object-fit: contain;
 }
+.mezon-sidenav__brand p {
+  margin-top: var(--space-1);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .mezon-sidenav__user {
-  display: grid; gap: 2px; padding: 10px 12px;
-  border-radius: var(--radius-xl); background: rgba(255,255,255,0.50);
-  border: 0.5px solid rgba(255,255,255,0.65); box-shadow: var(--shadow-xs);
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-inset);
+  border: 0.5px solid var(--border-card);
 }
 .mezon-sidenav__user strong {
-  font-size: 13px; font-weight: 600; letter-spacing: -0.02em;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
-.mezon-sidenav__user span { font-size: 11px; color: var(--text-tertiary); }
+.mezon-sidenav__user span {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
 .mezon-sidenav__nav {
-  flex: 1; position: relative; z-index: 1; overflow-y: auto; padding-right: 2px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  overflow-y: auto;
+  padding-right: 2px;
 }
+
 .mezon-nav-label {
-  text-transform: capitalize; font-size: 11px; letter-spacing: -0.01em;
-  font-weight: 600; color: var(--text-tertiary); padding: 8px 10px 4px;
+  text-transform: capitalize;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  padding: var(--space-2) 10px var(--space-1);
 }
+
 .mezon-nav-link {
-  display: flex; align-items: center; padding: 6px 10px; margin: 1px 0;
-  border-radius: 6px; font-weight: 500; font-size: 13px;
-  color: var(--text-primary); 
-  transition: all 0.1s ease; letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 7px 10px;
+  margin: 1px 0;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-primary);
+  transition: all var(--duration-fast) var(--ease-out);
+  letter-spacing: -0.01em;
 }
 .mezon-nav-link:hover {
-  background: rgba(0,0,0,0.05);
+  background: var(--fill-quaternary);
 }
 .mezon-nav-link--active {
-  background: rgba(0, 0, 0, 0.08);
-  color: var(--text-primary);
+  background: var(--tint-blue);
+  color: var(--color-blue);
   font-weight: 600;
 }
 .mezon-nav-link--active:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: var(--text-primary);
+  background: rgba(0, 122, 255, 0.12);
 }
+
+.mezon-nav-link__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.mezon-nav-link--active .mezon-nav-link__icon {
+  opacity: 1;
+  color: var(--color-blue);
+}
+
 .mezon-sidenav__footer {
-  position: relative; z-index: 1; padding: 14px 10px 4px;
+  position: relative;
+  z-index: 1;
+  padding: 14px 10px var(--space-1);
   border-top: 0.5px solid var(--separator);
 }
 .mezon-sidenav__footer p {
-  font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-1);
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    6. MAIN CONTENT
    ───────────────────────────────────────────────────────────────────────────── */
-.mezon-main { flex: 1; min-width: 0; }
+.mezon-main {
+  flex: 1;
+  min-width: 0;
+}
 .mezon-main-inner {
-  min-height: calc(100vh - var(--top-bar-height) - var(--shell-gap)*2);
-  display: flex; flex-direction: column; gap: 20px;
+  min-height: calc(100vh - var(--top-bar-height) - var(--shell-gap) * 2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   7. TYPOGRAPHY (HIG SEMANTICS)
+   7. TYPOGRAPHY (Semantic Scale)
    ───────────────────────────────────────────────────────────────────────────── */
-.macos-text-title {
-  font-size: 24px; font-weight: 700; color: var(--text-primary);
-  letter-spacing: -0.025em; line-height: 1.2;
-}
-.macos-text-subtitle {
-  font-size: 15px; font-weight: 500; color: var(--text-secondary);
-  line-height: 1.4; letter-spacing: -0.015em;
-}
-.macos-text-body {
-  font-size: 13px; font-weight: 400; color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-.macos-text-callout {
-  font-size: 14px; font-weight: 500; color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-.macos-text-caption {
-  font-size: 11px; font-weight: 500; color: var(--text-tertiary);
-  letter-spacing: 0.02em;
-}
-.macos-text-footnote {
-  font-size: 10px; font-weight: 500; color: var(--text-quaternary);
+.macos-text-title,
+.text-page-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
-/* Legacy mapped styles for transitions */
+.macos-text-subtitle,
+.text-section-subtitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.macos-text-body,
+.text-body {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-primary);
+  letter-spacing: -0.006em;
+  line-height: 1.5;
+}
+
+.macos-text-callout,
+.text-callout {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.macos-text-caption,
+.text-caption {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.macos-text-footnote,
+.text-footnote {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-quaternary);
+  line-height: 1.4;
+}
+
+.text-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: -0.01em;
+}
+
+/* Legacy section title */
 .mezon-section-title {
-  font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 700;
-  color: var(--text-primary); letter-spacing: -0.025em; line-height: 1.2;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 .mezon-section-title span {
   background: linear-gradient(135deg, var(--color-blue), var(--color-purple));
-  -webkit-background-clip: text; background-clip: text;
+  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .mezon-subtitle {
-  color: var(--text-tertiary); max-width: 640px; font-size: 15px; line-height: 1.5;
+  color: var(--text-tertiary);
+  max-width: 640px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ── Page Header Pattern ── */
+.mezon-page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.mezon-page-header__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  background: var(--tint-blue);
+  color: var(--color-blue);
+}
+.mezon-page-header__content {
+  flex: 1;
+  min-width: 0;
 }
 
 
@@ -422,156 +624,194 @@ body {
    8. CARDS
    ───────────────────────────────────────────────────────────────────────────── */
 .mezon-card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.72));
-  -webkit-backdrop-filter: var(--glass-blur);
-          backdrop-filter: var(--glass-blur);
-  border: 0.5px solid rgba(255,255,255,0.72);
+  background: var(--surface-primary);
+  border: 0.5px solid var(--border-card);
   border-radius: var(--radius-xl);
-  box-shadow: var(--glass-shadow), var(--shadow-md);
-  padding: 22px; position: relative; overflow: hidden;
-  transition: box-shadow 0.18s ease, border-color 0.18s ease;
-}
-.mezon-card::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 35%);
-  pointer-events: none; border-radius: inherit;
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
 }
 .mezon-card:hover {
-  box-shadow: var(--glass-shadow), var(--shadow-lg);
-  border-color: rgba(255,255,255,0.88);
+  box-shadow: var(--shadow-card);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 .mezon-card--accent {
   background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
-  backdrop-filter: none; color: #fff; border: none;
+  color: #fff;
+  border: none;
+  box-shadow: var(--shadow-card);
 }
-.mezon-card--accent::after { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    9. FORM FIELDS
    ───────────────────────────────────────────────────────────────────────────── */
 .mezon-field {
-  min-height: 36px; width: 100%; border-radius: var(--radius-md);
-  border: 1px solid rgba(0,0,0,0.12); background: rgba(255,255,255,0.85);
-  padding: 8px 12px; font-size: 13px; color: var(--text-primary);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03), 0 1px 0 rgba(255,255,255,0.5);
-  transition: all var(--macos-duration-fast) var(--macos-ease-out);
+  min-height: 36px;
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-field);
+  background: var(--surface-primary);
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
 }
 .mezon-field:focus-visible {
-  border-color: rgba(0,122,255,0.35); background: rgba(255,255,255,0.96);
-  outline: none; box-shadow: var(--ring-accent);
+  border-color: var(--color-blue);
+  background: var(--surface-primary);
+  outline: none;
+  box-shadow: var(--ring-accent);
 }
-.mezon-field:disabled { opacity: 0.5; cursor: not-allowed; }
-.mezon-field::placeholder { color: var(--text-tertiary); }
+.mezon-field:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--bg-inset);
+}
+.mezon-field::placeholder {
+  color: var(--text-tertiary);
+}
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    10. BUTTONS
    ───────────────────────────────────────────────────────────────────────────── */
 .mezon-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: var(--radius-md); font-weight: 500; font-size: 13px;
-  padding: 7px 16px; border: none; color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 7px 16px;
+  border: none;
+  color: var(--text-on-accent);
   background: var(--color-blue);
-  box-shadow: 0 0.5px 1px rgba(0,0,0,0.12);
-  transition: all var(--macos-duration-fast) var(--macos-ease-out); cursor: pointer;
-  transform: scale(1); /* Baseline for scaling animation */
+  box-shadow: var(--shadow-subtle);
+  transition: all var(--duration-fast) var(--ease-out);
+  cursor: pointer;
 }
-.mezon-btn:hover { background: #0071EE; }
-.mezon-btn:active { background: #005EC4; transform: scale(0.97); transition: all 100ms var(--macos-ease-out); }
+.mezon-btn:hover {
+  background: var(--color-blue-hover);
+}
+.mezon-btn:active {
+  background: var(--color-blue-active);
+  transform: scale(0.97);
+  transition-duration: 80ms;
+}
+
 .mezon-btn--outline {
-  background: rgba(0,0,0,0.04); border: 0.5px solid var(--separator);
-  color: var(--text-primary); box-shadow: var(--shadow-sm);
+  background: var(--surface-primary);
+  border: 0.5px solid var(--separator);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-subtle);
 }
-.mezon-btn--outline:hover { background: rgba(0,0,0,0.07); }
-.mezon-btn--outline:active { background: rgba(0,0,0,0.1); }
+.mezon-btn--outline:hover {
+  background: var(--fill-quaternary);
+}
+.mezon-btn--outline:active {
+  background: var(--fill-tertiary);
+}
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   11. BADGES & LABELS 
+   11. BADGES & LABELS
    ───────────────────────────────────────────────────────────────────────────── */
 .mezon-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px; border-radius: var(--radius-sm); font-size: 11px;
-  background: rgba(0,122,255,0.08); color: var(--color-blue);
-  font-weight: 600; letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  background: var(--tint-blue);
+  color: var(--color-blue);
 }
 .macos-badge-success {
-  background: rgba(52,199,89,0.12); color: var(--macos-green);
+  background: var(--tint-green);
+  color: #1B7A3D;
 }
 .macos-badge-warning {
-  background: rgba(255,204,0,0.12); color: var(--macos-orange);
+  background: var(--tint-orange);
+  color: #B25E00;
 }
 .macos-badge-danger {
-  background: rgba(255,59,48,0.12); color: var(--macos-red);
+  background: var(--tint-red);
+  color: var(--color-red);
 }
 .macos-badge-neutral {
-  background: rgba(60,60,67,0.1); color: var(--mezon-text-secondary);
+  background: rgba(60, 60, 67, 0.07);
+  color: var(--text-secondary);
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    12. GRID / HERO
    ───────────────────────────────────────────────────────────────────────────── */
-.mezon-grid { display: grid; gap: 16px; }
+.mezon-grid {
+  display: grid;
+  gap: var(--space-4);
+}
 .mezon-hero-panel {
-  border-radius: var(--radius-xl); padding: 24px;
-  border: 0.5px solid var(--glass-border); background: var(--glass-bg);
-  -webkit-backdrop-filter: var(--glass-blur);
-          backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-shadow), var(--shadow-md);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  border: 0.5px solid var(--border-card);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-card);
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    13. ANIMATIONS
    ───────────────────────────────────────────────────────────────────────────── */
-.mezon-shine { position: relative; overflow: hidden; }
-.mezon-shine::before {
-  content: ""; position: absolute;
-  width: 120px; height: 200%; background: rgba(255,255,255,0.25);
-  top: -50%; left: -60%; transform: rotate(25deg);
-  animation: mezon-shimmer 8s linear infinite;
-}
-@keyframes mezon-shimmer {
-  0%   { transform: translateX(-150%) rotate(25deg); }
-  100% { transform: translateX(300%) rotate(25deg); }
-}
 
-/* macOS Interactive Animations */
+/* Scale-in for modals, popovers */
 .macos-animate-scale-in {
-  animation: macos-scale-in var(--macos-duration-slow) var(--macos-ease-spring) forwards;
+  animation: macos-scale-in var(--duration-slow) var(--ease-spring) forwards;
 }
 @keyframes macos-scale-in {
-  0% { transform: scale(0.95); opacity: 0; }
+  0%   { transform: scale(0.95); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* Fade-in for page transitions */
 .macos-animate-fade-in {
-  animation: macos-fade-in var(--macos-duration-normal) var(--macos-ease-out) forwards;
+  animation: macos-fade-in var(--duration-normal) var(--ease-out) forwards;
 }
 @keyframes macos-fade-in {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0%   { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
+/* Utility transition class */
 .macos-transition {
-  transition: all var(--macos-duration-fast) var(--macos-ease-out) !important;
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
+/* Hover scale (for interactive cards) */
 .macos-hover-scale {
-  transition: transform var(--macos-duration-fast) var(--macos-ease-out), box-shadow var(--macos-duration-fast) var(--macos-ease-out) !important;
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
 }
 .macos-hover-scale:hover {
-  transform: scale(1.02);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-floating);
 }
 
+/* Hover row (for table rows) */
 .macos-hover-row {
-  transition: background-color var(--macos-duration-fast) var(--macos-ease-out) !important;
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 .macos-hover-row:hover {
-  background-color: var(--fill-quaternary) !important;
+  background-color: var(--fill-quaternary);
 }
 
 
@@ -579,35 +819,71 @@ body {
    14. MOBILE
    ───────────────────────────────────────────────────────────────────────────── */
 .mezon-mobile-menu-btn {
-  display: none; align-items: center; justify-content: center;
-  width: 36px; height: 36px; border-radius: var(--radius-md);
-  background: transparent; border: none; color: var(--text-primary);
-  cursor: pointer; transition: background 0.15s ease;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
 }
-.mezon-mobile-menu-btn:hover { background: rgba(0,0,0,0.05); }
-.mezon-mobile-menu-btn:active { transform: scale(0.95); }
+.mezon-mobile-menu-btn:hover {
+  background: var(--fill-quaternary);
+}
+.mezon-mobile-menu-btn:active {
+  transform: scale(0.95);
+}
 
 .mezon-mobile-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.25); z-index: 998;
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 998;
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
 }
+
 .mezon-mobile-close {
-  display: none; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: var(--radius-sm);
-  background: transparent; border: none; color: var(--text-tertiary);
-  cursor: pointer; transition: all 0.15s ease;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
 }
-.mezon-mobile-close:hover { background: rgba(0,0,0,0.05); color: var(--text-primary); }
+.mezon-mobile-close:hover {
+  background: var(--fill-quaternary);
+  color: var(--text-primary);
+}
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    15. RESPONSIVE
    ───────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .mezon-top-bar { min-height: auto; padding: 8px 12px; flex-wrap: wrap; gap: 6px; }
-  .mezon-shell { padding: 14px; gap: 14px; }
-  .mezon-sidenav { width: 240px; }
+  .mezon-top-bar {
+    min-height: auto;
+    padding: var(--space-2) var(--space-3);
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .mezon-shell {
+    padding: 14px;
+    gap: 14px;
+  }
+  .mezon-sidenav {
+    width: 240px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -615,30 +891,53 @@ body {
   .mezon-mobile-menu-btn { display: flex; }
   .mezon-mobile-overlay { display: block; }
   .mezon-mobile-close { display: flex; }
-  .mezon-top-bar { padding: 8px 12px; min-height: auto; flex-wrap: wrap; gap: 4px; }
-  .mezon-top-bar__cluster { flex-wrap: wrap; gap: 4px; width: 100%; justify-content: center; }
-  .mezon-top-bar__leading { width: 100%; justify-content: space-between; }
+
+  .mezon-top-bar {
+    padding: var(--space-2) var(--space-3);
+    min-height: auto;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+  .mezon-top-bar__cluster {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    width: 100%;
+    justify-content: center;
+  }
+  .mezon-top-bar__leading {
+    width: 100%;
+    justify-content: space-between;
+  }
   .mezon-window-controls { display: none; }
-  .mezon-shell { padding: 12px; }
+
+  .mezon-shell { padding: var(--space-3); }
+
   .mezon-sidenav {
-    position: fixed; top: 12px; left: 0;
-    height: calc(100vh - 24px); width: 280px; max-width: 85vw;
-    z-index: 999; transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
-    box-shadow: var(--shadow-floating); overflow-y: auto;
+    position: fixed;
+    top: var(--space-3);
+    left: 0;
+    height: calc(100vh - var(--space-6));
+    width: 280px;
+    max-width: 85vw;
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.3s var(--ease-spring);
+    box-shadow: var(--shadow-floating);
+    overflow-y: auto;
     border-radius: 0 var(--radius-2xl) var(--radius-2xl) 0;
   }
   .mezon-sidenav--mobile-open { transform: translateX(0); }
+
   .mezon-main-inner { min-height: auto; }
   .mezon-section-title { font-size: clamp(1.25rem, 5vw, 1.75rem); }
-  .mezon-card { padding: 16px; border-radius: var(--radius-lg); }
-  .mezon-hero-panel { padding: 16px; border-radius: var(--radius-lg); }
+  .mezon-card { padding: var(--space-4); border-radius: var(--radius-lg); }
+  .mezon-hero-panel { padding: var(--space-4); border-radius: var(--radius-lg); }
 }
 
 @media (max-width: 480px) {
-  .mezon-top-bar { padding: 6px 8px; }
-  .mezon-shell { padding: 8px; }
+  .mezon-top-bar { padding: 6px var(--space-2); }
+  .mezon-shell { padding: var(--space-2); }
   .mezon-section-title { font-size: 1.25rem; }
-  .mezon-card { padding: 12px; }
+  .mezon-card { padding: var(--space-3); }
   .mezon-top-bar__cluster .mezon-chip:nth-child(n+2) { display: none; }
 }

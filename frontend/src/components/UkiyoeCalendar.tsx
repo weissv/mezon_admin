@@ -81,7 +81,7 @@ export const UkiyoeCalendar: React.FC<UkiyoeCalendarProps> = ({ events, onEdit, 
  cells.push(
  <div 
  key={day} 
- className={`h-32 p-2 border-r border-b border-[#1d3b56]/30 relative macos-macos-transition hover:bg-[#fffdf9] group overflow-hidden
+ className={`h-32 p-2 border-r border-b border-[#1d3b56]/30 relative macos-transition hover:bg-[#fffdf9] group overflow-hidden
  ${isToday ? 'bg-[#fff5e6]' : 'bg-transparent'}
  `}
  >
@@ -102,7 +102,7 @@ export const UkiyoeCalendar: React.FC<UkiyoeCalendarProps> = ({ events, onEdit, 
  <div 
  key={event.id}
  onClick={() => onEdit(event)}
- className="text-xs p-1.5 rounded cursor-pointer border-l-2 shadow-sm hover:shadow-md macos-macos-transition font-serif group/event flex justify-between items-center bg-white border-l-[#1d3b56] text-[#2c2c2c] hover:bg-[var(--fill-quaternary)]"
+ className="text-xs p-1.5 rounded cursor-pointer border-l-2 shadow-sm hover:shadow-md macos-transition font-serif group/event flex justify-between items-center bg-white border-l-[#1d3b56] text-[#2c2c2c] hover:bg-[var(--fill-quaternary)]"
  title={`${event.title}${event.group ? `(${event.group.name})`: ''}\nОрганизатор: ${event.organizer}${event.performers?.length ? `\nИсполнители: ${event.performers.join(', ')}`: ''}`}
  >
  <span className="truncate flex-1">{event.title}</span>
@@ -139,13 +139,13 @@ export const UkiyoeCalendar: React.FC<UkiyoeCalendarProps> = ({ events, onEdit, 
  {/* Header */}
  <div className="flex justify-between items-center mb-8 relative z-10 border-b-2 border-[#1d3b56] pb-4">
  <div className="flex items-center gap-4">
- <button onClick={handlePrevMonth} className="p-2 hover:bg-[#1d3b56]/10 rounded-full macos-macos-transition">
+ <button onClick={handlePrevMonth} className="p-2 hover:bg-[#1d3b56]/10 rounded-full macos-transition">
  <ChevronLeft className="w-8 h-8"style={{ color: colors.indigo}} />
  </button>
  <h2 className="text-4xl font-serif font-bold tracking-wider uppercase"style={{ color: colors.indigo}}>
  {monthNames[currentMonth]} <span className="text-[#d65b5b]">{currentYear}</span>
  </h2>
- <button onClick={handleNextMonth} className="p-2 hover:bg-[#1d3b56]/10 rounded-full macos-macos-transition">
+ <button onClick={handleNextMonth} className="p-2 hover:bg-[#1d3b56]/10 rounded-full macos-transition">
  <ChevronRight className="w-8 h-8"style={{ color: colors.indigo}} />
  </button>
  </div>

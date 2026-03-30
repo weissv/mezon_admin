@@ -75,7 +75,7 @@ export default function LmsLayout() {
  {/* Кнопка"Вернуться в ERP"доступна всем ролям включая учителей */}
  <Link
  to="/dashboard"
- className="mezon-chip mezon-chip--blue flex items-center gap-2 hover:bg-blue-600 macos-macos-transition cursor-pointer"
+ className="mezon-chip mezon-chip--blue flex items-center gap-2 hover:bg-blue-600 macos-transition cursor-pointer"
  >
  <LayoutDashboard className="h-4 w-4"/>
  Вернуться в ERP

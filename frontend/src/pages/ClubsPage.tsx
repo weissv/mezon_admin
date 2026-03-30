@@ -349,7 +349,7 @@ export default function ClubsPage() {
  <button
  key={tab.id}
  onClick={() => setActiveTab(tab.id)}
- className={`flex items-center gap-2 rounded-[12px] px-4 py-2 macos-text-caption macos-macos-transition ${
+ className={`flex items-center gap-2 rounded-[12px] px-4 py-2 macos-text-caption macos-transition ${
  activeTab === tab.id
  ? 'bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
  : 'text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]'
@@ -384,7 +384,7 @@ export default function ClubsPage() {
  <button
  key={club.id}
  onClick={() => loadRatings(club)}
- className={`w-full p-4 text-left macos-macos-transition ${
+ className={`w-full p-4 text-left macos-transition ${
  selectedClubForRatings?.id === club.id ? 'bg-[rgba(10,132,255,0.08)]' : 'hover:bg-[rgba(255,255,255,0.5)]'
 }`}
  >
@@ -463,7 +463,7 @@ export default function ClubsPage() {
  <button
  key={club.id}
  onClick={() => loadReport(club)}
- className={`w-full p-4 text-left macos-macos-transition ${
+ className={`w-full p-4 text-left macos-transition ${
  selectedClubForReport?.id === club.id ? 'bg-[rgba(10,132,255,0.08)]' : 'hover:bg-[rgba(255,255,255,0.5)]'
 }`}
  >

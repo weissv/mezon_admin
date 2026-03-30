@@ -847,7 +847,7 @@ export default function SchedulePage() {
  </div>
  ) : viewMode ==="group"? (
  <button
- className="w-full h-16 border-2 border-dashed border-[var(--separator)] rounded-[var(--radius-md)] text-[var(--text-quaternary)] hover:border-[rgba(0,122,255,0.3)] hover:text-[var(--color-blue)] hover:bg-[rgba(0,122,255,0.04)] macos-macos-transition flex items-center justify-center"
+ className="w-full h-16 border-2 border-dashed border-[var(--separator)] rounded-[var(--radius-md)] text-[var(--text-quaternary)] hover:border-[rgba(0,122,255,0.3)] hover:text-[var(--color-blue)] hover:bg-[rgba(0,122,255,0.04)] macos-transition flex items-center justify-center"
  onClick={() => handleCreateSlot(day, ts.id)}
  >
  <PlusCircle className="h-5 w-5"/>

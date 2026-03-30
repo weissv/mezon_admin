@@ -118,7 +118,7 @@ function InventoryItemCombobox({
  <button
  key={item.id}
  type="button"
- className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm flex items-center justify-between gap-2 macos-macos-transition"
+ className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm flex items-center justify-between gap-2 macos-transition"
  onClick={() => {
  setSearch(item.name);
  setIsOpen(false);
@@ -259,7 +259,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  <button
  type="button"
  onClick={() => setValue('type', 'PLANNED')}
- className={`flex-1 py-2 px-3 rounded-lg border macos-text-caption macos-macos-transition ${
+ className={`flex-1 py-2 px-3 rounded-lg border macos-text-caption macos-transition ${
  selectedType === 'PLANNED'
  ? 'bg-blue-50 border-blue-300 text-blue-700 ring-1 ring-blue-200'
  : 'bg-white border-[rgba(0,0,0,0.08)] text-[var(--text-secondary)] hover:bg-[var(--fill-quaternary)]'
@@ -270,7 +270,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  <button
  type="button"
  onClick={() => setValue('type', 'OPERATIONAL')}
- className={`flex-1 py-2 px-3 rounded-lg border macos-text-caption macos-macos-transition ${
+ className={`flex-1 py-2 px-3 rounded-lg border macos-text-caption macos-transition ${
  selectedType === 'OPERATIONAL'
  ? 'bg-red-50 border-red-300 text-red-700 ring-1 ring-red-200'
  : 'bg-white border-[rgba(0,0,0,0.08)] text-[var(--text-secondary)] hover:bg-[var(--fill-quaternary)]'
@@ -292,7 +292,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  key={p.value}
  type="button"
  onClick={() => setValue('priority', p.value)}
- className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium macos-macos-transition ${
+ className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium macos-transition ${
  watch('priority') === p.value
  ? p.color === 'gray'
  ? 'bg-[var(--fill-tertiary)] border-[rgba(0,0,0,0.12)] text-[var(--text-primary)] ring-1 ring-gray-200'
@@ -385,7 +385,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  const linkedItem = isLinked ? inventoryItems.find(i => i.id === itemData.inventoryItemId) : null;
 
  return (
- <div key={field.id} className={`rounded-lg border p-3 macos-macos-transition ${isLinked ? 'border-green-200 bg-[rgba(52,199,89,0.06)]/30' : 'border-[rgba(0,0,0,0.08)] bg-white'}`}>
+ <div key={field.id} className={`rounded-lg border p-3 macos-transition ${isLinked ? 'border-green-200 bg-[rgba(52,199,89,0.06)]/30' : 'border-[rgba(0,0,0,0.08)] bg-white'}`}>
  {/* Row 1: Наименование (combobox) + кнопка удаления */}
  <div className="flex gap-2 items-start mb-2">
  <div className="flex-1 min-w-0">

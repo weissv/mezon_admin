@@ -300,7 +300,7 @@ function UnitEconomicsWidget() {
  <span className="w-24 truncate text-[var(--mezon-text-secondary)]">{row.label}</span>
  <div className="h-3 flex-1 overflow-hidden rounded-full bg-[rgba(60,60,67,0.08)]">
  <div
- className="h-full rounded-full bg-[var(--mezon-accent)] macos-macos-transition"
+ className="h-full rounded-full bg-[var(--mezon-accent)] macos-transition"
  style={{ width: `${Math.min(pct, 100)}%`}}
  />
  </div>

@@ -429,7 +429,7 @@ export default function ExamEditorPage() {
  <button
  key={type}
  onClick={() => addQuestion(type as ExamQuestionType)}
- className="flex flex-col items-center gap-2 p-3 text-sm text-[var(--text-primary)] bg-[var(--fill-quaternary)] rounded-lg hover:bg-[rgba(0,122,255,0.06)] hover:text-[var(--color-blue)] macos-macos-transition"
+ className="flex flex-col items-center gap-2 p-3 text-sm text-[var(--text-primary)] bg-[var(--fill-quaternary)] rounded-lg hover:bg-[rgba(0,122,255,0.06)] hover:text-[var(--color-blue)] macos-transition"
  title={description}
  >
  <Icon className="h-5 w-5"/>

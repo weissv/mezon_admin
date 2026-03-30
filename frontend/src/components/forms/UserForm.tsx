@@ -215,7 +215,7 @@ export function UserForm({ initialData, onSuccess, onCancel}: UserFormProps) {
  href={`https://t.me/${TELEGRAM_BOT_NAME}?start=${initialData.id}`}
  target="_blank"
  rel="noopener noreferrer"
- className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white macos-text-caption rounded-md macos-macos-transition"
+ className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white macos-text-caption rounded-md macos-transition"
  >
  <MessageCircle className="w-4 h-4"/>
  Подключить Telegram

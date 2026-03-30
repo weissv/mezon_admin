@@ -113,7 +113,7 @@ function DebtorCard({ item, maxDebt}: { item: DebtorItem; maxDebt: number}) {
  {/* Progress bar */}
  <div className="h-2 bg-[var(--fill-tertiary)] rounded-full overflow-hidden">
  <div
- className={`h-full rounded-full macos-macos-transition ${
+ className={`h-full rounded-full macos-transition ${
  isNegative ?"bg-red-400":"bg-emerald-400"
 }`}
  style={{ width: `${pct}%`}}

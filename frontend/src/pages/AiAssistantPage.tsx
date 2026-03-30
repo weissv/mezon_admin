@@ -364,7 +364,7 @@ export default function AiAssistantPage() {
  <div className="mb-4 flex gap-2 border-b pb-2">
  <button
  onClick={() => setActiveTab("chat")}
- className={`flex items-center gap-2 rounded-lg px-4 py-2 macos-macos-transition ${
+ className={`flex items-center gap-2 rounded-lg px-4 py-2 macos-transition ${
  activeTab ==="chat"
  ?"bg-indigo-600 text-white"
  :"bg-[var(--fill-tertiary)] text-[var(--text-primary)] hover:bg-[var(--fill-secondary)]"
@@ -375,7 +375,7 @@ export default function AiAssistantPage() {
  </button>
  <button
  onClick={() => setActiveTab("knowledge")}
- className={`flex items-center gap-2 rounded-lg px-4 py-2 macos-macos-transition ${
+ className={`flex items-center gap-2 rounded-lg px-4 py-2 macos-transition ${
  activeTab ==="knowledge"
  ?"bg-indigo-600 text-white"
  :"bg-[var(--fill-tertiary)] text-[var(--text-primary)] hover:bg-[var(--fill-secondary)]"
@@ -447,7 +447,7 @@ export default function AiAssistantPage() {
  ...prev,
  [index]: !prev[index]
 }))}
- className="w-full flex items-center justify-between px-3 py-2 text-sm text-violet-600 hover:bg-violet-100 macos-macos-transition"
+ className="w-full flex items-center justify-between px-3 py-2 text-sm text-violet-600 hover:bg-violet-100 macos-transition"
  >
  <span className="flex items-center gap-2">
  <span className="text-lg">💭</span>
@@ -538,7 +538,7 @@ export default function AiAssistantPage() {
  <button
  onClick={handleSendMessage}
  disabled={!inputValue.trim() || isLoading}
- className="flex items-center justify-center rounded-lg bg-indigo-600 px-4 text-white macos-macos-transition hover:bg-indigo-700 disabled:bg-gray-300"
+ className="flex items-center justify-center rounded-lg bg-indigo-600 px-4 text-white macos-transition hover:bg-indigo-700 disabled:bg-gray-300"
  >
  {isLoading ? (
  <Loader2 className="h-5 w-5 animate-spin"/>
@@ -580,14 +580,14 @@ export default function AiAssistantPage() {
  <button
  onClick={() => setResetPromptConfirmOpen(true)}
  disabled={isSavingPrompt}
- className="px-3 py-1.5 text-sm rounded-lg border border-[rgba(0,0,0,0.12)] text-[var(--text-secondary)] hover:bg-[var(--fill-quaternary)] disabled:opacity-50 macos-macos-transition"
+ className="px-3 py-1.5 text-sm rounded-lg border border-[rgba(0,0,0,0.12)] text-[var(--text-secondary)] hover:bg-[var(--fill-quaternary)] disabled:opacity-50 macos-transition"
  >
  Сбросить к стандартному
  </button>
  <button
  onClick={handleSaveSystemPrompt}
  disabled={isSavingPrompt}
- className="px-3 py-1.5 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 macos-macos-transition flex items-center gap-2"
+ className="px-3 py-1.5 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 macos-transition flex items-center gap-2"
  >
  {isSavingPrompt && <Loader2 className="h-3 w-3 animate-spin"/>}
  Сохранить промпт
@@ -934,7 +934,7 @@ export default function AiAssistantPage() {
  {/* Progress bar */}
  <div className="w-full bg-[var(--fill-secondary)] rounded-full h-3 overflow-hidden">
  <div 
- className="bg-[var(--color-blue)] h-3 rounded-full macos-macos-transition"
+ className="bg-[var(--color-blue)] h-3 rounded-full macos-transition"
  style={{ width: `${Math.round((syncStatus.current / syncStatus.total) * 100)}%`}}
  />
  </div>

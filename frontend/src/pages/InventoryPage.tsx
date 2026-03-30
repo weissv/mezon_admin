@@ -317,7 +317,7 @@ export default function InventoryPage() {
  {filterCards.map(({ type, label, count, icon: Icon, accent, iconBg, ring}) => (
  <Card
  key={type}
- className={`p-0 macos-macos-transition ${filterType === type ? `ring-2 ${ring}`: 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
+ className={`p-0 macos-transition ${filterType === type ? `ring-2 ${ring}`: 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
  >
  <button
  type="button"

@@ -40,7 +40,7 @@ export default function CashForecastWidget({ data}: { data: CashForecastData | u
  return (
  <div
  key={i}
- className={`flex-1 rounded-t macos-macos-transition ${d.cumulative >= 0 ? 'bg-green-400' : 'bg-red-400'}`}
+ className={`flex-1 rounded-t macos-transition ${d.cumulative >= 0 ? 'bg-green-400' : 'bg-red-400'}`}
  style={{ height: `${Math.max(h, 4)}%`}}
  title={`${d.date}: ${fmt(d.cumulative)}`}
  />

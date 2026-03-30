@@ -213,7 +213,7 @@ export default function IntegrationPage() {
 
  <div
  className={clsx(
-"border-2 border-dashed rounded-lg p-4 text-center macos-macos-transition cursor-pointer",
+"border-2 border-dashed rounded-lg p-4 text-center macos-transition cursor-pointer",
  dragActive[entity.key] ?"border-blue-500 bg-[rgba(0,122,255,0.06)]":"border-[rgba(0,0,0,0.12)] hover:border-blue-400",
  importing[entity.key] &&"opacity-50 pointer-events-none"
  )}

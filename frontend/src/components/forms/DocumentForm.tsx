@@ -182,7 +182,7 @@ export function DocumentForm({ initialData, onSuccess, onCancel}: DocumentFormPr
  <div className="mt-3 space-y-2">
  <div
  className={clsx(
- 'border-2 border-dashed rounded-lg p-4 text-center macos-macos-transition cursor-pointer',
+ 'border-2 border-dashed rounded-lg p-4 text-center macos-transition cursor-pointer',
  dragActive ? 'border-blue-500 bg-blue-50' : 'border-[rgba(0,0,0,0.12)] hover:border-blue-400',
  uploading && 'opacity-60 pointer-events-none'
  )}

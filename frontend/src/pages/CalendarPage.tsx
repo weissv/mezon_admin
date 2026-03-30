@@ -106,21 +106,21 @@ export default function CalendarPage() {
  <div className="flex bg-[var(--fill-tertiary)] p-1 rounded-lg">
  <button
  onClick={() => setViewMode('calendar')}
- className={`p-2 rounded-md macos-macos-transition ${viewMode === 'calendar' ? 'bg-white shadow text-[var(--color-blue)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+ className={`p-2 rounded-md macos-transition ${viewMode === 'calendar' ? 'bg-white shadow text-[var(--color-blue)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
  title="Календарь"
  >
  <Grid className="w-5 h-5"/>
  </button>
  <button
  onClick={() => setViewMode('list')}
- className={`p-2 rounded-md macos-macos-transition ${viewMode === 'list' ? 'bg-white shadow text-[var(--color-blue)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+ className={`p-2 rounded-md macos-transition ${viewMode === 'list' ? 'bg-white shadow text-[var(--color-blue)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
  title="Список"
  >
  <List className="w-5 h-5"/>
  </button>
  <button
  onClick={() => setViewMode('planner')}
- className={`p-2 rounded-md macos-macos-transition ${viewMode === 'planner' ? 'bg-white shadow text-pink-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+ className={`p-2 rounded-md macos-transition ${viewMode === 'planner' ? 'bg-white shadow text-pink-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
  title="Планер для соцсетей"
  >
  <Share2 className="w-5 h-5"/>

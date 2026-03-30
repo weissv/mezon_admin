@@ -50,7 +50,7 @@ export default function ActionLogPage() {
  </div>
  ) : (
  logs.map((log) => (
- <div key={log.id} className="p-4 macos-macos-transition hover:bg-[rgba(255,255,255,0.5)]">
+ <div key={log.id} className="p-4 macos-transition hover:bg-[rgba(255,255,255,0.5)]">
  <div className="flex items-start gap-4">
  <div className="flex-shrink-0 mt-1">
  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(10,132,255,0.12)]">
