@@ -82,13 +82,13 @@ export default function LmsSchedulePage() {
  <div className="space-y-6">
  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
  <div>
- <h1 className="macos-text-title text-[var(--mezon-dark)]">Расписание уроков</h1>
- <p className="text-[var(--text-secondary)]">Недельное расписание занятий</p>
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Расписание уроков</h1>
+ <p className="text-secondary">Недельное расписание занятий</p>
  </div>
  {isAdmin && selectedClass && (
  <button
  onClick={() => setShowAddModal(true)}
- className="inline-flex items-center gap-2 bg-[var(--mezon-accent)] text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 macos-transition"
+ className="inline-flex items-center gap-2 bg-macos-blue text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 macos-transition"
  >
  <Plus className="h-5 w-5"/>
  Добавить урок
@@ -96,16 +96,16 @@ export default function LmsSchedulePage() {
  )}
  </div>
 
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex items-center gap-4">
- <label className="macos-text-caption text-[var(--text-primary)]">
+ <label className="text-[11px] font-medium uppercase tracking-widest text-primary">
  <Users className="inline h-4 w-4 mr-1"/>
  Класс:
  </label>
  <select
  value={selectedClass ||""}
  onChange={(e) => setSelectedClass(e.target.value ? Number(e.target.value) : null)}
- className="px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  <option value="">Выберите класс</option>
  {classes.map((cls) => (
@@ -118,16 +118,16 @@ export default function LmsSchedulePage() {
  </div>
 
  {selectedClass ? (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] overflow-hidden">
+ <div className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
  <div className="overflow-x-auto">
  <table className="w-full min-w-[800px]">
- <thead className="bg-[var(--fill-quaternary)]">
+ <thead className="bg-fill-quaternary">
  <tr>
- <th className="px-4 py-3 text-left macos-text-caption text-[var(--text-primary)] w-20">
+ <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-widest text-primary w-20">
  Время
  </th>
  {DAYS.map((day) => (
- <th key={day} className="px-2 py-3 text-center macos-text-caption text-[var(--text-primary)]">
+ <th key={day} className="px-2 py-3 text-center text-[11px] font-medium uppercase tracking-widest text-primary">
  {day}
  </th>
  ))}
@@ -135,10 +135,10 @@ export default function LmsSchedulePage() {
  </thead>
  <tbody className="divide-y divide-gray-100">
  {TIME_SLOTS.map((slot) => (
- <tr key={slot.start} className="hover:bg-[var(--fill-quaternary)]">
- <td className="px-4 py-3 text-sm text-[var(--text-secondary)]">
+ <tr key={slot.start} className="hover:bg-fill-quaternary">
+ <td className="px-4 py-3 text-sm text-secondary">
  <div className="font-medium">{slot.start}</div>
- <div className="text-xs text-[var(--text-tertiary)]">{slot.end}</div>
+ <div className="text-xs text-tertiary">{slot.end}</div>
  </td>
  {DAYS.map((_, dayIdx) => {
  const item = getScheduleForSlot(dayIdx + 1, slot.start);
@@ -146,20 +146,20 @@ export default function LmsSchedulePage() {
  <td key={dayIdx} className="px-2 py-2">
  {item ? (
  <div
- className="p-2 rounded-lg text-sm cursor-pointer hover:opacity-80 macos-transition bg-[rgba(0,122,255,0.06)] border-l-4 border-teal-500"
+ className="p-2 rounded-lg text-sm cursor-pointer hover:opacity-80 macos-transition bg-tint-blue border-l-4 border-teal-500"
  onClick={() => isAdmin && handleDeleteScheduleItem(item.id)}
  >
- <div className="font-medium text-[var(--text-primary)] truncate">
+ <div className="font-medium text-primary truncate">
  {item.subject?.name ||"Предмет"}
  </div>
  {item.room && (
- <div className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mt-1">
+ <div className="text-xs text-secondary flex items-center gap-1 mt-1">
  <MapPin className="h-3 w-3"/>
  {item.room}
  </div>
  )}
  {item.teacher && (
- <div className="text-xs text-[var(--text-secondary)] truncate mt-1">
+ <div className="text-xs text-secondary truncate mt-1">
  {item.teacher.lastName} {item.teacher.firstName?.charAt(0)}.
  </div>
  )}
@@ -171,9 +171,9 @@ export default function LmsSchedulePage() {
  setSelectedSlot({ day: dayIdx + 1, time: slot.start});
  setShowAddModal(true);
 }}
- className="w-full h-full min-h-[60px] rounded-lg border-2 border-dashed border-[rgba(0,0,0,0.08)] hover:border-teal-500 hover:bg-[rgba(0,122,255,0.06)] macos-transition flex items-center justify-center"
+ className="w-full h-full min-h-[60px] rounded-lg border-2 border-dashed border-[rgba(0,0,0,0.08)] hover:border-teal-500 hover:bg-tint-blue macos-transition flex items-center justify-center"
  >
- <Plus className="h-4 w-4 text-[var(--text-quaternary)]"/>
+ <Plus className="h-4 w-4 text-tertiary"/>
  </button>
  )
  )}
@@ -187,9 +187,9 @@ export default function LmsSchedulePage() {
  </div>
  </div>
  ) : (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-12 text-center">
- <Calendar className="h-12 w-12 text-[var(--text-quaternary)] mx-auto mb-4"/>
- <p className="text-[var(--text-secondary)]">Выберите класс для просмотра расписания</p>
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
+ <Calendar className="h-12 w-12 text-tertiary mx-auto mb-4"/>
+ <p className="text-secondary">Выберите класс для просмотра расписания</p>
  </div>
  )}
 
@@ -268,16 +268,16 @@ function AddScheduleModal({
  return (
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
  <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
- <h2 className="macos-text-title text-[var(--text-primary)] mb-4">Добавить урок в расписание</h2>
+ <h2 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary mb-4">Добавить урок в расписание</h2>
  <form onSubmit={handleSubmit} className="space-y-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Предмет
  </label>
  <select
  value={formData.subjectId}
  onChange={(e) => setFormData({ ...formData, subjectId: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  {subjects.map((s) => (
  <option key={s.id} value={s.id}>
@@ -288,13 +288,13 @@ function AddScheduleModal({
  </div>
  <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  День недели
  </label>
  <select
  value={formData.dayOfWeek}
  onChange={(e) => setFormData({ ...formData, dayOfWeek: Number(e.target.value)})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  {DAYS.map((day, idx) => (
  <option key={idx} value={idx + 1}>
@@ -304,7 +304,7 @@ function AddScheduleModal({
  </select>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Время
  </label>
  <select
@@ -317,7 +317,7 @@ function AddScheduleModal({
  endTime: slot?.end || e.target.value,
 });
 }}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  {timeSlots.map((slot) => (
  <option key={slot.start} value={slot.start}>
@@ -328,14 +328,14 @@ function AddScheduleModal({
  </div>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Кабинет
  </label>
  <input
  type="text"
  value={formData.room}
  onChange={(e) => setFormData({ ...formData, room: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  placeholder="Каб. 101"
  />
  </div>
@@ -343,14 +343,14 @@ function AddScheduleModal({
  <button
  type="button"
  onClick={onClose}
- className="flex-1 px-4 py-2 mezon-field rounded-[8px] text-[var(--text-primary)] hover:bg-[var(--fill-quaternary)] macos-transition"
+ className="flex-1 px-4 py-2 mezon-field rounded-lg text-primary hover:bg-fill-quaternary macos-transition"
  >
  Отмена
  </button>
  <button
  type="submit"
  disabled={loading}
- className="flex-1 px-4 py-2 bg-[var(--color-blue)] text-white rounded-lg font-medium hover:bg-[var(--color-blue)] macos-transition disabled:opacity-50"
+ className="flex-1 px-4 py-2 bg-macos-blue text-white rounded-lg font-medium hover:bg-macos-blue macos-transition disabled:opacity-50"
  >
  {loading ?"Добавление...":"Добавить"}
  </button>

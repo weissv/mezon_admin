@@ -89,7 +89,7 @@ function InventoryItemCombobox({
  return (
  <div ref={wrapperRef} className="relative w-full">
  <div className="relative">
- <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-tertiary)] pointer-events-none"/>
+ <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-tertiary pointer-events-none"/>
  <input
  type="text"
  value={search}
@@ -103,14 +103,14 @@ function InventoryItemCombobox({
  className="w-full pl-8 pr-8 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
  />
  <ChevronDown
- className={`absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-tertiary)] cursor-pointer transition-transform ${isOpen ? 'rotate-180' : ''}`}
+ className={`absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-tertiary cursor-pointer transition-transform ${isOpen ? 'rotate-180' : ''}`}
  onClick={() => setIsOpen(!isOpen)}
  />
  </div>
  {isOpen && (
  <div className="absolute z-50 w-full mt-1 bg-white border border-[rgba(0,0,0,0.08)] rounded-md shadow-lg max-h-48 overflow-y-auto">
  {filtered.length === 0 ? (
- <div className="px-3 py-2 text-xs text-[var(--text-secondary)] italic">
+ <div className="px-3 py-2 text-xs text-secondary italic">
  {search ? `Нет совпадений."${search}"будет использовано как название`: 'Начните вводить для поиска...'}
  </div>
  ) : (
@@ -126,12 +126,12 @@ function InventoryItemCombobox({
 }}
  >
  <div className="flex items-center gap-2 min-w-0">
- <Package className="h-3.5 w-3.5 text-[var(--text-tertiary)] flex-shrink-0"/>
+ <Package className="h-3.5 w-3.5 text-tertiary flex-shrink-0"/>
  <span className="truncate">{item.name}</span>
  </div>
- <div className="flex items-center gap-2 flex-shrink-0 text-xs text-[var(--text-secondary)]">
- <span className="bg-[var(--fill-tertiary)] px-1.5 py-0.5 rounded">{item.unit}</span>
- <span className={`px-1.5 py-0.5 rounded ${item.quantity > 0 ? 'bg-[rgba(52,199,89,0.06)] text-green-700' : 'bg-red-50 text-[var(--color-red)]'}`}>
+ <div className="flex items-center gap-2 flex-shrink-0 text-xs text-secondary">
+ <span className="bg-fill-tertiary px-1.5 py-0.5 rounded">{item.unit}</span>
+ <span className={`px-1.5 py-0.5 rounded ${item.quantity > 0 ? 'bg-[rgba(52,199,89,0.06)] text-green-700' : 'bg-red-50 text-macos-red'}`}>
  {item.quantity} {item.unit}
  </span>
  </div>
@@ -254,15 +254,15 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  {/* Тип и приоритет */}
  <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1.5">Тип закупки</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1.5">Тип закупки</label>
  <div className="flex gap-2">
  <button
  type="button"
  onClick={() => setValue('type', 'PLANNED')}
- className={`flex-1 py-2 px-3 rounded-lg border macos-text-caption macos-transition ${
+ className={`flex-1 py-2 px-3 rounded-lg border text-[11px] font-medium uppercase tracking-widest macos-transition ${
  selectedType === 'PLANNED'
  ? 'bg-blue-50 border-blue-300 text-blue-700 ring-1 ring-blue-200'
- : 'bg-white border-[rgba(0,0,0,0.08)] text-[var(--text-secondary)] hover:bg-[var(--fill-quaternary)]'
+ : 'bg-white border-[rgba(0,0,0,0.08)] text-secondary hover:bg-fill-quaternary'
 }`}
  >
  📋 Плановая
@@ -270,10 +270,10 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  <button
  type="button"
  onClick={() => setValue('type', 'OPERATIONAL')}
- className={`flex-1 py-2 px-3 rounded-lg border macos-text-caption macos-transition ${
+ className={`flex-1 py-2 px-3 rounded-lg border text-[11px] font-medium uppercase tracking-widest macos-transition ${
  selectedType === 'OPERATIONAL'
  ? 'bg-red-50 border-red-300 text-red-700 ring-1 ring-red-200'
- : 'bg-white border-[rgba(0,0,0,0.08)] text-[var(--text-secondary)] hover:bg-[var(--fill-quaternary)]'
+ : 'bg-white border-[rgba(0,0,0,0.08)] text-secondary hover:bg-fill-quaternary'
 }`}
  >
  ⚡ Оперативная
@@ -281,7 +281,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  </div>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1.5">Приоритет</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1.5">Приоритет</label>
  <div className="flex gap-2">
  {[
  { value: 0, label: 'Обычный', color: 'gray'},
@@ -295,11 +295,11 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium macos-transition ${
  watch('priority') === p.value
  ? p.color === 'gray'
- ? 'bg-[var(--fill-tertiary)] border-[rgba(0,0,0,0.12)] text-[var(--text-primary)] ring-1 ring-gray-200'
+ ? 'bg-fill-tertiary border-field text-primary ring-1 ring-gray-200'
  : p.color === 'orange'
  ? 'bg-orange-50 border-orange-300 text-orange-700 ring-1 ring-orange-200'
  : 'bg-red-50 border-red-300 text-red-700 ring-1 ring-red-200'
- : 'bg-white border-[rgba(0,0,0,0.08)] text-[var(--text-secondary)] hover:bg-[var(--fill-quaternary)]'
+ : 'bg-white border-[rgba(0,0,0,0.08)] text-secondary hover:bg-fill-quaternary'
 }`}
  >
  {p.label}
@@ -311,14 +311,14 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
 
  {/* Название */}
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1.5">Название закупки *</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1.5">Название закупки *</label>
  <Input {...register('title')} placeholder="Напр.: Закупка канцтоваров на март"className="text-sm"/>
  <FormError message={errors.title?.message} />
  </div>
 
  {/* Описание */}
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1.5">Обоснование / описание</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1.5">Обоснование / описание</label>
  <textarea
  {...register('description')}
  className="w-full p-2.5 border border-[rgba(0,0,0,0.08)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
@@ -330,8 +330,8 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  {/* Поставщик и дата */}
  <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1.5">
- Поставщик <span className="text-[var(--text-tertiary)] font-normal">(необязательно)</span>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1.5">
+ Поставщик <span className="text-tertiary font-normal">(необязательно)</span>
  </label>
  <select
  {...register('supplierId', { setValueAs: (v) => (v === '' || v === null || v === undefined) ? null : Number(v)})}
@@ -345,14 +345,14 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  </select>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1.5">Ожид. дата доставки</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1.5">Ожид. дата доставки</label>
  <Input type="date"{...register('expectedDeliveryDate')} className="text-sm"/>
  </div>
  </div>
 
  {/* Источник финансирования */}
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1.5">Источник финансирования</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1.5">Источник финансирования</label>
  <Input {...register('budgetSource')} placeholder="Бюджет школы, спонсорские и т.д."className="text-sm"/>
  </div>
 
@@ -363,7 +363,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  <div className="flex justify-between items-center mb-3">
  <div>
  <h3 className="font-semibold text-gray-800">Позиции заказа</h3>
- <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+ <p className="text-xs text-secondary mt-0.5">
  Выберите товар со склада или введите название вручную
  </p>
  </div>
@@ -372,7 +372,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  variant="outline"
  size="sm"
  onClick={() => append({ name: '', quantity: 1, unit: 'шт', price: 0, ingredientId: null, inventoryItemId: null})}
- className="text-[var(--color-blue)] border-blue-200 hover:bg-blue-50"
+ className="text-macos-blue border-blue-200 hover:bg-blue-50"
  >
  <PlusCircle className="h-4 w-4 mr-1"/> Добавить позицию
  </Button>
@@ -389,10 +389,10 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  {/* Row 1: Наименование (combobox) + кнопка удаления */}
  <div className="flex gap-2 items-start mb-2">
  <div className="flex-1 min-w-0">
- <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+ <label className="block text-xs font-medium text-secondary mb-1">
  Наименование *
  {isLinked && (
- <span className="ml-2 inline-flex items-center gap-0.5 text-[var(--color-green)]">
+ <span className="ml-2 inline-flex items-center gap-0.5 text-macos-green">
  <Link2 className="h-3 w-3"/>
  Привязан к складу
  {linkedItem && `(остаток: ${linkedItem.quantity} ${linkedItem.unit})`}
@@ -421,7 +421,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  size="sm"
  onClick={() => remove(index)}
  disabled={fields.length === 1}
- className="text-red-400 hover:text-[var(--color-red)] hover:bg-red-50 h-9 w-9 p-0"
+ className="text-red-400 hover:text-macos-red hover:bg-red-50 h-9 w-9 p-0"
  >
  <Trash2 className="h-4 w-4"/>
  </Button>
@@ -431,7 +431,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  {/* Row 2: Кол-во, Ед, Цена, Итого */}
  <div className="grid grid-cols-4 gap-2">
  <div>
- <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Кол-во *</label>
+ <label className="block text-xs font-medium text-secondary mb-1">Кол-во *</label>
  <Input
  type="number"
  step="0.5"
@@ -443,7 +443,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  <FormError message={errors.items?.[index]?.quantity?.message} />
  </div>
  <div>
- <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Ед. изм. *</label>
+ <label className="block text-xs font-medium text-secondary mb-1">Ед. изм. *</label>
  <Controller
  control={control}
  name={`items.${index}.unit`}
@@ -471,7 +471,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  <FormError message={errors.items?.[index]?.unit?.message} />
  </div>
  <div>
- <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Цена за ед.</label>
+ <label className="block text-xs font-medium text-secondary mb-1">Цена за ед.</label>
  <Input
  type="number"
  step="1"
@@ -483,8 +483,8 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  <FormError message={errors.items?.[index]?.price?.message} />
  </div>
  <div>
- <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Сумма</label>
- <div className="px-3 py-2 bg-[var(--fill-quaternary)] border border-[rgba(0,0,0,0.08)] rounded-md text-sm text-right font-medium text-[var(--text-primary)]">
+ <label className="block text-xs font-medium text-secondary mb-1">Сумма</label>
+ <div className="px-3 py-2 bg-fill-quaternary border border-[rgba(0,0,0,0.08)] rounded-md text-sm text-right font-medium text-primary">
  {currency.format((itemData?.quantity || 0) * (itemData?.price || 0))}
  </div>
  </div>
@@ -495,7 +495,7 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  </div>
 
  {errors.items && typeof errors.items.message === 'string' && (
- <div className="mt-2 flex items-center gap-1.5 text-[var(--color-red)] text-sm">
+ <div className="mt-2 flex items-center gap-1.5 text-macos-red text-sm">
  <AlertCircle className="h-4 w-4"/>
  <FormError message={errors.items.message} />
  </div>
@@ -505,9 +505,9 @@ export function PurchaseOrderForm({ initialData, onSuccess, onCancel}: PurchaseO
  {/* Итого */}
  <div className="border-t border-[rgba(0,0,0,0.08)] pt-4">
  <div className="flex justify-between items-center">
- <span className="text-sm text-[var(--text-secondary)]">Позиций: {fields.length}</span>
+ <span className="text-sm text-secondary">Позиций: {fields.length}</span>
  <div className="text-lg font-bold text-gray-800">
- Итого: <span className="text-[var(--color-blue)]">{currency.format(totalAmount)}</span>
+ Итого: <span className="text-macos-blue">{currency.format(totalAmount)}</span>
  </div>
  </div>
  </div>

@@ -55,35 +55,35 @@ export function SupplierForm({ initialData, onSuccess, onCancel}: SupplierFormPr
  return (
  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
  <div>
- <label className="block macos-text-caption mb-1">Название поставщика *</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Название поставщика *</label>
  <Input {...register('name')} placeholder="ООО Продукты"/>
  <FormError message={errors.name?.message} />
  </div>
 
  <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="block macos-text-caption mb-1">Телефон</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Телефон</label>
  <Input {...register('phone')} placeholder="+998 90 123-45-67"/>
  </div>
  <div>
- <label className="block macos-text-caption mb-1">Email</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Email</label>
  <Input {...register('email')} type="email"placeholder="info@example.com"/>
  <FormError message={errors.email?.message} />
  </div>
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">ИНН</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">ИНН</label>
  <Input {...register('inn')} placeholder="123456789"/>
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Адрес</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Адрес</label>
  <Input {...register('address')} placeholder="г. Ташкент, ул. ..."/>
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Контактная информация</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Контактная информация</label>
  <textarea
  {...register('contactInfo')}
  className="w-full p-2 border rounded-md text-sm"
@@ -94,7 +94,7 @@ export function SupplierForm({ initialData, onSuccess, onCancel}: SupplierFormPr
 
  <div className="flex items-center gap-2">
  <input type="checkbox"id="isActive"{...register('isActive')} className="h-4 w-4"/>
- <label htmlFor="isActive"className="macos-text-caption">Активный поставщик</label>
+ <label htmlFor="isActive"className="text-[11px] font-medium uppercase tracking-widest">Активный поставщик</label>
  </div>
 
  <div className="flex justify-end gap-2 pt-4">

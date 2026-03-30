@@ -28,8 +28,8 @@ type Broadcast = {
 type Group = { id: number; name: string};
 
 const iconMap: Record<SystemNotification["type"], JSX.Element> = {
- CONTRACT_EXPIRING: <FileText className="h-6 w-6 text-[var(--color-red)]"/>,
- MEDICAL_CHECKUP_DUE: <BellRing className="h-6 w-6 text-[var(--color-orange)]"/>,
+ CONTRACT_EXPIRING: <FileText className="h-6 w-6 text-macos-red"/>,
+ MEDICAL_CHECKUP_DUE: <BellRing className="h-6 w-6 text-macos-orange"/>,
 };
 
 const ROLE_OPTIONS = [{ value:"", label:"Все роли"}].concat(
@@ -156,7 +156,7 @@ export default function NotificationsPage() {
  {systemLoading ? (
  <div className="p-4 text-center">Загрузка...</div>
  ) : systemNotifications.length === 0 ? (
- <div className="p-4 text-center text-[var(--text-secondary)]">Нет предстоящих событий.</div>
+ <div className="p-4 text-center text-secondary">Нет предстоящих событий.</div>
  ) : (
  <ul className="divide-y divide-gray-200">
  {systemNotifications.map((notification, index) => (
@@ -164,7 +164,7 @@ export default function NotificationsPage() {
  <div className="flex-shrink-0">{iconMap[notification.type]}</div>
  <div className="flex-1">
  <p className="font-semibold">{notification.message}</p>
- <p className="text-sm text-[var(--text-secondary)]">
+ <p className="text-sm text-secondary">
  Событие произойдёт: {new Date(notification.date).toLocaleDateString()}
  </p>
  </div>
@@ -177,30 +177,30 @@ export default function NotificationsPage() {
  <Card className="space-y-4">
  <div className="flex items-center justify-between">
  <h2 className="text-xl font-semibold">Массовые объявления</h2>
- {broadcastLoading && <span className="text-sm text-[var(--text-secondary)]">Обновляем...</span>}
+ {broadcastLoading && <span className="text-sm text-secondary">Обновляем...</span>}
  </div>
 
  {canManageBroadcasts && (
  <form className="space-y-4"onSubmit={handleCreateBroadcast}>
  <div className="grid gap-4 md:grid-cols-2">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Заголовок</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Заголовок</label>
  <input
  type="text"
  value={formState.title}
  onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value}))}
- className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md"
+ className="w-full px-3 py-2 border border-field rounded-md"
  placeholder="Например, Инструктаж по пожарной безопасности"
  required
  />
  </div>
  <div className="grid gap-3 md:grid-cols-2">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Роль</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Роль</label>
  <select
  value={formState.targetRole}
  onChange={(event) => setFormState((prev) => ({ ...prev, targetRole: event.target.value}))}
- className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md"
+ className="w-full px-3 py-2 border border-field rounded-md"
  >
  {ROLE_OPTIONS.map((option) => (
  <option key={option.value ||"all"} value={option.value}>
@@ -210,11 +210,11 @@ export default function NotificationsPage() {
  </select>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Класс</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Класс</label>
  <select
  value={formState.targetGroupId}
  onChange={(event) => setFormState((prev) => ({ ...prev, targetGroupId: event.target.value}))}
- className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md"
+ className="w-full px-3 py-2 border border-field rounded-md"
  >
  <option value="">Все классы</option>
  {groups.map((group) => (
@@ -228,11 +228,11 @@ export default function NotificationsPage() {
  </div>
 
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Текст сообщения</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Текст сообщения</label>
  <textarea
  value={formState.content}
  onChange={(event) => setFormState((prev) => ({ ...prev, content: event.target.value}))}
- className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md"
+ className="w-full px-3 py-2 border border-field rounded-md"
  rows={4}
  placeholder="Коротко опишите событие, прикрепите инструкции..."
  required
@@ -250,31 +250,31 @@ export default function NotificationsPage() {
 
  <div className="space-y-3">
  {broadcasts.length === 0 && !broadcastLoading && (
- <div className="text-sm text-[var(--text-secondary)]">История объявлений пока пустая.</div>
+ <div className="text-sm text-secondary">История объявлений пока пустая.</div>
  )}
  <ul className="space-y-3">
  {broadcasts.map((broadcast) => (
- <li key={broadcast.id} className="mezon-field rounded-[8px] p-4">
+ <li key={broadcast.id} className="mezon-field rounded-lg p-4">
  <div className="flex items-start justify-between gap-4">
  <div>
- <p className="text-sm text-[var(--text-secondary)]">
+ <p className="text-sm text-secondary">
  {new Date(broadcast.createdAt).toLocaleString("ru-RU")}
  </p>
- <h3 className="macos-text-callout">{broadcast.title}</h3>
+ <h3 className="text-[14px] font-semibold tracking-[-0.01em]">{broadcast.title}</h3>
  </div>
  {canManageBroadcasts && (
  <button
  type="button"
  onClick={() => setDeleteConfirm(broadcast)}
- className="text-[var(--text-tertiary)] hover:text-[var(--color-red)]"
+ className="text-tertiary hover:text-macos-red"
  aria-label="Удалить объявление"
  >
  <Trash2 className="h-4 w-4"/>
  </button>
  )}
  </div>
- <p className="mt-2 text-[var(--text-primary)] whitespace-pre-line">{broadcast.content}</p>
- <div className="mt-2 text-sm text-[var(--text-secondary)] flex flex-wrap gap-4">
+ <p className="mt-2 text-primary whitespace-pre-line">{broadcast.content}</p>
+ <div className="mt-2 text-sm text-secondary flex flex-wrap gap-4">
  <span>
  Роли: {broadcast.targetRole ? ROLE_LABELS[broadcast.targetRole] :"Все"}
  </span>
@@ -292,19 +292,19 @@ export default function NotificationsPage() {
  <div className="p-4">
  <div className="flex items-start gap-4">
  <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,59,48,0.12)] rounded-full flex items-center justify-center">
- <AlertTriangle className="h-5 w-5 text-[var(--color-red)]"/>
+ <AlertTriangle className="h-5 w-5 text-macos-red"/>
  </div>
  <div className="flex-1">
- <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить это объявление?</p>
+ <p className="font-medium text-primary">Вы уверены, что хотите удалить это объявление?</p>
  {deleteConfirm && (
- <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-md">
- <p className="macos-text-caption">{deleteConfirm.title}</p>
- <p className="text-xs text-[var(--text-secondary)] mt-1">
+ <div className="mt-2 p-3 bg-fill-quaternary rounded-md">
+ <p className="text-[11px] font-medium uppercase tracking-widest">{deleteConfirm.title}</p>
+ <p className="text-xs text-secondary mt-1">
  {new Date(deleteConfirm.createdAt).toLocaleDateString('ru-RU')}
  </p>
  </div>
  )}
- <p className="text-sm text-[var(--text-secondary)] mt-2">Это действие нельзя отменить.</p>
+ <p className="text-sm text-secondary mt-2">Это действие нельзя отменить.</p>
  </div>
  </div>
  <div className="flex justify-end gap-3 mt-6">

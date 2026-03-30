@@ -152,20 +152,20 @@ export default function ExamResultsPage() {
  <div className="flex items-center gap-4">
  <button
  onClick={() => navigate("/exams")}
- className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--fill-tertiary)] rounded-lg"
+ className="p-2 text-secondary hover:text-primary hover:bg-fill-tertiary rounded-lg"
  >
  <ArrowLeft className="h-5 w-5"/>
  </button>
  <div>
- <h1 className="macos-text-title text-[var(--mezon-dark)]">
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">
  Результаты: {exam.title}
  </h1>
- <p className="text-[var(--text-secondary)] text-sm mt-1">{exam.subject}</p>
+ <p className="text-secondary text-sm mt-1">{exam.subject}</p>
  </div>
  </div>
  <button
  onClick={exportResults}
- className="flex items-center gap-2 px-4 py-2 bg-[var(--fill-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--fill-secondary)]"
+ className="flex items-center gap-2 px-4 py-2 bg-fill-tertiary text-primary rounded-lg hover:bg-fill-secondary"
  >
  <Download className="h-5 w-5"/>
  Экспорт CSV
@@ -175,60 +175,60 @@ export default function ExamResultsPage() {
  {/* Статистика */}
  {stats && (
  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-[rgba(0,122,255,0.12)] rounded-lg">
- <Users className="h-5 w-5 text-[var(--color-blue)]"/>
+ <Users className="h-5 w-5 text-macos-blue"/>
  </div>
  <div>
- <p className="text-sm text-[var(--text-secondary)]">Всего</p>
- <p className="macos-text-title text-[var(--text-primary)]">{stats.total}</p>
+ <p className="text-sm text-secondary">Всего</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{stats.total}</p>
  </div>
  </div>
  </div>
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex items-center gap-3">
- <div className="p-2 bg-[rgba(0,122,255,0.1)] rounded-lg">
- <CheckCircle className="h-5 w-5 text-[var(--color-blue)]"/>
+ <div className="p-2 bg-tint-blue rounded-lg">
+ <CheckCircle className="h-5 w-5 text-macos-blue"/>
  </div>
  <div>
- <p className="text-sm text-[var(--text-secondary)]">Завершено</p>
- <p className="macos-text-title text-[var(--text-primary)]">{stats.completed}</p>
+ <p className="text-sm text-secondary">Завершено</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{stats.completed}</p>
  </div>
  </div>
  </div>
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-[rgba(52,199,89,0.12)] rounded-lg">
- <CheckCircle className="h-5 w-5 text-[var(--color-green)]"/>
+ <CheckCircle className="h-5 w-5 text-macos-green"/>
  </div>
  <div>
- <p className="text-sm text-[var(--text-secondary)]">Зачёт</p>
- <p className="macos-text-title text-[var(--text-primary)]">{stats.passed}</p>
+ <p className="text-sm text-secondary">Зачёт</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{stats.passed}</p>
  </div>
  </div>
  </div>
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-[rgba(175,82,222,0.12)] rounded-lg">
  <BarChart className="h-5 w-5 text-[var(--color-purple)]"/>
  </div>
  <div>
- <p className="text-sm text-[var(--text-secondary)]">Средний балл</p>
- <p className="macos-text-title text-[var(--text-primary)]">
+ <p className="text-sm text-secondary">Средний балл</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">
  {stats.avgScore.toFixed(1)}
  </p>
  </div>
  </div>
  </div>
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-[rgba(255,204,0,0.12)] rounded-lg">
- <BarChart className="h-5 w-5 text-[var(--color-orange)]"/>
+ <BarChart className="h-5 w-5 text-macos-orange"/>
  </div>
  <div>
- <p className="text-sm text-[var(--text-secondary)]">Средний %</p>
- <p className="macos-text-title text-[var(--text-primary)]">
+ <p className="text-sm text-secondary">Средний %</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">
  {stats.avgPercentage.toFixed(0)}%
  </p>
  </div>
@@ -238,14 +238,14 @@ export default function ExamResultsPage() {
  )}
 
  {/* Список прохождений */}
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] overflow-hidden">
- <div className="p-4 border-b bg-[var(--fill-quaternary)]">
- <h2 className="font-semibold text-[var(--text-primary)]">Прохождения ({submissions.length})</h2>
+ <div className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
+ <div className="p-4 border-b bg-fill-quaternary">
+ <h2 className="font-semibold text-primary">Прохождения ({submissions.length})</h2>
  </div>
 
  {submissions.length === 0 ? (
- <div className="p-8 text-center text-[var(--text-secondary)]">
- <Users className="h-12 w-12 mx-auto mb-4 text-[var(--text-quaternary)]"/>
+ <div className="p-8 text-center text-secondary">
+ <Users className="h-12 w-12 mx-auto mb-4 text-tertiary"/>
  <p>Пока никто не проходил контрольную</p>
  </div>
  ) : (
@@ -254,7 +254,7 @@ export default function ExamResultsPage() {
  <div key={submission.id}>
  {/* Строка прохождения */}
  <div
- className="flex items-center gap-4 p-4 hover:bg-[var(--fill-quaternary)] cursor-pointer"
+ className="flex items-center gap-4 p-4 hover:bg-fill-quaternary cursor-pointer"
  onClick={() => {
  if (expandedSubmission === submission.id) {
  setExpandedSubmission(null);
@@ -267,32 +267,32 @@ export default function ExamResultsPage() {
  >
  <div className="flex-shrink-0">
  {submission.passed === true ? (
- <CheckCircle className="h-6 w-6 text-[var(--color-green)]"/>
+ <CheckCircle className="h-6 w-6 text-macos-green"/>
  ) : submission.passed === false ? (
- <XCircle className="h-6 w-6 text-[var(--color-red)]"/>
+ <XCircle className="h-6 w-6 text-macos-red"/>
  ) : (
- <Clock className="h-6 w-6 text-[var(--color-orange)]"/>
+ <Clock className="h-6 w-6 text-macos-orange"/>
  )}
  </div>
  <div className="flex-1 min-w-0">
- <p className="font-medium text-[var(--text-primary)]">{submission.studentName}</p>
- <p className="text-sm text-[var(--text-secondary)]">
+ <p className="font-medium text-primary">{submission.studentName}</p>
+ <p className="text-sm text-secondary">
  {submission.studentClass && `${submission.studentClass} · `}
  {formatDate(submission.submittedAt)}
  </p>
  </div>
  <div className="text-right">
- <p className="font-semibold text-[var(--text-primary)]">
+ <p className="font-semibold text-primary">
  {submission.totalScore ?? 0}/{submission.maxScore}
  </p>
- <p className="text-sm text-[var(--text-secondary)]">
+ <p className="text-sm text-secondary">
  {Math.round(submission.percentage ?? 0)}%
  </p>
  </div>
  <div className="flex items-center gap-2">
  {!submission.aiReviewCompleted && (
  <span
- className="px-2 py-1 text-xs bg-[rgba(255,204,0,0.12)] text-[var(--color-orange)] rounded"
+ className="px-2 py-1 text-xs bg-[rgba(255,204,0,0.12)] text-macos-orange rounded"
  title="Ожидает AI проверки"
  >
  <AlertTriangle className="h-3 w-3 inline-block mr-1"/>
@@ -300,17 +300,17 @@ export default function ExamResultsPage() {
  </span>
  )}
  {expandedSubmission === submission.id ? (
- <ChevronUp className="h-5 w-5 text-[var(--text-tertiary)]"/>
+ <ChevronUp className="h-5 w-5 text-tertiary"/>
  ) : (
- <ChevronDown className="h-5 w-5 text-[var(--text-tertiary)]"/>
+ <ChevronDown className="h-5 w-5 text-tertiary"/>
  )}
  </div>
  </div>
 
  {/* Детали прохождения */}
  {expandedSubmission === submission.id && selectedSubmission && (
- <div className="border-t bg-[var(--fill-quaternary)] p-4">
- <h3 className="font-medium text-[var(--text-primary)] mb-4">Ответы студента</h3>
+ <div className="border-t bg-fill-quaternary p-4">
+ <h3 className="font-medium text-primary mb-4">Ответы студента</h3>
  <div className="space-y-4">
  {selectedSubmission.answers?.map((answer, i) => (
  <AnswerCard
@@ -353,33 +353,33 @@ function AnswerCard({
  <div className="bg-white rounded-lg border p-4">
  <div className="flex items-start gap-3">
  <span
- className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full macos-text-caption ${
+ className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-[11px] font-medium uppercase tracking-widest ${
  answer.isCorrect === true
- ?"bg-[rgba(52,199,89,0.12)] text-[var(--color-green)]"
+ ?"bg-[rgba(52,199,89,0.12)] text-macos-green"
  : answer.isCorrect === false
- ?"bg-[rgba(255,59,48,0.12)] text-[var(--color-red)]"
- :"bg-[rgba(255,204,0,0.12)] text-[var(--color-orange)]"
+ ?"bg-[rgba(255,59,48,0.12)] text-macos-red"
+ :"bg-[rgba(255,204,0,0.12)] text-macos-orange"
 }`}
  >
  {index + 1}
  </span>
  <div className="flex-1">
- <p className="text-[var(--text-primary)] font-medium mb-2">{answer.question?.content}</p>
- <div className="bg-[var(--fill-quaternary)] rounded p-2 mb-2">
- <p className="text-sm text-[var(--text-secondary)]">Ответ студента:</p>
- <p className="text-[var(--text-primary)]">{answer.answer ||"—"}</p>
+ <p className="text-primary font-medium mb-2">{answer.question?.content}</p>
+ <div className="bg-fill-quaternary rounded p-2 mb-2">
+ <p className="text-sm text-secondary">Ответ студента:</p>
+ <p className="text-primary">{answer.answer ||"—"}</p>
  </div>
 
  {/* AI/Ручная оценка */}
  <div className="flex items-center gap-4 text-sm">
  <div>
- <span className="text-[var(--text-secondary)]">Баллы: </span>
+ <span className="text-secondary">Баллы: </span>
  <span className="font-semibold">
  {answer.score ?? 0}/{answer.maxScore}
  </span>
  </div>
  {answer.aiChecked && (
- <span className="px-2 py-0.5 bg-[rgba(0,122,255,0.12)] text-[var(--color-blue)] rounded text-xs">
+ <span className="px-2 py-0.5 bg-[rgba(0,122,255,0.12)] text-macos-blue rounded text-xs">
  AI: {answer.aiScore}
  </span>
  )}
@@ -392,7 +392,7 @@ function AnswerCard({
 
  {/* Отзыв */}
  {(answer.aiFeedback || answer.manualFeedback) && !editing && (
- <div className="mt-2 text-sm text-[var(--text-secondary)] bg-[var(--fill-quaternary)] p-2 rounded">
+ <div className="mt-2 text-sm text-secondary bg-fill-quaternary p-2 rounded">
  💬 {answer.manualFeedback || answer.aiFeedback}
  </div>
  )}
@@ -402,7 +402,7 @@ function AnswerCard({
  <div className="mt-3">
  <button
  onClick={() => setEditing(true)}
- className="flex items-center gap-1 text-sm text-[var(--color-blue)] hover:text-[var(--color-blue)]"
+ className="flex items-center gap-1 text-sm text-macos-blue hover:text-macos-blue"
  >
  <Edit className="h-4 w-4"/>
  Оценить вручную
@@ -412,26 +412,26 @@ function AnswerCard({
 
  {/* Форма ручной оценки */}
  {editing && (
- <div className="mt-3 space-y-3 p-3 bg-[var(--fill-quaternary)] rounded-lg">
+ <div className="mt-3 space-y-3 p-3 bg-fill-quaternary rounded-lg">
  <div className="flex items-center gap-4">
- <label className="text-sm text-[var(--text-primary)]">Баллы:</label>
+ <label className="text-sm text-primary">Баллы:</label>
  <input
  type="number"
  value={score}
  onChange={(e) => setScore(Number(e.target.value))}
  min={0}
  max={answer.maxScore}
- className="w-20 px-2 py-1 border rounded focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-20 px-2 py-1 border rounded focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
- <span className="text-sm text-[var(--text-secondary)]">/ {answer.maxScore}</span>
+ <span className="text-sm text-secondary">/ {answer.maxScore}</span>
  </div>
  <div>
- <label className="block text-sm text-[var(--text-primary)] mb-1">Комментарий:</label>
+ <label className="block text-sm text-primary mb-1">Комментарий:</label>
  <textarea
  value={feedback}
  onChange={(e) => setFeedback(e.target.value)}
  rows={2}
- className="w-full px-3 py-2 border rounded focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 border rounded focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  placeholder="Комментарий к оценке..."
  />
  </div>
@@ -441,13 +441,13 @@ function AnswerCard({
  onGrade(answer.id, score, feedback);
  setEditing(false);
 }}
- className="px-3 py-1.5 bg-[var(--color-blue)] text-white rounded text-sm hover:bg-[var(--color-blue)]"
+ className="px-3 py-1.5 bg-macos-blue text-white rounded text-sm hover:bg-macos-blue"
  >
  Сохранить
  </button>
  <button
  onClick={() => setEditing(false)}
- className="px-3 py-1.5 bg-[var(--fill-secondary)] text-[var(--text-primary)] rounded text-sm hover:bg-gray-300"
+ className="px-3 py-1.5 bg-fill-secondary text-primary rounded text-sm hover:bg-gray-300"
  >
  Отмена
  </button>

@@ -70,20 +70,20 @@ export default function LmsDiaryPage() {
  return (
  <div className="space-y-6">
  <div>
- <h1 className="macos-text-title text-[var(--mezon-dark)]">Дневник</h1>
- <p className="text-[var(--text-secondary)] mt-1">
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Дневник</h1>
+ <p className="text-secondary mt-1">
  Расписание на неделю
  </p>
  </div>
 
  {/* Week Navigation and Class Selector */}
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
  <div className="flex items-center gap-2">
  <select
  value={selectedClass ||""}
  onChange={(e) => setSelectedClass(e.target.value ? Number(e.target.value) : null)}
- className="px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  <option value="">Выберите класс</option>
  {classes.map((cls) => (
@@ -98,7 +98,7 @@ export default function LmsDiaryPage() {
  <Button variant="outline"size="sm"onClick={prevWeek}>
  <ChevronLeft className="h-4 w-4"/>
  </Button>
- <span className="font-medium text-[var(--text-primary)] min-w-[200px] text-center">
+ <span className="font-medium text-primary min-w-[200px] text-center">
  {format(weekStart,"d MMMM", { locale: ru})} -{""}
  {format(addDays(weekStart, 5),"d MMMM yyyy", { locale: ru})}
  </span>
@@ -118,9 +118,9 @@ export default function LmsDiaryPage() {
  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
  </div>
  ) : !selectedClass ? (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-12 text-center">
- <Calendar className="h-12 w-12 text-[var(--text-quaternary)] mx-auto mb-4"/>
- <p className="text-[var(--text-secondary)]">Выберите класс для просмотра дневника</p>
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
+ <Calendar className="h-12 w-12 text-tertiary mx-auto mb-4"/>
+ <p className="text-secondary">Выберите класс для просмотра дневника</p>
  </div>
  ) : (
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -132,28 +132,28 @@ export default function LmsDiaryPage() {
  return (
  <div
  key={day.toISOString()}
- className={`bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] overflow-hidden ${
+ className={`bg-white rounded-xl shadow-subtle border border-card overflow-hidden ${
  isToday ?"ring-2 ring-teal-500":""
 }`}
  >
  <div
  className={`px-4 py-3 ${
  isToday
- ?"bg-[var(--color-blue)] text-white"
- :"bg-[var(--fill-quaternary)] text-[var(--text-primary)]"
+ ?"bg-macos-blue text-white"
+ :"bg-fill-quaternary text-primary"
 }`}
  >
  <div className="font-semibold">
  {format(day,"EEEE", { locale: ru})}
  </div>
- <div className={`text-sm ${isToday ?"text-teal-100":"text-[var(--text-secondary)]"}`}>
+ <div className={`text-sm ${isToday ?"text-teal-100":"text-secondary"}`}>
  {format(day,"d MMMM", { locale: ru})}
  </div>
  </div>
 
  <div className="p-4">
  {daySchedule.length === 0 ? (
- <div className="text-center text-[var(--text-tertiary)] py-6">
+ <div className="text-center text-tertiary py-6">
  <BookOpen className="h-8 w-8 mx-auto mb-2 opacity-50"/>
  <p className="text-sm">Нет уроков</p>
  </div>
@@ -162,22 +162,22 @@ export default function LmsDiaryPage() {
  {daySchedule.map((item) => (
  <div
  key={item.id}
- className="flex items-start gap-3 p-2 rounded-lg bg-[var(--fill-quaternary)] hover:bg-[var(--fill-tertiary)] macos-transition"
+ className="flex items-start gap-3 p-2 rounded-lg bg-fill-quaternary hover:bg-fill-tertiary macos-transition"
  >
- <div className="text-xs text-[var(--text-secondary)] font-mono mt-0.5 min-w-[45px]">
+ <div className="text-xs text-secondary font-mono mt-0.5 min-w-[45px]">
  {item.startTime}
  </div>
  <div className="flex-1 min-w-0">
- <div className="font-medium text-[var(--text-primary)] truncate">
+ <div className="font-medium text-primary truncate">
  {item.subject?.name ||"Предмет"}
  </div>
  {item.room && (
- <div className="text-xs text-[var(--text-secondary)]">
+ <div className="text-xs text-secondary">
  Каб. {item.room}
  </div>
  )}
  {item.teacher && (
- <div className="text-xs text-[var(--text-secondary)]">
+ <div className="text-xs text-secondary">
  {item.teacher.lastName} {item.teacher.firstName?.charAt(0)}.
  </div>
  )}

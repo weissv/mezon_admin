@@ -53,7 +53,7 @@ export function AbsencesView({ childId}: AbsencesViewProps) {
 }
 };
 
- if (loading) return <div className="p-4 text-sm text-[var(--text-secondary)]">Загрузка...</div>;
+ if (loading) return <div className="p-4 text-sm text-secondary">Загрузка...</div>;
 
  return (
  <div className="p-4 space-y-4">
@@ -64,15 +64,15 @@ export function AbsencesView({ childId}: AbsencesViewProps) {
  ) : (
  <form onSubmit={handleAdd} className="border p-4 rounded space-y-3">
  <div>
- <label className="block macos-text-caption mb-1">Дата начала</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Дата начала</label>
  <Input type="date"value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
  </div>
  <div>
- <label className="block macos-text-caption mb-1">Дата окончания</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Дата окончания</label>
  <Input type="date"value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
  </div>
  <div>
- <label className="block macos-text-caption mb-1">Причина</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Причина</label>
  <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Семейный отпуск"required />
  </div>
  <div className="flex gap-2">
@@ -84,7 +84,7 @@ export function AbsencesView({ childId}: AbsencesViewProps) {
 
  <div className="space-y-2">
  {absences.length === 0 ? (
- <p className="text-[var(--text-secondary)] text-sm">Нет записей об отсутствиях</p>
+ <p className="text-secondary text-sm">Нет записей об отсутствиях</p>
  ) : (
  absences.map((absence) => (
  <div key={absence.id} className="flex justify-between items-center p-3 border rounded">
@@ -92,7 +92,7 @@ export function AbsencesView({ childId}: AbsencesViewProps) {
  <div className="font-medium text-sm">
  {new Date(absence.startDate).toLocaleDateString('ru-RU')} &mdash; {new Date(absence.endDate).toLocaleDateString('ru-RU')}
  </div>
- {absence.reason && <div className="text-sm text-[var(--text-secondary)]">{absence.reason}</div>}
+ {absence.reason && <div className="text-sm text-secondary">{absence.reason}</div>}
  </div>
  <Button variant="destructive"size="sm"onClick={() => setDeleteConfirm(absence)}>Удалить</Button>
  </div>
@@ -105,19 +105,19 @@ export function AbsencesView({ childId}: AbsencesViewProps) {
  <div className="p-4">
  <div className="flex items-start gap-4">
  <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,59,48,0.12)] rounded-full flex items-center justify-center">
- <AlertTriangle className="h-5 w-5 text-[var(--color-red)]"/>
+ <AlertTriangle className="h-5 w-5 text-macos-red"/>
  </div>
  <div className="flex-1">
- <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить эту запись?</p>
+ <p className="font-medium text-primary">Вы уверены, что хотите удалить эту запись?</p>
  {deleteConfirm && (
- <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-md">
- <p className="macos-text-caption">
+ <div className="mt-2 p-3 bg-fill-quaternary rounded-md">
+ <p className="text-[11px] font-medium uppercase tracking-widest">
  {new Date(deleteConfirm.startDate).toLocaleDateString('ru-RU')} &mdash; {new Date(deleteConfirm.endDate).toLocaleDateString('ru-RU')}
  </p>
- {deleteConfirm.reason && <p className="text-xs text-[var(--text-secondary)] mt-1">{deleteConfirm.reason}</p>}
+ {deleteConfirm.reason && <p className="text-xs text-secondary mt-1">{deleteConfirm.reason}</p>}
  </div>
  )}
- <p className="text-sm text-[var(--text-secondary)] mt-2">Это действие нельзя отменить.</p>
+ <p className="text-sm text-secondary mt-2">Это действие нельзя отменить.</p>
  </div>
  </div>
  <div className="flex justify-end gap-3 mt-6">

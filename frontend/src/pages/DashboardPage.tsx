@@ -107,60 +107,60 @@ export default function DashboardPage() {
  );
 }
 
- if (error || !bootstrap || !preferences) {
- return (
- <div className="mezon-card text-center py-12 shadow-[var(--shadow-sm)]">
- <p className="macos-text-callout text-[var(--macos-red)] mb-4">{error ?? 'Не удалось загрузить дашборд'}</p>
- <Button onClick={refetch}>Повторить</Button>
- </div>
- );
-}
+  if (error || !bootstrap || !preferences) {
+    return (
+      <div className="rounded-xl border border-card bg-surface-primary shadow-subtle p-5 text-center py-12">
+        <p className="font-semibold text-[14px] tracking-[-0.01em] text-macos-red mb-4">{error ?? 'Не удалось загрузить дашборд'}</p>
+        <Button onClick={refetch}>Повторить</Button>
+      </div>
+    );
+  }
 
- return (
- <div className="dashboard-root space-y-6">
- {/* ---- Header ---- */}
- <header className="dashboard-page-header">
- <div className="dashboard-page-header__main">
- <span className="mezon-badge macos-badge-neutral">Mezon ERP</span>
- <h1 className="macos-text-title mt-2">Дашборд</h1>
- <p className="macos-text-subtitle mt-1 text-[var(--text-secondary)]">
- Единая рабочая поверхность для метрик, сигналов и быстрых действий по операционному контуру.
- </p>
- <div className="dashboard-page-header__meta mt-3">
- <span className="macos-text-caption">
- Виджетов: {bootstrap.overview.visibleWidgetCount}
- </span>
- <span className="macos-text-caption ml-3">
- Действий: {bootstrap.overview.quickActionCount}
- </span>
- {activeView && (
- <span className="macos-text-caption ml-3 text-[var(--color-blue)]">
- Вид: {activeView.name}
- </span>
- )}
- </div>
- </div>
+  return (
+    <div className="dashboard-root space-y-6">
+      {/* ---- Header ---- */}
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-[0.01em] uppercase bg-fill-quaternary text-secondary">Mezon ERP</span>
+          <h1 className="text-[24px] font-bold tracking-[-0.025em] text-primary leading-tight mt-2">Дашборд</h1>
+          <p className="text-[15px] font-medium text-secondary leading-relaxed tracking-[-0.01em] mt-1">
+            Единая рабочая поверхность для метрик, сигналов и быстрых действий по операционному контуру.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 mt-3">
+            <span className="text-[11px] font-semibold tracking-[0.02em] uppercase text-tertiary">
+              Виджетов: {bootstrap.overview.visibleWidgetCount}
+            </span>
+            <span className="text-[11px] font-semibold tracking-[0.02em] uppercase text-tertiary">
+              Действий: {bootstrap.overview.quickActionCount}
+            </span>
+            {activeView && (
+              <span className="text-[11px] font-semibold tracking-[0.02em] uppercase text-macos-blue">
+                Вид: {activeView.name}
+              </span>
+            )}
+          </div>
+        </div>
 
- <div className="dashboard-page-header__controls">
- <Button variant="outline"size="sm"onClick={refetch} title="Обновить">
- <RefreshCw className="h-4 w-4"/>
- </Button>
+        <div className="flex items-center gap-2 mt-4 sm:mt-0 flex-shrink-0">
+          <Button variant="outline" size="sm" onClick={refetch} title="Обновить">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
 
- <Button
- variant={isEditMode ? 'default' : 'outline'}
- size="sm"
- onClick={() => setIsEditMode(prev => !prev)}
- >
- {isEditMode ? <X className="h-4 w-4 mr-1"/> : <Pencil className="h-4 w-4 mr-1"/>}
- {isEditMode ? 'Готово' : 'Редактировать'}
- </Button>
+          <Button
+            variant={isEditMode ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setIsEditMode(prev => !prev)}
+          >
+            {isEditMode ? <X className="h-4 w-4 mr-1" /> : <Pencil className="h-4 w-4 mr-1" />}
+            {isEditMode ? 'Готово' : 'Редактировать'}
+          </Button>
 
- <Button variant="outline"size="sm"onClick={() => setIsPanelOpen(true)}>
- <Settings className="h-4 w-4 mr-1"/>
- Настроить
- </Button>
- </div>
- </header>
+          <Button variant="outline" size="sm" onClick={() => setIsPanelOpen(true)}>
+            <Settings className="h-4 w-4 mr-1" />
+            Настроить
+          </Button>
+        </div>
+      </header>
 
  {/* ---- Overview strip ---- */}
  {bootstrap.overview && (

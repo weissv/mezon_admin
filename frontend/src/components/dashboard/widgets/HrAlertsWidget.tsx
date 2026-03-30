@@ -16,7 +16,7 @@ interface HrAlertsData {
 }
 
 const ALERT_CONFIG: Record<string, { icon: typeof UserCheck; color: string; label: string}> = {
- medical: { icon: UserCheck, color: 'text-[var(--color-red)]', label: 'Мед. осмотр'},
+ medical: { icon: UserCheck, color: 'text-macos-red', label: 'Мед. осмотр'},
  contract: { icon: FileText, color: 'text-amber-500', label: 'Договор'},
  document: { icon: Calendar, color: 'text-blue-500', label: 'Документ'},
 };
@@ -30,8 +30,8 @@ export default function HrAlertsWidget({ data}: { data: HrAlertsData | undefined
  <div className="space-y-3">
  <div className="grid grid-cols-2 gap-2">
  <div className="p-2 bg-red-50 rounded-lg text-center">
- <p className="text-lg font-bold text-[var(--color-red)]">{data.medicalExpiring ?? 0}</p>
- <p className="text-xs text-[var(--color-red)]">Мед. осмотры</p>
+ <p className="text-lg font-bold text-macos-red">{data.medicalExpiring ?? 0}</p>
+ <p className="text-xs text-macos-red">Мед. осмотры</p>
  </div>
  <div className="p-2 bg-amber-50 rounded-lg text-center">
  <p className="text-lg font-bold text-amber-600">{data.contractsExpiring}</p>
@@ -48,12 +48,12 @@ export default function HrAlertsWidget({ data}: { data: HrAlertsData | undefined
  <Icon className={`h-3 w-3 flex-shrink-0 ${cfg.color}`} />
  <div className="truncate flex-1">
  <span className="font-medium">{alert.employeeName}</span>
- <span className="text-[var(--text-tertiary)]"> — {alert.detail}</span>
+ <span className="text-tertiary"> — {alert.detail}</span>
  </div>
- <span className={`whitespace-nowrap ${alert.overdue ? 'text-[var(--color-red)] font-medium' : 'text-[var(--text-tertiary)]'}`}>
+ <span className={`whitespace-nowrap ${alert.overdue ? 'text-macos-red font-medium' : 'text-tertiary'}`}>
  {new Date(alert.dueDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short'})}
  </span>
- {alert.overdue && <AlertTriangle className="h-3 w-3 text-[var(--color-red)] flex-shrink-0"/>}
+ {alert.overdue && <AlertTriangle className="h-3 w-3 text-macos-red flex-shrink-0"/>}
  </div>
  );
 })}

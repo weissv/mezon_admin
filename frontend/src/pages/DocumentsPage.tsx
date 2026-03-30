@@ -97,7 +97,7 @@ export default function DocumentsPage() {
  href={row.fileUrl} 
  target="_blank"
  rel="noopener noreferrer"
- className="inline-flex items-center justify-center h-8 px-3 text-sm rounded-md text-gray-800 hover:bg-[var(--fill-tertiary)]"
+ className="inline-flex items-center justify-center h-8 px-3 text-sm rounded-md text-gray-800 hover:bg-fill-tertiary"
  >
  Скачать
  </a>
@@ -112,7 +112,7 @@ export default function DocumentsPage() {
  return (
  <div>
  <div className="flex justify-between items-center mb-4">
- <h1 className="macos-text-title">Управление документами</h1>
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight">Управление документами</h1>
  <div className="flex gap-2">
  <Button
  variant={viewMode === 'documents' ? 'default' : 'outline'}
@@ -160,16 +160,16 @@ export default function DocumentsPage() {
  <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
  <div className="p-4 space-y-4">
  <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
- <AlertTriangle className="h-6 w-6 text-[var(--color-red)] flex-shrink-0 mt-0.5"/>
+ <AlertTriangle className="h-6 w-6 text-macos-red flex-shrink-0 mt-0.5"/>
  <div>
  <h4 className="font-semibold text-red-800">Внимание!</h4>
- <p className="text-[var(--color-red)] text-sm mt-1">
+ <p className="text-macos-red text-sm mt-1">
  Вы собираетесь удалить документ. Это действие нельзя отменить.
  </p>
  </div>
  </div>
  {deletingDocument && (
- <div className="bg-[var(--fill-quaternary)] p-3 rounded-lg">
+ <div className="bg-fill-quaternary p-3 rounded-lg">
  <p><strong>Название:</strong> {deletingDocument.name}</p>
  {deletingDocument.employee && (
  <p><strong>Сотрудник:</strong> {deletingDocument.employee.firstName} {deletingDocument.employee.lastName}</p>
@@ -307,17 +307,17 @@ function TemplatesView({ onTemplateCreated}: { onTemplateCreated: () => void}) {
  <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
  <div className="p-4 space-y-4">
  <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
- <AlertTriangle className="h-6 w-6 text-[var(--color-red)] flex-shrink-0 mt-0.5"/>
+ <AlertTriangle className="h-6 w-6 text-macos-red flex-shrink-0 mt-0.5"/>
  <div>
  <h4 className="font-semibold text-red-800">Внимание!</h4>
- <p className="text-[var(--color-red)] text-sm mt-1">
+ <p className="text-macos-red text-sm mt-1">
  Вы собираетесь удалить шаблон документа. Это действие нельзя отменить.
  Документы, созданные по этому шаблону, не будут удалены.
  </p>
  </div>
  </div>
  {deletingTemplate && (
- <div className="bg-[var(--fill-quaternary)] p-3 rounded-lg">
+ <div className="bg-fill-quaternary p-3 rounded-lg">
  <p><strong>Название:</strong> {deletingTemplate.name}</p>
  </div>
  )}

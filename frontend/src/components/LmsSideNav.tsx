@@ -102,9 +102,9 @@ export default function LmsSideNav() {
  >
  <X className="h-6 w-6"/>
  </button>
- </div>
- <p className="text-[#007AFF] font-semibold text-[13px] mt-2">ШКОЛА (LMS)</p>
- </div>
+        </div>
+        <p className="font-semibold text-[13px] mt-2 text-macos-blue">ШКОЛА (LMS)</p>
+      </div>
 
  <div className="mezon-sidenav__nav">
  <p className="mezon-nav-label">Учебный процесс</p>

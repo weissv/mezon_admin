@@ -52,12 +52,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="min-h-[400px] flex items-center justify-center p-8">
           <div className="text-center max-w-md">
             <div className="mx-auto w-16 h-16 bg-[var(--tint-red)] rounded-[var(--radius-xl)] flex items-center justify-center mb-4">
-              <AlertCircle className="w-8 h-8 text-[var(--color-red)]" />
+              <AlertCircle className="w-8 h-8 text-macos-red" />
             </div>
-            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] mb-2 tracking-[-0.01em]">
+            <h2 className="text-[17px] font-semibold text-primary mb-2 tracking-[-0.01em]">
               Что-то пошло не так
             </h2>
-            <p className="text-[13px] text-[var(--text-tertiary)] mb-5">
+            <p className="text-[13px] text-tertiary mb-5">
               {error?.message || 'Произошла непредвиденная ошибка'}
             </p>
             <div className="flex justify-center gap-3">
@@ -75,8 +75,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               )}
             </div>
             {process.env.NODE_ENV === 'development' && error && (
-              <details className="mt-5 text-left bg-[var(--fill-quaternary)] rounded-[var(--radius-md)] p-3 text-[11px] font-mono text-[var(--text-secondary)]">
-                <summary className="cursor-pointer font-sans font-medium text-[12px] text-[var(--text-primary)]">
+              <details className="mt-5 text-left bg-fill-quaternary rounded-[var(--radius-md)] p-3 text-[11px] font-mono text-secondary">
+                <summary className="cursor-pointer font-sans font-medium text-[12px] text-primary">
                   Детали ошибки
                 </summary>
                 <pre className="mt-2 overflow-auto whitespace-pre-wrap">{error.stack}</pre>

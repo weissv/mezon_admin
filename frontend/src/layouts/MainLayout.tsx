@@ -36,10 +36,10 @@ export default function MainLayout() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-canvas)]">
+      <div className="flex min-h-screen items-center justify-center bg-bg-canvas">
         <div className="flex flex-col items-center gap-3">
           <Spinner size="lg" />
-          <span className="text-[13px] text-[var(--text-tertiary)] tracking-[-0.01em]">
+          <span className="text-[13px] text-text-tertiary tracking-[-0.01em]">
             Загрузка...
           </span>
         </div>
@@ -49,22 +49,22 @@ export default function MainLayout() {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg-canvas)] px-6 text-center">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-bg-canvas px-6 text-center">
         <div className="max-w-md space-y-4">
-          <div className="mx-auto w-14 h-14 bg-[var(--tint-blue)] rounded-[var(--radius-xl)] flex items-center justify-center mb-2">
-            <svg className="w-7 h-7 text-[var(--color-blue)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="mx-auto w-14 h-14 bg-tint-blue rounded-xl flex items-center justify-center mb-2">
+            <svg className="w-7 h-7 text-macos-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
           </div>
-          <p className="text-[18px] font-semibold text-[var(--text-primary)] tracking-[-0.02em]">
+          <p className="text-[18px] font-semibold text-text-primary tracking-[-0.02em]">
             Сессия потеряна
           </p>
-          <p className="text-[14px] text-[var(--text-tertiary)] leading-relaxed">
+          <p className="text-[14px] text-text-tertiary leading-relaxed">
             Вы не авторизованы или ваша сессия устарела.
           </p>
           <Link
             to="/auth/login"
-            className="inline-flex items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-blue)] px-5 py-2.5 text-[13px] font-medium text-white shadow-[var(--shadow-subtle)] macos-transition hover:bg-[var(--color-blue-hover)]"
+            className="inline-flex items-center justify-center rounded-md bg-macos-blue px-5 py-2.5 text-[13px] font-medium text-white shadow-subtle macos-transition hover:bg-macos-blue-hover"
           >
             Перейти к входу
           </Link>

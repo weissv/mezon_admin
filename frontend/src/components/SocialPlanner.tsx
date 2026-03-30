@@ -147,18 +147,18 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  <div className="flex items-center gap-2">
  <button
  onClick={handlePrevMonth}
- className="p-2 rounded-lg bg-white shadow-sm hover:bg-[var(--fill-quaternary)] macos-transition"
+ className="p-2 rounded-lg bg-white shadow-sm hover:bg-fill-quaternary macos-transition"
  >
- <ChevronLeft className="w-5 h-5 text-[var(--text-secondary)]"/>
+ <ChevronLeft className="w-5 h-5 text-secondary"/>
  </button>
- <span className="font-nunito font-semibold text-lg text-[var(--text-primary)] min-w-[160px] text-center">
+ <span className="font-nunito font-semibold text-lg text-primary min-w-[160px] text-center">
  {monthNamesRu[currentMonth]} {currentYear}
  </span>
  <button
  onClick={handleNextMonth}
- className="p-2 rounded-lg bg-white shadow-sm hover:bg-[var(--fill-quaternary)] macos-transition"
+ className="p-2 rounded-lg bg-white shadow-sm hover:bg-fill-quaternary macos-transition"
  >
- <ChevronRight className="w-5 h-5 text-[var(--text-secondary)]"/>
+ <ChevronRight className="w-5 h-5 text-secondary"/>
  </button>
  </div>
  <button
@@ -195,7 +195,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  {monthNames[currentMonth]}
  </h1>
  <p 
- className="font-nunito text-xl text-[var(--text-secondary)] tracking-widest"
+ className="font-nunito text-xl text-secondary tracking-widest"
  style={{ fontFamily:"'Nunito', sans-serif"}}
  >
  {currentYear}
@@ -209,7 +209,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  {weeks.map((week, idx) => (
  <div
  key={idx}
- className="date-label px-3 py-2 rounded-lg text-center text-sm font-nunito font-semibold text-[var(--text-secondary)]"
+ className="date-label px-3 py-2 rounded-lg text-center text-sm font-nunito font-semibold text-secondary"
  style={{
  background: 'linear-gradient(180deg, #fff, #fff)',
  boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
@@ -220,9 +220,9 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  justifyContent: 'center',
 }}
  >
- <span className="text-lg font-bold text-[var(--text-primary)]">{week.start}</span>
- <span className="text-xs text-[var(--text-tertiary)]">—</span>
- <span className="text-lg font-bold text-[var(--text-primary)]">{week.end}</span>
+ <span className="text-lg font-bold text-primary">{week.start}</span>
+ <span className="text-xs text-tertiary">—</span>
+ <span className="text-lg font-bold text-primary">{week.end}</span>
  </div>
  ))}
  </div>
@@ -234,7 +234,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  {dayNames.map((day, idx) => (
  <div
  key={idx}
- className="text-center text-sm font-nunito font-semibold text-[var(--text-secondary)] uppercase tracking-wider"
+ className="text-center text-sm font-nunito font-semibold text-secondary uppercase tracking-wider"
  style={{ fontFamily:"'Nunito', sans-serif"}}
  >
  {day}
@@ -279,7 +279,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  <div 
  className={`
  absolute top-1 right-2 font-nunito text-sm font-bold
- ${isToday ? 'text-pink-500' : 'text-[var(--text-tertiary)]'}
+ ${isToday ? 'text-pink-500' : 'text-tertiary'}
  `}
  style={{ fontFamily:"'Nunito', sans-serif"}}
  >
@@ -291,7 +291,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  {dayEvents.slice(0, 2).map((event, eventIdx) => (
  <div
  key={event.id}
- className="text-xs font-nunito text-[var(--text-primary)] truncate leading-tight cursor-pointer hover:text-[var(--text-primary)]"
+ className="text-xs font-nunito text-primary truncate leading-tight cursor-pointer hover:text-primary"
  style={{ fontFamily:"'Nunito', sans-serif"}}
  onClick={() => onEdit?.(event)}
  title={event.title}
@@ -301,7 +301,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  ))}
  {dayEvents.length > 2 && (
  <div 
- className="text-xs text-[var(--text-tertiary)] font-nunito"
+ className="text-xs text-tertiary font-nunito"
  style={{ fontFamily:"'Nunito', sans-serif"}}
  >
  +{dayEvents.length - 2} ещё

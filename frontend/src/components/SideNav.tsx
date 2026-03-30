@@ -136,7 +136,7 @@ export default function SideNav() {
         {/* Footer */}
         <div className="mezon-sidenav__footer">
           <p>Есть вопрос? Свяжитесь:</p>
-          <p className="font-semibold text-[var(--color-blue)] text-[12px]">+ 71 // 207 17 30</p>
+          <p className="font-semibold text-macos-blue text-[12px]">+ 71 // 207 17 30</p>
           <div className="mt-1.5 mezon-top-bar__social">
             {socialLinks.map(({ icon: Icon, href }) => (
               <a key={href} href={href} target="_blank" rel="noreferrer">

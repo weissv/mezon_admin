@@ -15,7 +15,7 @@ export default function DebtorsView() {
 
  if (loading) {
  return (
- <div className="flex items-center justify-center h-64 text-[var(--text-tertiary)]">
+ <div className="flex items-center justify-center h-64 text-tertiary">
  Загрузка дебиторов...
  </div>
  );
@@ -24,9 +24,9 @@ export default function DebtorsView() {
  if (items.length === 0) {
  return (
  <Card className="p-12 text-center">
- <Users className="mx-auto h-10 w-10 text-[var(--text-quaternary)] mb-3"/>
- <p className="text-[var(--text-secondary)] text-lg">Нет данных о дебиторской задолженности</p>
- <p className="text-[var(--text-tertiary)] text-sm mt-1">Информация появится после синхронизации с 1С</p>
+ <Users className="mx-auto h-10 w-10 text-tertiary mb-3"/>
+ <p className="text-secondary text-lg">Нет данных о дебиторской задолженности</p>
+ <p className="text-tertiary text-sm mt-1">Информация появится после синхронизации с 1С</p>
  </Card>
  );
 }
@@ -40,21 +40,21 @@ export default function DebtorsView() {
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
  <Card className="p-4 flex items-center gap-3">
  <div className="p-2 rounded-lg bg-[rgba(255,59,48,0.06)]">
- <AlertTriangle className="h-5 w-5 text-[var(--color-red)]"/>
+ <AlertTriangle className="h-5 w-5 text-macos-red"/>
  </div>
  <div>
- <p className="text-xs text-[var(--text-secondary)]">Общая задолженность</p>
- <p className="macos-text-title text-[var(--color-red)]">{currency.format(totalDebt)}</p>
+ <p className="text-xs text-secondary">Общая задолженность</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-macos-red">{currency.format(totalDebt)}</p>
  </div>
  </Card>
 
  <Card className="p-4 flex items-center gap-3">
- <div className="p-2 rounded-lg bg-[var(--fill-tertiary)]">
- <Users className="h-5 w-5 text-[var(--text-secondary)]"/>
+ <div className="p-2 rounded-lg bg-fill-tertiary">
+ <Users className="h-5 w-5 text-secondary"/>
  </div>
  <div>
- <p className="text-xs text-[var(--text-secondary)]">Дебиторов</p>
- <p className="macos-text-title text-gray-800">{items.length}</p>
+ <p className="text-xs text-secondary">Дебиторов</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-gray-800">{items.length}</p>
  </div>
  </Card>
 
@@ -63,14 +63,14 @@ export default function DebtorsView() {
  <TrendingUp className="h-5 w-5 text-amber-600"/>
  </div>
  <div>
- <p className="text-xs text-[var(--text-secondary)]">Макс. долг</p>
- <p className="macos-text-title text-amber-700">{currency.format(maxDebt)}</p>
+ <p className="text-xs text-secondary">Макс. долг</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-amber-700">{currency.format(maxDebt)}</p>
  </div>
  </Card>
  </div>
 
  {snapshotDate && (
- <p className="text-xs text-[var(--text-tertiary)]">
+ <p className="text-xs text-tertiary">
  Данные на: {new Date(snapshotDate).toLocaleDateString("ru-RU", { day:"numeric", month:"long", year:"numeric"})}
  </p>
  )}
@@ -98,12 +98,12 @@ function DebtorCard({ item, maxDebt}: { item: DebtorItem; maxDebt: number}) {
  <div>
  <p className="font-medium text-gray-800">{item.contractorName}</p>
  {item.contractorInn && (
- <p className="text-xs text-[var(--text-tertiary)] mt-0.5">ИНН: {item.contractorInn}</p>
+ <p className="text-xs text-tertiary mt-0.5">ИНН: {item.contractorInn}</p>
  )}
  </div>
  <span
  className={`text-lg font-bold ${
- isNegative ?"text-[var(--color-red)]":"text-emerald-600"
+ isNegative ?"text-macos-red":"text-emerald-600"
 }`}
  >
  {currency.format(Number(item.amount))}
@@ -111,7 +111,7 @@ function DebtorCard({ item, maxDebt}: { item: DebtorItem; maxDebt: number}) {
  </div>
 
  {/* Progress bar */}
- <div className="h-2 bg-[var(--fill-tertiary)] rounded-full overflow-hidden">
+ <div className="h-2 bg-fill-tertiary rounded-full overflow-hidden">
  <div
  className={`h-full rounded-full macos-transition ${
  isNegative ?"bg-red-400":"bg-emerald-400"

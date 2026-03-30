@@ -34,7 +34,7 @@ export default function CalendarTodayWidget({ data}: { data: CalendarTodayData |
  return (
  <div className="space-y-2">
  {events.length === 0 && (
- <p className="text-sm text-[var(--text-tertiary)] text-center py-4">Нет событий на сегодня</p>
+ <p className="text-sm text-tertiary text-center py-4">Нет событий на сегодня</p>
  )}
 
  {events.map(ev => (
@@ -42,8 +42,8 @@ export default function CalendarTodayWidget({ data}: { data: CalendarTodayData |
  key={ev.id}
  className={`border-l-2 pl-3 py-1.5 ${TYPE_COLORS[ev.type] ?? 'border-l-gray-300'}`}
  >
- <p className="macos-text-caption leading-tight">{ev.title}</p>
- <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mt-0.5">
+ <p className="text-[11px] font-medium uppercase tracking-widest leading-tight">{ev.title}</p>
+ <div className="flex items-center gap-3 text-xs text-secondary mt-0.5">
  <span className="flex items-center gap-1">
  <Clock className="h-3 w-3"/>
  {timeFmt(ev.startTime)}

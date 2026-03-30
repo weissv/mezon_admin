@@ -91,7 +91,7 @@ export default function TransactionsView() {
  key:"date",
  header:"Дата",
  render: (row) => (
- <span className="text-[var(--text-primary)] font-medium">
+ <span className="text-primary font-medium">
  {new Date(row.date).toLocaleDateString("ru-RU", { day:"2-digit", month:"short", year:"2-digit"})}
  </span>
  ),
@@ -100,12 +100,12 @@ export default function TransactionsView() {
  key:"channel",
  header:"Канал",
  render: (row) => {
- if (!row.channel) return <span className="text-[var(--text-quaternary)]">—</span>;
+ if (!row.channel) return <span className="text-tertiary">—</span>;
  return (
  <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
  row.channel ==="CASH"
  ?"bg-emerald-50 text-emerald-700"
- :"bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)]"
+ :"bg-tint-blue text-macos-blue"
 }`}>
  {row.channel ==="CASH"? <Banknote className="h-3 w-3"/> : <Building2 className="h-3 w-3"/>}
  {TRANSACTION_CHANNELS[row.channel]}
@@ -120,7 +120,7 @@ export default function TransactionsView() {
  <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
  row.type ==="INCOME"
  ?"bg-emerald-50 text-emerald-700"
- :"bg-[rgba(255,59,48,0.06)] text-[var(--color-red)]"
+ :"bg-[rgba(255,59,48,0.06)] text-macos-red"
 }`}>
  {row.type ==="INCOME"? <ArrowUpRight className="h-3 w-3"/> : <ArrowDownRight className="h-3 w-3"/>}
  {FINANCE_TYPES[row.type]}
@@ -131,7 +131,7 @@ export default function TransactionsView() {
  key:"amount",
  header:"Сумма",
  render: (row) => (
- <span className={`font-semibold ${Number(row.amount) >= 0 ?"text-emerald-600":"text-[var(--color-red)]"}`}>
+ <span className={`font-semibold ${Number(row.amount) >= 0 ?"text-emerald-600":"text-macos-red"}`}>
  {currency.format(Number(row.amount))}
  </span>
  ),
@@ -140,7 +140,7 @@ export default function TransactionsView() {
  key:"category",
  header:"Категория",
  render: (row) => (
- <span className="text-xs bg-[var(--fill-tertiary)] text-[var(--text-primary)] px-2 py-1 rounded">
+ <span className="text-xs bg-fill-tertiary text-primary px-2 py-1 rounded">
  {FINANCE_CATEGORIES[row.category] || row.category}
  </span>
  ),
@@ -149,7 +149,7 @@ export default function TransactionsView() {
  key:"contractor",
  header:"Контрагент",
  render: (row) => (
- <span className="text-[var(--text-primary)] truncate max-w-[160px] block">
+ <span className="text-primary truncate max-w-[160px] block">
  {row.contractor?.name || row.person?.name ||"—"}
  </span>
  ),
@@ -158,7 +158,7 @@ export default function TransactionsView() {
  key:"cashFlowArticle",
  header:"Статья ДДС",
  render: (row) => (
- <span className="text-[var(--text-secondary)] truncate max-w-[140px] block text-sm">
+ <span className="text-secondary truncate max-w-[140px] block text-sm">
  {row.cashFlowArticle?.name ||"—"}
  </span>
  ),
@@ -167,7 +167,7 @@ export default function TransactionsView() {
  key:"documentNumber",
  header:"№ док.",
  render: (row) => (
- <span className="text-[var(--text-secondary)] font-mono text-xs">{row.documentNumber ||"—"}</span>
+ <span className="text-secondary font-mono text-xs">{row.documentNumber ||"—"}</span>
  ),
 },
  {
@@ -176,7 +176,7 @@ export default function TransactionsView() {
  render: (row) => {
  const text = row.description || row.purpose ||"";
  return (
- <span className="text-[var(--text-secondary)] text-sm truncate max-w-[200px] block"title={text}>
+ <span className="text-secondary text-sm truncate max-w-[200px] block"title={text}>
  {text ||"—"}
  </span>
  );
@@ -210,7 +210,7 @@ export default function TransactionsView() {
  </select>
 
  <div className="relative">
- <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--text-tertiary)]"/>
+ <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-tertiary"/>
  <input
  type="text"
  placeholder="Поиск по описанию, контрагенту..."
@@ -230,14 +230,14 @@ export default function TransactionsView() {
  <Filter className="h-4 w-4 mr-1"/>
  Фильтры
  {activeFilterCount > 0 && (
- <span className="absolute -top-1.5 -right-1.5 bg-[rgba(0,122,255,0.06)]0 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+ <span className="absolute -top-1.5 -right-1.5 bg-tint-blue0 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
  {activeFilterCount}
  </span>
  )}
  </Button>
 
  {activeFilterCount > 0 && (
- <button onClick={clearFilters} className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] flex items-center gap-1">
+ <button onClick={clearFilters} className="text-xs text-tertiary hover:text-secondary flex items-center gap-1">
  <X className="h-3 w-3"/> Сбросить
  </button>
  )}
@@ -254,7 +254,7 @@ export default function TransactionsView() {
  <Card className="p-4">
  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
  <div>
- <label className="text-xs text-[var(--text-secondary)] block mb-1">Категория</label>
+ <label className="text-xs text-secondary block mb-1">Категория</label>
  <select
  className="border rounded-lg px-3 py-2 text-sm w-full bg-white"
  value={filters.category}
@@ -267,7 +267,7 @@ export default function TransactionsView() {
  </select>
  </div>
  <div>
- <label className="text-xs text-[var(--text-secondary)] block mb-1">Контрагент</label>
+ <label className="text-xs text-secondary block mb-1">Контрагент</label>
  <select
  className="border rounded-lg px-3 py-2 text-sm w-full bg-white"
  value={filters.contractorId}
@@ -280,7 +280,7 @@ export default function TransactionsView() {
  </select>
  </div>
  <div>
- <label className="text-xs text-[var(--text-secondary)] block mb-1">Дата от</label>
+ <label className="text-xs text-secondary block mb-1">Дата от</label>
  <input
  type="date"
  className="border rounded-lg px-3 py-2 text-sm w-full bg-white"
@@ -289,7 +289,7 @@ export default function TransactionsView() {
  />
  </div>
  <div>
- <label className="text-xs text-[var(--text-secondary)] block mb-1">Дата до</label>
+ <label className="text-xs text-secondary block mb-1">Дата до</label>
  <input
  type="date"
  className="border rounded-lg px-3 py-2 text-sm w-full bg-white"

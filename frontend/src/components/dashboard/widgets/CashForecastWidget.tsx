@@ -26,9 +26,9 @@ export default function CashForecastWidget({ data}: { data: CashForecastData | u
 
  return (
  <div className="space-y-3">
- <div className="flex justify-between text-xs text-[var(--text-secondary)]">
+ <div className="flex justify-between text-xs text-secondary">
  <span>Прогноз на 30 дней</span>
- <span className={data.netChange >= 0 ? 'text-[var(--color-green)]' : 'text-[var(--color-red)]'}>
+ <span className={data.netChange >= 0 ? 'text-macos-green' : 'text-macos-red'}>
  {data.netChange >= 0 ? '+' : ''}{fmt(data.netChange)}
  </span>
  </div>
@@ -50,19 +50,19 @@ export default function CashForecastWidget({ data}: { data: CashForecastData | u
 
  <div className="grid grid-cols-3 gap-2 text-center text-xs">
  <div>
- <TrendingUp className="h-3 w-3 mx-auto text-[var(--color-green)]"/>
+ <TrendingUp className="h-3 w-3 mx-auto text-macos-green"/>
  <p className="font-medium">{fmt(data.totalIncome)}</p>
- <p className="text-[var(--text-tertiary)]">Доход</p>
+ <p className="text-tertiary">Доход</p>
  </div>
  <div>
- <TrendingDown className="h-3 w-3 mx-auto text-[var(--color-red)]"/>
+ <TrendingDown className="h-3 w-3 mx-auto text-macos-red"/>
  <p className="font-medium">{fmt(data.totalExpense)}</p>
- <p className="text-[var(--text-tertiary)]">Расход</p>
+ <p className="text-tertiary">Расход</p>
  </div>
  <div>
  <Minus className="h-3 w-3 mx-auto text-blue-500"/>
  <p className="font-medium">{fmt(data.netChange)}</p>
- <p className="text-[var(--text-tertiary)]">Нетто</p>
+ <p className="text-tertiary">Нетто</p>
  </div>
  </div>
  </div>

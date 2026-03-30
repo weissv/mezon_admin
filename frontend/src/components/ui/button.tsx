@@ -1,69 +1,73 @@
 // src/components/ui/button.tsx
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, forwardRef } from "react";
 import clsx from "clsx";
 
 export type ButtonVariant = "default" | "outline" | "ghost" | "secondary" | "destructive";
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
 }
 
 const base = [
   "inline-flex items-center justify-center gap-2 font-medium",
-  "macos-transition",
+  "macos-transition rounded-md outline-none",
   "disabled:opacity-40 disabled:cursor-not-allowed",
   "active:scale-[0.97] touch-manipulation",
   "tracking-[-0.01em] leading-none",
-  "focus-visible:outline-none",
 ].join(" ");
 
 const variants: Record<ButtonVariant, string> = {
   default: [
-    "bg-[var(--color-blue)] text-white rounded-[8px]",
-    "shadow-[var(--shadow-subtle)]",
-    "hover:bg-[var(--color-blue-hover)]",
-    "active:bg-[var(--color-blue-active)]",
-    "focus-visible:shadow-[var(--ring-accent)]",
+    "bg-macos-blue text-white",
+    "shadow-subtle",
+    "hover:bg-macos-blue-hover",
+    "active:bg-macos-blue-active",
+    "focus-visible:ring-2 focus-visible:ring-macos-blue/50",
   ].join(" "),
   outline: [
-    "bg-[var(--surface-primary)] text-[var(--text-primary)] rounded-[8px]",
-    "border border-[var(--separator)]",
-    "shadow-[var(--shadow-subtle)]",
-    "hover:bg-[var(--fill-quaternary)] hover:border-[rgba(0,0,0,0.15)]",
-    "focus-visible:shadow-[var(--ring-accent)]",
+    "bg-surface-primary text-text-primary",
+    "border border-separator",
+    "shadow-subtle",
+    "hover:bg-fill-quaternary hover:border-border-card",
+    "focus-visible:ring-2 focus-visible:ring-macos-blue/50",
   ].join(" "),
   ghost: [
-    "text-[var(--color-blue)] rounded-[8px]",
-    "hover:bg-[var(--fill-quaternary)]",
-    "focus-visible:shadow-[var(--ring-accent)]",
+    "text-macos-blue",
+    "hover:bg-fill-quaternary hover:text-macos-blue-hover",
+    "focus-visible:ring-2 focus-visible:ring-macos-blue/50",
   ].join(" "),
   secondary: [
-    "bg-[var(--fill-tertiary)] text-[var(--text-primary)] rounded-[8px]",
-    "hover:bg-[var(--fill-secondary)]",
-    "focus-visible:shadow-[var(--ring-accent)]",
+    "bg-fill-tertiary text-text-primary",
+    "hover:bg-fill-secondary",
+    "focus-visible:ring-2 focus-visible:ring-macos-blue/50",
   ].join(" "),
   destructive: [
-    "bg-[var(--color-red)] text-white rounded-[8px]",
-    "shadow-[var(--shadow-subtle)]",
-    "hover:bg-[var(--color-red-hover)]",
-    "active:bg-[var(--color-red-active)]",
-    "focus-visible:shadow-[var(--ring-danger)]",
+    "bg-macos-red text-white",
+    "shadow-subtle",
+    "hover:bg-macos-red-hover",
+    "active:bg-macos-red-active",
+    "focus-visible:ring-2 focus-visible:ring-macos-red/50",
   ].join(" "),
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "text-[12px] px-2.5 py-1.5 min-h-[28px]",
-  md: "text-[13px] px-3.5 py-2 min-h-[32px]",
-  lg: "text-[14px] px-5 py-2.5 min-h-[38px]",
+  sm: "text-[12px] px-2.5 py-1 min-h-[28px]",
+  md: "text-[13px] px-3.5 py-1.5 min-h-[32px]",
+  lg: "text-[14px] px-5 py-2 min-h-[36px]",
+  icon: "h-8 w-8 px-0",
 };
 
-export function Button({ className, variant = "default", size = "md", ...props }: ButtonProps) {
-  return (
-    <button
-      className={clsx(base, variants[variant], sizes[size], className)}
-      {...props}
-    />
-  );
-}
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = "default", size = "md", ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        className={clsx(base, variants[variant], sizes[size], className)}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";

@@ -19,7 +19,7 @@ const spinnerSizes = {
 export function Spinner({ size = 'md', className }: SpinnerProps) {
   return (
     <Loader2
-      className={cn('animate-spin text-[var(--color-blue)]', spinnerSizes[size], className)}
+      className={cn('animate-spin text-macos-blue', spinnerSizes[size], className)}
     />
   );
 }
@@ -33,7 +33,7 @@ export function FullPageLoader({ message = 'Загрузка...' }: FullPageLoad
   return (
     <div className="fixed inset-0 bg-[var(--bg-canvas)]/80 backdrop-blur-[20px] z-50 flex flex-col items-center justify-center">
       <Spinner size="xl" />
-      <p className="mt-4 text-[13px] text-[var(--text-tertiary)] tracking-[-0.01em]">{message}</p>
+      <p className="mt-4 text-[13px] text-tertiary tracking-[-0.01em]">{message}</p>
     </div>
   );
 }
@@ -56,7 +56,7 @@ export function LoadingCard({ className, message, height = 200 }: LoadingCardPro
       style={{ minHeight: height }}
     >
       <Spinner size="lg" />
-      {message && <p className="mt-2 text-[12px] text-[var(--text-tertiary)]">{message}</p>}
+      {message && <p className="mt-2 text-[12px] text-tertiary">{message}</p>}
     </div>
   );
 }
@@ -80,7 +80,7 @@ const roundedClasses = {
 export function Skeleton({ className, width, height, rounded = 'md' }: SkeletonProps) {
   return (
     <div
-      className={cn('animate-pulse bg-[var(--fill-quaternary)]', roundedClasses[rounded], className)}
+      className={cn('animate-pulse bg-fill-quaternary', roundedClasses[rounded], className)}
       style={{ width, height }}
     />
   );

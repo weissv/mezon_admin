@@ -59,10 +59,10 @@ export default function LmsClassesPage() {
  {/* Header */}
  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
  <div>
- <h1 className="macos-text-title text-[var(--text-primary)]">Классы</h1>
- <p className="text-[var(--text-secondary)]">
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Классы</h1>
+ <p className="text-secondary">
  Управление школьными классами и учениками
- <span className="text-xs text-[var(--text-tertiary)] ml-2">
+ <span className="text-xs text-tertiary ml-2">
  (синхронизировано с ERP)
  </span>
  </p>
@@ -71,14 +71,14 @@ export default function LmsClassesPage() {
  <div className="flex gap-2">
  <a
  href="/groups"
- className="inline-flex items-center gap-2 border border-[rgba(0,0,0,0.12)] text-[var(--text-primary)] px-4 py-2 rounded-lg font-medium hover:bg-[var(--fill-quaternary)] macos-transition"
+ className="inline-flex items-center gap-2 border border-field text-primary px-4 py-2 rounded-lg font-medium hover:bg-fill-quaternary macos-transition"
  >
  <Edit className="h-4 w-4"/>
  Управление в ERP
  </a>
  <button
  onClick={() => setShowCreateModal(true)}
- className="inline-flex items-center gap-2 bg-[var(--color-blue)] text-white px-4 py-2 rounded-lg font-medium hover:bg-[var(--color-blue)] macos-transition"
+ className="inline-flex items-center gap-2 bg-macos-blue text-white px-4 py-2 rounded-lg font-medium hover:bg-macos-blue macos-transition"
  >
  <Plus className="h-5 w-5"/>
  Добавить класс
@@ -88,25 +88,25 @@ export default function LmsClassesPage() {
  </div>
 
  {/* Filters */}
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex flex-col sm:flex-row gap-4">
  <div className="relative flex-1">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--text-tertiary)]"/>
+ <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-tertiary"/>
  <input
  type="text"
  placeholder="Поиск по названию класса..."
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
- className="w-full pl-10 pr-4 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full pl-10 pr-4 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  <div className="flex gap-2 flex-wrap">
  <button
  onClick={() => setSelectedGrade(null)}
- className={`px-4 py-2 rounded-lg macos-text-caption macos-transition ${
+ className={`px-4 py-2 rounded-lg text-[11px] font-medium uppercase tracking-widest macos-transition ${
  selectedGrade === null
- ?"bg-[var(--color-blue)] text-white"
- :"bg-[var(--fill-tertiary)] text-[var(--text-primary)] hover:bg-[var(--fill-secondary)]"
+ ?"bg-macos-blue text-white"
+ :"bg-fill-tertiary text-primary hover:bg-fill-secondary"
 }`}
  >
  Все
@@ -115,10 +115,10 @@ export default function LmsClassesPage() {
  <button
  key={grade}
  onClick={() => setSelectedGrade(grade)}
- className={`px-4 py-2 rounded-lg macos-text-caption macos-transition ${
+ className={`px-4 py-2 rounded-lg text-[11px] font-medium uppercase tracking-widest macos-transition ${
  selectedGrade === grade
- ?"bg-[var(--color-blue)] text-white"
- :"bg-[var(--fill-tertiary)] text-[var(--text-primary)] hover:bg-[var(--fill-secondary)]"
+ ?"bg-macos-blue text-white"
+ :"bg-fill-tertiary text-primary hover:bg-fill-secondary"
 }`}
  >
  {grade} класс
@@ -130,13 +130,13 @@ export default function LmsClassesPage() {
 
  {/* Classes Grid */}
  {Object.keys(classesByGrade).length === 0 ? (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-12 text-center">
- <Users className="h-12 w-12 text-[var(--text-quaternary)] mx-auto mb-4"/>
- <p className="text-[var(--text-secondary)]">Классы не найдены</p>
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
+ <Users className="h-12 w-12 text-tertiary mx-auto mb-4"/>
+ <p className="text-secondary">Классы не найдены</p>
  {isAdmin && (
  <button
  onClick={() => setShowCreateModal(true)}
- className="mt-4 inline-flex items-center gap-2 text-[var(--color-blue)] hover:text-[var(--color-blue)]"
+ className="mt-4 inline-flex items-center gap-2 text-macos-blue hover:text-macos-blue"
  >
  <Plus className="h-5 w-5"/>
  Добавить первый класс
@@ -149,7 +149,7 @@ export default function LmsClassesPage() {
  .sort(([a], [b]) => Number(a) - Number(b))
  .map(([grade, gradeClasses]) => (
  <div key={grade}>
- <h2 className="macos-text-callout text-[var(--text-primary)] mb-4">
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-primary mb-4">
  {grade} класс
  </h2>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -157,26 +157,26 @@ export default function LmsClassesPage() {
  <div
  key={cls.id}
  onClick={() => setEditingClass(cls)}
- className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-5 hover:shadow-md transition-shadow group cursor-pointer"
+ className="bg-white rounded-xl shadow-subtle border border-card p-5 hover:shadow-md transition-shadow group cursor-pointer"
  >
  <div className="flex items-start justify-between mb-3">
- <div className="w-12 h-12 bg-[rgba(0,122,255,0.1)] rounded-xl flex items-center justify-center">
- <span className="macos-text-title text-[var(--color-blue)]">{cls.name}</span>
+ <div className="w-12 h-12 bg-tint-blue rounded-xl flex items-center justify-center">
+ <span className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-macos-blue">{cls.name}</span>
  </div>
- <Edit className="h-5 w-5 text-[var(--text-quaternary)] group-hover:text-[var(--color-blue)] macos-transition"/>
+ <Edit className="h-5 w-5 text-tertiary group-hover:text-macos-blue macos-transition"/>
  </div>
  <div className="space-y-2">
- <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+ <div className="flex items-center gap-2 text-sm text-secondary">
  <Users className="h-4 w-4"/>
  <span>{cls.studentsCount || 0} учеников</span>
  </div>
  {cls.teacher && (
- <p className="text-sm text-[var(--text-secondary)] truncate">
+ <p className="text-sm text-secondary truncate">
  Классный рук.: {cls.teacher.lastName} {cls.teacher.firstName?.charAt(0)}.
  </p>
  )}
  {cls.academicYear && (
- <p className="text-xs text-[var(--text-tertiary)]">{cls.academicYear}</p>
+ <p className="text-xs text-tertiary">{cls.academicYear}</p>
  )}
  </div>
  </div>
@@ -256,17 +256,17 @@ function CreateClassModal({
  return (
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
  <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
- <h2 className="macos-text-title text-[var(--text-primary)] mb-4">Добавить класс</h2>
+ <h2 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary mb-4">Добавить класс</h2>
  <form onSubmit={handleSubmit} className="space-y-4">
  <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Класс
  </label>
  <select
  value={formData.grade}
  onChange={(e) => setFormData({ ...formData, grade: Number(e.target.value)})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((g) => (
  <option key={g} value={g}>
@@ -276,13 +276,13 @@ function CreateClassModal({
  </select>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Буква
  </label>
  <select
  value={formData.section}
  onChange={(e) => setFormData({ ...formData, section: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  <option value="">Без буквы</option>
  {["А","Б","В","Г","Д"].map((s) => (
@@ -294,14 +294,14 @@ function CreateClassModal({
  </div>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Учебный год
  </label>
  <input
  type="text"
  value={formData.academicYear}
  onChange={(e) => setFormData({ ...formData, academicYear: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  placeholder="2024-2025"
  />
  </div>
@@ -309,14 +309,14 @@ function CreateClassModal({
  <button
  type="button"
  onClick={onClose}
- className="flex-1 px-4 py-2 mezon-field rounded-[8px] text-[var(--text-primary)] hover:bg-[var(--fill-quaternary)] macos-transition"
+ className="flex-1 px-4 py-2 mezon-field rounded-lg text-primary hover:bg-fill-quaternary macos-transition"
  >
  Отмена
  </button>
  <button
  type="submit"
  disabled={loading}
- className="flex-1 px-4 py-2 bg-[var(--color-blue)] text-white rounded-lg font-medium hover:bg-[var(--color-blue)] macos-transition disabled:opacity-50"
+ className="flex-1 px-4 py-2 bg-macos-blue text-white rounded-lg font-medium hover:bg-macos-blue macos-transition disabled:opacity-50"
  >
  {loading ?"Создание...":"Создать"}
  </button>
@@ -398,21 +398,21 @@ function EditClassModal({
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
  <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
  <div className="flex items-center justify-between mb-4">
- <h2 className="macos-text-title text-[var(--text-primary)]">Редактировать класс</h2>
- <button onClick={onClose} className="p-1 hover:bg-[var(--fill-tertiary)] rounded-lg macos-transition">
- <X className="h-5 w-5 text-[var(--text-secondary)]"/>
+ <h2 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Редактировать класс</h2>
+ <button onClick={onClose} className="p-1 hover:bg-fill-tertiary rounded-lg macos-transition">
+ <X className="h-5 w-5 text-secondary"/>
  </button>
  </div>
  <form onSubmit={handleSubmit} className="space-y-4">
  <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Класс
  </label>
  <select
  value={formData.grade}
  onChange={(e) => setFormData({ ...formData, grade: Number(e.target.value)})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((g) => (
  <option key={g} value={g}>
@@ -422,13 +422,13 @@ function EditClassModal({
  </select>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Буква
  </label>
  <select
  value={formData.section}
  onChange={(e) => setFormData({ ...formData, section: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  <option value="">Без буквы</option>
  {["А","Б","В","Г","Д","Е","Ж","З"].map((s) => (
@@ -440,50 +440,50 @@ function EditClassModal({
  </div>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Учебный год
  </label>
  <input
  type="text"
  value={formData.academicYear}
  onChange={(e) => setFormData({ ...formData, academicYear: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  placeholder="2024-2025"
  />
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Вместимость
  </label>
  <input
  type="number"
  value={formData.capacity ||""}
  onChange={(e) => setFormData({ ...formData, capacity: e.target.value ? Number(e.target.value) : undefined})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  placeholder="30"
  />
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Описание
  </label>
  <textarea
  value={formData.description}
  onChange={(e) => setFormData({ ...formData, description: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  rows={2}
  placeholder="Дополнительная информация о классе"
  />
  </div>
  
  {/* Информация о классе */}
- <div className="bg-[var(--fill-quaternary)] rounded-lg p-3 text-sm">
- <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+ <div className="bg-fill-quaternary rounded-lg p-3 text-sm">
+ <div className="flex items-center gap-2 text-secondary">
  <Users className="h-4 w-4"/>
  <span>{classData.studentsCount || 0} учеников в классе</span>
  </div>
  {classData.teacher && (
- <p className="text-[var(--text-secondary)] mt-1">
+ <p className="text-secondary mt-1">
  Классный рук.: {classData.teacher.lastName} {classData.teacher.firstName}
  </p>
  )}
@@ -494,21 +494,21 @@ function EditClassModal({
  type="button"
  onClick={handleDelete}
  disabled={deleting}
- className="px-4 py-2 border border-red-200 text-[var(--color-red)] rounded-lg hover:bg-[rgba(255,59,48,0.06)] macos-transition disabled:opacity-50"
+ className="px-4 py-2 border border-red-200 text-macos-red rounded-lg hover:bg-[rgba(255,59,48,0.06)] macos-transition disabled:opacity-50"
  >
  {deleting ?"...":"Удалить"}
  </button>
  <button
  type="button"
  onClick={onClose}
- className="flex-1 px-4 py-2 mezon-field rounded-[8px] text-[var(--text-primary)] hover:bg-[var(--fill-quaternary)] macos-transition"
+ className="flex-1 px-4 py-2 mezon-field rounded-lg text-primary hover:bg-fill-quaternary macos-transition"
  >
  Отмена
  </button>
  <button
  type="submit"
  disabled={loading}
- className="flex-1 px-4 py-2 bg-[var(--color-blue)] text-white rounded-lg font-medium hover:bg-[var(--color-blue)] macos-transition disabled:opacity-50"
+ className="flex-1 px-4 py-2 bg-macos-blue text-white rounded-lg font-medium hover:bg-macos-blue macos-transition disabled:opacity-50"
  >
  {loading ?"Сохранение...":"Сохранить"}
  </button>
