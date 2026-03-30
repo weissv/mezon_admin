@@ -66,7 +66,7 @@ export class SyncContext {
 
       if (nextUrl) {
         // Follow the odata.nextLink URL directly (it includes $skip and params)
-        const resp = await this.client.get(nextUrl, {
+        const resp: any = await this.client.get(nextUrl, {
           timeout: FETCH_TIMEOUT_MS,
         });
         items = resp.data?.value ?? [];
@@ -75,7 +75,7 @@ export class SyncContext {
         // Standard $skip/$top pagination
         const params = { ...baseParams, $skip: String(skip) };
         const url = `/${encodeURIComponent(entity)}`;
-        const resp = await this.client.get(url, {
+        const resp: any = await this.client.get(url, {
           params,
           timeout: FETCH_TIMEOUT_MS,
         });
