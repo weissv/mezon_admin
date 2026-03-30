@@ -1,11 +1,14 @@
 // Calendar/Event types
-export interface Event {
+export interface CalendarEvent {
   id: number;
-  title: string;      // Тема/название
-  date: string;       // Дата
-  groupId: number | null;  // ID класса
-  group?: { id: number; name: string } | null;  // Класс (связь)
-  organizer: string;  // Организатор
-  performers: string[]; // Исполнители
+  title: string;
+  date: string;
+  groupId: number | null;
+  group?: { id: number; name: string } | null;
+  organizer: string;
+  performers: string[];
   createdAt: string;
 }
+
+/** @deprecated Use CalendarEvent instead */
+export type Event = CalendarEvent;

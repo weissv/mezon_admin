@@ -1,14 +1,14 @@
-import React, { useState} from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Trash2} from 'lucide-react';
-import { Event} from '../types/calendar';
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Trash2 } from 'lucide-react';
+import type { CalendarEvent } from '../types/calendar';
 
 interface UkiyoeCalendarProps {
- events: Event[];
- onEdit: (event: Event) => void;
- onDelete: (event: Event) => void;
+  events: CalendarEvent[];
+  onEdit: (event: CalendarEvent) => void;
+  onDelete: (event: CalendarEvent) => void;
 }
 
-export const UkiyoeCalendar: React.FC<UkiyoeCalendarProps> = ({ events, onEdit, onDelete}) => {
+export const UkiyoeCalendar: React.FC<UkiyoeCalendarProps> = ({ events, onEdit, onDelete }) => {
  const [currentDate, setCurrentDate] = useState(new Date());
 
  // Ukiyo-e Color Palette

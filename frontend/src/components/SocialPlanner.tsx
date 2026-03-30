@@ -1,12 +1,13 @@
-import React, { useRef, useState} from 'react';
-import { Download, ChevronLeft, ChevronRight, Star, Heart, Sparkles, Music, Coffee, Sun, Moon, Cloud} from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Download, ChevronLeft, ChevronRight, Star, Heart, Sparkles, Music, Coffee, Sun, Moon, Cloud } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import { Event} from '../types/calendar';
+import { toast } from 'sonner';
+import type { CalendarEvent } from '../types/calendar';
 
 interface SocialPlannerProps {
- events: Event[];
- month?: Date;
- onEdit?: (event: Event) => void;
+  events: CalendarEvent[];
+  month?: Date;
+  onEdit?: (event: CalendarEvent) => void;
 }
 
 // Pastel color palette for sticky notes
@@ -30,17 +31,16 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  const [isExporting, setIsExporting] = useState(false);
 
  const currentYear = currentDate.getFullYear();
- const currentMonth = currentDate.getMonth();
+  const currentMonth = currentDate.getMonth();
 
- const monthNames = [
- 'January', 'February', 'March', 'April', 'May', 'June',
- 'July', 'August', 'September', 'October', 'November', 'December'
- ];
+  const monthNamesRu = [
+    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь',
+  ];
 
- const monthNamesRu = [
- 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
- 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
- ];
+  const monthNameEn = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
+    new Date(currentYear, currentMonth, 1),
+  );
 
  const getDaysInMonth = (year: number, month: number) => {
  return new Date(year, month + 1, 0).getDate();
@@ -119,11 +119,12 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
 });
  
  const link = document.createElement('a');
- link.download = `planner-${monthNames[currentMonth].toLowerCase()}-${currentYear}.png`;
+ link.download = `planner-${monthNameEn.toLowerCase()}-${currentYear}.png`;
  link.href = canvas.toDataURL('image/png');
  link.click();
-} catch (error) {
- console.error('Export failed:', error);
+ } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Ошибка экспорта';
+    toast.error('Ошибка экспорта', { description: message });
 } finally {
  setIsExporting(false);
 }
@@ -192,7 +193,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  className="font-dancing text-5xl text-gray-800 mb-2"
  style={{ fontFamily:"'Dancing Script', cursive"}}
  >
- {monthNames[currentMonth]}
+ {monthNameEn}
  </h1>
  <p 
  className="font-nunito text-xl text-secondary tracking-widest"
