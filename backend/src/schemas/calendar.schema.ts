@@ -5,7 +5,7 @@ export const createEventSchema = z.object({
   body: z.object({
     title: z.string().min(3, "Тема должна содержать не менее 3 символов"),
     date: z.string().datetime({ message: "Неверный формат даты" }),
-    groupId: z.number().int().positive().nullable().optional(),
+    groupId: z.number().int().positive().nullable(),
     organizer: z.string().min(2, "Укажите организатора"),
     performers: z.array(z.string()).default([]),
   }),
@@ -18,7 +18,7 @@ export const updateEventSchema = z.object({
   body: z.object({
     title: z.string().min(3, "Тема должна содержать не менее 3 символов"),
     date: z.string().datetime({ message: "Неверный формат даты" }),
-    groupId: z.number().int().positive().nullable().optional(),
+    groupId: z.number().int().positive().nullable(),
     organizer: z.string().min(2, "Укажите организатора"),
     performers: z.array(z.string()).default([]),
   }),

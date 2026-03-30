@@ -10,8 +10,11 @@ import { UkiyoeCalendar } from '../components/UkiyoeCalendar';
 import { SocialPlanner } from '../components/SocialPlanner';
 import { useCalendar } from '../features/calendar';
 
+const LIST_PAGE_SIZE = 10;
+
 export default function CalendarPage() {
   const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'planner'>('calendar');
+  const [listPage, setListPage] = useState(1);
 
   const {
     events,
@@ -120,11 +123,11 @@ export default function CalendarPage() {
       {viewMode === 'list' ? (
         <DataTable
           columns={columns}
-          data={events}
-          page={1}
-          pageSize={10}
+          data={events.slice((listPage - 1) * LIST_PAGE_SIZE, listPage * LIST_PAGE_SIZE)}
+          page={listPage}
+          pageSize={LIST_PAGE_SIZE}
           total={events.length}
-          onPageChange={() => {}}
+          onPageChange={setListPage}
           wrapCells
         />
       ) : viewMode === 'planner' ? (
