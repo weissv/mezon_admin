@@ -23,7 +23,7 @@ export default function UsersPage() {
  <div className="inline-flex w-fit gap-1 rounded-[16px] border border-[var(--glass-border)] bg-[var(--mezon-panel-muted)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
  <button
  onClick={() => setActiveTab('users')}
- className={`flex items-center gap-2 rounded-[12px] px-4 py-2 macos-text-caption macos-macos-transition ${
+ className={`flex items-center gap-2 rounded-[12px] px-4 py-2 macos-text-caption macos-transition ${
  activeTab === 'users'
  ? 'bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
  : 'text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]'
@@ -34,7 +34,7 @@ export default function UsersPage() {
  </button>
  <button
  onClick={() => setActiveTab('roles')}
- className={`flex items-center gap-2 rounded-[12px] px-4 py-2 macos-text-caption macos-macos-transition ${
+ className={`flex items-center gap-2 rounded-[12px] px-4 py-2 macos-text-caption macos-transition ${
  activeTab === 'roles'
  ? 'bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
  : 'text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]'

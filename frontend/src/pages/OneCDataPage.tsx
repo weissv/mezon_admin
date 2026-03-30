@@ -95,7 +95,7 @@ export default function OneCDataPage() {
  <button
  onClick={handleSync}
  disabled={syncing}
- className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-blue)] text-white macos-text-caption rounded-lg hover:bg-blue-700 disabled:opacity-50 macos-macos-transition"
+ className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-blue)] text-white macos-text-caption rounded-lg hover:bg-blue-700 disabled:opacity-50 macos-transition"
  >
  <RefreshCw className={`h-4 w-4 ${syncing ?"animate-spin":""}`} />
  {syncing ?"Синхронизация...":"Синхронизировать"}
@@ -125,7 +125,7 @@ export default function OneCDataPage() {
  activeTab === tab.id
  ?"border-blue-500 text-[var(--color-blue)]"
  :"border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[rgba(0,0,0,0.12)]"
-} whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2 macos-macos-transition`}
+} whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2 macos-transition`}
  >
  {tab.icon}
  {tab.label}

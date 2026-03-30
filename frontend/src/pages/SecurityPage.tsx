@@ -221,7 +221,7 @@ export default function SecurityPage() {
  {Object.entries(eventTypeLabels).map(([key, label]) => (
  <Card
  key={key} 
- className={`p-0 macos-macos-transition ${filterType === key ? 'ring-2 ring-[var(--mezon-accent)]' : 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
+ className={`p-0 macos-transition ${filterType === key ? 'ring-2 ring-[var(--mezon-accent)]' : 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
  >
  <button
  type="button"

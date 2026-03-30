@@ -659,7 +659,7 @@ export default function MaintenancePage() {
  <button
  key={tab.id}
  onClick={() => setActiveTab(tab.id)}
- className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm macos-macos-transition ${
+ className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm macos-transition ${
  activeTab === tab.id
  ? 'border-blue-500 text-[var(--color-blue)]'
  : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[rgba(0,0,0,0.12)]'
@@ -679,7 +679,7 @@ export default function MaintenancePage() {
  {/* Статистика */}
  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
  <div 
- className={`bg-white rounded-lg border p-4 cursor-pointer macos-macos-transition hover:shadow-md ${filterStatus === '' && filterType === '' ? 'ring-2 ring-blue-500' : ''}`}
+ className={`bg-white rounded-lg border p-4 cursor-pointer macos-transition hover:shadow-md ${filterStatus === '' && filterType === '' ? 'ring-2 ring-blue-500' : ''}`}
  onClick={() => { setFilterStatus(''); setFilterType('');}}
  >
  <p className="text-sm text-[var(--text-secondary)]">Всего</p>
@@ -689,7 +689,7 @@ export default function MaintenancePage() {
  {/* Для Директора/Завуча/Разработчика показываем Ожидают одобрения */}
  {canApprove && (
  <div 
- className={`bg-white rounded-lg border p-4 cursor-pointer macos-macos-transition hover:shadow-md ${filterStatus === 'PENDING' ? 'ring-2 ring-yellow-500' : ''}`}
+ className={`bg-white rounded-lg border p-4 cursor-pointer macos-transition hover:shadow-md ${filterStatus === 'PENDING' ? 'ring-2 ring-yellow-500' : ''}`}
  onClick={() => { setFilterStatus(filterStatus === 'PENDING' ? '' : 'PENDING'); setFilterType('');}}
  >
  <p className="text-sm text-[var(--text-secondary)]">Ожидают</p>
@@ -700,7 +700,7 @@ export default function MaintenancePage() {
  {/* Для Завхоза показываем Одобренные */}
  {(isZavhoz || canApprove) && (
  <div 
- className={`bg-white rounded-lg border p-4 cursor-pointer macos-macos-transition hover:shadow-md ${filterStatus === 'APPROVED' ? 'ring-2 ring-green-500' : ''}`}
+ className={`bg-white rounded-lg border p-4 cursor-pointer macos-transition hover:shadow-md ${filterStatus === 'APPROVED' ? 'ring-2 ring-green-500' : ''}`}
  onClick={() => { setFilterStatus(filterStatus === 'APPROVED' ? '' : 'APPROVED'); setFilterType('');}}
  >
  <p className="text-sm text-[var(--text-secondary)]">{isZavhoz ? 'Новые' : 'Одобренные'}</p>
@@ -709,7 +709,7 @@ export default function MaintenancePage() {
  )}
  
  <div 
- className={`bg-white rounded-lg border p-4 cursor-pointer macos-macos-transition hover:shadow-md ${filterStatus === 'IN_PROGRESS' ? 'ring-2 ring-blue-500' : ''}`}
+ className={`bg-white rounded-lg border p-4 cursor-pointer macos-transition hover:shadow-md ${filterStatus === 'IN_PROGRESS' ? 'ring-2 ring-blue-500' : ''}`}
  onClick={() => { setFilterStatus(filterStatus === 'IN_PROGRESS' ? '' : 'IN_PROGRESS'); setFilterType('');}}
  >
  <p className="text-sm text-[var(--text-secondary)]">В работе</p>
@@ -717,7 +717,7 @@ export default function MaintenancePage() {
  </div>
  
  <div 
- className={`bg-white rounded-lg border p-4 cursor-pointer macos-macos-transition hover:shadow-md ${filterStatus === 'DONE' ? 'ring-2 ring-gray-500' : ''}`}
+ className={`bg-white rounded-lg border p-4 cursor-pointer macos-transition hover:shadow-md ${filterStatus === 'DONE' ? 'ring-2 ring-gray-500' : ''}`}
  onClick={() => { setFilterStatus(filterStatus === 'DONE' ? '' : 'DONE'); setFilterType('');}}
  >
  <p className="text-sm text-[var(--text-secondary)]">Выполнено</p>
@@ -728,7 +728,7 @@ export default function MaintenancePage() {
  {/* Фильтры по типу */}
  <div className="grid grid-cols-2 gap-4">
  <div 
- className={`bg-white rounded-lg border p-4 cursor-pointer macos-macos-transition hover:shadow-md ${filterType === 'REPAIR' ? 'ring-2 ring-blue-500' : ''}`}
+ className={`bg-white rounded-lg border p-4 cursor-pointer macos-transition hover:shadow-md ${filterType === 'REPAIR' ? 'ring-2 ring-blue-500' : ''}`}
  onClick={() => { setFilterType(filterType === 'REPAIR' ? '' : 'REPAIR'); setFilterStatus('');}}
  >
  <div className="flex items-center gap-2">
@@ -738,7 +738,7 @@ export default function MaintenancePage() {
  <p className="macos-text-title">{stats.repair}</p>
  </div>
  <div 
- className={`bg-white rounded-lg border p-4 cursor-pointer macos-macos-transition hover:shadow-md ${filterType === 'ISSUE' ? 'ring-2 ring-blue-500' : ''}`}
+ className={`bg-white rounded-lg border p-4 cursor-pointer macos-transition hover:shadow-md ${filterType === 'ISSUE' ? 'ring-2 ring-blue-500' : ''}`}
  onClick={() => { setFilterType(filterType === 'ISSUE' ? '' : 'ISSUE'); setFilterStatus('');}}
  >
  <div className="flex items-center gap-2">

@@ -133,7 +133,7 @@ export function InventoryAutocomplete({
  <li
  key={`${item.name}-${item.id}`}
  onClick={() => handleSelect(item)}
- className="px-3 py-2 cursor-pointer hover:bg-blue-50 macos-macos-transition flex justify-between items-center text-sm"
+ className="px-3 py-2 cursor-pointer hover:bg-blue-50 macos-transition flex justify-between items-center text-sm"
  >
  <span className="font-medium text-gray-800">{item.name}</span>
  <div className="flex items-center gap-2">

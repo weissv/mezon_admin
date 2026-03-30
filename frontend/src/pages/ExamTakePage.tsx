@@ -244,7 +244,7 @@ export default function ExamTakePage() {
  <button
  onClick={handleStart}
  disabled={loading || !studentName.trim()}
- className="w-full mt-6 px-6 py-3 bg-[var(--color-blue)] text-white rounded-lg font-medium hover:bg-[var(--color-blue)] disabled:opacity-50 disabled:cursor-not-allowed macos-macos-transition"
+ className="w-full mt-6 px-6 py-3 bg-[var(--color-blue)] text-white rounded-lg font-medium hover:bg-[var(--color-blue)] disabled:opacity-50 disabled:cursor-not-allowed macos-transition"
  >
  {loading ?"Загрузка...":"Начать контрольную"}
  </button>
@@ -509,7 +509,7 @@ function QuestionView({
  {(question.options || []).map((option, i) => (
  <label
  key={i}
- className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer macos-macos-transition ${
+ className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer macos-transition ${
  value === option
  ?"border-teal-500 bg-[rgba(0,122,255,0.06)]"
  :"border-[rgba(0,0,0,0.08)] hover:border-[rgba(0,0,0,0.12)]"
@@ -537,7 +537,7 @@ function QuestionView({
  return (
  <label
  key={i}
- className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer macos-macos-transition ${
+ className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer macos-transition ${
  selected
  ?"border-teal-500 bg-[rgba(0,122,255,0.06)]"
  :"border-[rgba(0,0,0,0.08)] hover:border-[rgba(0,0,0,0.12)]"
@@ -570,7 +570,7 @@ function QuestionView({
  <button
  key={option}
  onClick={() => onChange(option)}
- className={`p-4 border rounded-lg font-medium macos-macos-transition ${
+ className={`p-4 border rounded-lg font-medium macos-transition ${
  value === option
  ?"border-teal-500 bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)]"
  :"border-[rgba(0,0,0,0.08)] text-[var(--text-primary)] hover:border-[rgba(0,0,0,0.12)]"

@@ -147,7 +147,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  <div className="flex items-center gap-2">
  <button
  onClick={handlePrevMonth}
- className="p-2 rounded-lg bg-white shadow-sm hover:bg-[var(--fill-quaternary)] macos-macos-transition"
+ className="p-2 rounded-lg bg-white shadow-sm hover:bg-[var(--fill-quaternary)] macos-transition"
  >
  <ChevronLeft className="w-5 h-5 text-[var(--text-secondary)]"/>
  </button>
@@ -156,7 +156,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  </span>
  <button
  onClick={handleNextMonth}
- className="p-2 rounded-lg bg-white shadow-sm hover:bg-[var(--fill-quaternary)] macos-macos-transition"
+ className="p-2 rounded-lg bg-white shadow-sm hover:bg-[var(--fill-quaternary)] macos-transition"
  >
  <ChevronRight className="w-5 h-5 text-[var(--text-secondary)]"/>
  </button>
@@ -164,7 +164,7 @@ export const SocialPlanner: React.FC<SocialPlannerProps> = ({ events, month = ne
  <button
  onClick={handleExport}
  disabled={isExporting}
- className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-lg shadow-md hover:shadow-lg macos-macos-transition font-nunito font-semibold disabled:opacity-50"
+ className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-lg shadow-md hover:shadow-lg macos-transition font-nunito font-semibold disabled:opacity-50"
  >
  <Download className="w-4 h-4"/>
  {isExporting ? 'Экспорт...' : 'Скачать PNG'}

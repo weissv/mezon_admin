@@ -46,7 +46,7 @@ export default function FinancePage() {
  activeTab === tab.id
  ?"bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
  :"text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]"
-} whitespace-nowrap rounded-[12px] px-4 py-2 macos-text-caption flex items-center gap-2 macos-macos-transition`}
+} whitespace-nowrap rounded-[12px] px-4 py-2 macos-text-caption flex items-center gap-2 macos-transition`}
  >
  {tab.icon}
  {tab.label}
