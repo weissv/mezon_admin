@@ -10,11 +10,11 @@ export async function syncUniversalCatalog(ctx: SyncContext, entityName: string)
     .replace(/^ChartOfCharacteristicTypes_/, "ВидыХарактеристик_");
   const filter = "DeletionMark eq false";
   const rows = await ctx.fetchAll(entityName, filter);
-  let upserted = 0;
-  let errors = 0;
 
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    `Catalog ${catalogType}`,
+    async (r: any) => {
       const data: Record<string, any> = {
         catalogType,
         code: r.Code ?? null,
@@ -40,12 +40,9 @@ export async function syncUniversalCatalog(ctx: SyncContext, entityName: string)
         create: { externalId: r.Ref_Key, ...data },
         update: data,
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      logger.error(`[1C-Sync] Catalog ${catalogType} upsert error for ${r.Ref_Key}:`, (err as Error).message);
-    }
-  }
+    },
+  );
+
   return { entity: entityName, fetched: rows.length, upserted, errors };
 }
 
@@ -59,12 +56,12 @@ export async function syncUniversalRegister(ctx: SyncContext, entityName: string
         ? "Calculation"
         : "Information";
   const rows = await ctx.fetchAll(entityName);
-  let upserted = 0;
-  let errors = 0;
 
-  for (const r of rows as any[]) {
-    const refKey = ctx.buildRegisterExternalId(registerType, r);
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    `Register ${registerType}`,
+    async (r: any) => {
+      const refKey = ctx.buildRegisterExternalId(registerType, r);
       const data: Record<string, any> = {
         registerType,
         registerKind,
@@ -89,12 +86,9 @@ export async function syncUniversalRegister(ctx: SyncContext, entityName: string
         create: { externalId: refKey, ...data },
         update: data,
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      logger.error(`[1C-Sync] Register ${registerType} upsert error for ${refKey}:`, (err as Error).message);
-    }
-  }
+    },
+  );
+
   return { entity: entityName, fetched: rows.length, upserted, errors };
 }
 

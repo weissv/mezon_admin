@@ -3,6 +3,11 @@ import type { SyncContext, SyncResult } from "./sync-context";
 import { resolveContractorId } from "./resolvers";
 import { logger } from "../../../../utils/logger";
 
+/**
+ * CRITICAL: Only posted, non-deleted invoice documents are synced.
+ */
+const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
+
 interface InvoiceSyncOptions {
   contractorRefExtractor?: (row: any) => string | null;
   totalAmountExtractor?: (row: any) => number;
@@ -24,13 +29,12 @@ async function syncInvoiceDoc(
   direction: InvoiceDirection,
   options?: InvoiceSyncOptions,
 ): Promise<SyncResult> {
-  const filter = "DeletionMark eq false";
-  const rows = await ctx.fetchAll(entity, filter);
-  let upserted = 0;
-  let errors = 0;
+  const rows = await ctx.fetchAll(entity, DOCUMENT_FILTER);
 
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    `${label} (${entity})`,
+    async (r: any) => {
       const contractorRefKey = options?.contractorRefExtractor
         ? options.contractorRefExtractor(r)
         : extractInvoiceContractorRefKey(r);
@@ -69,12 +73,8 @@ async function syncInvoiceDoc(
           comment,
         },
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      logger.error(`[1C-Sync] ${label} upsert error:`, (err as Error).message);
-    }
-  }
+    },
+  );
 
   return { entity, fetched: rows.length, upserted, errors };
 }

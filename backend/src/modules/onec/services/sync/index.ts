@@ -45,19 +45,24 @@ export class OneCSyncService {
 
   private buildSyncPhases(): SyncPhase[] {
     return [
-      { label: "Phase 1: Core Catalogs", steps: coreCatalogSteps(this.ctx) },
-      { label: "Phase 1b: Extended Catalogs", steps: extendedCatalogSteps(this.ctx) },
-      { label: "Phase 2: Finance Documents", steps: financeSyncSteps(this.ctx) },
-      { label: "Phase 3: Invoices", steps: invoiceSyncSteps(this.ctx) },
-      { label: "Phase 4: Extended Finance Documents", steps: extendedFinanceDocSteps(this.ctx) },
-      { label: "Phase 5: Warehouse Documents", steps: warehouseDocSteps(this.ctx) },
-      { label: "Phase 6: HR Documents", steps: hrSyncSteps(this.ctx) },
-      { label: "Phase 7: Payroll Documents", steps: payrollSyncSteps(this.ctx) },
-      { label: "Phase 8: Universal Catalogs", steps: universalCatalogSteps(this.ctx) },
-      { label: "Phase 9: Registers", steps: registerSteps(this.ctx) },
-      { label: "Phase 10: Charts", steps: chartEntitySteps(this.ctx) },
-      { label: "Phase 11: Accounting Register", steps: extraRegisterSteps(this.ctx) },
-      { label: "Phase 12: Balance Snapshots", steps: [() => syncBalanceSnapshots(this.ctx)] },
+      // ── Step 1: Master data (CashFlowArticles → Contractors → Persons) ──
+      { label: "Phase 1: Core Catalogs (CashFlow → Contractors → Persons)", steps: coreCatalogSteps(this.ctx) },
+      { label: "Phase 2: Extended Catalogs", steps: extendedCatalogSteps(this.ctx) },
+      // ── Step 2: Financial documents (require master data FKs) ──
+      { label: "Phase 3: Finance Documents (Posted only)", steps: financeSyncSteps(this.ctx) },
+      { label: "Phase 4: Invoices (Posted only)", steps: invoiceSyncSteps(this.ctx) },
+      { label: "Phase 5: Extended Finance Documents (Posted only)", steps: extendedFinanceDocSteps(this.ctx) },
+      { label: "Phase 6: Warehouse Documents (Posted only)", steps: warehouseDocSteps(this.ctx) },
+      // ── Step 3: HR & Payroll ──
+      { label: "Phase 7: HR Documents (Posted only)", steps: hrSyncSteps(this.ctx) },
+      { label: "Phase 8: Payroll Documents (Posted only)", steps: payrollSyncSteps(this.ctx) },
+      // ── Step 4: Universal catalogs & registers ──
+      { label: "Phase 9: Universal Catalogs", steps: universalCatalogSteps(this.ctx) },
+      { label: "Phase 10: Registers", steps: registerSteps(this.ctx) },
+      { label: "Phase 11: Charts", steps: chartEntitySteps(this.ctx) },
+      { label: "Phase 12: Accounting Register", steps: extraRegisterSteps(this.ctx) },
+      // ── Step 5: Derived data ──
+      { label: "Phase 13: Balance Snapshots (calculated)", steps: [() => syncBalanceSnapshots(this.ctx)] },
     ];
   }
 

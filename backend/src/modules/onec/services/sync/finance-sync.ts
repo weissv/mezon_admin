@@ -3,6 +3,12 @@ import type { SyncContext, SyncResult } from "./sync-context";
 import { resolveCounterparty, resolveCashFlowArticleId } from "./resolvers";
 import { logger } from "../../../../utils/logger";
 
+/**
+ * CRITICAL: Documents use `Posted eq true` to exclude drafts that pollute
+ * financial balances. Only posted, non-deleted documents are synced.
+ */
+const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
+
 async function syncFinanceDoc(
   ctx: SyncContext,
   entity: string,
@@ -10,13 +16,12 @@ async function syncFinanceDoc(
   channel: TransactionChannel,
   sign: 1 | -1,
 ): Promise<SyncResult> {
-  const filter = "DeletionMark eq false";
-  const rows = await ctx.fetchAll(entity, filter);
-  let upserted = 0;
-  let errors = 0;
+  const rows = await ctx.fetchAll(entity, DOCUMENT_FILTER);
 
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    `${label} (${entity})`,
+    async (r: any) => {
       const rawAmount = parseFloat(r.СуммаДокумента) || 0;
       const amount = rawAmount * sign;
       const date = r.Date ? new Date(r.Date) : new Date();
@@ -68,12 +73,8 @@ async function syncFinanceDoc(
           purpose,
         },
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      logger.error(`[1C-Sync] ${label} upsert error:`, (err as Error).message);
-    }
-  }
+    },
+  );
 
   return { entity, fetched: rows.length, upserted, errors };
 }

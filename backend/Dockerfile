@@ -49,15 +49,17 @@ RUN npm prune --omit=dev
 # Этап 3: Запуск в продакшене
 FROM node:20-slim AS runner
 WORKDIR /app
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends postgresql-client \
-	&& rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 # Копируем только то, что нужно для запуска
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
+# Keep network-heavy apt-get after builder artifacts are copied.
+# This prevents BuildKit from contending with npm registry downloads in deps stage.
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends postgresql-client \
+	&& rm -rf /var/lib/apt/lists/*
 
 EXPOSE 4000
 # Run migrations, seed database, then start server

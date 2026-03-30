@@ -1,19 +1,23 @@
 import type { SyncContext, SyncResult } from "./sync-context";
 import { logger } from "../../../../utils/logger";
 
+/**
+ * Payroll Documents: only posted, non-deleted documents are synced.
+ */
+const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
+
 async function syncGenericPayrollDocument(
   ctx: SyncContext,
   entity: string,
   docType: string,
   extractor: (row: any) => Record<string, any>,
 ): Promise<SyncResult> {
-  const filter = "DeletionMark eq false";
-  const rows = await ctx.fetchAll(entity, filter);
-  let upserted = 0;
-  let errors = 0;
+  const rows = await ctx.fetchAll(entity, DOCUMENT_FILTER);
 
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    `Payroll ${docType} (${entity})`,
+    async (r: any) => {
       const extra = extractor(r);
       const baseData = {
         docType,
@@ -30,12 +34,9 @@ async function syncGenericPayrollDocument(
         create: { externalId: r.Ref_Key, ...baseData },
         update: baseData,
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      logger.error(`[1C-Sync] Payroll ${docType} upsert error for ${r.Ref_Key}:`, (err as Error).message);
-    }
-  }
+    },
+  );
+
   return { entity, fetched: rows.length, upserted, errors };
 }
 
