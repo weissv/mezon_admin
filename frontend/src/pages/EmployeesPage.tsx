@@ -3,8 +3,8 @@ import { toast} from 'sonner';
 import { useApi} from '../hooks/useApi';
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Button} from '../components/ui/button';
-import { Modal} from '../components/Modal';
-import { PlusCircle, AlertCircle, UploadCloud, Download, Trash2} from 'lucide-react';
+import { Modal, ModalActions, ModalNotice, ModalSection } from '../components/Modal';
+import { PlusCircle, AlertCircle, AlertTriangle, UploadCloud, Download, Trash2} from 'lucide-react';
 import { EmployeeForm} from '../components/forms/EmployeeForm';
 import { Employee} from '../types/employee';
 import { api} from '../lib/api';
@@ -187,6 +187,7 @@ export default function EmployeesPage() {
  isOpen={isModalOpen}
  onClose={() => setIsModalOpen(false)}
  title={editingEmployee ? 'Редактировать данные' : 'Добавить нового сотрудника'}
+ eyebrow={editingEmployee ? 'Редактирование' : 'Сотрудники'}
  >
  <EmployeeForm
  initialData={editingEmployee}
@@ -200,36 +201,48 @@ export default function EmployeesPage() {
  isOpen={!!deleteConfirm}
  onClose={() => setDeleteConfirm(null)}
  title="Удаление сотрудника"
+ eyebrow="Опасное действие"
+ tone="danger"
+ icon={<AlertTriangle className="h-5 w-5" />}
+ closeOnBackdrop={!isDeleting}
+ closeOnEscape={!isDeleting}
+ footer={
+   <ModalActions>
+     <Button variant="outline" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>
+       Отмена
+     </Button>
+     <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+       {isDeleting ? 'Удаление...' : 'Удалить'}
+     </Button>
+   </ModalActions>
+ }
  >
- <div className="p-4">
- <div className="flex items-start gap-4 mb-4">
- <div className="p-2 bg-[rgba(255,59,48,0.12)] rounded-lg">
- <AlertCircle className="h-6 w-6 text-macos-red"/>
- </div>
- <div>
- <p className="text-[14px] font-semibold tracking-[-0.01em] text-primary">Вы уверены, что хотите удалить сотрудника?</p>
- <p className="text-[14px] leading-relaxed text-secondary mt-1">
- <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.position})
- </p>
- {deleteConfirm?.user && (
- <p className="text-[11px] font-medium uppercase tracking-widest text-macos-orange mt-2">
- ⚠️ У сотрудника есть привязанный аккаунт ({deleteConfirm.user.email}), он тоже будет удалён.
- </p>
+ <ModalNotice tone="danger" title="Это действие нельзя отменить">
+   Сотрудник будет полностью удалён из системы.
+   {deleteConfirm?.user && (
+     <> Вместе с ним будет удалён привязанный аккаунт ({deleteConfirm.user.email}).</>
+   )}
+ </ModalNotice>
+ {deleteConfirm && (
+   <ModalSection title="Данные сотрудника">
+     <div className="mezon-modal-facts">
+       <div className="mezon-modal-fact">
+         <span className="mezon-modal-fact__label">ФИО</span>
+         <span className="mezon-modal-fact__value">{deleteConfirm.lastName} {deleteConfirm.firstName}</span>
+       </div>
+       <div className="mezon-modal-fact">
+         <span className="mezon-modal-fact__label">Должность</span>
+         <span className="mezon-modal-fact__value">{deleteConfirm.position}</span>
+       </div>
+       {deleteConfirm.user && (
+         <div className="mezon-modal-fact">
+           <span className="mezon-modal-fact__label">Аккаунт</span>
+           <span className="mezon-modal-fact__value">{deleteConfirm.user.email}</span>
+         </div>
+       )}
+     </div>
+   </ModalSection>
  )}
- <p className="text-[11px] font-medium uppercase tracking-widest text-macos-red mt-2">
- Это действие нельзя отменить!
- </p>
- </div>
- </div>
- <div className="flex justify-end gap-2">
- <Button variant="ghost"onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>
- Отмена
- </Button>
- <Button variant="destructive"onClick={handleDelete} disabled={isDeleting}>
- {isDeleting ? 'Удаление...' : 'Удалить'}
- </Button>
- </div>
- </div>
  </Modal>
  </div>
  );
