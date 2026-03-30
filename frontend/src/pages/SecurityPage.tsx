@@ -26,7 +26,7 @@ const eventTypeLabels: Record<string, string> = {
 const eventTypeColors: Record<string, string> = {
  INCIDENT: 'bg-[rgba(255,59,48,0.12)] text-[var(--macos-red)]',
  FIRE_CHECK: 'bg-[rgba(255,149,0,0.14)] text-[var(--macos-orange)]',
- VISITOR_LOG: 'bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)]',
+ VISITOR_LOG: 'bg-[rgba(10,132,255,0.12)] text-macos-blue',
  DOCUMENT: 'bg-[rgba(52,199,89,0.14)] text-[var(--macos-green)]',
 };
 
@@ -202,7 +202,7 @@ export default function SecurityPage() {
  <div className="space-y-6">
  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
  <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+ <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-macos-blue shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
  <Shield className="h-5 w-5"/>
  </div>
  <div>
@@ -221,7 +221,7 @@ export default function SecurityPage() {
  {Object.entries(eventTypeLabels).map(([key, label]) => (
  <Card
  key={key} 
- className={`p-0 macos-transition ${filterType === key ? 'ring-2 ring-[var(--mezon-accent)]' : 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
+ className={`p-0 macos-transition ${filterType === key ? 'ring-2 ring-macos-blue' : 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
  >
  <button
  type="button"
@@ -232,8 +232,8 @@ export default function SecurityPage() {
  <Shield className="h-4 w-4"/>
  </div>
  <div>
- <p className="text-sm text-[var(--mezon-text-secondary)]">{label}</p>
- <p className="macos-text-title text-[var(--mezon-dark)]">{stats[key] || 0}</p>
+ <p className="text-sm text-secondary">{label}</p>
+ <p className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{stats[key] || 0}</p>
  </div>
  </button>
  </Card>
@@ -242,7 +242,7 @@ export default function SecurityPage() {
 
  {/* Фильтр */}
  {filterType && (
- <div className="flex items-center gap-2 rounded-lg bg-[rgba(10,132,255,0.08)] px-3 py-2 text-sm text-[var(--mezon-accent)]">
+ <div className="flex items-center gap-2 rounded-lg bg-[rgba(10,132,255,0.08)] px-3 py-2 text-sm text-macos-blue">
  <Filter className="h-4 w-4"/>
  <span>Фильтр: {eventTypeLabels[filterType]}</span>
  <button onClick={() => setFilterType('')} className="ml-2 underline hover:no-underline">
@@ -254,11 +254,11 @@ export default function SecurityPage() {
  <Card>
  {loading ? (
  <div className="p-8 text-center">
- <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-[var(--mezon-accent)]"></div>
- <p className="mt-2 text-[var(--mezon-text-secondary)]">Загрузка...</p>
+ <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-macos-blue"></div>
+ <p className="mt-2 text-secondary">Загрузка...</p>
  </div>
  ) : filteredLogs.length === 0 ? (
- <div className="p-8 text-center text-[var(--mezon-text-secondary)]">
+ <div className="p-8 text-center text-secondary">
  {filterType ? 'Нет записей выбранного типа' : 'Журнал пуст. Добавьте первую запись.'}
  </div>
  ) : (
@@ -281,13 +281,13 @@ export default function SecurityPage() {
  >
  <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
  <div>
- <label htmlFor="date"className="mb-1 block font-medium text-[var(--mezon-dark)]">Дата и время *</label>
+ <label htmlFor="date"className="mb-1 block font-medium text-primary">Дата и время *</label>
  <Input type="datetime-local"{...register('date')} id="date"/>
  {errors.date && <FormError message={errors.date.message} />}
  </div>
 
  <div>
- <label htmlFor="eventType"className="mb-1 block font-medium text-[var(--mezon-dark)]">Тип события *</label>
+ <label htmlFor="eventType"className="mb-1 block font-medium text-primary">Тип события *</label>
  <select {...register('eventType')} id="eventType"className={selectClassName}>
  <option value="INCIDENT">Происшествие</option>
  <option value="FIRE_CHECK">Проверка пожарной безопасности</option>
@@ -298,7 +298,7 @@ export default function SecurityPage() {
  </div>
 
  <div>
- <label htmlFor="description"className="mb-1 block font-medium text-[var(--mezon-dark)]">Описание</label>
+ <label htmlFor="description"className="mb-1 block font-medium text-primary">Описание</label>
  <textarea 
  {...register('description')} 
  id="description"
@@ -309,7 +309,7 @@ export default function SecurityPage() {
  </div>
 
  <div>
- <label htmlFor="documentUrl"className="mb-1 block font-medium text-[var(--mezon-dark)]">Ссылка на документ</label>
+ <label htmlFor="documentUrl"className="mb-1 block font-medium text-primary">Ссылка на документ</label>
  <Input 
  {...register('documentUrl')} 
  id="documentUrl"
@@ -341,7 +341,7 @@ export default function SecurityPage() {
  <AlertCircle className="h-6 w-6 text-[var(--macos-red)]"/>
  </div>
  <div>
- <p className="font-medium text-[var(--mezon-dark)]">Вы уверены, что хотите удалить эту запись?</p>
+ <p className="font-medium text-primary">Вы уверены, что хотите удалить эту запись?</p>
  {deleteConfirm && (
  <div className="mt-2 rounded-lg bg-[rgba(255,255,255,0.58)] p-3 text-sm">
  <p><strong>Тип:</strong> {eventTypeLabels[deleteConfirm.eventType]}</p>

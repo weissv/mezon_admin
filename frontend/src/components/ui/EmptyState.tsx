@@ -57,17 +57,17 @@ export function EmptyState({
       <div
         className={cn(
           'mx-auto rounded-[var(--radius-xl)] flex items-center justify-center mb-4',
-          'bg-[var(--fill-quaternary)]',
+          'bg-fill-quaternary',
           sizes.iconWrapper
         )}
       >
-        <Icon className={cn('text-[var(--text-tertiary)]', sizes.icon)} />
+        <Icon className={cn('text-tertiary', sizes.icon)} />
       </div>
-      <h3 className={cn('font-semibold text-[var(--text-primary)] mb-1 tracking-[-0.01em]', sizes.title)}>
+      <h3 className={cn('font-semibold text-primary mb-1 tracking-[-0.01em]', sizes.title)}>
         {title}
       </h3>
       {description && (
-        <p className={cn('text-[var(--text-tertiary)] mb-4 max-w-sm mx-auto', sizes.description)}>
+        <p className={cn('text-tertiary mb-4 max-w-sm mx-auto', sizes.description)}>
           {description}
         </p>
       )}

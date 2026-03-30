@@ -25,7 +25,7 @@ export default function FinancePage() {
  return (
  <div className="space-y-6">
  <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+ <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-macos-blue shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
  <LayoutDashboard className="h-5 w-5"/>
  </div>
  <div>
@@ -36,7 +36,7 @@ export default function FinancePage() {
  </div>
 
  {/* Tabs */}
- <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-[var(--glass-border)] bg-[var(--mezon-panel-muted)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
+ <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-card bg-surface-primary p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
  <nav className="flex gap-1"aria-label="Finance tabs">
  {tabs.map((tab) => (
  <button
@@ -44,9 +44,9 @@ export default function FinancePage() {
  onClick={() => setActiveTab(tab.id)}
  className={`${
  activeTab === tab.id
- ?"bg-[rgba(255,255,255,0.9)] text-[var(--mezon-dark)] shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
- :"text-[var(--mezon-text-secondary)] hover:bg-[rgba(255,255,255,0.58)] hover:text-[var(--mezon-dark)]"
-} whitespace-nowrap rounded-[12px] px-4 py-2 macos-text-caption flex items-center gap-2 macos-transition`}
+ ?"bg-[rgba(255,255,255,0.9)] text-primary shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
+ :"text-secondary hover:bg-[rgba(255,255,255,0.58)] hover:text-primary"
+} whitespace-nowrap rounded-xl px-4 py-2 text-[11px] font-medium uppercase tracking-widest flex items-center gap-2 macos-transition`}
  >
  {tab.icon}
  {tab.label}

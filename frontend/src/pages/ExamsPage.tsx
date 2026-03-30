@@ -128,73 +128,73 @@ export default function ExamsPage() {
 
  return (
  <div className="space-y-6">
- {/* Заголовок */}
- <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
- <div>
- <h1 className="macos-text-title text-[var(--mezon-dark)]">Контрольные работы</h1>
- <p className="macos-text-subtitle text-[var(--text-secondary)] mt-1">Создавайте и управляйте контрольными</p>
- </div>
- <Button onClick={() => navigate("/exams/new")}>
- <Plus className="h-5 w-5 mr-1"/>
- Создать контрольную
- </Button>
- </div>
+      {/* Заголовок */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-[24px] font-bold tracking-[-0.025em] text-primary leading-tight mt-2">Контрольные работы</h1>
+          <p className="text-[15px] font-medium text-secondary leading-relaxed tracking-[-0.01em] mt-1">Создавайте и управляйте контрольными</p>
+        </div>
+        <Button onClick={() => navigate("/exams/new")}>
+          <Plus className="h-5 w-5 mr-1" />
+          Создать контрольную
+        </Button>
+      </div>
 
- {/* Фильтры */}
- <div className="bg-[var(--mezon-panel-muted)] rounded-[12px] shadow-[var(--shadow-sm)] p-4 border border-[var(--glass-border)]">
- <div className="flex flex-col sm:flex-row gap-4">
- <div className="relative flex-1">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--text-tertiary)]"/>
- <input
- type="text"
- placeholder="Поиск по названию или предмету..."
- value={searchQuery}
- onChange={(e) => setSearchQuery(e.target.value)}
- className="w-full pl-10 pr-4 py-2 mezon-field rounded-[8px]"
- />
- </div>
- <select
- value={statusFilter}
- onChange={(e) => setStatusFilter(e.target.value)}
- className="px-4 py-2 mezon-field rounded-[8px]"
- >
- <option value="">Все статусы</option>
- <option value="DRAFT">Черновики</option>
- <option value="PUBLISHED">Опубликованные</option>
- <option value="CLOSED">Закрытые</option>
- <option value="ARCHIVED">В архиве</option>
- </select>
- </div>
- </div>
+      {/* Фильтры */}
+      <div className="bg-surface-primary rounded-xl shadow-subtle p-4 border border-card">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-tertiary" />
+            <input
+              type="text"
+              placeholder="Поиск по названию или предмету..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 mezon-field"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 mezon-field sm:w-auto"
+          >
+            <option value="">Все статусы</option>
+            <option value="DRAFT">Черновики</option>
+            <option value="PUBLISHED">Опубликованные</option>
+            <option value="CLOSED">Закрытые</option>
+            <option value="ARCHIVED">В архиве</option>
+          </select>
+        </div>
+      </div>
 
- {/* Список контрольных */}
- {filteredExams.length === 0 ? (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] p-12 text-center border border-[var(--glass-border)]">
- <FileText className="h-16 w-16 text-[var(--text-quaternary)] mx-auto mb-4"/>
- <h3 className="macos-text-callout text-[var(--text-primary)] mb-2">Нет контрольных</h3>
- <p className="macos-text-body text-[var(--text-secondary)] mb-6">Создайте первую контрольную работу</p>
- <Button onClick={() => navigate("/exams/new")}>
- <Plus className="h-5 w-5 mr-1"/>
- Создать контрольную
- </Button>
- </div>
+      {/* Список контрольных */}
+      {filteredExams.length === 0 ? (
+        <div className="bg-surface-primary rounded-xl shadow-subtle p-12 text-center border border-card">
+          <FileText className="h-16 w-16 text-tertiary mx-auto mb-4" />
+          <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-primary mb-2">Нет контрольных</h3>
+          <p className="text-[14px] text-secondary mb-6">Создайте первую контрольную работу</p>
+          <Button onClick={() => navigate("/exams/new")}>
+            <Plus className="h-5 w-5 mr-1" />
+            Создать контрольную
+          </Button>
+        </div>
  ) : (
- <div className="grid gap-4">
- {filteredExams.map((exam) => (
- <div key={exam.id} className="bg-[var(--mezon-panel-muted)] border border-[rgba(0,0,0,0.06)] rounded-[12px] shadow-[var(--shadow-sm)] p-6">
- <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
- {/* Основная информация */}
- <div className="flex-1">
- <div className="flex items-center gap-3 mb-2">
- <h3 className="macos-text-callout text-[var(--text-primary)]">{exam.title}</h3>
- <span className={`mezon-badge ${statusColors[exam.status]}`}>
- {statusLabels[exam.status]}
- </span>
- </div>
- {exam.description && (
- <p className="macos-text-body text-[var(--text-secondary)] mb-3 line-clamp-2">{exam.description}</p>
- )}
- <div className="flex flex-wrap items-center gap-4 macos-text-caption text-[var(--text-tertiary)]">
+        <div className="grid gap-4">
+          {filteredExams.map((exam) => (
+            <div key={exam.id} className="bg-surface-primary border border-card rounded-xl shadow-subtle p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                {/* Основная информация */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-primary">{exam.title}</h3>
+                    <span className={`mezon-badge ${statusColors[exam.status]}`}>
+                      {statusLabels[exam.status]}
+                    </span>
+                  </div>
+                  {exam.description && (
+                    <p className="text-[14px] leading-relaxed text-secondary mb-3 line-clamp-2">{exam.description}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-4 text-[11px] font-medium text-tertiary uppercase tracking-widest">
  {exam.subject && (
  <span className="flex items-center gap-1">
  <FileText className="h-4 w-4"/>

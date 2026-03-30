@@ -35,7 +35,7 @@ export default function InvoicesView() {
  key:"date",
  header:"Дата",
  render: (row) => (
- <span className="text-[var(--text-primary)] font-medium">
+ <span className="text-primary font-medium">
  {new Date(row.date).toLocaleDateString("ru-RU", { day:"2-digit", month:"short", year:"2-digit"})}
  </span>
  ),
@@ -44,7 +44,7 @@ export default function InvoicesView() {
  key:"documentNumber",
  header:"№ документа",
  render: (row) => (
- <span className="font-mono text-sm text-[var(--text-secondary)]">{row.documentNumber ||"—"}</span>
+ <span className="font-mono text-sm text-secondary">{row.documentNumber ||"—"}</span>
  ),
 },
  {
@@ -53,7 +53,7 @@ export default function InvoicesView() {
  render: (row) => (
  <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
  row.direction ==="INCOMING"
- ?"bg-[rgba(0,122,255,0.06)] text-[var(--color-blue)]"
+ ?"bg-tint-blue text-macos-blue"
  :"bg-orange-50 text-orange-700"
 }`}>
  {row.direction ==="INCOMING"? <ArrowDownLeft className="h-3 w-3"/> : <ArrowUpRight className="h-3 w-3"/>}
@@ -74,7 +74,7 @@ export default function InvoicesView() {
  key:"contractor",
  header:"Контрагент",
  render: (row) => (
- <span className="text-[var(--text-primary)] truncate max-w-[200px] block">
+ <span className="text-primary truncate max-w-[200px] block">
  {row.contractor?.name ||"—"}
  </span>
  ),
@@ -86,7 +86,7 @@ export default function InvoicesView() {
  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
  row.posted
  ?"bg-emerald-50 text-emerald-700"
- :"bg-[rgba(255,204,0,0.06)] text-[var(--color-orange)]"
+ :"bg-[rgba(255,204,0,0.06)] text-macos-orange"
 }`}>
  {row.posted ? <CheckCircle2 className="h-3 w-3"/> : <Clock className="h-3 w-3"/>}
  {row.posted ?"Проведён":"Черновик"}
@@ -97,14 +97,14 @@ export default function InvoicesView() {
  key:"operationType",
  header:"Тип операции",
  render: (row) => (
- <span className="text-[var(--text-secondary)] text-sm">{row.operationType ||"—"}</span>
+ <span className="text-secondary text-sm">{row.operationType ||"—"}</span>
  ),
 },
  {
  key:"comment",
  header:"Комментарий",
  render: (row) => (
- <span className="text-[var(--text-tertiary)] text-sm truncate max-w-[180px] block"title={row.comment ||""}>
+ <span className="text-tertiary text-sm truncate max-w-[180px] block"title={row.comment ||""}>
  {row.comment ||"—"}
  </span>
  ),
@@ -116,13 +116,13 @@ export default function InvoicesView() {
  {/* Summary Cards */}
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
  <Card className="p-4 flex items-center gap-3">
- <div className="p-2 rounded-lg bg-[rgba(0,122,255,0.06)]">
- <ArrowDownLeft className="h-5 w-5 text-[var(--color-blue)]"/>
+ <div className="p-2 rounded-lg bg-tint-blue">
+ <ArrowDownLeft className="h-5 w-5 text-macos-blue"/>
  </div>
  <div>
- <p className="text-xs text-[var(--text-secondary)]">Поступления</p>
- <p className="text-lg font-bold text-[var(--color-blue)]">{currency.format(incomingSum)}</p>
- <p className="text-xs text-[var(--text-tertiary)]">{incoming.length} документов</p>
+ <p className="text-xs text-secondary">Поступления</p>
+ <p className="text-lg font-bold text-macos-blue">{currency.format(incomingSum)}</p>
+ <p className="text-xs text-tertiary">{incoming.length} документов</p>
  </div>
  </Card>
 
@@ -131,20 +131,20 @@ export default function InvoicesView() {
  <ArrowUpRight className="h-5 w-5 text-orange-600"/>
  </div>
  <div>
- <p className="text-xs text-[var(--text-secondary)]">Реализация</p>
+ <p className="text-xs text-secondary">Реализация</p>
  <p className="text-lg font-bold text-orange-700">{currency.format(outgoingSum)}</p>
- <p className="text-xs text-[var(--text-tertiary)]">{outgoing.length} документов</p>
+ <p className="text-xs text-tertiary">{outgoing.length} документов</p>
  </div>
  </Card>
 
  <Card className="p-4 flex items-center gap-3">
- <div className="p-2 rounded-lg bg-[var(--fill-tertiary)]">
- <CheckCircle2 className="h-5 w-5 text-[var(--text-secondary)]"/>
+ <div className="p-2 rounded-lg bg-fill-tertiary">
+ <CheckCircle2 className="h-5 w-5 text-secondary"/>
  </div>
  <div>
- <p className="text-xs text-[var(--text-secondary)]">Всего накладных</p>
+ <p className="text-xs text-secondary">Всего накладных</p>
  <p className="text-lg font-bold text-gray-800">{total}</p>
- <p className="text-xs text-[var(--text-tertiary)]">
+ <p className="text-xs text-tertiary">
  проведено: {invoices.filter((i) => i.posted).length}
  </p>
  </div>

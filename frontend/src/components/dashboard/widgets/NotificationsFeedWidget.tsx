@@ -18,9 +18,9 @@ interface NotificationsFeedData {
 const TYPE_ICONS: Record<string, { icon: typeof Bell; color: string}> = {
  info: { icon: Info, color: 'text-blue-500'},
  warning: { icon: AlertTriangle, color: 'text-amber-500'},
- success: { icon: CheckCircle, color: 'text-[var(--color-green)]'},
- error: { icon: XCircle, color: 'text-[var(--color-red)]'},
- default: { icon: Bell, color: 'text-[var(--text-secondary)]'},
+ success: { icon: CheckCircle, color: 'text-macos-green'},
+ error: { icon: XCircle, color: 'text-macos-red'},
+ default: { icon: Bell, color: 'text-secondary'},
 };
 
 export default function NotificationsFeedWidget({ data}: { data: NotificationsFeedData | undefined}) {
@@ -31,14 +31,14 @@ export default function NotificationsFeedWidget({ data}: { data: NotificationsFe
  return (
  <div className="space-y-2">
  {(data.unreadCount ?? 0) > 0 && (
- <div className="flex items-center gap-1 text-xs text-[var(--color-blue)] bg-blue-50 px-2 py-1 rounded">
+ <div className="flex items-center gap-1 text-xs text-macos-blue bg-blue-50 px-2 py-1 rounded">
  <Bell className="h-3 w-3"/>
  {data.unreadCount} непрочитанных
  </div>
  )}
 
  {notifications.length === 0 && (
- <p className="text-sm text-[var(--text-tertiary)] text-center py-4">Нет уведомлений</p>
+ <p className="text-sm text-tertiary text-center py-4">Нет уведомлений</p>
  )}
 
  {notifications.slice(0, 6).map(n => {
@@ -54,9 +54,9 @@ export default function NotificationsFeedWidget({ data}: { data: NotificationsFe
  <Icon className={`h-3.5 w-3.5 mt-0.5 flex-shrink-0 ${cfg.color}`} />
  <div className="flex-1 min-w-0">
  <p className={`truncate ${!n.read ? 'font-semibold' : ''}`}>{n.title}</p>
- {n.body && <p className="text-[var(--text-tertiary)] truncate">{n.body}</p>}
+ {n.body && <p className="text-tertiary truncate">{n.body}</p>}
  </div>
- <span className="text-[var(--text-tertiary)] whitespace-nowrap">
+ <span className="text-tertiary whitespace-nowrap">
  {new Date(n.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit'})}
  </span>
  </div>

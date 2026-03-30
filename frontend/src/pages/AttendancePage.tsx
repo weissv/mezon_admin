@@ -74,12 +74,12 @@ export default function AttendancePage() {
 
  return (
  <div className="space-y-6">
- <h1 className="macos-text-title">Посещаемость</h1>
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight">Посещаемость</h1>
 
- <Card className="p-4 shadow-[var(--shadow-sm)]">
+ <Card className="p-4 shadow-subtle">
  <div className="flex flex-wrap items-center gap-4">
  <div>
- <label htmlFor="date-select"className="block macos-text-caption mb-1">
+ <label htmlFor="date-select"className="block text-[11px] font-medium uppercase tracking-widest mb-1">
  Дата
  </label>
  <input
@@ -91,7 +91,7 @@ export default function AttendancePage() {
  />
  </div>
  <div>
- <label htmlFor="group-select"className="block macos-text-caption mb-1">
+ <label htmlFor="group-select"className="block text-[11px] font-medium uppercase tracking-widest mb-1">
  Класс
  </label>
  <select
@@ -112,26 +112,26 @@ export default function AttendancePage() {
  </Card>
 
  {error && (
- <div className="macos-text-callout text-[var(--macos-red)] bg-[rgba(255,59,48,0.06)] border border-[rgba(255,59,48,0.15)] p-3 rounded-[var(--radius-md)]">
+ <div className="text-[14px] font-semibold tracking-[-0.01em] text-[var(--macos-red)] bg-[rgba(255,59,48,0.06)] border border-[rgba(255,59,48,0.15)] p-3 rounded-[var(--radius-md)]">
  {error}
  </div>
  )}
 
- <Card className="shadow-[var(--shadow-sm)]">
+ <Card className="shadow-subtle">
  {loading ? (
- <div className="p-4 text-center macos-text-body text-[var(--text-tertiary)]">Загрузка...</div>
+ <div className="p-4 text-center text-[14px] leading-relaxed text-tertiary">Загрузка...</div>
  ) : (
  <ul className="divide-y divide-[var(--separator)]">
  {children.map((child) => (
  <li key={child.id} className="p-4 flex justify-between items-center">
- <span className="macos-text-callout text-[var(--text-primary)]">{child.lastName} {child.firstName}</span>
+ <span className="text-[14px] font-semibold tracking-[-0.01em] text-primary">{child.lastName} {child.firstName}</span>
  <div className="flex gap-2">
  <Button
  onClick={() => handleSetPresence(child.id, true)}
  className={`!px-3 !py-1 text-sm ${
  attendance.get(child.id) === true
- ? '!bg-[var(--color-green)] hover:!bg-[var(--color-green)] !text-white'
- : '!bg-[var(--fill-quaternary)] hover:!bg-[var(--fill-tertiary)] !text-[var(--text-secondary)]'
+ ? '!bg-macos-green hover:!bg-macos-green !text-white'
+ : '!bg-fill-quaternary hover:!bg-fill-tertiary !text-secondary'
 }`}
  >
  Присутствует
@@ -140,8 +140,8 @@ export default function AttendancePage() {
  onClick={() => handleSetPresence(child.id, false)}
  className={`!px-3 !py-1 text-sm ${
  attendance.get(child.id) === false
- ? '!bg-[var(--color-red)] hover:!bg-[var(--color-red)] !text-white'
- : '!bg-[var(--fill-quaternary)] hover:!bg-[var(--fill-tertiary)] !text-[var(--text-secondary)]'
+ ? '!bg-macos-red hover:!bg-macos-red !text-white'
+ : '!bg-fill-quaternary hover:!bg-fill-tertiary !text-secondary'
 }`}
  >
  Отсутствует
@@ -150,7 +150,7 @@ export default function AttendancePage() {
  </li>
  ))}
  {children.length === 0 && !loading && (
- <li className="p-4 text-center macos-text-body text-[var(--text-tertiary)]">В этом классе нет детей или класс не выбран.</li>
+ <li className="p-4 text-center text-[14px] leading-relaxed text-tertiary">В этом классе нет детей или класс не выбран.</li>
  )}
  </ul>
  )}

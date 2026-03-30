@@ -35,7 +35,7 @@ export function ShoppingListModal({ isOpen, onClose, onGenerate}: { isOpen: bool
  return (
  <Modal isOpen={isOpen} onClose={onClose} title="Список покупок">
  <div className="space-y-4">
- <h2 className="macos-text-title mb-4">Выбор периода для списка закупок</h2>
+ <h2 className="text-[24px] font-bold tracking-[-0.025em] leading-tight mb-4">Выбор периода для списка закупок</h2>
  <div className="grid grid-cols-2 gap-4 mb-4">
  <div>
  <label htmlFor="startDate"className="block mb-1">

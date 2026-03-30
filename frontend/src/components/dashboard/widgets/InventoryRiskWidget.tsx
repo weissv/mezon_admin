@@ -34,15 +34,15 @@ export default function InventoryRiskWidget({ data}: { data: InventoryRiskData |
  const isCritical = item.daysLeft <= 2;
  return (
  <div key={item.id} className="flex items-center gap-2 text-xs">
- <Package className={`h-3 w-3 flex-shrink-0 ${isCritical ? 'text-[var(--color-red)]' : 'text-amber-500'}`} />
+ <Package className={`h-3 w-3 flex-shrink-0 ${isCritical ? 'text-macos-red' : 'text-amber-500'}`} />
  <span className="truncate flex-1">{item.name}</span>
- <div className="w-16 h-1.5 bg-[var(--fill-secondary)] rounded-full overflow-hidden">
+ <div className="w-16 h-1.5 bg-fill-secondary rounded-full overflow-hidden">
  <div
  className={`h-full rounded-full ${isCritical ? 'bg-red-500' : 'bg-amber-400'}`}
  style={{ width: `${ratio * 100}%`}}
  />
  </div>
- <span className="text-[var(--text-tertiary)] w-14 text-right">
+ <span className="text-tertiary w-14 text-right">
  {item.currentQty} {item.unit}
  </span>
  </div>
@@ -51,7 +51,7 @@ export default function InventoryRiskWidget({ data}: { data: InventoryRiskData |
  </div>
 
  {data.totalLow > 6 && (
- <p className="text-xs text-[var(--text-tertiary)] text-center">ещё {data.totalLow - 6} позиций…</p>
+ <p className="text-xs text-tertiary text-center">ещё {data.totalLow - 6} позиций…</p>
  )}
  </div>
  );

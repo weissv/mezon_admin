@@ -33,7 +33,7 @@ describe('Button', () => {
  render(<Button>Default</Button>);
 
  const button = screen.getByRole('button');
- expect(button).toHaveClass('bg-[var(--mezon-accent)]');
+ expect(button).toHaveClass('bg-macos-blue');
  expect(button).toHaveClass('text-white');
 });
 
@@ -42,14 +42,14 @@ describe('Button', () => {
 
  const button = screen.getByRole('button');
  expect(button).toHaveClass('border-2');
- expect(button).toHaveClass('border-[var(--mezon-accent)]');
+ expect(button).toHaveClass('border-macos-blue');
 });
 
  it('применяет ghost вариант', () => {
  render(<Button variant="ghost">Ghost</Button>);
 
  const button = screen.getByRole('button');
- expect(button).toHaveClass('text-[var(--mezon-accent)]');
+ expect(button).toHaveClass('text-macos-blue');
 });
 
  it('применяет secondary вариант', () => {

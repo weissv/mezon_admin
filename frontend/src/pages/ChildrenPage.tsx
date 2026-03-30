@@ -149,7 +149,7 @@ export default function ChildrenPage() {
  header: 'ФИО',
  render: (row) => (
  <button
- className="text-left text-[var(--color-blue)] hover:underline font-medium"
+ className="text-left text-macos-blue hover:underline font-medium"
  onClick={() => navigate(`/children/${row.id}`)}
  >
  {row.lastName} {row.firstName} {row.middleName || ''}
@@ -199,7 +199,7 @@ export default function ChildrenPage() {
  <Archive className="h-4 w-4"/>
  </Button>
  )}
- <Button variant="ghost"size="sm"className="text-[var(--color-red)]"onClick={() => setDeleteConfirm(row)} title="Удалить">
+ <Button variant="ghost"size="sm"className="text-macos-red"onClick={() => setDeleteConfirm(row)} title="Удалить">
  <Trash2 className="h-4 w-4"/>
  </Button>
  </div>
@@ -211,22 +211,22 @@ export default function ChildrenPage() {
  <div>
  <div className="mb-4 flex items-start justify-between gap-4">
  <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-[rgba(0,122,255,0.08)] text-[var(--color-blue)]">
+ <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-[rgba(0,122,255,0.08)] text-macos-blue">
  <Users className="h-5 w-5"/>
  </div>
  <div>
  <div className="mezon-badge macos-badge-neutral mb-1">Children · контингент</div>
- <h1 className="macos-text-title">Управление контингентом детей</h1>
- <p className="macos-text-subtitle mt-1">Профили учеников, статусы, родители и массовый импорт в одном рабочем пространстве.</p>
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight">Управление контингентом детей</h1>
+ <p className="text-[15px] font-medium leading-relaxed tracking-[-0.01em] mt-1">Профили учеников, статусы, родители и массовый импорт в одном рабочем пространстве.</p>
  </div>
  </div>
  </div>
 
  {/* Import/Export Card */}
- <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-[var(--shadow-sm)]">
+ <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-subtle">
  <div>
- <p className="macos-text-callout">Массовая загрузка списков</p>
- <p className="macos-text-body text-[var(--text-secondary)] mt-1">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон.</p>
+ <p className="text-[14px] font-semibold tracking-[-0.01em]">Массовая загрузка списков</p>
+ <p className="text-[14px] leading-relaxed text-secondary mt-1">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон.</p>
  </div>
  <div className="flex flex-col gap-2 sm:flex-row">
  <Button variant="outline"onClick={handleExport} disabled={isExporting}>
@@ -239,7 +239,7 @@ export default function ChildrenPage() {
  </Card>
 
  {/* Search + Filters + Add */}
- <div className="mb-4 flex flex-col gap-3 rounded-[18px] border border-[var(--glass-border)] bg-[var(--mezon-panel-muted)] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px] sm:flex-row sm:items-center sm:justify-between">
+ <div className="mb-4 flex flex-col gap-3 rounded-[18px] border border-card bg-surface-primary p-4 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px] sm:flex-row sm:items-center sm:justify-between">
  <div className="flex items-center gap-2 flex-1">
  <div className="relative flex-1 max-w-sm">
  <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4"/>
@@ -271,10 +271,10 @@ export default function ChildrenPage() {
 
  {/* Filters panel */}
  {showFilters && (
- <Card className="mb-4 p-4 shadow-[var(--shadow-sm)]">
+ <Card className="mb-4 p-4 shadow-subtle">
  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
  <div>
- <label className="mb-1 block macos-text-caption">Статус</label>
+ <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">Статус</label>
  <select
  className={selectClassName}
  value={filters.status ?? ''}
@@ -290,7 +290,7 @@ export default function ChildrenPage() {
  </select>
  </div>
  <div>
- <label className="mb-1 block macos-text-caption">Класс</label>
+ <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">Класс</label>
  <select
  className={selectClassName}
  value={filters.groupId ?? ''}
@@ -306,7 +306,7 @@ export default function ChildrenPage() {
  </select>
  </div>
  <div>
- <label className="mb-1 block macos-text-caption">Пол</label>
+ <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">Пол</label>
  <select
  className={selectClassName}
  value={filters.gender ?? ''}
@@ -356,11 +356,11 @@ export default function ChildrenPage() {
  <AlertCircle className="h-6 w-6 text-[var(--macos-red)]"/>
  </div>
  <div>
- <p className="macos-text-callout">Вы уверены, что хотите удалить ученика?</p>
- <p className="mt-1 macos-text-body text-[var(--text-secondary)]">
+ <p className="text-[14px] font-semibold tracking-[-0.01em]">Вы уверены, что хотите удалить ученика?</p>
+ <p className="mt-1 text-[14px] leading-relaxed text-secondary">
  <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.group?.name})
  </p>
- <p className="mt-2 macos-text-caption text-[var(--macos-red)]">
+ <p className="mt-2 text-[11px] font-medium uppercase tracking-widest text-[var(--macos-red)]">
  Все связанные данные (посещаемость, отсутствия, записи в кружки) будут удалены.
  </p>
  </div>

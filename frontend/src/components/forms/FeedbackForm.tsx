@@ -44,22 +44,22 @@ export function FeedbackForm({ onSuccess, onCancel}: FeedbackFormProps) {
  return (
  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
  <div>
- <label className="block macos-text-caption mb-1">Имя родителя</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Имя родителя</label>
  <Input {...register('parentName')} placeholder="Иванова Мария Петровна"/>
  <FormError message={errors.parentName?.message} />
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Контактная информация</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Контактная информация</label>
  <Input {...register('contactInfo')} placeholder="maria@example.com или +79991234567"/>
  <FormError message={errors.contactInfo?.message} />
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Тип обращения</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Тип обращения</label>
  <select 
  {...register('type')} 
- className="w-full px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+ className="w-full px-3 py-2 border border-field rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
  >
  <option value="Обращение">Обращение</option>
  <option value="Жалоба">Жалоба</option>
@@ -69,11 +69,11 @@ export function FeedbackForm({ onSuccess, onCancel}: FeedbackFormProps) {
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Сообщение</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Сообщение</label>
  <textarea
  {...register('message')}
  placeholder="Подробное описание обращения..."
- className="w-full h-32 px-3 py-2 border border-[rgba(0,0,0,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+ className="w-full h-32 px-3 py-2 border border-field rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
  />
  <FormError message={errors.message?.message} />
  </div>

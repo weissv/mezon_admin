@@ -583,7 +583,7 @@ export default function SchedulePage() {
  if (loading) {
  return (
  <div className="flex items-center justify-center h-64">
- <div className="text-[var(--text-tertiary)]">Загрузка расписания...</div>
+ <div className="text-tertiary">Загрузка расписания...</div>
  </div>
  );
 }
@@ -619,9 +619,9 @@ export default function SchedulePage() {
  <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
  <div className="flex items-center gap-2">
  <Calendar className="h-6 w-6"/>
- <h1 className="macos-text-title">Расписание</h1>
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight">Расписание</h1>
  {allConflicts.length > 0 && (
- <span className="ml-2 px-2 py-1 bg-[rgba(255,59,48,0.1)] text-[var(--color-red)] text-xs rounded-full flex items-center gap-1">
+ <span className="ml-2 px-2 py-1 bg-[rgba(255,59,48,0.1)] text-macos-red text-xs rounded-full flex items-center gap-1">
  <AlertCircle className="h-3 w-3"/>
  {allConflicts.length} конфликтов
  </span>
@@ -667,12 +667,12 @@ export default function SchedulePage() {
  variant={activeTab ==="conflicts"?"default":"outline"}
  size="sm"
  onClick={() => setActiveTab("conflicts")}
- className={allConflicts.length > 0 ?"border-[rgba(255,59,48,0.3)] text-[var(--color-red)]":""}
+ className={allConflicts.length > 0 ?"border-[rgba(255,59,48,0.3)] text-macos-red":""}
  >
  <AlertTriangle className="h-4 w-4 mr-2"/>
  Конфликты
  {allConflicts.length > 0 && (
- <span className="ml-1 px-1.5 py-0.5 bg-[rgba(255,59,48,0.1)] text-[var(--color-red)] text-xs rounded">
+ <span className="ml-1 px-1.5 py-0.5 bg-[rgba(255,59,48,0.1)] text-macos-red text-xs rounded">
  {allConflicts.length}
  </span>
  )}
@@ -762,8 +762,8 @@ export default function SchedulePage() {
 
  {/* Schedule Grid */}
  {timeSlots.length === 0 ? (
- <Card className="p-8 text-center text-[var(--text-tertiary)]">
- <Clock className="h-12 w-12 mx-auto mb-4 text-[var(--text-quaternary)]"/>
+ <Card className="p-8 text-center text-tertiary">
+ <Clock className="h-12 w-12 mx-auto mb-4 text-tertiary"/>
  <p className="mb-4">Сначала настройте расписание звонков</p>
  <Button onClick={() => setActiveTab("timeslots")}>
  <Settings className="h-4 w-4 mr-2"/>
@@ -771,21 +771,21 @@ export default function SchedulePage() {
  </Button>
  </Card>
  ) : !currentSelector ? (
- <Card className="p-8 text-center text-[var(--text-tertiary)]">
+ <Card className="p-8 text-center text-tertiary">
  {viewMode ==="group"?"Выберите класс для просмотра расписания":"Выберите учителя для просмотра расписания"}
  </Card>
  ) : (
  <Card className="overflow-x-auto">
  <table className="w-full min-w-[800px]">
  <thead>
- <tr className="bg-[var(--fill-quaternary)]">
- <th className="p-3 text-left macos-text-caption text-[var(--text-secondary)] border-b border-[var(--separator)] w-24">
+ <tr className="bg-fill-quaternary">
+ <th className="p-3 text-left text-[11px] font-medium uppercase tracking-widest text-secondary border-b border-[var(--separator)] w-24">
  Урок
  </th>
  {[1, 2, 3, 4, 5, 6].map((day) => (
  <th
  key={day}
- className="p-3 text-center macos-text-caption text-[var(--text-secondary)] border-b border-[var(--separator)]"
+ className="p-3 text-center text-[11px] font-medium uppercase tracking-widest text-secondary border-b border-[var(--separator)]"
  >
  {DAY_NAMES[day]}
  </th>
@@ -799,7 +799,7 @@ export default function SchedulePage() {
  <tr key={ts.id} className="border-b border-[var(--separator)] hover:bg-[rgba(0,122,255,0.03)]">
  <td className="p-2 text-sm">
  <div className="font-medium">{ts.number} урок</div>
- <div className="text-xs text-[var(--text-tertiary)]">
+ <div className="text-xs text-tertiary">
  {ts.startTime} – {ts.endTime}
  </div>
  </td>
@@ -833,7 +833,7 @@ export default function SchedulePage() {
  )}
  {viewMode ==="group"&& (
  <button
- className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--color-red)] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+ className="absolute -top-1 -right-1 w-5 h-5 bg-macos-red rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
  onClick={(e) => {
  e.stopPropagation();
  setDeleteConfirm(slot);
@@ -847,13 +847,13 @@ export default function SchedulePage() {
  </div>
  ) : viewMode ==="group"? (
  <button
- className="w-full h-16 border-2 border-dashed border-[var(--separator)] rounded-[var(--radius-md)] text-[var(--text-quaternary)] hover:border-[rgba(0,122,255,0.3)] hover:text-[var(--color-blue)] hover:bg-[rgba(0,122,255,0.04)] macos-transition flex items-center justify-center"
+ className="w-full h-16 border-2 border-dashed border-[var(--separator)] rounded-[var(--radius-md)] text-tertiary hover:border-[rgba(0,122,255,0.3)] hover:text-macos-blue hover:bg-[rgba(0,122,255,0.04)] macos-transition flex items-center justify-center"
  onClick={() => handleCreateSlot(day, ts.id)}
  >
  <PlusCircle className="h-5 w-5"/>
  </button>
  ) : (
- <div className="w-full h-16 border border-[var(--separator)] rounded-[var(--radius-md)] bg-[var(--fill-quaternary)]"/>
+ <div className="w-full h-16 border border-[var(--separator)] rounded-[var(--radius-md)] bg-fill-quaternary"/>
  )}
  </td>
  );
@@ -871,7 +871,7 @@ export default function SchedulePage() {
  {activeTab ==="subjects"&& (
  <Card className="p-4">
  <div className="flex justify-between items-center mb-4">
- <h2 className="macos-text-callout flex items-center gap-2">
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
  <BookOpen className="h-5 w-5"/>
  Предметы ({subjects.length})
  </h2>
@@ -882,7 +882,7 @@ export default function SchedulePage() {
  </div>
 
  {subjects.length === 0 ? (
- <p className="text-[var(--text-tertiary)] text-center py-8">Предметы не добавлены</p>
+ <p className="text-tertiary text-center py-8">Предметы не добавлены</p>
  ) : (
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
  {subjects.map((subject) => (
@@ -898,7 +898,7 @@ export default function SchedulePage() {
  <div>
  <p className="font-medium">{subject.name}</p>
  {subject.shortName && (
- <p className="text-xs text-[var(--text-tertiary)]">{subject.shortName}</p>
+ <p className="text-xs text-tertiary">{subject.shortName}</p>
  )}
  </div>
  </div>
@@ -910,7 +910,7 @@ export default function SchedulePage() {
  variant="ghost"
  size="sm"
  onClick={() => handleDeleteSubject(subject)}
- className="text-[var(--color-red)] hover:text-[var(--color-red)] hover:bg-[rgba(255,59,48,0.06)]"
+ className="text-macos-red hover:text-macos-red hover:bg-[rgba(255,59,48,0.06)]"
  >
  <Trash2 className="h-4 w-4"/>
  </Button>
@@ -926,7 +926,7 @@ export default function SchedulePage() {
  {activeTab ==="rooms"&& (
  <Card className="p-4">
  <div className="flex justify-between items-center mb-4">
- <h2 className="macos-text-callout flex items-center gap-2">
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
  <DoorOpen className="h-5 w-5"/>
  Кабинеты ({rooms.length})
  </h2>
@@ -937,7 +937,7 @@ export default function SchedulePage() {
  </div>
 
  {rooms.length === 0 ? (
- <p className="text-[var(--text-tertiary)] text-center py-8">Кабинеты не добавлены</p>
+ <p className="text-tertiary text-center py-8">Кабинеты не добавлены</p>
  ) : (
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
  {rooms.map((room) => (
@@ -948,7 +948,7 @@ export default function SchedulePage() {
  <div>
  <p className="font-medium">{room.name}</p>
  {room.capacity && (
- <p className="text-xs text-[var(--text-tertiary)]">Вместимость: {room.capacity}</p>
+ <p className="text-xs text-tertiary">Вместимость: {room.capacity}</p>
  )}
  </div>
  <div className="flex gap-1">
@@ -959,7 +959,7 @@ export default function SchedulePage() {
  variant="ghost"
  size="sm"
  onClick={() => handleDeleteRoom(room)}
- className="text-[var(--color-red)] hover:text-[var(--color-red)] hover:bg-[rgba(255,59,48,0.06)]"
+ className="text-macos-red hover:text-macos-red hover:bg-[rgba(255,59,48,0.06)]"
  >
  <Trash2 className="h-4 w-4"/>
  </Button>
@@ -975,7 +975,7 @@ export default function SchedulePage() {
  {activeTab ==="timeslots"&& (
  <Card className="p-4">
  <div className="flex justify-between items-center mb-4">
- <h2 className="macos-text-callout flex items-center gap-2">
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
  <Clock className="h-5 w-5"/>
  Расписание звонков ({timeSlots.length})
  </h2>
@@ -986,7 +986,7 @@ export default function SchedulePage() {
  </div>
 
  {timeSlots.length === 0 ? (
- <p className="text-[var(--text-tertiary)] text-center py-8">Звонки не настроены</p>
+ <p className="text-tertiary text-center py-8">Звонки не настроены</p>
  ) : (
  <div className="space-y-2">
  {timeSlots
@@ -997,12 +997,12 @@ export default function SchedulePage() {
  className="flex items-center justify-between p-3 rounded-[var(--radius-md)] border border-[var(--separator)]"
  >
  <div className="flex items-center gap-4">
- <div className="w-10 h-10 rounded-full bg-[rgba(0,122,255,0.1)] flex items-center justify-center font-bold text-[var(--color-blue)]">
+ <div className="w-10 h-10 rounded-full bg-tint-blue flex items-center justify-center font-bold text-macos-blue">
  {slot.number}
  </div>
  <div>
  <p className="font-medium">{slot.number}-й урок</p>
- <p className="text-sm text-[var(--text-tertiary)]">
+ <p className="text-sm text-tertiary">
  {slot.startTime} – {slot.endTime}
  </p>
  </div>
@@ -1015,7 +1015,7 @@ export default function SchedulePage() {
  variant="ghost"
  size="sm"
  onClick={() => handleDeleteTimeSlot(slot)}
- className="text-[var(--color-red)] hover:text-[var(--color-red)] hover:bg-[rgba(255,59,48,0.06)]"
+ className="text-macos-red hover:text-macos-red hover:bg-[rgba(255,59,48,0.06)]"
  >
  <Trash2 className="h-4 w-4"/>
  </Button>
@@ -1031,8 +1031,8 @@ export default function SchedulePage() {
  {activeTab ==="conflicts"&& (
  <Card className="p-4">
  <div className="flex justify-between items-center mb-4">
- <h2 className="macos-text-callout flex items-center gap-2">
- <AlertTriangle className="h-5 w-5 text-[var(--color-orange)]"/>
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
+ <AlertTriangle className="h-5 w-5 text-macos-orange"/>
  Конфликты в расписании
  </h2>
  <Button variant="outline"size="sm"onClick={loadConflicts}>
@@ -1042,9 +1042,9 @@ export default function SchedulePage() {
 
  {allConflicts.length === 0 ? (
  <div className="text-center py-8">
- <Check className="h-12 w-12 mx-auto text-[var(--color-green)] mb-4"/>
- <p className="text-[var(--color-green)] font-medium">Конфликтов не обнаружено!</p>
- <p className="text-[var(--text-tertiary)] text-sm mt-2">Расписание составлено корректно</p>
+ <Check className="h-12 w-12 mx-auto text-macos-green mb-4"/>
+ <p className="text-macos-green font-medium">Конфликтов не обнаружено!</p>
+ <p className="text-tertiary text-sm mt-2">Расписание составлено корректно</p>
  </div>
  ) : (
  <div className="space-y-3">
@@ -1053,25 +1053,25 @@ export default function SchedulePage() {
  key={idx}
  className={`p-4 rounded-[var(--radius-md)] border-l-4 ${
  conflict.type ==="teacher"
- ?"border-[var(--color-red)] bg-[rgba(255,59,48,0.05)]"
+ ?"border-macos-red bg-[rgba(255,59,48,0.05)]"
  : conflict.type ==="room"
- ?"border-[var(--color-orange)] bg-[rgba(255,149,0,0.05)]"
+ ?"border-macos-orange bg-[rgba(255,149,0,0.05)]"
  :"border-[var(--color-yellow)] bg-[rgba(255,204,0,0.05)]"
 }`}
  >
  <div className="flex items-start gap-3">
  <div className="flex-shrink-0">
  {conflict.type ==="teacher"? (
- <UserCheck className="h-5 w-5 text-[var(--color-red)]"/>
+ <UserCheck className="h-5 w-5 text-macos-red"/>
  ) : conflict.type ==="room"? (
- <DoorOpen className="h-5 w-5 text-[var(--color-orange)]"/>
+ <DoorOpen className="h-5 w-5 text-macos-orange"/>
  ) : (
  <Users className="h-5 w-5 text-[var(--color-yellow)]"/>
  )}
  </div>
  <div className="flex-1">
- <p className="font-medium text-[var(--text-primary)]">{conflict.message}</p>
- <p className="text-sm text-[var(--text-secondary)] mt-1">
+ <p className="font-medium text-primary">{conflict.message}</p>
+ <p className="text-sm text-secondary mt-1">
  {DAY_NAMES[conflict.dayOfWeek]}, {conflict.timeSlot}-й урок
  </p>
  </div>
@@ -1094,8 +1094,8 @@ export default function SchedulePage() {
  <form onSubmit={handleSaveSlot} className="p-4 space-y-4">
  {formConflicts.length > 0 && (
  <div className="p-3 bg-[rgba(255,59,48,0.06)] border border-[rgba(255,59,48,0.15)] rounded-[var(--radius-md)]">
- <p className="macos-text-caption text-[var(--color-red)] mb-2">Обнаружены конфликты:</p>
- <ul className="text-sm text-[var(--color-red)] space-y-1">
+ <p className="text-[11px] font-medium uppercase tracking-widest text-macos-red mb-2">Обнаружены конфликты:</p>
+ <ul className="text-sm text-macos-red space-y-1">
  {formConflicts.map((c, i) => (
  <li key={i}>• {c.message}</li>
  ))}
@@ -1226,7 +1226,7 @@ export default function SchedulePage() {
  key={color}
  type="button"
  className={`w-8 h-8 rounded-lg border-2 transition-transform ${
- subjectForm.color === color ?"border-[var(--text-primary)] scale-110":"border-transparent"
+ subjectForm.color === color ?"border-text-primary scale-110":"border-transparent"
 }`}
  style={{ backgroundColor: color}}
  onClick={() => setSubjectForm({ ...subjectForm, color})}
@@ -1339,14 +1339,14 @@ export default function SchedulePage() {
  <div className="p-4">
  <div className="flex items-start gap-4">
  <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,59,48,0.12)] rounded-full flex items-center justify-center">
- <AlertTriangle className="h-5 w-5 text-[var(--color-red)]"/>
+ <AlertTriangle className="h-5 w-5 text-macos-red"/>
  </div>
  <div className="flex-1">
- <p className="font-medium text-[var(--text-primary)]">Удалить этот урок из расписания?</p>
+ <p className="font-medium text-primary">Удалить этот урок из расписания?</p>
  {deleteConfirm && (
- <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-[var(--radius-md)] text-sm">
+ <div className="mt-2 p-3 bg-fill-quaternary rounded-[var(--radius-md)] text-sm">
  <p><strong>{deleteConfirm.subject.name}</strong></p>
- <p className="text-[var(--text-secondary)]">
+ <p className="text-secondary">
  {DAY_NAMES[deleteConfirm.dayOfWeek]}, {deleteConfirm.timeSlot.number}-й урок
  </p>
  </div>

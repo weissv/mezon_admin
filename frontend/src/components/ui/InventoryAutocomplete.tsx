@@ -140,7 +140,7 @@ export function InventoryAutocomplete({
  <span className={`text-xs px-1.5 py-0.5 rounded ${item.quantity > 0 ? 'bg-[rgba(52,199,89,0.12)] text-green-700' : 'bg-[rgba(255,59,48,0.12)] text-red-700'}`}>
  {item.quantity} {item.unit}
  </span>
- <span className="text-[var(--text-secondary)] text-xs bg-[var(--fill-tertiary)] px-2 py-0.5 rounded">
+ <span className="text-secondary text-xs bg-fill-tertiary px-2 py-0.5 rounded">
  {item.unit}
  </span>
  </div>

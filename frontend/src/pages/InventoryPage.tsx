@@ -93,9 +93,9 @@ export default function InventoryPage() {
  label: 'Все товары',
  count: stats.all,
  icon: Archive,
- accent: 'text-[var(--mezon-text-secondary)]',
+ accent: 'text-secondary',
  iconBg: 'bg-[rgba(60,60,67,0.08)]',
- ring: 'ring-[var(--mezon-accent)]',
+ ring: 'ring-macos-blue',
 },
  {
  type: 'FOOD' as const,
@@ -292,7 +292,7 @@ export default function InventoryPage() {
  <div className="space-y-6">
  <div className="flex justify-between items-center">
  <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)] shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
+ <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-macos-blue shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
  <Archive className="h-5 w-5"/>
  </div>
  <div>
@@ -328,8 +328,8 @@ export default function InventoryPage() {
  <Icon className={`h-5 w-5 ${accent}`} />
  </div>
  <div>
- <span className="text-sm text-[var(--mezon-text-secondary)]">{label}</span>
- <p className={`mt-1 macos-text-title ${type === 'ALL' ? 'text-[var(--mezon-dark)]' : accent}`}>{count}</p>
+ <span className="text-sm text-secondary">{label}</span>
+ <p className={`mt-1 text-[24px] font-bold tracking-[-0.025em] leading-tight ${type === 'ALL' ? 'text-primary' : accent}`}>{count}</p>
  </div>
  </button>
  </Card>
@@ -337,7 +337,7 @@ export default function InventoryPage() {
  </div>
 
  <Card>
- <h2 className="flex items-center gap-2 p-4 text-xl font-semibold text-[var(--mezon-dark)]">
+ <h2 className="flex items-center gap-2 p-4 text-xl font-semibold text-primary">
  {filterType === 'FOOD' && <Apple className="h-5 w-5 text-[var(--macos-green)]"/>}
  {filterType === 'HOUSEHOLD' && <Package className="h-5 w-5 text-[var(--macos-orange)]"/>}
  {filterType === 'STATIONERY' && <Pencil className="h-5 w-5 text-[var(--macos-purple)]"/>}
@@ -346,12 +346,12 @@ export default function InventoryPage() {
  {loading ? (
  <div className="p-4">Загрузка...</div>
  ) : filteredItems.length === 0 ? (
- <div className="p-8 text-center text-[var(--mezon-text-secondary)]">
+ <div className="p-8 text-center text-secondary">
  {filterType === 'ALL' ? 'Нет товаров на складе' : `Нет товаров в категории"${inventoryTypeLabels[filterType]}"`}
  </div>
  ) : (
  <table className="w-full text-sm">
- <thead className="bg-[rgba(255,255,255,0.6)] text-[var(--mezon-text-secondary)]">
+ <thead className="bg-[rgba(255,255,255,0.6)] text-secondary">
  <tr>
  <th className="text-left p-2">Наименование</th>
  <th className="text-left p-2">Тип</th>
@@ -387,7 +387,7 @@ export default function InventoryPage() {
  <Trash2 className="h-3 w-3 text-[var(--macos-red)]"/>
  </Button>
  <Button variant="outline"size="sm"onClick={() => handleShowHistory(item)} title="История движений">
- <History className="h-3 w-3 text-[var(--mezon-accent)]"/>
+ <History className="h-3 w-3 text-macos-blue"/>
  </Button>
  <Button variant="destructive"size="sm"onClick={() => openDeleteModal(item)} title="Удалить">
  &times;
@@ -403,9 +403,9 @@ export default function InventoryPage() {
 
  {shoppingList && (
  <Card className="mt-6">
- <h2 className="p-4 text-xl font-semibold text-[var(--mezon-dark)]">Список закупок</h2>
+ <h2 className="p-4 text-xl font-semibold text-primary">Список закупок</h2>
  <table className="w-full text-sm">
- <thead className="bg-[rgba(255,255,255,0.6)] text-[var(--mezon-text-secondary)]">
+ <thead className="bg-[rgba(255,255,255,0.6)] text-secondary">
  <tr>
  <th className="text-left p-2">Продукт</th>
  <th className="text-left p-2">Требуется</th>
@@ -444,7 +444,7 @@ export default function InventoryPage() {
  >
  <form onSubmit={handleSubmit} className="space-y-4 p-4">
  <div>
- <label className="block macos-text-caption mb-1">Наименование *</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Наименование *</label>
  <Input
  value={formData.name}
  onChange={(e) => setFormData({ ...formData, name: e.target.value})}
@@ -454,7 +454,7 @@ export default function InventoryPage() {
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Тип товара *</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Тип товара *</label>
  <select
  value={formData.type}
  onChange={(e) => setFormData({ ...formData, type: e.target.value as InventoryType})}
@@ -468,7 +468,7 @@ export default function InventoryPage() {
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Количество *</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Количество *</label>
  <Input
  type="number"
  value={formData.quantity}
@@ -480,7 +480,7 @@ export default function InventoryPage() {
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Единица измерения *</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Единица измерения *</label>
  <Input
  value={formData.unit}
  onChange={(e) => setFormData({ ...formData, unit: e.target.value})}
@@ -490,19 +490,19 @@ export default function InventoryPage() {
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Срок годности</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Срок годности</label>
  <Input
  type="date"
  value={formData.expiryDate}
  onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value})}
  />
  {formData.type !== 'FOOD' && (
- <p className="mt-1 text-xs text-[var(--mezon-text-secondary)]">Для хозяйственных и канцелярских товаров срок годности обычно не указывается</p>
+ <p className="mt-1 text-xs text-secondary">Для хозяйственных и канцелярских товаров срок годности обычно не указывается</p>
  )}
  </div>
 
  <div>
- <label className="block macos-text-caption mb-1">Мин. остаток (для уведомлений)</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Мин. остаток (для уведомлений)</label>
  <Input
  type="number"
  value={formData.minQuantity}
@@ -510,7 +510,7 @@ export default function InventoryPage() {
  placeholder="0"
  step="0.01"
  />
- <p className="mt-1 text-xs text-[var(--mezon-text-secondary)]">При снижении остатка ниже этого значения товар будет выделяться</p>
+ <p className="mt-1 text-xs text-secondary">При снижении остатка ниже этого значения товар будет выделяться</p>
  </div>
 
  <div className="flex gap-2 justify-end pt-4">
@@ -567,11 +567,11 @@ export default function InventoryPage() {
  {transactionsLoading ? (
  <div className="text-center py-4">Загрузка...</div>
  ) : transactions.length === 0 ? (
- <div className="py-4 text-center text-[var(--mezon-text-secondary)]">Нет записей о движениях</div>
+ <div className="py-4 text-center text-secondary">Нет записей о движениях</div>
  ) : (
  <div className="max-h-[60vh] overflow-y-auto">
  <table className="w-full text-sm">
- <thead className="sticky top-0 bg-[rgba(255,255,255,0.72)] text-[var(--mezon-text-secondary)]">
+ <thead className="sticky top-0 bg-[rgba(255,255,255,0.72)] text-secondary">
  <tr>
  <th className="text-left p-2">Дата</th>
  <th className="text-left p-2">Тип</th>
@@ -613,11 +613,11 @@ export default function InventoryPage() {
  {writeOffItem && (
  <div className="rounded-lg border border-[rgba(255,149,0,0.18)] bg-[rgba(255,149,0,0.1)] p-3">
  <p className="font-medium">{writeOffItem.name}</p>
- <p className="text-sm text-[var(--mezon-text-secondary)]">На складе: <strong>{writeOffItem.quantity} {writeOffItem.unit}</strong></p>
+ <p className="text-sm text-secondary">На складе: <strong>{writeOffItem.quantity} {writeOffItem.unit}</strong></p>
  </div>
  )}
  <div>
- <label className="block macos-text-caption mb-1">Количество для списания *</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Количество для списания *</label>
  <Input
  type="number"
  value={writeOffData.quantity}
@@ -628,7 +628,7 @@ export default function InventoryPage() {
  />
  </div>
  <div>
- <label className="block macos-text-caption mb-1">Причина списания</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Причина списания</label>
  <Input
  value={writeOffData.reason}
  onChange={(e) => setWriteOffData({ ...writeOffData, reason: e.target.value})}
@@ -650,11 +650,11 @@ export default function InventoryPage() {
  {receiveItem && (
  <div className="rounded-lg border border-[rgba(52,199,89,0.18)] bg-[rgba(52,199,89,0.1)] p-3">
  <p className="font-medium">{receiveItem.name}</p>
- <p className="text-sm text-[var(--mezon-text-secondary)]">Текущий остаток: <strong>{receiveItem.quantity} {receiveItem.unit}</strong></p>
+ <p className="text-sm text-secondary">Текущий остаток: <strong>{receiveItem.quantity} {receiveItem.unit}</strong></p>
  </div>
  )}
  <div>
- <label className="block macos-text-caption mb-1">Количество прихода *</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Количество прихода *</label>
  <Input
  type="number"
  value={receiveData.quantity}
@@ -664,7 +664,7 @@ export default function InventoryPage() {
  />
  </div>
  <div>
- <label className="block macos-text-caption mb-1">Комментарий</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Комментарий</label>
  <Input
  value={receiveData.reason}
  onChange={(e) => setReceiveData({ ...receiveData, reason: e.target.value})}
@@ -686,11 +686,11 @@ export default function InventoryPage() {
  {allTransactionsLoading ? (
  <div className="text-center py-4">Загрузка...</div>
  ) : allTransactions.length === 0 ? (
- <div className="py-4 text-center text-[var(--mezon-text-secondary)]">Нет записей о движениях</div>
+ <div className="py-4 text-center text-secondary">Нет записей о движениях</div>
  ) : (
  <div className="max-h-[70vh] overflow-y-auto">
  <table className="w-full text-sm">
- <thead className="sticky top-0 bg-[rgba(255,255,255,0.72)] text-[var(--mezon-text-secondary)]">
+ <thead className="sticky top-0 bg-[rgba(255,255,255,0.72)] text-secondary">
  <tr>
  <th className="text-left p-2">Дата</th>
  <th className="text-left p-2">Товар</th>

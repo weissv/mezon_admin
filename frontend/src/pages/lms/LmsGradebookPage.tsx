@@ -68,9 +68,9 @@ export default function LmsGradebookPage() {
 };
 
  const getGradeColor = (grade: number) => {
- if (grade >= 4) return"bg-[rgba(52,199,89,0.12)] text-[var(--color-green)]";
- if (grade >= 3) return"bg-[rgba(255,204,0,0.12)] text-[var(--color-orange)]";
- return"bg-[rgba(255,59,48,0.12)] text-[var(--color-red)]";
+ if (grade >= 4) return"bg-[rgba(52,199,89,0.12)] text-macos-green";
+ if (grade >= 3) return"bg-[rgba(255,204,0,0.12)] text-macos-orange";
+ return"bg-[rgba(255,59,48,0.12)] text-macos-red";
 };
 
  if (loading) {
@@ -84,21 +84,21 @@ export default function LmsGradebookPage() {
  return (
  <div className="space-y-6">
  <div>
- <h1 className="macos-text-title text-[var(--mezon-dark)]">Журнал оценок</h1>
- <p className="text-[var(--text-secondary)]">Выставление и просмотр оценок учеников</p>
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Журнал оценок</h1>
+ <p className="text-secondary">Выставление и просмотр оценок учеников</p>
  </div>
 
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex flex-col sm:flex-row gap-4">
  <div className="flex-1">
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  <Users className="inline h-4 w-4 mr-1"/>
  Класс
  </label>
  <select
  value={selectedClass ??""}
  onChange={(e) => setSelectedClass(e.target.value ? Number(e.target.value) : null)}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  <option value="">Выберите класс</option>
  {classes.map((cls) => (
@@ -109,14 +109,14 @@ export default function LmsGradebookPage() {
  </select>
  </div>
  <div className="flex-1">
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  <BookOpen className="inline h-4 w-4 mr-1"/>
  Предмет
  </label>
  <select
  value={selectedSubject ||""}
  onChange={(e) => setSelectedSubject(e.target.value || null)}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  <option value="">Выберите предмет</option>
  {subjects.map((subj) => (
@@ -130,25 +130,25 @@ export default function LmsGradebookPage() {
  </div>
 
  {selectedClass && selectedSubject ? (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] overflow-hidden">
+ <div className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
  {gradebook && gradebook.students?.length > 0 ? (
  <div className="overflow-x-auto">
  <table className="w-full">
- <thead className="bg-[var(--fill-quaternary)]">
+ <thead className="bg-fill-quaternary">
  <tr>
- <th className="px-4 py-3 text-left macos-text-caption text-[var(--text-primary)] sticky left-0 bg-[var(--fill-quaternary)] z-10">
+ <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-widest text-primary sticky left-0 bg-fill-quaternary z-10">
  Ученик
  </th>
  {(gradebook.dates ?? []).map((date) => (
- <th key={date} className="px-2 py-3 text-center macos-text-caption text-[var(--text-primary)] min-w-[60px]">
+ <th key={date} className="px-2 py-3 text-center text-[11px] font-medium uppercase tracking-widest text-primary min-w-[60px]">
  {new Date(date).toLocaleDateString("ru-RU", { day:"2-digit", month:"2-digit"})}
  </th>
  ))}
- <th className="px-4 py-3 text-center macos-text-caption text-[var(--text-primary)]">
+ <th className="px-4 py-3 text-center text-[11px] font-medium uppercase tracking-widest text-primary">
  Средний
  </th>
  {isTeacher && (
- <th className="px-4 py-3 text-center macos-text-caption text-[var(--text-primary)]">
+ <th className="px-4 py-3 text-center text-[11px] font-medium uppercase tracking-widest text-primary">
  Действия
  </th>
  )}
@@ -156,8 +156,8 @@ export default function LmsGradebookPage() {
  </thead>
  <tbody className="divide-y divide-gray-100">
  {(gradebook.students ?? []).map(({ student, grades, average}) => (
- <tr key={student.id} className="hover:bg-[var(--fill-quaternary)]">
- <td className="px-4 py-3 macos-text-caption text-[var(--text-primary)] sticky left-0 bg-white z-10">
+ <tr key={student.id} className="hover:bg-fill-quaternary">
+ <td className="px-4 py-3 text-[11px] font-medium uppercase tracking-widest text-primary sticky left-0 bg-white z-10">
  {student.student?.lastName} {student.student?.firstName}
  </td>
  {(gradebook.dates ?? []).map((date) => {
@@ -171,7 +171,7 @@ export default function LmsGradebookPage() {
  {gradeForDate.value}
  </span>
  ) : (
- <span className="text-[var(--text-quaternary)]">-</span>
+ <span className="text-tertiary">-</span>
  )}
  </td>
  );
@@ -188,7 +188,7 @@ export default function LmsGradebookPage() {
  setSelectedStudent(student.id);
  setShowAddGradeModal(true);
 }}
- className="inline-flex items-center gap-1 text-[var(--color-blue)] hover:text-[var(--color-blue)] text-sm"
+ className="inline-flex items-center gap-1 text-macos-blue hover:text-macos-blue text-sm"
  >
  <Plus className="h-4 w-4"/>
  Оценка
@@ -202,8 +202,8 @@ export default function LmsGradebookPage() {
  </div>
  ) : (
  <div className="p-12 text-center">
- <BookOpen className="h-12 w-12 text-[var(--text-quaternary)] mx-auto mb-4"/>
- <p className="text-[var(--text-secondary)] mb-4">
+ <BookOpen className="h-12 w-12 text-tertiary mx-auto mb-4"/>
+ <p className="text-secondary mb-4">
  {gradebook?.students.length === 0
  ?"В этом классе пока нет учеников"
  :"Оценки пока не выставлены"}
@@ -211,7 +211,7 @@ export default function LmsGradebookPage() {
  {isTeacher && (
  <button
  onClick={() => setShowAddGradeModal(true)}
- className="inline-flex items-center gap-2 text-[var(--color-blue)] hover:text-[var(--color-blue)]"
+ className="inline-flex items-center gap-2 text-macos-blue hover:text-macos-blue"
  >
  <Plus className="h-5 w-5"/>
  Добавить оценку
@@ -221,9 +221,9 @@ export default function LmsGradebookPage() {
  )}
  </div>
  ) : (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-12 text-center">
- <Filter className="h-12 w-12 text-[var(--text-quaternary)] mx-auto mb-4"/>
- <p className="text-[var(--text-secondary)]">Выберите класс и предмет для просмотра журнала</p>
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
+ <Filter className="h-12 w-12 text-tertiary mx-auto mb-4"/>
+ <p className="text-secondary">Выберите класс и предмет для просмотра журнала</p>
  </div>
  )}
 
@@ -286,16 +286,16 @@ function AddGradeModal({
  return (
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
  <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
- <h2 className="macos-text-title text-[var(--text-primary)] mb-4">Добавить оценку</h2>
+ <h2 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary mb-4">Добавить оценку</h2>
  <form onSubmit={handleSubmit} className="space-y-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Ученик
  </label>
  <select
  value={formData.studentId}
  onChange={(e) => setFormData({ ...formData, studentId: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  {students.map((s) => (
  <option key={s.id} value={s.id}>
@@ -306,13 +306,13 @@ function AddGradeModal({
  </div>
  <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Оценка
  </label>
  <select
  value={formData.grade}
  onChange={(e) => setFormData({ ...formData, grade: Number(e.target.value)})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  >
  {[5, 4, 3, 2, 1].map((g) => (
  <option key={g} value={g}>
@@ -322,26 +322,26 @@ function AddGradeModal({
  </select>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Дата
  </label>
  <input
  type="date"
  value={formData.date}
  onChange={(e) => setFormData({ ...formData, date: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Комментарий (необязательно)
  </label>
  <input
  type="text"
  value={formData.comment}
  onChange={(e) => setFormData({ ...formData, comment: e.target.value})}
- className="w-full px-3 py-2 mezon-field rounded-[8px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-3 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  placeholder="За что оценка..."
  />
  </div>
@@ -349,14 +349,14 @@ function AddGradeModal({
  <button
  type="button"
  onClick={onClose}
- className="flex-1 px-4 py-2 mezon-field rounded-[8px] text-[var(--text-primary)] hover:bg-[var(--fill-quaternary)] macos-transition"
+ className="flex-1 px-4 py-2 mezon-field rounded-lg text-primary hover:bg-fill-quaternary macos-transition"
  >
  Отмена
  </button>
  <button
  type="submit"
  disabled={loading}
- className="flex-1 px-4 py-2 bg-[var(--color-blue)] text-white rounded-lg font-medium hover:bg-[var(--color-blue)] macos-transition disabled:opacity-50"
+ className="flex-1 px-4 py-2 bg-macos-blue text-white rounded-lg font-medium hover:bg-macos-blue macos-transition disabled:opacity-50"
  >
  {loading ?"Сохранение...":"Сохранить"}
  </button>

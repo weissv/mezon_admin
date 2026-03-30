@@ -142,7 +142,7 @@ export default function FeedbackPage() {
  <Bug className='h-7 w-7 text-rose-600' />
  Баг-репорт
  </h1>
- <p className='max-w-3xl text-[var(--text-secondary)]'>
+ <p className='max-w-3xl text-secondary'>
  Сообщите о проблеме в системе. Новый репорт сохраняется в ERP и сразу отправляется разработчику в Telegram через тот же бот, который уже рассылает служебные заявки.
  </p>
  </div>
@@ -155,7 +155,7 @@ export default function FeedbackPage() {
  </div>
  <div>
  <h2 className='text-xl font-semibold'>Новый баг-репорт</h2>
- <p className='text-sm text-[var(--text-secondary)]'>
+ <p className='text-sm text-secondary'>
  Чем точнее сценарий и ожидаемое поведение, тем быстрее получится воспроизвести и исправить проблему.
  </p>
  </div>
@@ -193,7 +193,7 @@ export default function FeedbackPage() {
  <div className='flex items-center justify-between'>
  <div>
  <h2 className='text-xl font-semibold'>Журнал баг-репортов</h2>
- <p className='text-sm text-[var(--text-secondary)]'>Административный обзор отправленных сообщений для разбора и ответа.</p>
+ <p className='text-sm text-secondary'>Административный обзор отправленных сообщений для разбора и ответа.</p>
  </div>
  </div>
 
@@ -227,16 +227,16 @@ export default function FeedbackPage() {
  <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title='Подтверждение удаления'>
  <div className='space-y-4 p-4'>
  <div className='flex items-start gap-3 rounded-lg border border-red-200 bg-[rgba(255,59,48,0.06)] p-4'>
- <AlertTriangle className='mt-0.5 h-6 w-6 flex-shrink-0 text-[var(--color-red)]' />
+ <AlertTriangle className='mt-0.5 h-6 w-6 flex-shrink-0 text-macos-red' />
  <div>
  <h4 className='font-semibold text-red-800'>Внимание!</h4>
- <p className='mt-1 text-sm text-[var(--color-red)]'>
+ <p className='mt-1 text-sm text-macos-red'>
  Вы собираетесь удалить баг-репорт. Это действие нельзя отменить.
  </p>
  </div>
  </div>
  {deletingFeedback && (
- <div className='rounded-lg bg-[var(--fill-quaternary)] p-3'>
+ <div className='rounded-lg bg-fill-quaternary p-3'>
  <p><strong>Родитель:</strong> {deletingFeedback.parentName}</p>
  <p><strong>Тип:</strong> {deletingFeedback.type}</p>
  <p><strong>Статус:</strong> {getStatusBadge(deletingFeedback.status)}</p>

@@ -169,7 +169,7 @@ export default function MenuPage() {
  <h3 className="font-bold text-lg">{date.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long'})}</h3>
  {menuForDay ? (
  <div className="mt-2">
- <p className="font-semibold text-sm text-[var(--text-secondary)]">{menuForDay.ageGroup}</p>
+ <p className="font-semibold text-sm text-secondary">{menuForDay.ageGroup}</p>
  <ul className="mt-1 list-disc list-inside">
  {menuForDay.meals.map((meal: any, i: number) => (
  <li key={i}><strong>{meal.name}:</strong> {meal.dish} ({meal.calories} ккал)</li>
@@ -196,14 +196,14 @@ export default function MenuPage() {
  size="sm"
  variant="outline"
  onClick={() => setDeleteConfirm(menuForDay)}
- className="text-[var(--color-red)] hover:text-[var(--color-red)] hover:bg-[rgba(255,59,48,0.06)]"
+ className="text-macos-red hover:text-macos-red hover:bg-[rgba(255,59,48,0.06)]"
  >
  <Trash2 className="h-3 w-3"/>
  </Button>
  </div>
  </div>
  ) : (
- <p className="text-[var(--text-tertiary)] mt-2">Меню не составлено</p>
+ <p className="text-tertiary mt-2">Меню не составлено</p>
  )}
  <Button onClick={() => handleOpenModal(date)} className="mt-4 w-full">
  {menuForDay ? 'Редактировать' : 'Создать'}
@@ -243,23 +243,23 @@ export default function MenuPage() {
  <div className="p-4 space-y-3">
  <div className="grid grid-cols-2 gap-4">
  <div className="p-3 bg-[rgba(255,149,0,0.08)] rounded-[var(--radius-md)]">
- <div className="text-sm text-[var(--text-secondary)]">Калорийность</div>
- <div className="macos-text-title text-[var(--text-primary)]">{kbzhuData.kbju?.calories?.toFixed(1) || 0} ккал</div>
+ <div className="text-sm text-secondary">Калорийность</div>
+ <div className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{kbzhuData.kbju?.calories?.toFixed(1) || 0} ккал</div>
  </div>
- <div className="p-3 bg-[rgba(0,122,255,0.06)] rounded-[var(--radius-md)]">
- <div className="text-sm text-[var(--text-secondary)]">Белки</div>
- <div className="macos-text-title text-[var(--text-primary)]">{kbzhuData.kbju?.protein?.toFixed(1) || 0} г</div>
+ <div className="p-3 bg-tint-blue rounded-[var(--radius-md)]">
+ <div className="text-sm text-secondary">Белки</div>
+ <div className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{kbzhuData.kbju?.protein?.toFixed(1) || 0} г</div>
  </div>
  <div className="p-3 bg-[rgba(255,204,0,0.08)] rounded-[var(--radius-md)]">
- <div className="text-sm text-[var(--text-secondary)]">Жиры</div>
- <div className="macos-text-title text-[var(--text-primary)]">{kbzhuData.kbju?.fat?.toFixed(1) || 0} г</div>
+ <div className="text-sm text-secondary">Жиры</div>
+ <div className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{kbzhuData.kbju?.fat?.toFixed(1) || 0} г</div>
  </div>
  <div className="p-3 bg-[rgba(52,199,89,0.08)] rounded-[var(--radius-md)]">
- <div className="text-sm text-[var(--text-secondary)]">Углеводы</div>
- <div className="macos-text-title text-[var(--text-primary)]">{kbzhuData.kbju?.carbs?.toFixed(1) || 0} г</div>
+ <div className="text-sm text-secondary">Углеводы</div>
+ <div className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{kbzhuData.kbju?.carbs?.toFixed(1) || 0} г</div>
  </div>
  </div>
- <p className="text-sm text-[var(--text-tertiary)]">
+ <p className="text-sm text-tertiary">
  Возрастная группа: {kbzhuData.ageGroup}
  </p>
  </div>
@@ -270,22 +270,22 @@ export default function MenuPage() {
  <Modal isOpen={!!shoppingList} onClose={() => setShoppingList(null)} title="Список покупок">
  {shoppingList && (
  <div className="p-4">
- <p className="text-sm text-[var(--text-secondary)] mb-4">
+ <p className="text-sm text-secondary mb-4">
  Порций: {shoppingList.portions} | Дата: {shoppingList.date && new Date(shoppingList.date).toLocaleDateString('ru-RU')}
  </p>
  <div className="space-y-2">
  {shoppingList.items?.map((item: any, idx: number) => (
  <div key={idx} className="flex justify-between p-2 border border-[var(--separator)] rounded-[var(--radius-md)]">
- <span className="font-medium text-[var(--text-primary)]">{item.ingredientName}</span>
+ <span className="font-medium text-primary">{item.ingredientName}</span>
  <div className="text-right">
  <div className="text-sm">
  Нужно: <span className="font-semibold">{item.requiredQty} {item.unit}</span>
  </div>
- <div className="text-sm text-[var(--text-secondary)]">
+ <div className="text-sm text-secondary">
  На складе: {item.inStock} {item.unit}
  </div>
  {item.toBuy > 0 && (
- <div className="text-sm font-bold text-[var(--color-red)]">
+ <div className="text-sm font-bold text-macos-red">
  Купить: {item.toBuy} {item.unit}
  </div>
  )}
@@ -343,21 +343,21 @@ export default function MenuPage() {
  <div className="p-4">
  <div className="flex items-start gap-4">
  <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,59,48,0.12)] rounded-full flex items-center justify-center">
- <AlertTriangle className="h-5 w-5 text-[var(--color-red)]"/>
+ <AlertTriangle className="h-5 w-5 text-macos-red"/>
  </div>
  <div className="flex-1">
- <p className="font-medium text-[var(--text-primary)]">Вы уверены, что хотите удалить это меню?</p>
+ <p className="font-medium text-primary">Вы уверены, что хотите удалить это меню?</p>
  {deleteConfirm && (
- <div className="mt-2 p-3 bg-[var(--fill-quaternary)] rounded-[var(--radius-md)]">
- <p className="macos-text-caption text-[var(--text-primary)]">
+ <div className="mt-2 p-3 bg-fill-quaternary rounded-[var(--radius-md)]">
+ <p className="text-[11px] font-medium uppercase tracking-widest text-primary">
  {new Date(deleteConfirm.date).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long'})}
  </p>
- <p className="text-xs text-[var(--text-tertiary)] mt-1">
+ <p className="text-xs text-tertiary mt-1">
  Возрастная группа: {deleteConfirm.ageGroup}
  </p>
  </div>
  )}
- <p className="text-sm text-[var(--text-tertiary)] mt-2">Это действие нельзя отменить.</p>
+ <p className="text-sm text-tertiary mt-2">Это действие нельзя отменить.</p>
  </div>
  </div>
  <div className="flex justify-end gap-3 mt-6">

@@ -22,7 +22,7 @@ function KPICard({
  color?: KPIColor;
 }) {
  const colorClasses = {
- blue: 'bg-[rgba(10,132,255,0.12)] text-[var(--mezon-accent)]',
+ blue: 'bg-[rgba(10,132,255,0.12)] text-macos-blue',
  green: 'bg-[rgba(52,199,89,0.14)] text-[var(--macos-green)]',
  purple: 'bg-[rgba(191,90,242,0.14)] text-[var(--macos-purple)]',
  orange: 'bg-[rgba(255,149,0,0.14)] text-[var(--macos-orange)]',
@@ -32,8 +32,8 @@ function KPICard({
  <div className="mezon-card">
  <div className="flex items-start justify-between">
  <div>
- <p className="macos-text-caption text-[var(--mezon-text-secondary)]">{title}</p>
- <h3 className="mt-1 macos-text-title text-[var(--mezon-dark)]">{value}</h3>
+ <p className="text-[11px] font-medium uppercase tracking-widest text-secondary">{title}</p>
+ <h3 className="mt-1 text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{value}</h3>
  {subtitle && <p className="mt-1 text-xs text-[var(--mezon-text-soft)]">{subtitle}</p>}
  </div>
  <div className={`p-3 rounded-xl ${colorClasses}`}>
@@ -68,7 +68,7 @@ export default function LmsSchoolDashboard() {
 }, []);
 
  if (loading) {
- return <div className="mezon-card h-64 animate-pulse text-[var(--mezon-text-secondary)]">Загрузка статистики...</div>;
+ return <div className="mezon-card h-64 animate-pulse text-secondary">Загрузка статистики...</div>;
 }
 
  return (
@@ -127,8 +127,8 @@ export default function LmsSchoolDashboard() {
  {/* Recent Activity / Grades */}
  <div className="lg:col-span-2 space-y-6">
  <div className="flex items-center justify-between">
- <h2 className="macos-text-callout text-[var(--mezon-dark)]">Последние оценки</h2>
- <Link to="/lms/school/gradebook"className="text-sm text-[var(--mezon-accent)] hover:underline">Все оценки</Link>
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-primary">Последние оценки</h2>
+ <Link to="/lms/school/gradebook"className="text-sm text-macos-blue hover:underline">Все оценки</Link>
  </div>
  
  <div className="mezon-card p-0 overflow-hidden">
@@ -143,7 +143,7 @@ export default function LmsSchoolDashboard() {
  const gradeColor = gradeValue >= 90
  ? 'bg-[var(--macos-green)]'
  : gradeValue >= 75
- ? 'bg-[var(--mezon-accent)]'
+ ? 'bg-macos-blue'
  : 'bg-[var(--macos-orange)]';
 
  return (
@@ -156,8 +156,8 @@ export default function LmsSchoolDashboard() {
  {gradeValue}
  </div>
  <div>
- <p className="font-medium text-[var(--mezon-dark)]">{studentName}</p>
- <p className="text-xs text-[var(--mezon-text-secondary)]">{subjectName} • {new Date(g.date).toLocaleDateString()}</p>
+ <p className="font-medium text-primary">{studentName}</p>
+ <p className="text-xs text-secondary">{subjectName} • {new Date(g.date).toLocaleDateString()}</p>
  </div>
  </div>
  {g.comment && (
@@ -168,7 +168,7 @@ export default function LmsSchoolDashboard() {
 })}
  </div>
  ) : (
- <div className="p-8 text-center text-[var(--mezon-text-secondary)]">Нет свежих оценок</div>
+ <div className="p-8 text-center text-secondary">Нет свежих оценок</div>
  )}
  </div>
  </div>
@@ -176,7 +176,7 @@ export default function LmsSchoolDashboard() {
  {/* Upcoming Homework / Events */}
  <div className="space-y-6">
  <div className="flex items-center justify-between">
- <h2 className="macos-text-callout text-[var(--mezon-dark)]">Ближайшие события</h2>
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-primary">Ближайшие события</h2>
  </div>
  
  <div className="mezon-card">
@@ -186,17 +186,17 @@ export default function LmsSchoolDashboard() {
  <AlertCircle className="h-5 w-5"/>
  </div>
  <div>
- <p className="font-medium text-[var(--mezon-dark)]">Родительское собрание</p>
- <p className="mt-1 text-sm text-[var(--mezon-text-secondary)]">10 декабря, 18:00. Актовый зал.</p>
+ <p className="font-medium text-primary">Родительское собрание</p>
+ <p className="mt-1 text-sm text-secondary">10 декабря, 18:00. Актовый зал.</p>
  </div>
  </div>
  <div className="flex items-start gap-3 border-b border-[rgba(60,60,67,0.08)] pb-4 last:border-0 last:pb-0">
- <div className="rounded-lg bg-[rgba(10,132,255,0.12)] p-2 text-[var(--mezon-accent)]">
+ <div className="rounded-lg bg-[rgba(10,132,255,0.12)] p-2 text-macos-blue">
  <Clock className="h-5 w-5"/>
  </div>
  <div>
- <p className="font-medium text-[var(--mezon-dark)]">Контрольная работа</p>
- <p className="mt-1 text-sm text-[var(--mezon-text-secondary)]">Математика, 5А класс. Завтра.</p>
+ <p className="font-medium text-primary">Контрольная работа</p>
+ <p className="mt-1 text-sm text-secondary">Математика, 5А класс. Завтра.</p>
  </div>
  </div>
  </div>

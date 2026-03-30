@@ -254,15 +254,15 @@ export default function ExamEditorPage() {
  <div className="flex items-center gap-4">
  <button
  onClick={() => navigate("/exams")}
- className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--fill-tertiary)] rounded-lg"
+ className="p-2 text-secondary hover:text-primary hover:bg-fill-tertiary rounded-lg"
  >
  <ArrowLeft className="h-5 w-5"/>
  </button>
  <div>
- <h1 className="macos-text-title text-[var(--mezon-dark)]">
+ <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">
  {isNew ?"Новая контрольная":"Редактирование контрольной"}
  </h1>
- <p className="text-[var(--text-secondary)] text-sm mt-1">
+ <p className="text-secondary text-sm mt-1">
  {questions.filter((q) => q.content?.trim()).length} вопросов
  </p>
  </div>
@@ -270,7 +270,7 @@ export default function ExamEditorPage() {
  <div className="flex items-center gap-2">
  <button
  onClick={() => setShowSettings(!showSettings)}
- className="inline-flex items-center gap-2 px-4 py-2 text-[var(--text-primary)] bg-[var(--fill-tertiary)] rounded-lg hover:bg-[var(--fill-secondary)]"
+ className="inline-flex items-center gap-2 px-4 py-2 text-primary bg-fill-tertiary rounded-lg hover:bg-fill-secondary"
  >
  <Settings className="h-5 w-5"/>
  Настройки
@@ -278,7 +278,7 @@ export default function ExamEditorPage() {
  <button
  onClick={saveExam}
  disabled={saving}
- className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-blue)] text-white rounded-lg hover:bg-[var(--color-blue)] disabled:opacity-50"
+ className="inline-flex items-center gap-2 px-4 py-2 bg-macos-blue text-white rounded-lg hover:bg-macos-blue disabled:opacity-50"
  >
  <Save className="h-5 w-5"/>
  {saving ?"Сохранение...":"Сохранить"}
@@ -288,43 +288,43 @@ export default function ExamEditorPage() {
 
  {/* Настройки контрольной */}
  {showSettings && (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-6 space-y-4">
- <h2 className="macos-text-callout text-[var(--text-primary)]">Основные настройки</h2>
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-6 space-y-4">
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-primary">Основные настройки</h2>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
- Название <span className="text-[var(--color-red)]">*</span>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
+ Название <span className="text-macos-red">*</span>
  </label>
  <input
  type="text"
  value={exam.title}
  onChange={(e) => setExam({ ...exam, title: e.target.value})}
  placeholder="Рубежный контроль по экономике №1"
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Предмет</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Предмет</label>
  <input
  type="text"
  value={exam.subject ||""}
  onChange={(e) => setExam({ ...exam, subject: e.target.value})}
  placeholder="Экономика"
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  <div className="md:col-span-2">
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Описание</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Описание</label>
  <textarea
  value={exam.description ||""}
  onChange={(e) => setExam({ ...exam, description: e.target.value})}
  placeholder="Инструкции для студентов..."
  rows={2}
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Ограничение времени (мин)
  </label>
  <input
@@ -333,11 +333,11 @@ export default function ExamEditorPage() {
  onChange={(e) => setExam({ ...exam, timeLimit: e.target.value ? Number(e.target.value) : null})}
  placeholder="60"
  min="1"
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Проходной балл (%)
  </label>
  <input
@@ -346,29 +346,29 @@ export default function ExamEditorPage() {
  onChange={(e) => setExam({ ...exam, passingScore: Number(e.target.value)})}
  min="0"
  max="100"
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Дата начала
  </label>
  <input
  type="datetime-local"
  value={exam.startDate?.slice(0, 16) ||""}
  onChange={(e) => setExam({ ...exam, startDate: e.target.value || null})}
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Дата окончания
  </label>
  <input
  type="datetime-local"
  value={exam.endDate?.slice(0, 16) ||""}
  onChange={(e) => setExam({ ...exam, endDate: e.target.value || null})}
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  </div>
@@ -378,27 +378,27 @@ export default function ExamEditorPage() {
  type="checkbox"
  checked={exam.shuffleQuestions}
  onChange={(e) => setExam({ ...exam, shuffleQuestions: e.target.checked})}
- className="rounded border-[rgba(0,0,0,0.12)] text-[var(--color-blue)] focus:ring-[rgba(0,122,255,0.3)]"
+ className="rounded border-field text-macos-blue focus:ring-macos-blue/30"
  />
- <span className="text-sm text-[var(--text-primary)]">Перемешивать вопросы</span>
+ <span className="text-sm text-primary">Перемешивать вопросы</span>
  </label>
  <label className="flex items-center gap-2">
  <input
  type="checkbox"
  checked={exam.shuffleOptions}
  onChange={(e) => setExam({ ...exam, shuffleOptions: e.target.checked})}
- className="rounded border-[rgba(0,0,0,0.12)] text-[var(--color-blue)] focus:ring-[rgba(0,122,255,0.3)]"
+ className="rounded border-field text-macos-blue focus:ring-macos-blue/30"
  />
- <span className="text-sm text-[var(--text-primary)]">Перемешивать варианты ответов</span>
+ <span className="text-sm text-primary">Перемешивать варианты ответов</span>
  </label>
  <label className="flex items-center gap-2">
  <input
  type="checkbox"
  checked={exam.showResults}
  onChange={(e) => setExam({ ...exam, showResults: e.target.checked})}
- className="rounded border-[rgba(0,0,0,0.12)] text-[var(--color-blue)] focus:ring-[rgba(0,122,255,0.3)]"
+ className="rounded border-field text-macos-blue focus:ring-macos-blue/30"
  />
- <span className="text-sm text-[var(--text-primary)]">Показывать результаты после сдачи</span>
+ <span className="text-sm text-primary">Показывать результаты после сдачи</span>
  </label>
  </div>
  </div>
@@ -407,7 +407,7 @@ export default function ExamEditorPage() {
  {/* Список вопросов */}
  <div className="space-y-4">
  <div className="flex items-center justify-between">
- <h2 className="macos-text-callout text-[var(--text-primary)]">Вопросы</h2>
+ <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-primary">Вопросы</h2>
  </div>
 
  {questions.map((question, index) => (
@@ -422,14 +422,14 @@ export default function ExamEditorPage() {
  ))}
 
  {/* Добавить вопрос */}
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] p-4">
- <p className="macos-text-caption text-[var(--text-primary)] mb-3">Добавить вопрос:</p>
+ <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
+ <p className="text-[11px] font-medium uppercase tracking-widest text-primary mb-3">Добавить вопрос:</p>
  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
  {Object.entries(questionTypeLabels).map(([type, { label, icon: Icon, description}]) => (
  <button
  key={type}
  onClick={() => addQuestion(type as ExamQuestionType)}
- className="flex flex-col items-center gap-2 p-3 text-sm text-[var(--text-primary)] bg-[var(--fill-quaternary)] rounded-lg hover:bg-[rgba(0,122,255,0.06)] hover:text-[var(--color-blue)] macos-transition"
+ className="flex flex-col items-center gap-2 p-3 text-sm text-primary bg-fill-quaternary rounded-lg hover:bg-tint-blue hover:text-macos-blue macos-transition"
  title={description}
  >
  <Icon className="h-5 w-5"/>
@@ -461,28 +461,28 @@ function QuestionEditor({
  const TypeIcon = typeInfo.icon;
 
  return (
- <div className="bg-white rounded-[12px] shadow-[var(--shadow-sm)] border border-[rgba(0,0,0,0.06)] overflow-hidden">
+ <div className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
  {/* Заголовок вопроса */}
  <div
- className="flex items-start gap-3 p-4 cursor-pointer hover:bg-[var(--fill-quaternary)]"
+ className="flex items-start gap-3 p-4 cursor-pointer hover:bg-fill-quaternary"
  onClick={() => onChange({ expanded: !question.expanded})}
  >
- <GripVertical className="h-5 w-5 text-[var(--text-tertiary)]"/>
- <span className="flex items-center justify-center w-8 h-8 bg-[rgba(0,122,255,0.1)] text-[var(--color-blue)] rounded-full macos-text-caption">
+ <GripVertical className="h-5 w-5 text-tertiary"/>
+ <span className="flex items-center justify-center w-8 h-8 bg-tint-blue text-macos-blue rounded-full text-[11px] font-medium uppercase tracking-widest">
  {index + 1}
  </span>
- <TypeIcon className="h-5 w-5 text-[var(--text-secondary)]"/>
- <span className="flex-1 min-w-0 text-[var(--text-primary)] whitespace-pre-line break-words">
+ <TypeIcon className="h-5 w-5 text-secondary"/>
+ <span className="flex-1 min-w-0 text-primary whitespace-pre-line break-words">
  {question.content ||"Новый вопрос"}
  </span>
  <div className="flex items-center gap-1 flex-shrink-0">
- <span className="text-sm text-[var(--text-secondary)]">{question.points || 1} б.</span>
+ <span className="text-sm text-secondary">{question.points || 1} б.</span>
  <button
  onClick={(e) => {
  e.stopPropagation();
  onDuplicate();
 }}
- className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+ className="p-1.5 text-tertiary hover:text-secondary"
  title="Дублировать"
  >
  <Copy className="h-4 w-4"/>
@@ -492,15 +492,15 @@ function QuestionEditor({
  e.stopPropagation();
  onRemove();
 }}
- className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--color-red)]"
+ className="p-1.5 text-tertiary hover:text-macos-red"
  title="Удалить"
  >
  <Trash2 className="h-4 w-4"/>
  </button>
  {question.expanded ? (
- <ChevronUp className="h-5 w-5 text-[var(--text-tertiary)]"/>
+ <ChevronUp className="h-5 w-5 text-tertiary"/>
  ) : (
- <ChevronDown className="h-5 w-5 text-[var(--text-tertiary)]"/>
+ <ChevronDown className="h-5 w-5 text-tertiary"/>
  )}
  </div>
  </div>
@@ -509,20 +509,20 @@ function QuestionEditor({
  {question.expanded && (
  <div className="p-4 pt-0 space-y-4 border-t border-[rgba(0,0,0,0.04)]">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Вопрос</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Вопрос</label>
  <textarea
  value={question.content ||""}
  onChange={(e) => onChange({ content: e.target.value})}
  placeholder="Введите текст вопроса..."
  rows={3}
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
 
  {/* Варианты ответов для выборочных вопросов */}
  {["SINGLE_CHOICE","MULTIPLE_CHOICE","TRUE_FALSE"].includes(question.type ||"") && (
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-2">Варианты ответов</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-2">Варианты ответов</label>
  <div className="space-y-2">
  {(question.options || []).map((option, optIndex) => (
  <div key={optIndex} className="flex items-center gap-2">
@@ -545,7 +545,7 @@ function QuestionEditor({
  : current.filter((a: string) => a !== option);
  onChange({ correctAnswer: updated});
 }}
- className="rounded border-[rgba(0,0,0,0.12)] text-[var(--color-blue)] focus:ring-[rgba(0,122,255,0.3)]"
+ className="rounded border-field text-macos-blue focus:ring-macos-blue/30"
  />
  ) : (
  <input
@@ -553,7 +553,7 @@ function QuestionEditor({
  name={`question_${question.id || question.tempId}_correct`}
  checked={question.correctAnswer === option}
  onChange={() => onChange({ correctAnswer: option})}
- className="border-[rgba(0,0,0,0.12)] text-[var(--color-blue)] focus:ring-[rgba(0,122,255,0.3)]"
+ className="border-field text-macos-blue focus:ring-macos-blue/30"
  />
  )}
  <input
@@ -570,7 +570,7 @@ function QuestionEditor({
 }
 }}
  placeholder={`Вариант ${optIndex + 1}`}
- className="flex-1 px-3 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="flex-1 px-3 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  disabled={question.type ==="TRUE_FALSE"}
  />
  {question.type !=="TRUE_FALSE"&& (
@@ -579,7 +579,7 @@ function QuestionEditor({
  const updated = (question.options || []).filter((_, i) => i !== optIndex);
  onChange({ options: updated});
 }}
- className="p-2 text-[var(--text-tertiary)] hover:text-[var(--color-red)]"
+ className="p-2 text-tertiary hover:text-macos-red"
  >
  <Trash2 className="h-4 w-4"/>
  </button>
@@ -589,7 +589,7 @@ function QuestionEditor({
  {question.type !=="TRUE_FALSE"&& (
  <button
  onClick={() => onChange({ options: [...(question.options || []),""]})}
- className="flex items-center gap-1 text-sm text-[var(--color-blue)] hover:text-[var(--color-blue)]"
+ className="flex items-center gap-1 text-sm text-macos-blue hover:text-macos-blue"
  >
  <Plus className="h-4 w-4"/>
  Добавить вариант
@@ -602,7 +602,7 @@ function QuestionEditor({
  {/* Ожидаемый ответ для текстовых вопросов */}
  {["TEXT_SHORT","TEXT_LONG","PROBLEM"].includes(question.type ||"") && (
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Ожидаемый ответ {question.type ==="TEXT_SHORT"&&"(для автопроверки)"}
  </label>
  <textarea
@@ -614,7 +614,7 @@ function QuestionEditor({
  :"Образец правильного ответа..."
 }
  rows={question.type ==="TEXT_SHORT"? 1 : 4}
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  )}
@@ -622,7 +622,7 @@ function QuestionEditor({
  {/* Ключевые точки для AI проверки */}
  {["TEXT_LONG","PROBLEM"].includes(question.type ||"") && (
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Ключевые моменты для оценки AI
  </label>
  <textarea
@@ -634,9 +634,9 @@ function QuestionEditor({
 }
  placeholder="Каждая строка — отдельный критерий оценки"
  rows={3}
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
- <p className="text-xs text-[var(--text-secondary)] mt-1">
+ <p className="text-xs text-secondary mt-1">
  AI будет оценивать наличие этих моментов в ответе студента
  </p>
  </div>
@@ -644,7 +644,7 @@ function QuestionEditor({
 
  {/* Пояснение */}
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  Пояснение к ответу (видно после сдачи)
  </label>
  <textarea
@@ -652,20 +652,20 @@ function QuestionEditor({
  onChange={(e) => onChange({ explanation: e.target.value})}
  placeholder="Объяснение правильного ответа..."
  rows={2}
- className="w-full px-4 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-full px-4 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
 
  {/* Баллы */}
  <div className="flex items-center gap-4">
  <div>
- <label className="block macos-text-caption text-[var(--text-primary)] mb-1">Баллы</label>
+ <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Баллы</label>
  <input
  type="number"
  value={question.points || 1}
  onChange={(e) => onChange({ points: Number(e.target.value)})}
  min="1"
- className="w-24 px-3 py-2 mezon-field rounded-[8px] focus-visible:ring-4 focus-visible:ring-[rgba(0,122,255,0.3)]"
+ className="w-24 px-3 py-2 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30"
  />
  </div>
  {question.type ==="MULTIPLE_CHOICE"&& (
@@ -674,9 +674,9 @@ function QuestionEditor({
  type="checkbox"
  checked={question.partialCredit}
  onChange={(e) => onChange({ partialCredit: e.target.checked})}
- className="rounded border-[rgba(0,0,0,0.12)] text-[var(--color-blue)] focus:ring-[rgba(0,122,255,0.3)]"
+ className="rounded border-field text-macos-blue focus:ring-macos-blue/30"
  />
- <span className="text-sm text-[var(--text-primary)]">Частичный зачёт</span>
+ <span className="text-sm text-primary">Частичный зачёт</span>
  </label>
  )}
  </div>

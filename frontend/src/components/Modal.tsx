@@ -47,21 +47,21 @@ export function Modal({
       <div
         className={clsx(
           "relative w-full max-h-[85vh] overflow-y-auto",
-          "rounded-[var(--radius-sheet)] bg-[var(--surface-overlay)]",
-          "border border-[var(--border-card)]",
-          "shadow-[var(--shadow-floating)]",
+          "rounded-[20px] bg-surface-overlay",
+          "border border-card",
+          "shadow-floating",
           "p-6 macos-animate-scale-in",
           sizeClasses[size]
         )}
       >
         {/* Header */}
-        <div className="mb-4 flex items-center justify-between pb-3 border-b border-[var(--separator)]">
-          <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+        <div className="mb-4 flex items-center justify-between pb-3 border-b border-separator">
+          <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-primary">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-[var(--fill-quaternary)] hover:bg-[var(--fill-tertiary)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] macos-transition text-sm leading-none"
+            className="w-7 h-7 rounded-full bg-fill-quaternary hover:bg-fill-tertiary flex items-center justify-center text-tertiary hover:text-primary macos-transition text-sm leading-none"
             aria-label="Close"
           >
             &times;
