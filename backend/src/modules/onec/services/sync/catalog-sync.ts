@@ -1,17 +1,48 @@
 import type { SyncContext, SyncResult } from "./sync-context";
 import { logger } from "../../../../utils/logger";
 
+export async function syncCashFlowArticles(ctx: SyncContext): Promise<SyncResult> {
+  const entity = "Catalog_СтатьиДвиженияДенежныхСредств";
+  const filter = "DeletionMark eq false";
+  const select = "Ref_Key,Code,Description,IsFolder,DeletionMark";
+
+  const rows = await ctx.fetchAll(entity, filter, select);
+
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    entity,
+    async (r: any) => {
+      await ctx.db.cashFlowArticle.upsert({
+        where: { externalId: r.Ref_Key },
+        create: {
+          externalId: r.Ref_Key,
+          code: r.Code ?? null,
+          name: r.Description ?? "—",
+          isFolder: r.IsFolder ?? false,
+        },
+        update: {
+          code: r.Code ?? null,
+          name: r.Description ?? "—",
+          isFolder: r.IsFolder ?? false,
+        },
+      });
+    },
+  );
+
+  return { entity, fetched: rows.length, upserted, errors };
+}
+
 export async function syncContractors(ctx: SyncContext): Promise<SyncResult> {
   const entity = "Catalog_Контрагенты";
   const filter = "DeletionMark eq false";
   const select = "Ref_Key,Code,Description,НаименованиеПолное,ИНН,КПП,IsFolder,DeletionMark";
 
   const rows = await ctx.fetchAll(entity, filter, select);
-  let upserted = 0;
-  let errors = 0;
 
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    entity,
+    async (r: any) => {
       await ctx.db.contractor.upsert({
         where: { externalId: r.Ref_Key },
         create: {
@@ -34,12 +65,8 @@ export async function syncContractors(ctx: SyncContext): Promise<SyncResult> {
           isActive: !r.DeletionMark,
         },
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      console.error(`[1C-Sync] Contractor upsert error:`, (err as Error).message);
-    }
-  }
+    },
+  );
 
   return { entity, fetched: rows.length, upserted, errors };
 }
@@ -50,11 +77,11 @@ export async function syncPersons(ctx: SyncContext): Promise<SyncResult> {
   const select = "Ref_Key,Code,Description,DeletionMark";
 
   const rows = await ctx.fetchAll(entity, filter, select);
-  let upserted = 0;
-  let errors = 0;
 
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    entity,
+    async (r: any) => {
       await ctx.db.person.upsert({
         where: { externalId: r.Ref_Key },
         create: {
@@ -69,47 +96,8 @@ export async function syncPersons(ctx: SyncContext): Promise<SyncResult> {
           isActive: !r.DeletionMark,
         },
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      console.error(`[1C-Sync] Person upsert error:`, (err as Error).message);
-    }
-  }
-
-  return { entity, fetched: rows.length, upserted, errors };
-}
-
-export async function syncCashFlowArticles(ctx: SyncContext): Promise<SyncResult> {
-  const entity = "Catalog_СтатьиДвиженияДенежныхСредств";
-  const filter = "DeletionMark eq false";
-  const select = "Ref_Key,Code,Description,IsFolder,DeletionMark";
-
-  const rows = await ctx.fetchAll(entity, filter, select);
-  let upserted = 0;
-  let errors = 0;
-
-  for (const r of rows as any[]) {
-    try {
-      await ctx.db.cashFlowArticle.upsert({
-        where: { externalId: r.Ref_Key },
-        create: {
-          externalId: r.Ref_Key,
-          code: r.Code ?? null,
-          name: r.Description ?? "—",
-          isFolder: r.IsFolder ?? false,
-        },
-        update: {
-          code: r.Code ?? null,
-          name: r.Description ?? "—",
-          isFolder: r.IsFolder ?? false,
-        },
-      });
-      upserted++;
-    } catch (err) {
-      errors++;
-      console.error(`[1C-Sync] CashFlowArticle upsert error:`, (err as Error).message);
-    }
-  }
+    },
+  );
 
   return { entity, fetched: rows.length, upserted, errors };
 }
@@ -123,11 +111,11 @@ async function syncGenericCatalog(
 ): Promise<SyncResult> {
   const filter = "DeletionMark eq false";
   const rows = await ctx.fetchAll(entity, filter, selectFields);
-  let upserted = 0;
-  let errors = 0;
 
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    entity,
+    async (r: any) => {
       const data: Record<string, any> = { isActive: true };
       for (const [oneCField, dbField] of Object.entries(fieldMap)) {
         data[dbField] = r[oneCField] ?? null;
@@ -139,12 +127,9 @@ async function syncGenericCatalog(
         create: { externalId: r.Ref_Key, ...data },
         update: data,
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      logger.error(`[1C-Sync] ${entity} upsert error for ${r.Ref_Key}:`, (err as Error).message);
-    }
-  }
+    },
+  );
+
   return { entity, fetched: rows.length, upserted, errors };
 }
 
@@ -208,11 +193,15 @@ export async function syncDepartments(ctx: SyncContext): Promise<SyncResult> {
   });
 }
 
+/**
+ * Step 1: CashFlowArticles MUST be synced first — finance documents
+ * resolve cashFlowArticleId via FK lookup.
+ */
 export function coreCatalogSteps(ctx: SyncContext) {
   return [
+    () => syncCashFlowArticles(ctx),
     () => syncContractors(ctx),
     () => syncPersons(ctx),
-    () => syncCashFlowArticles(ctx),
   ];
 }
 

@@ -1,6 +1,12 @@
 import type { SyncContext, SyncResult } from "./sync-context";
 import { logger } from "../../../../utils/logger";
 
+/**
+ * CRITICAL: All documents use `Posted eq true` to exclude drafts.
+ * Only posted, non-deleted documents are synced into the ERP.
+ */
+const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
+
 async function syncGenericDocument(
   ctx: SyncContext,
   entity: string,
@@ -8,13 +14,12 @@ async function syncGenericDocument(
   model: "oneCDocument" | "oneCHRDocument" | "oneCPayrollDocument",
   extractor: (row: any) => Record<string, any>,
 ): Promise<SyncResult> {
-  const filter = "DeletionMark eq false";
-  const rows = await ctx.fetchAll(entity, filter);
-  let upserted = 0;
-  let errors = 0;
+  const rows = await ctx.fetchAll(entity, DOCUMENT_FILTER);
 
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    `${docType} (${entity})`,
+    async (r: any) => {
       const extra = extractor(r);
       const baseData = {
         docType,
@@ -31,12 +36,9 @@ async function syncGenericDocument(
         create: { externalId: r.Ref_Key, ...baseData },
         update: baseData,
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      logger.error(`[1C-Sync] ${docType} upsert error for ${r.Ref_Key}:`, (err as Error).message);
-    }
-  }
+    },
+  );
+
   return { entity, fetched: rows.length, upserted, errors };
 }
 

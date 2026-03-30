@@ -33,6 +33,6 @@ export const config = {
   oneCBaseUrl: process.env.ONEC_BASE_URL || "http://100.66.251.128/mezon_db/odata/standard.odata",
   oneCUser: process.env.ONEC_USER || "Главный бухгалтер",
   oneCPassword: process.env.ONEC_PASSWORD || "",
-  oneCTimeoutMs: parseInt(process.env.ONEC_TIMEOUT_MS || "10000", 10),
+  oneCTimeoutMs: parseInt(process.env.ONEC_TIMEOUT_MS || "60000", 10),
   oneCCronSchedule: process.env.ONEC_CRON_SCHEDULE || "*/15 * * * *", // каждые 15 минут
 };

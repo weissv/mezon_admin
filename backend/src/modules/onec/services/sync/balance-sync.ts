@@ -67,7 +67,7 @@ export async function syncBalanceSnapshots(ctx: SyncContext): Promise<SyncResult
     }
   } catch (err) {
     errors++;
-    console.error(`[1C-Sync] BalanceSnapshot aggregate error:`, (err as Error).message);
+    logger.error(`[1C-Sync] BalanceSnapshot aggregate error:`, (err as Error).message);
   }
 
   return { entity, fetched: 0, upserted, errors };

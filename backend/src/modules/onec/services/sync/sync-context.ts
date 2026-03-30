@@ -6,9 +6,25 @@ import { logger } from "../../../../utils/logger";
 
 export type { SyncResult };
 
-const PAGE_SIZE = 500;
-const MAX_PAGES = 200;
+/**
+ * Number of records per OData page request.
+ * 1C typically limits to 1000, we use 1000 to minimize round-trips.
+ */
+const PAGE_SIZE = 1000;
+
+/**
+ * Number of Prisma upserts to execute in parallel per chunk.
+ * Keeps the DB connection pool healthy while providing parallelism.
+ */
+export const UPSERT_CHUNK_SIZE = 100;
+
 export const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+
+/**
+ * Per-request timeout override for OData fetches (60s).
+ * Overrides the client default to give 1C enough time for large datasets.
+ */
+const FETCH_TIMEOUT_MS = 60_000;
 
 export class SyncContext {
   constructor(
@@ -16,6 +32,15 @@ export class SyncContext {
     public readonly db: PrismaClient,
   ) {}
 
+  /**
+   * Fetches ALL records from a 1C OData entity, handling pagination exhaustively.
+   *
+   * Strategy:
+   * 1. If the response contains `odata.nextLink`, follow it (preferred).
+   * 2. Otherwise, use `$skip` + `$top` pagination until a page returns fewer
+   *    items than PAGE_SIZE.
+   * 3. No artificial MAX_PAGES ceiling — fetches until the entity is fully drained.
+   */
   async fetchAll<T = Record<string, unknown>>(
     entity: string,
     filter?: string,
@@ -23,34 +48,107 @@ export class SyncContext {
   ): Promise<T[]> {
     const results: T[] = [];
     let skip = 0;
-    let pageCount = 0;
+    let pageIndex = 0;
 
-    const params: Record<string, string> = {
+    const baseParams: Record<string, string> = {
       $format: "json",
       $top: String(PAGE_SIZE),
     };
-    if (filter) params.$filter = filter;
-    if (select) params.$select = select;
+    if (filter) baseParams.$filter = filter;
+    if (select) baseParams.$select = select;
 
-    while (pageCount < MAX_PAGES) {
-      params.$skip = String(skip);
+    // First request uses the entity URL with params
+    let nextUrl: string | null = null;
 
-      const url = `/${encodeURIComponent(entity)}`;
-      const resp = await this.client.get(url, { params });
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      let items: T[];
 
-      const items: T[] = resp.data?.value ?? [];
+      if (nextUrl) {
+        // Follow the odata.nextLink URL directly (it includes $skip and params)
+        const resp = await this.client.get(nextUrl, {
+          timeout: FETCH_TIMEOUT_MS,
+        });
+        items = resp.data?.value ?? [];
+        nextUrl = resp.data?.["odata.nextLink"] ?? null;
+      } else {
+        // Standard $skip/$top pagination
+        const params = { ...baseParams, $skip: String(skip) };
+        const url = `/${encodeURIComponent(entity)}`;
+        const resp = await this.client.get(url, {
+          params,
+          timeout: FETCH_TIMEOUT_MS,
+        });
+        items = resp.data?.value ?? [];
+        nextUrl = resp.data?.["odata.nextLink"] ?? null;
+      }
+
       results.push(...items);
+      pageIndex++;
 
-      if (items.length < PAGE_SIZE) break;
+      // Log progress for large entities
+      if (pageIndex % 10 === 0) {
+        logger.info(
+          `[1C-Sync] fetchAll "${entity}": ${results.length} records fetched so far (page ${pageIndex})...`,
+        );
+      }
+
+      // If we got a nextLink, follow it (ignore item count)
+      if (nextUrl) {
+        continue;
+      }
+
+      // No nextLink — check if this was a partial page (end of data)
+      if (items.length < PAGE_SIZE) {
+        break;
+      }
+
+      // Full page but no nextLink — advance $skip manually
       skip += PAGE_SIZE;
-      pageCount++;
     }
 
-    if (pageCount >= MAX_PAGES) {
-      logger.warn(`[1C-Sync] fetchAll hit MAX_PAGES (${MAX_PAGES}) for entity "${entity}" — data may be incomplete`);
-    }
+    logger.info(
+      `[1C-Sync] fetchAll "${entity}": completed — ${results.length} total records in ${pageIndex} page(s)`,
+    );
 
     return results;
+  }
+
+  /**
+   * Processes an array of items in chunks, executing `processor` for each item.
+   * Uses Promise.allSettled to ensure a single failure does not break the batch.
+   *
+   * Returns { upserted, errors } counts.
+   */
+  async processInChunks<T>(
+    items: T[],
+    entityLabel: string,
+    processor: (item: T) => Promise<void>,
+    chunkSize: number = UPSERT_CHUNK_SIZE,
+  ): Promise<{ upserted: number; errors: number }> {
+    let upserted = 0;
+    let errors = 0;
+
+    for (let i = 0; i < items.length; i += chunkSize) {
+      const chunk = items.slice(i, i + chunkSize);
+      const results = await Promise.allSettled(
+        chunk.map((item) => processor(item)),
+      );
+
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          upserted++;
+        } else {
+          errors++;
+          logger.error(
+            `[1C-Sync] ${entityLabel} chunk upsert error:`,
+            result.reason?.message ?? String(result.reason),
+          );
+        }
+      }
+    }
+
+    return { upserted, errors };
   }
 
   buildRegisterExternalId(registerType: string, row: Record<string, unknown>): string {

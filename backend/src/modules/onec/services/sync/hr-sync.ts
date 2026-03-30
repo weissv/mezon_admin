@@ -1,29 +1,24 @@
 import type { SyncContext, SyncResult } from "./sync-context";
 import { logger } from "../../../../utils/logger";
 
-function syncGenericHRDocument(
+/**
+ * HR Documents also use `Posted eq true` — only finalized HR actions should
+ * appear in the ERP. Draft hiring/dismissal orders are excluded.
+ */
+const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
+
+async function syncGenericHRDocument(
   ctx: SyncContext,
   entity: string,
   docType: string,
   extractor: (row: any) => Record<string, any>,
 ): Promise<SyncResult> {
-  return syncGenericDocument(ctx, entity, docType, "oneCHRDocument", extractor);
-}
+  const rows = await ctx.fetchAll(entity, DOCUMENT_FILTER);
 
-async function syncGenericDocument(
-  ctx: SyncContext,
-  entity: string,
-  docType: string,
-  model: "oneCHRDocument",
-  extractor: (row: any) => Record<string, any>,
-): Promise<SyncResult> {
-  const filter = "DeletionMark eq false";
-  const rows = await ctx.fetchAll(entity, filter);
-  let upserted = 0;
-  let errors = 0;
-
-  for (const r of rows as any[]) {
-    try {
+  const { upserted, errors } = await ctx.processInChunks(
+    rows as any[],
+    `HR ${docType} (${entity})`,
+    async (r: any) => {
       const extra = extractor(r);
       const baseData = {
         docType,
@@ -35,17 +30,14 @@ async function syncGenericDocument(
         ...extra,
       };
       const db = ctx.db as any;
-      await db[model].upsert({
+      await db.oneCHRDocument.upsert({
         where: { externalId: r.Ref_Key },
         create: { externalId: r.Ref_Key, ...baseData },
         update: baseData,
       });
-      upserted++;
-    } catch (err) {
-      errors++;
-      logger.error(`[1C-Sync] HR ${docType} upsert error for ${r.Ref_Key}:`, (err as Error).message);
-    }
-  }
+    },
+  );
+
   return { entity, fetched: rows.length, upserted, errors };
 }
 
