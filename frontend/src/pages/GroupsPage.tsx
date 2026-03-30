@@ -7,7 +7,12 @@ import { api} from '../lib/api';
 import { Card} from '../components/Card';
 import { Button} from '../components/ui/button';
 import { Input} from '../components/ui/input';
-import { Modal} from '../components/Modal';
+import {
+ Modal,
+ ModalActions,
+ ModalNotice,
+ ModalSection,
+} from '../components/Modal';
 
 interface Teacher {
  id: number;
@@ -47,6 +52,7 @@ export default function GroupsPage() {
  const [deleteConfirm, setDeleteConfirm] = useState<Group | null>(null);
  const [isDeleting, setIsDeleting] = useState(false);
  const [isSaving, setIsSaving] = useState(false);
+ const groupFormId = 'group-editor-form';
 
  // Form state
  const [formGrade, setFormGrade] = useState<number>(1);
@@ -271,11 +277,32 @@ export default function GroupsPage() {
  isOpen={isModalOpen}
  onClose={() => setIsModalOpen(false)}
  title={editingGroup ? 'Редактировать класс' : 'Новый класс'}
+ eyebrow="Учебная структура"
+ description="Соберите карточку класса так, чтобы администратору было легко проверить состав, вместимость и ответственного педагога."
+ icon={<Users className="h-5 w-5"/>}
+ size="lg"
+ meta={<span className="mezon-badge macos-badge-neutral">{formSection ? `${formGrade}${formSection}` : `${formGrade} класс`}</span>}
+ footer={
+ <ModalActions>
+ <Button
+ type="button"
+ variant="outline"
+ onClick={() => setIsModalOpen(false)}
+ disabled={isSaving}
  >
- <form onSubmit={handleSubmit} className="p-4 space-y-4">
- <div className="grid grid-cols-2 gap-4">
+ Отмена
+ </Button>
+ <Button form={groupFormId} type="submit"disabled={isSaving}>
+ {isSaving ? 'Сохранение...' : 'Сохранить'}
+ </Button>
+ </ModalActions>
+ }
+ >
+ <form id={groupFormId} onSubmit={handleSubmit} className="mezon-modal-form">
+ <ModalSection title="Идентификация класса" description="Сначала задайте номер и букву класса, чтобы сразу видеть итоговое название.">
+ <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
  <div>
- <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">
+ <label className="mezon-form-label">
  Класс (номер)
  </label>
  <select
@@ -291,7 +318,7 @@ export default function GroupsPage() {
  </select>
  </div>
  <div>
- <label className="mb-1 block font-medium text-primary">
+ <label className="mezon-form-label mezon-form-label--regular">
  Буква класса
  </label>
  <select
@@ -309,8 +336,14 @@ export default function GroupsPage() {
  </div>
  </div>
 
+ <ModalNotice title="Предпросмотр" tone="info">
+ Итоговое название будет сохранено как <strong>{formSection ? `${formGrade}${formSection}` : `${formGrade} класс`}</strong>.
+ </ModalNotice>
+ </ModalSection>
+
+ <ModalSection title="Организация класса" description="Добавьте параметры, которые чаще всего нужны завучу и классному руководителю.">
  <div>
- <label className="mb-1 block font-medium text-primary">
+ <label className="mezon-form-label mezon-form-label--regular">
  Учебный год
  </label>
  <Input
@@ -321,7 +354,7 @@ export default function GroupsPage() {
  </div>
 
  <div>
- <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">
+ <label className="mezon-form-label">
  Классный руководитель
  </label>
  <select
@@ -346,8 +379,9 @@ export default function GroupsPage() {
  </select>
  </div>
 
+ <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
  <div>
- <label className="mb-1 block font-medium text-primary">
+ <label className="mezon-form-label mezon-form-label--regular">
  Вместимость класса
  </label>
  <Input
@@ -360,7 +394,7 @@ export default function GroupsPage() {
  </div>
 
  <div>
- <label className="mb-1 block font-medium text-primary">
+ <label className="mezon-form-label mezon-form-label--regular">
  Описание (опционально)
  </label>
  <Input
@@ -369,20 +403,8 @@ export default function GroupsPage() {
  placeholder="Профиль, особенности класса..."
  />
  </div>
-
- <div className="flex justify-end gap-3 pt-4">
- <Button
- type="button"
- variant="outline"
- onClick={() => setIsModalOpen(false)}
- disabled={isSaving}
- >
- Отмена
- </Button>
- <Button type="submit"disabled={isSaving}>
- {isSaving ? 'Сохранение...' : 'Сохранить'}
- </Button>
  </div>
+ </ModalSection>
  </form>
  </Modal>
 
@@ -391,32 +413,14 @@ export default function GroupsPage() {
  isOpen={!!deleteConfirm}
  onClose={() => setDeleteConfirm(null)}
  title="Удаление класса"
- >
- <div className="p-4">
- <div className="flex items-start gap-4">
- <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[rgba(255,59,48,0.12)]">
- <AlertTriangle className="h-5 w-5 text-[var(--macos-red)]"/>
- </div>
- <div className="flex-1">
- <p className="text-[14px] font-semibold tracking-[-0.01em] text-primary">
- Вы уверены, что хотите удалить этот класс?
- </p>
- {deleteConfirm && (
- <div className="mt-2 rounded-lg border border-[rgba(0,0,0,0.05)] bg-[rgba(0,0,0,0.03)] p-3">
- <p className="text-[14px] leading-relaxed text-primary">{deleteConfirm.name}</p>
- {deleteConfirm._count && deleteConfirm._count.children > 0 && (
- <p className="mt-1 text-[11px] font-medium uppercase tracking-widest text-[var(--macos-red)]">
- В классе {deleteConfirm._count.children} учеников!
- </p>
- )}
- </div>
- )}
- <p className="mt-2 text-sm text-secondary">
- Это действие нельзя отменить. Все связанные данные будут удалены.
- </p>
- </div>
- </div>
- <div className="flex justify-end gap-3 mt-6">
+ eyebrow="Опасное действие"
+ description="Удаление класса повлияет на связанных учеников и организационные данные. Подтверждайте действие только после проверки последствий."
+ icon={<AlertTriangle className="h-5 w-5"/>}
+ tone="danger"
+ closeOnBackdrop={!isDeleting}
+ closeOnEscape={!isDeleting}
+ footer={
+ <ModalActions>
  <Button
  variant="outline"
  onClick={() => setDeleteConfirm(null)}
@@ -431,8 +435,33 @@ export default function GroupsPage() {
  >
  {isDeleting ? 'Удаление...' : 'Удалить'}
  </Button>
+ </ModalActions>
+ }
+ >
+ {deleteConfirm ? (
+ <>
+ <ModalNotice title="Удаление затронет связанные записи" tone="danger">
+ Класс будет удалён без возможности восстановления. Если в нём уже есть ученики, их данные также потребуют отдельной проверки и переноса.
+ </ModalNotice>
+
+ <ModalSection title="Проверка перед удалением" description="Убедитесь, что удаляете нужный класс и понимаете масштаб изменений.">
+ <div className="mezon-modal-facts">
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Класс</span>
+ <span className="mezon-modal-fact__value">{deleteConfirm.name}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Учебный год</span>
+ <span className="mezon-modal-fact__value">{deleteConfirm.academicYear || 'Не указан'}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Учеников в классе</span>
+ <span className="mezon-modal-fact__value">{deleteConfirm._count?.children || 0}</span>
  </div>
  </div>
+ </ModalSection>
+ </>
+ ) : null}
  </Modal>
  </div>
  );

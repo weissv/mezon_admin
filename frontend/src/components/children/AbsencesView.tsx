@@ -4,7 +4,7 @@ import { useState} from 'react';
 import { PlusCircle, AlertTriangle} from 'lucide-react';
 import { Button} from '../ui/button';
 import { Input} from '../ui/input';
-import { Modal} from '../Modal';
+import { Modal, ModalActions, ModalNotice, ModalSection} from '../Modal';
 import { useAbsences} from '../../hooks/useChildren';
 import type { TemporaryAbsence} from '../../types/child';
 
@@ -56,43 +56,45 @@ export function AbsencesView({ childId}: AbsencesViewProps) {
  if (loading) return <div className="p-4 text-sm text-secondary">Загрузка...</div>;
 
  return (
- <div className="p-4 space-y-4">
+ <div className="space-y-4">
  {!showForm ? (
  <Button onClick={() => setShowForm(true)} size="sm">
  <PlusCircle className="mr-2 h-4 w-4"/> Добавить отсутствие
  </Button>
  ) : (
- <form onSubmit={handleAdd} className="border p-4 rounded space-y-3">
+ <form onSubmit={handleAdd} className="rounded-[20px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.74)] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] space-y-4">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Дата начала</label>
+ <label className="mezon-form-label">Дата начала</label>
  <Input type="date"value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
  </div>
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Дата окончания</label>
+ <label className="mezon-form-label">Дата окончания</label>
  <Input type="date"value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
  </div>
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Причина</label>
+ <label className="mezon-form-label">Причина</label>
  <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Семейный отпуск"required />
  </div>
- <div className="flex gap-2">
+ <div className="mezon-modal-inline-actions !border-t-0 !pt-0">
  <Button type="submit"size="sm"disabled={submitting}>{submitting ? 'Сохранение...' : 'Сохранить'}</Button>
  <Button type="button"variant="ghost"size="sm"onClick={() => setShowForm(false)}>Отмена</Button>
  </div>
  </form>
  )}
 
- <div className="space-y-2">
+ <div className="space-y-3">
  {absences.length === 0 ? (
- <p className="text-secondary text-sm">Нет записей об отсутствиях</p>
+ <ModalNotice title="Пока без записей" tone="info">
+ В этом журнале ещё нет периодов отсутствия. Добавьте новый интервал, если ребёнок временно не посещает занятия.
+ </ModalNotice>
  ) : (
  absences.map((absence) => (
- <div key={absence.id} className="flex justify-between items-center p-3 border rounded">
+ <div key={absence.id} className="flex items-start justify-between gap-4 rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.74)] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
  <div>
- <div className="font-medium text-sm">
+ <div className="font-medium text-sm text-primary">
  {new Date(absence.startDate).toLocaleDateString('ru-RU')} &mdash; {new Date(absence.endDate).toLocaleDateString('ru-RU')}
  </div>
- {absence.reason && <div className="text-sm text-secondary">{absence.reason}</div>}
+ {absence.reason ? <div className="mt-1 text-sm text-secondary">{absence.reason}</div> : null}
  </div>
  <Button variant="destructive"size="sm"onClick={() => setDeleteConfirm(absence)}>Удалить</Button>
  </div>
@@ -101,32 +103,43 @@ export function AbsencesView({ childId}: AbsencesViewProps) {
  </div>
 
  {/* Delete confirmation */}
- <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление отсутствия">
- <div className="p-4">
- <div className="flex items-start gap-4">
- <div className="flex-shrink-0 w-10 h-10 bg-[rgba(255,59,48,0.12)] rounded-full flex items-center justify-center">
- <AlertTriangle className="h-5 w-5 text-macos-red"/>
- </div>
- <div className="flex-1">
- <p className="font-medium text-primary">Вы уверены, что хотите удалить эту запись?</p>
- {deleteConfirm && (
- <div className="mt-2 p-3 bg-fill-quaternary rounded-md">
- <p className="text-[11px] font-medium uppercase tracking-widest">
- {new Date(deleteConfirm.startDate).toLocaleDateString('ru-RU')} &mdash; {new Date(deleteConfirm.endDate).toLocaleDateString('ru-RU')}
- </p>
- {deleteConfirm.reason && <p className="text-xs text-secondary mt-1">{deleteConfirm.reason}</p>}
- </div>
- )}
- <p className="text-sm text-secondary mt-2">Это действие нельзя отменить.</p>
- </div>
- </div>
- <div className="flex justify-end gap-3 mt-6">
+ <Modal
+ isOpen={!!deleteConfirm}
+ onClose={() => setDeleteConfirm(null)}
+ title="Удаление отсутствия"
+ eyebrow="Опасное действие"
+ description="Запись будет удалена из журнала посещаемости без возможности восстановления."
+ icon={<AlertTriangle className="h-5 w-5"/>}
+ tone="danger"
+ closeOnBackdrop={!isDeleting}
+ closeOnEscape={!isDeleting}
+ footer={
+ <ModalActions>
  <Button variant="ghost"onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>Отмена</Button>
  <Button variant="destructive"onClick={handleDelete} disabled={isDeleting}>
  {isDeleting ? 'Удаление...' : 'Удалить'}
  </Button>
+ </ModalActions>
+ }
+ >
+ <ModalNotice title="Проверьте период" tone="danger">
+ Удаление записи сразу изменит картину отсутствий в карточке ребёнка и в сопутствующих журналах.
+ </ModalNotice>
+
+ {deleteConfirm ? (
+ <ModalSection title="Период отсутствия" description="Убедитесь, что удаляете правильную запись.">
+ <div className="mezon-modal-facts">
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Даты</span>
+ <span className="mezon-modal-fact__value">{new Date(deleteConfirm.startDate).toLocaleDateString('ru-RU')} &mdash; {new Date(deleteConfirm.endDate).toLocaleDateString('ru-RU')}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Причина</span>
+ <span className="mezon-modal-fact__value">{deleteConfirm.reason || 'Не указана'}</span>
  </div>
  </div>
+ </ModalSection>
+ ) : null}
  </Modal>
  </div>
  );

@@ -5,7 +5,7 @@ import { useParams, useNavigate} from 'react-router-dom';
 import { ArrowLeft, Edit, Archive, CalendarX, Users, BookOpen} from 'lucide-react';
 import { Button} from '../components/ui/button';
 import { Card} from '../components/Card';
-import { Modal} from '../components/Modal';
+import { Modal, ModalNotice, ModalSection} from '../components/Modal';
 import { ChildForm} from '../components/forms/ChildForm';
 import { AbsencesView} from '../components/children/AbsencesView';
 import { useChild, useChildMutations} from '../hooks/useChildren';
@@ -210,7 +210,16 @@ export default function ChildDetailPage() {
  </div>
 
  {/* Edit Modal */}
- <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Редактировать данные">
+ <Modal
+ isOpen={isEditOpen}
+ onClose={() => setIsEditOpen(false)}
+ title="Редактировать данные"
+ eyebrow="Профиль ученика"
+ description="Изменения в карточке ребёнка собраны по блокам, чтобы можно было спокойно проверить персональные данные, родителей, договор и медицинскую информацию."
+ icon={<Edit className="h-5 w-5"/>}
+ size="xl"
+ meta={<span className={`mezon-badge ${child.status === 'ACTIVE' ? '' : 'macos-badge-neutral'}`}>{statusLabel(child.status)}</span>}
+ >
  <ChildForm
  initialData={child}
  onSuccess={() => { setIsEditOpen(false); refresh();}}
@@ -219,8 +228,23 @@ export default function ChildDetailPage() {
  </Modal>
 
  {/* Absences Modal */}
- <Modal isOpen={showAbsences} onClose={() => setShowAbsences(false)} title={`Отсутствия — ${fullName}`}>
+ <Modal
+ isOpen={showAbsences}
+ onClose={() => setShowAbsences(false)}
+ title={`Отсутствия — ${fullName}`}
+ eyebrow="Журнал посещаемости"
+ description="Здесь администратор видит текущие периоды отсутствий и может быстро добавить новый интервал без перехода на другой экран."
+ icon={<CalendarX className="h-5 w-5"/>}
+ size="lg"
+ meta={<span className="mezon-badge macos-badge-neutral">{child.group.name}</span>}
+ >
+ <ModalNotice title="Контекст" tone="info">
+ Проверяйте даты и причину отсутствия перед сохранением, чтобы классный руководитель и журнал посещаемости видели одинаковую картину.
+ </ModalNotice>
+
+ <ModalSection title="Записи по ученику" description="Все периоды отображаются в хронологии и доступны для удаления при ошибке ввода.">
  <AbsencesView childId={child.id} />
+ </ModalSection>
  </Modal>
  </div>
  );

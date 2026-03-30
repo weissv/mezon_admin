@@ -165,29 +165,29 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
 };
 
  return (
- <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
+ <form onSubmit={handleSubmit(onSubmit)} className="mezon-modal-form">
  {/* ===== Секция 1: Основные данные ===== */}
- <fieldset>
- <legend className="text-sm font-semibold text-primary mb-2 border-b pb-1 w-full">Основные данные</legend>
+ <fieldset className="space-y-4 rounded-[20px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.72)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+ <legend className="px-1 text-[15px] font-semibold tracking-[-0.015em] text-primary">Основные данные</legend>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
  <div>
- <label className="text-sm text-secondary">Фамилия *</label>
+ <label className="mezon-form-label mezon-form-label--regular">Фамилия *</label>
  <Input {...register('lastName')} />
  <FormError message={errors.lastName?.message} />
  </div>
  <div>
- <label className="text-sm text-secondary">Имя *</label>
+ <label className="mezon-form-label mezon-form-label--regular">Имя *</label>
  <Input {...register('firstName')} />
  <FormError message={errors.firstName?.message} />
  </div>
  <div>
- <label className="text-sm text-secondary">Отчество</label>
+ <label className="mezon-form-label mezon-form-label--regular">Отчество</label>
  <Input {...register('middleName')} />
  </div>
  <div>
- <label className="text-sm text-secondary">Класс *</label>
+ <label className="mezon-form-label mezon-form-label--regular">Класс *</label>
  <select
- className="w-full rounded-md border border-field px-3 py-2 text-sm"
+ className="mezon-field"
  disabled={isLoadingGroups}
  {...register('groupId', { valueAsNumber: true})}
  >
@@ -199,14 +199,14 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
  <FormError message={errors.groupId?.message} />
  </div>
  <div>
- <label className="text-sm text-secondary">Дата рождения *</label>
+ <label className="mezon-form-label mezon-form-label--regular">Дата рождения *</label>
  <Input type="date"{...register('birthDate')} />
  <FormError message={errors.birthDate?.message} />
  </div>
  <div>
- <label className="text-sm text-secondary">Пол</label>
+ <label className="mezon-form-label mezon-form-label--regular">Пол</label>
  <select
- className="w-full rounded-md border border-field px-3 py-2 text-sm"
+ className="mezon-field"
  {...register('gender')}
  >
  <option value="">Не указан</option>
@@ -215,25 +215,25 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
  </select>
  </div>
  <div>
- <label className="text-sm text-secondary">Национальность</label>
+ <label className="mezon-form-label mezon-form-label--regular">Национальность</label>
  <Input {...register('nationality')} placeholder="узбек, русский и т.д."/>
  </div>
  <div>
- <label className="text-sm text-secondary">Номер метрики</label>
+ <label className="mezon-form-label mezon-form-label--regular">Номер метрики</label>
  <Input {...register('birthCertificateNumber')} placeholder="I-TN № 0000000"/>
  </div>
  </div>
  <div className="mt-3">
- <label className="text-sm text-secondary">Адрес проживания</label>
+ <label className="mezon-form-label mezon-form-label--regular">Адрес проживания</label>
  <Input {...register('address')} placeholder="Район, улица, дом, квартира"/>
  </div>
  </fieldset>
 
  {/* ===== Секция 2: Родители ===== */}
- <fieldset>
- <legend className="text-sm font-semibold text-primary mb-2 border-b pb-1 w-full">Родители / Опекуны</legend>
+ <fieldset className="space-y-4 rounded-[20px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.72)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+ <legend className="px-1 text-[15px] font-semibold tracking-[-0.015em] text-primary">Родители / Опекуны</legend>
  {parentFields.map((field, index) => (
- <div key={field.id} className="border rounded-md p-3 mb-3 bg-fill-quaternary relative">
+ <div key={field.id} className="relative rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.82)] p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
  <Button
  type="button"
  variant="ghost"
@@ -245,14 +245,14 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
  </Button>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
  <div>
- <label className="text-sm text-secondary">ФИО *</label>
+ <label className="mezon-form-label mezon-form-label--regular">ФИО *</label>
  <Input {...register(`parents.${index}.fullName`)} />
  <FormError message={errors.parents?.[index]?.fullName?.message} />
  </div>
  <div>
- <label className="text-sm text-secondary">Отношение *</label>
+ <label className="mezon-form-label mezon-form-label--regular">Отношение *</label>
  <select
- className="w-full rounded-md border border-field px-3 py-2 text-sm"
+ className="mezon-field"
  {...register(`parents.${index}.relation`)}
  >
  <option value="">Выберите</option>
@@ -264,16 +264,16 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
  <FormError message={errors.parents?.[index]?.relation?.message} />
  </div>
  <div>
- <label className="text-sm text-secondary">Телефон</label>
+ <label className="mezon-form-label mezon-form-label--regular">Телефон</label>
  <Input {...register(`parents.${index}.phone`)} placeholder="+998 90 000 00 00"/>
  </div>
  <div>
- <label className="text-sm text-secondary">Email</label>
+ <label className="mezon-form-label mezon-form-label--regular">Email</label>
  <Input type="email"{...register(`parents.${index}.email`)} />
  <FormError message={errors.parents?.[index]?.email?.message} />
  </div>
  <div className="sm:col-span-2">
- <label className="text-sm text-secondary">Место работы</label>
+ <label className="mezon-form-label mezon-form-label--regular">Место работы</label>
  <Input {...register(`parents.${index}.workplace`)} />
  </div>
  </div>
@@ -290,45 +290,45 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
  </fieldset>
 
  {/* ===== Секция 3: Договор ===== */}
- <fieldset>
- <legend className="text-sm font-semibold text-primary mb-2 border-b pb-1 w-full">Договор</legend>
+ <fieldset className="space-y-4 rounded-[20px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.72)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+ <legend className="px-1 text-[15px] font-semibold tracking-[-0.015em] text-primary">Договор</legend>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
  <div>
- <label className="text-sm text-secondary">№ Договора</label>
+ <label className="mezon-form-label mezon-form-label--regular">№ Договора</label>
  <Input {...register('contractNumber')} />
  </div>
  <div>
- <label className="text-sm text-secondary">Дата договора</label>
+ <label className="mezon-form-label mezon-form-label--regular">Дата договора</label>
  <Input type="date"{...register('contractDate')} />
  </div>
  </div>
  </fieldset>
 
  {/* ===== Секция 4: Мед. сведения ===== */}
- <fieldset>
- <legend className="text-sm font-semibold text-primary mb-2 border-b pb-1 w-full">Медицинские сведения</legend>
+ <fieldset className="space-y-4 rounded-[20px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.72)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+ <legend className="px-1 text-[15px] font-semibold tracking-[-0.015em] text-primary">Медицинские сведения</legend>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
  <div>
- <label className="text-sm text-secondary">Аллергии (через запятую)</label>
+ <label className="mezon-form-label mezon-form-label--regular">Аллергии (через запятую)</label>
  <Input {...register('healthAllergies')} placeholder="молоко, орехи"/>
  </div>
  <div>
- <label className="text-sm text-secondary">Особые условия</label>
+ <label className="mezon-form-label mezon-form-label--regular">Особые условия</label>
  <Input {...register('healthConditions')} placeholder="астма, диабет"/>
  </div>
  <div>
- <label className="text-sm text-secondary">Медикаменты</label>
+ <label className="mezon-form-label mezon-form-label--regular">Медикаменты</label>
  <Input {...register('healthMedications')} placeholder="ингалятор"/>
  </div>
  <div>
- <label className="text-sm text-secondary">Примечания</label>
+ <label className="mezon-form-label mezon-form-label--regular">Примечания</label>
  <Input {...register('healthNotes')} />
  </div>
  </div>
  </fieldset>
 
  {/* ===== Кнопки ===== */}
- <div className="flex justify-end gap-2 pt-2 border-t">
+ <div className="mezon-modal-inline-actions">
  <Button type="button"variant="ghost"onClick={onCancel}>Отмена</Button>
  <Button type="submit"disabled={isSubmitting}>{isSubmitting ? 'Сохранение...' : 'Сохранить'}</Button>
  </div>

@@ -18,7 +18,7 @@ import {
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Button} from '../components/ui/button';
 import { Input} from '../components/ui/input';
-import { Modal} from '../components/Modal';
+import { Modal, ModalActions, ModalNotice, ModalSection} from '../components/Modal';
 import { Card} from '../components/Card';
 import { ChildForm} from '../components/forms/ChildForm';
 import { useChildren, useChildMutations, useGroups} from '../hooks/useChildren';
@@ -340,6 +340,11 @@ export default function ChildrenPage() {
  isOpen={isModalOpen}
  onClose={() => setIsModalOpen(false)}
  title={editingChild ? 'Редактировать данные' : 'Добавить нового ребенка'}
+ eyebrow="Контингент"
+ description="Форма собрана по блокам, чтобы администратор мог спокойно пройти по персональным данным, родителям, договору и мединформации без лишней прокрутки внутри модалки."
+ icon={<Users className="h-5 w-5"/>}
+ size="xl"
+ meta={editingChild ? <span className="mezon-badge macos-badge-neutral">Редактирование</span> : <span className="mezon-badge">Новый профиль</span>}
  >
  <ChildForm
  initialData={editingChild}
@@ -349,29 +354,49 @@ export default function ChildrenPage() {
  </Modal>
 
  {/* Delete Confirmation */}
- <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Удаление ученика">
- <div className="p-4">
- <div className="flex items-start gap-4 mb-4">
- <div className="rounded-[8px] bg-[rgba(255,59,48,0.12)] p-2">
- <AlertCircle className="h-6 w-6 text-[var(--macos-red)]"/>
- </div>
- <div>
- <p className="text-[14px] font-semibold tracking-[-0.01em]">Вы уверены, что хотите удалить ученика?</p>
- <p className="mt-1 text-[14px] leading-relaxed text-secondary">
- <strong>{deleteConfirm?.lastName} {deleteConfirm?.firstName}</strong> ({deleteConfirm?.group?.name})
- </p>
- <p className="mt-2 text-[11px] font-medium uppercase tracking-widest text-[var(--macos-red)]">
- Все связанные данные (посещаемость, отсутствия, записи в кружки) будут удалены.
- </p>
- </div>
- </div>
- <div className="flex justify-end gap-2">
+ <Modal
+ isOpen={!!deleteConfirm}
+ onClose={() => setDeleteConfirm(null)}
+ title="Удаление ученика"
+ eyebrow="Опасное действие"
+ description="Профиль ребёнка будет удалён вместе со связанными записями. Перед подтверждением проверьте, что удаляется именно нужный ученик."
+ icon={<AlertCircle className="h-5 w-5"/>}
+ tone="danger"
+ closeOnBackdrop={!isDeleting}
+ closeOnEscape={!isDeleting}
+ footer={
+ <ModalActions>
  <Button variant="ghost"onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>Отмена</Button>
  <Button variant="destructive"onClick={handleDelete} disabled={isDeleting}>
  {isDeleting ? 'Удаление...' : 'Удалить'}
  </Button>
+ </ModalActions>
+ }
+ >
+ {deleteConfirm ? (
+ <>
+ <ModalNotice title="Удаление затронет связанные данные" tone="danger">
+ Будут удалены посещаемость, отсутствия и записи в кружки, связанные с этим профилем. Это действие нельзя отменить.
+ </ModalNotice>
+
+ <ModalSection title="Проверка профиля" description="Убедитесь, что выбрали правильного ученика.">
+ <div className="mezon-modal-facts">
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Ученик</span>
+ <span className="mezon-modal-fact__value">{deleteConfirm.lastName} {deleteConfirm.firstName}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Класс</span>
+ <span className="mezon-modal-fact__value">{deleteConfirm.group?.name || 'Не указан'}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Статус</span>
+ <span className="mezon-modal-fact__value">{statusLabel(deleteConfirm.status)}</span>
  </div>
  </div>
+ </ModalSection>
+ </>
+ ) : null}
  </Modal>
  </div>
  );
