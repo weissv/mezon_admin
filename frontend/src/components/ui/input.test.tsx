@@ -137,33 +137,13 @@ describe('Input', () => {
 });
 
  describe('Стили', () => {
- it('имеет базовые классы', () => {
- render(<Input />);
+		it('имеет базовые классы', () => {
+			render(<Input />);
 
- const input = screen.getByRole('textbox');
- expect(input).toHaveClass('w-full');
- expect(input).toHaveClass('rounded-2xl');
- expect(input).toHaveClass('border');
-});
-
- it('имеет macos-transition класс', () => {
- render(<Input />);
-
- expect(screen.getByRole('textbox')).toHaveClass('transition');
-});
-
- it('имеет min-height для touch', () => {
- render(<Input />);
-
- expect(screen.getByRole('textbox')).toHaveClass('min-h-[44px]');
-});
-
- it('имеет touch-manipulation класс', () => {
- render(<Input />);
-
- expect(screen.getByRole('textbox')).toHaveClass('touch-manipulation');
-});
-});
+			const input = screen.getByRole('textbox');
+			expect(input).toHaveClass('mezon-field');
+		});
+	});
 
  describe('Контролируемый компонент', () => {
  it('отображает контролируемое значение', () => {

@@ -3,6 +3,7 @@ import { z} from 'zod';
 import { zodResolver} from '@hookform/resolvers/zod';
 import { toast} from 'sonner';
 import { api} from '../../lib/api';
+import { ModalNotice, ModalSection} from '../Modal';
 import { Button} from '../ui/button';
 import { Input} from '../ui/input';
 import { FormError} from '../ui/FormError';
@@ -44,24 +45,30 @@ export function DocumentTemplateForm({ initialData, onSuccess, onCancel}: Docume
 };
 
  return (
- <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+ <form onSubmit={handleSubmit(onSubmit)} className="mezon-modal-form">
+ <ModalSection title="Параметры шаблона" description="Название и содержание должны быть понятными, чтобы сотрудники быстро выбирали нужный шаблон из списка.">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Название шаблона</label>
+ <label className="mezon-form-label">Название шаблона</label>
  <Input {...register('name')} placeholder="Договор стандартный"/>
  <FormError message={errors.name?.message} />
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Содержимое</label>
+ <label className="mezon-form-label">Содержимое</label>
  <textarea
  {...register('content')}
  placeholder="Шаблон документа..."
- className="w-full h-32 px-3 py-2 border border-field rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+ className="mezon-field mezon-textarea"
  />
  <FormError message={errors.content?.message} />
  </div>
 
- <div className="flex justify-end gap-2 pt-4">
+ <ModalNotice title="Подсказка" tone="info">
+ Используйте содержание как основу для типового документа. Чем яснее структура шаблона, тем меньше ручных правок потребуется потом.
+ </ModalNotice>
+ </ModalSection>
+
+ <div className="mezon-modal-inline-actions">
  <Button type="button"variant="ghost"onClick={onCancel}>Отмена</Button>
  <Button type="submit"disabled={isSubmitting}>
  {isSubmitting ? 'Сохранение...' : 'Сохранить'}

@@ -6,6 +6,7 @@ import { toast} from 'sonner';
 import clsx from 'clsx';
 import { UploadCloud} from 'lucide-react';
 import { api} from '../../lib/api';
+import { ModalNotice, ModalSection} from '../Modal';
 import { Button} from '../ui/button';
 import { Input} from '../ui/input';
 import { FormError} from '../ui/FormError';
@@ -168,23 +169,27 @@ export function DocumentForm({ initialData, onSuccess, onCancel}: DocumentFormPr
 };
 
  return (
- <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+ <form onSubmit={handleSubmit(onSubmit)} className="mezon-modal-form">
+ <ModalSection title="Карточка документа" description="Заполните название и файл, чтобы документ было легко найти в каталоге и открыть без лишних уточнений.">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Название документа</label>
+ <label className="mezon-form-label">Название документа</label>
  <Input {...register('name')} placeholder="Договор №123"/>
  <FormError message={errors.name?.message} />
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Ссылка на файл</label>
+ <label className="mezon-form-label">Ссылка на файл</label>
  <Input {...register('fileUrl')} placeholder="/uploads/document.pdf"/>
  <FormError message={errors.fileUrl?.message} />
- <div className="mt-3 space-y-2">
+
+ <div className="mt-3 space-y-3">
  <div
  className={clsx(
- 'border-2 border-dashed rounded-lg p-4 text-center macos-transition cursor-pointer',
- dragActive ? 'border-blue-500 bg-blue-50' : 'border-field hover:border-blue-400',
- uploading && 'opacity-60 pointer-events-none'
+ 'cursor-pointer rounded-[20px] border-2 border-dashed p-5 text-center macos-transition',
+ dragActive
+ ? 'border-[var(--color-blue)] bg-[rgba(0,122,255,0.06)]'
+ : 'border-[rgba(15,23,42,0.12)] bg-[rgba(255,255,255,0.68)] hover:border-[rgba(0,122,255,0.42)]',
+ uploading && 'pointer-events-none opacity-60'
  )}
  onClick={handleManualUpload}
  onDragEnter={handleDrag}
@@ -194,18 +199,20 @@ export function DocumentForm({ initialData, onSuccess, onCancel}: DocumentFormPr
  >
  <div className="flex flex-col items-center gap-2">
  <UploadCloud className="h-6 w-6 text-secondary"/>
- <p className="font-medium">Перетащите файл или нажмите для выбора</p>
+ <p className="font-medium text-primary">Перетащите файл или нажмите для выбора</p>
  <p className="text-sm text-secondary">Поддерживаются PDF, DOCX, изображения и другие форматы</p>
- {uploadedFileName && (
+ {uploadedFileName ? (
  <p className="text-xs text-secondary">{uploading ? 'Обработка...' : uploadedFileName}</p>
- )}
+ ) : null}
  </div>
  </div>
+
  <div className="flex justify-center">
  <Button type="button"variant="secondary"size="sm"onClick={handleManualUpload} disabled={uploading}>
  {uploading ? 'Загружаем...' : 'Загрузить файл'}
  </Button>
  </div>
+
  <input
  ref={fileInputRef}
  type="file"
@@ -216,10 +223,16 @@ export function DocumentForm({ initialData, onSuccess, onCancel}: DocumentFormPr
  </div>
  </div>
 
+ <ModalNotice title="Подсказка" tone="info">
+ Если загружаете файл прямо из модалки, поле ссылки заполнится автоматически. Ссылку можно и вставить вручную, если файл уже хранится в системе.
+ </ModalNotice>
+ </ModalSection>
+
+ <ModalSection title="Привязка документа" description="Связи помогают быстро находить документы в карточках сотрудников и учеников.">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Шаблон (опционально)</label>
+ <label className="mezon-form-label">Шаблон</label>
  <select
- className="w-full rounded-md border border-field px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+ className="mezon-field"
  {...register('templateId', { valueAsNumber: true})}
  disabled={isLoading}
  >
@@ -232,9 +245,9 @@ export function DocumentForm({ initialData, onSuccess, onCancel}: DocumentFormPr
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Сотрудник (опционально)</label>
+ <label className="mezon-form-label">Сотрудник</label>
  <select
- className="w-full rounded-md border border-field px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+ className="mezon-field"
  {...register('employeeId', { valueAsNumber: true})}
  disabled={isLoading}
  >
@@ -247,9 +260,9 @@ export function DocumentForm({ initialData, onSuccess, onCancel}: DocumentFormPr
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Ученик (опционально)</label>
+ <label className="mezon-form-label">Ученик</label>
  <select
- className="w-full rounded-md border border-field px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+ className="mezon-field"
  {...register('childId', { valueAsNumber: true})}
  disabled={isLoading}
  >
@@ -260,8 +273,9 @@ export function DocumentForm({ initialData, onSuccess, onCancel}: DocumentFormPr
  </select>
  <FormError message={errors.childId?.message} />
  </div>
+ </ModalSection>
 
- <div className="flex justify-end gap-2 pt-4">
+ <div className="mezon-modal-inline-actions">
  <Button type="button"variant="ghost"onClick={onCancel}>Отмена</Button>
  <Button type="submit"disabled={isSubmitting}>
  {isSubmitting ? 'Сохранение...' : 'Сохранить'}

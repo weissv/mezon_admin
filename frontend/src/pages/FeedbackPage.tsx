@@ -4,7 +4,7 @@ import { useApi} from '../hooks/useApi';
 import { useAuth} from '../hooks/useAuth';
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Button} from '../components/ui/button';
-import { Modal} from '../components/Modal';
+import { Modal, ModalActions, ModalNotice, ModalSection} from '../components/Modal';
 import { MessageCircleWarning, ShieldAlert, AlertTriangle, Bug} from 'lucide-react';
 import { Feedback, FeedbackStatus} from '../types/feedback';
 import { FeedbackResponseForm} from '../components/forms/FeedbackResponseForm';
@@ -213,6 +213,11 @@ export default function FeedbackPage() {
  isOpen={isResponseModalOpen}
  onClose={() => setIsResponseModalOpen(false)}
  title='Ответ на баг-репорт'
+ eyebrow='Разбор обращения'
+ description='Перед ответом проверьте исходный баг-репорт, затем зафиксируйте понятный ответ и актуальный статус, чтобы историю было легко восстановить позже.'
+ icon={<MessageCircleWarning className='h-5 w-5' />}
+ size='xl'
+ meta={selectedFeedback ? getStatusBadge(selectedFeedback.status) : null}
  >
  {selectedFeedback && (
  <FeedbackResponseForm
@@ -224,34 +229,57 @@ export default function FeedbackPage() {
  </Modal>
 
  {/* Delete confirmation modal */}
- <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title='Подтверждение удаления'>
- <div className='space-y-4 p-4'>
- <div className='flex items-start gap-3 rounded-lg border border-red-200 bg-[rgba(255,59,48,0.06)] p-4'>
- <AlertTriangle className='mt-0.5 h-6 w-6 flex-shrink-0 text-macos-red' />
- <div>
- <h4 className='font-semibold text-red-800'>Внимание!</h4>
- <p className='mt-1 text-sm text-macos-red'>
- Вы собираетесь удалить баг-репорт. Это действие нельзя отменить.
- </p>
- </div>
- </div>
- {deletingFeedback && (
- <div className='rounded-lg bg-fill-quaternary p-3'>
- <p><strong>Родитель:</strong> {deletingFeedback.parentName}</p>
- <p><strong>Тип:</strong> {deletingFeedback.type}</p>
- <p><strong>Статус:</strong> {getStatusBadge(deletingFeedback.status)}</p>
- <p><strong>Сообщение:</strong> {deletingFeedback.message.substring(0, 100)}...</p>
- </div>
- )}
- <div className='flex justify-end gap-2 pt-2'>
+ <Modal
+ isOpen={deleteModalOpen}
+ onClose={() => setDeleteModalOpen(false)}
+ title='Удаление баг-репорта'
+ eyebrow='Опасное действие'
+ description='Обращение исчезнет из журнала навсегда. Перед удалением проверьте автора, тип и фрагмент сообщения.'
+ icon={<AlertTriangle className='h-5 w-5' />}
+ tone='danger'
+ closeOnBackdrop={!deleting}
+ closeOnEscape={!deleting}
+ footer={
+ <ModalActions>
  <Button variant="outline"onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
  Отмена
  </Button>
  <Button variant="destructive"onClick={handleDelete} disabled={deleting}>
  {deleting ? 'Удаление...' : 'Удалить'}
  </Button>
+ </ModalActions>
+ }
+ >
+ <ModalNotice title='Удаление необратимо' tone='danger'>
+ После подтверждения обращение, история статусов и ответ будут удалены из административного журнала.
+ </ModalNotice>
+
+ {deletingFeedback ? (
+ <ModalSection title='Карточка обращения' description='Сверьте данные, чтобы не удалить чужой или уже разобранный репорт.'>
+ <div className='mezon-modal-facts'>
+ <div className='mezon-modal-fact'>
+ <span className='mezon-modal-fact__label'>Автор</span>
+ <span className='mezon-modal-fact__value'>{deletingFeedback.parentName}</span>
+ </div>
+ <div className='mezon-modal-fact'>
+ <span className='mezon-modal-fact__label'>Тип</span>
+ <span className='mezon-modal-fact__value'>{deletingFeedback.type}</span>
+ </div>
+ <div className='mezon-modal-fact'>
+ <span className='mezon-modal-fact__label'>Контакты</span>
+ <span className='mezon-modal-fact__value'>{deletingFeedback.contactInfo}</span>
+ </div>
+ <div className='mezon-modal-fact'>
+ <span className='mezon-modal-fact__label'>Статус</span>
+ <span className='mezon-modal-fact__value'>{deletingFeedback.status === 'NEW' ? 'Новое' : deletingFeedback.status === 'IN_PROGRESS' ? 'В работе' : 'Решено'}</span>
  </div>
  </div>
+
+ <ModalNotice title='Фрагмент сообщения' tone='warning'>
+ {deletingFeedback.message.substring(0, 160)}{deletingFeedback.message.length > 160 ? '...' : ''}
+ </ModalNotice>
+ </ModalSection>
+ ) : null}
  </Modal>
  </div>
  );

@@ -3,6 +3,7 @@ import { z} from 'zod';
 import { zodResolver} from '@hookform/resolvers/zod';
 import { toast} from 'sonner';
 import { api} from '../../lib/api';
+import { ModalNotice, ModalSection} from '../Modal';
 import { Button} from '../ui/button';
 import { FormError} from '../ui/FormError';
 import { Feedback} from '../../types/feedback';
@@ -39,50 +40,58 @@ export function FeedbackResponseForm({ feedback, onSuccess, onCancel}: FeedbackR
 };
 
  return (
- <div className="space-y-4">
- <div className="p-4 bg-fill-quaternary rounded-md">
- <h3 className="font-medium mb-2">Исходное обращение:</h3>
- <p className="text-sm text-primary mb-2">
- <strong>От:</strong> {feedback.parentName} ({feedback.contactInfo})
- </p>
- <p className="text-sm text-primary mb-2">
- <strong>Тип:</strong> {feedback.type}
- </p>
- <p className="text-sm text-primary">
- <strong>Сообщение:</strong> {feedback.message}
- </p>
+ <form onSubmit={handleSubmit(onSubmit)} className="mezon-modal-form">
+ <ModalSection title="Исходное обращение" description="Перед ответом сверьте автора, контакты и текст сообщения, чтобы не потерять контекст переписки.">
+ <div className="mezon-modal-facts">
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Автор</span>
+ <span className="mezon-modal-fact__value">{feedback.parentName}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Контакты</span>
+ <span className="mezon-modal-fact__value">{feedback.contactInfo}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Тип</span>
+ <span className="mezon-modal-fact__value">{feedback.type}</span>
+ </div>
  </div>
 
- <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+ <ModalNotice title="Сообщение" tone="info">
+ {feedback.message}
+ </ModalNotice>
+ </ModalSection>
+
+ <ModalSection title="Ответ и статус" description="Сформулируйте понятный ответ и сразу переведите обращение в актуальный статус.">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Ответ</label>
+ <label className="mezon-form-label">Ответ</label>
  <textarea
  {...register('response')}
  placeholder="Ваш ответ на обращение..."
- className="w-full h-32 px-3 py-2 border border-field rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+ className="mezon-field mezon-textarea"
  />
  <FormError message={errors.response?.message} />
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Статус</label>
+ <label className="mezon-form-label">Статус</label>
  <select 
  {...register('status')} 
- className="w-full px-3 py-2 border border-field rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+ className="mezon-field"
  >
  <option value="IN_PROGRESS">В работе</option>
  <option value="RESOLVED">Решено</option>
  </select>
  <FormError message={errors.status?.message} />
  </div>
+ </ModalSection>
 
- <div className="flex justify-end gap-2 pt-4">
+ <div className="mezon-modal-inline-actions">
  <Button type="button"variant="ghost"onClick={onCancel}>Отмена</Button>
  <Button type="submit"disabled={isSubmitting}>
  {isSubmitting ? 'Сохранение...' : 'Сохранить ответ'}
  </Button>
  </div>
  </form>
- </div>
  );
 }

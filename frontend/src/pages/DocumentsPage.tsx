@@ -3,7 +3,7 @@ import { toast} from 'sonner';
 import { useApi} from '../hooks/useApi';
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Button} from '../components/ui/button';
-import { Modal} from '../components/Modal';
+import { Modal, ModalActions, ModalNotice, ModalSection} from '../components/Modal';
 import { PlusCircle, FileText, AlertTriangle} from 'lucide-react';
 import { Document, DocumentTemplate} from '../types/document';
 import { DocumentForm} from '../components/forms/DocumentForm';
@@ -148,6 +148,11 @@ export default function DocumentsPage() {
  isOpen={isModalOpen}
  onClose={() => setIsModalOpen(false)}
  title={editingDocument ? 'Редактировать документ' : 'Новый документ'}
+ eyebrow="Документооборот"
+ description="Заполните карточку документа так, чтобы его было легко найти по названию, файлу и привязке к сотруднику или ученику."
+ icon={<FileText className="h-5 w-5"/>}
+ size="xl"
+ meta={editingDocument ? <span className="mezon-badge macos-badge-neutral">Редактирование</span> : <span className="mezon-badge">Новый файл</span>}
  >
  <DocumentForm
  initialData={editingDocument}
@@ -157,37 +162,53 @@ export default function DocumentsPage() {
  </Modal>
  
  {/* Delete confirmation modal */}
- <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
- <div className="p-4 space-y-4">
- <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
- <AlertTriangle className="h-6 w-6 text-macos-red flex-shrink-0 mt-0.5"/>
- <div>
- <h4 className="font-semibold text-red-800">Внимание!</h4>
- <p className="text-macos-red text-sm mt-1">
- Вы собираетесь удалить документ. Это действие нельзя отменить.
- </p>
- </div>
- </div>
- {deletingDocument && (
- <div className="bg-fill-quaternary p-3 rounded-lg">
- <p><strong>Название:</strong> {deletingDocument.name}</p>
- {deletingDocument.employee && (
- <p><strong>Сотрудник:</strong> {deletingDocument.employee.firstName} {deletingDocument.employee.lastName}</p>
- )}
- {deletingDocument.child && (
- <p><strong>Ребенок:</strong> {deletingDocument.child.firstName} {deletingDocument.child.lastName}</p>
- )}
- </div>
- )}
- <div className="flex justify-end gap-2 pt-2">
+ <Modal
+ isOpen={deleteModalOpen}
+ onClose={() => setDeleteModalOpen(false)}
+ title="Удаление документа"
+ eyebrow="Опасное действие"
+ description="Документ будет удалён без возможности восстановления. Перед подтверждением проверьте, что выбрали правильный файл."
+ icon={<AlertTriangle className="h-5 w-5"/>}
+ tone="danger"
+ closeOnBackdrop={!deleting}
+ closeOnEscape={!deleting}
+ footer={
+ <ModalActions>
  <Button variant="outline"onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
  Отмена
  </Button>
  <Button variant="destructive"onClick={handleDelete} disabled={deleting}>
  {deleting ? 'Удаление...' : 'Удалить'}
  </Button>
+ </ModalActions>
+ }
+ >
+ <ModalNotice title="Удаление необратимо" tone="danger">
+ Если документ уже использовался в работе сотрудников или связан с учеником, после удаления его придётся загружать заново.
+ </ModalNotice>
+
+ {deletingDocument ? (
+ <ModalSection title="Проверка файла" description="Сверьте ключевые реквизиты перед удалением.">
+ <div className="mezon-modal-facts">
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Название</span>
+ <span className="mezon-modal-fact__value">{deletingDocument.name}</span>
  </div>
+ {deletingDocument.employee ? (
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Сотрудник</span>
+ <span className="mezon-modal-fact__value">{deletingDocument.employee.firstName} {deletingDocument.employee.lastName}</span>
  </div>
+ ) : null}
+ {deletingDocument.child ? (
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Ученик</span>
+ <span className="mezon-modal-fact__value">{deletingDocument.child.firstName} {deletingDocument.child.lastName}</span>
+ </div>
+ ) : null}
+ </div>
+ </ModalSection>
+ ) : null}
  </Modal>
  </>
  ) : (
@@ -295,6 +316,11 @@ function TemplatesView({ onTemplateCreated}: { onTemplateCreated: () => void}) {
  isOpen={isModalOpen}
  onClose={() => setIsModalOpen(false)}
  title={editingTemplate ? 'Редактировать шаблон' : 'Новый шаблон'}
+ eyebrow="Шаблоны"
+ description="Подготовьте шаблон так, чтобы из него было удобно быстро создавать типовые документы без повторного ручного ввода."
+ icon={<FileText className="h-5 w-5"/>}
+ size="xl"
+ meta={editingTemplate ? <span className="mezon-badge macos-badge-neutral">Редактирование</span> : <span className="mezon-badge">Новый шаблон</span>}
  >
  <DocumentTemplateForm
  initialData={editingTemplate}
@@ -304,32 +330,45 @@ function TemplatesView({ onTemplateCreated}: { onTemplateCreated: () => void}) {
  </Modal>
  
  {/* Delete confirmation modal */}
- <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
- <div className="p-4 space-y-4">
- <div className="flex items-start gap-3 p-4 bg-[rgba(255,59,48,0.06)] border border-red-200 rounded-lg">
- <AlertTriangle className="h-6 w-6 text-macos-red flex-shrink-0 mt-0.5"/>
- <div>
- <h4 className="font-semibold text-red-800">Внимание!</h4>
- <p className="text-macos-red text-sm mt-1">
- Вы собираетесь удалить шаблон документа. Это действие нельзя отменить.
- Документы, созданные по этому шаблону, не будут удалены.
- </p>
- </div>
- </div>
- {deletingTemplate && (
- <div className="bg-fill-quaternary p-3 rounded-lg">
- <p><strong>Название:</strong> {deletingTemplate.name}</p>
- </div>
- )}
- <div className="flex justify-end gap-2 pt-2">
+ <Modal
+ isOpen={deleteModalOpen}
+ onClose={() => setDeleteModalOpen(false)}
+ title="Удаление шаблона"
+ eyebrow="Опасное действие"
+ description="Шаблон будет удалён из каталога, но уже созданные по нему документы останутся. Подтвердите действие только после проверки названия."
+ icon={<AlertTriangle className="h-5 w-5"/>}
+ tone="danger"
+ closeOnBackdrop={!deleting}
+ closeOnEscape={!deleting}
+ footer={
+ <ModalActions>
  <Button variant="outline"onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
  Отмена
  </Button>
  <Button variant="destructive"onClick={handleDelete} disabled={deleting}>
  {deleting ? 'Удаление...' : 'Удалить'}
  </Button>
+ </ModalActions>
+ }
+ >
+ <ModalNotice title="Что изменится после удаления" tone="danger">
+ Шаблон исчезнет из каталога, поэтому новые документы по нему создать уже не получится. Ранее сформированные документы не будут затронуты.
+ </ModalNotice>
+
+ {deletingTemplate ? (
+ <ModalSection title="Проверка шаблона" description="Убедитесь, что выбрали нужный шаблон из списка.">
+ <div className="mezon-modal-facts">
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Название</span>
+ <span className="mezon-modal-fact__value">{deletingTemplate.name}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Содержимое</span>
+ <span className="mezon-modal-fact__value">{deletingTemplate.content.slice(0, 80)}{deletingTemplate.content.length > 80 ? '...' : ''}</span>
  </div>
  </div>
+ </ModalSection>
+ ) : null}
  </Modal>
  </>
  );

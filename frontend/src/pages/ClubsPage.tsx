@@ -3,7 +3,7 @@ import { toast} from 'sonner';
 import { useApi} from '../hooks/useApi';
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Button} from '../components/ui/button';
-import { Modal} from '../components/Modal';
+import { Modal, ModalActions, ModalNotice, ModalSection} from '../components/Modal';
 import { Input} from '../components/ui/input';
 import { Card} from '../components/Card';
 import { PlusCircle, AlertTriangle, Star, BarChart3, Users, FileText, Loader2} from 'lucide-react';
@@ -73,7 +73,7 @@ interface Child {
 
 type TabType = 'clubs' | 'ratings' | 'reports';
 const selectClassName = 'mezon-field';
-const textareaClassName = 'mezon-field min-h-[96px] resize-y';
+const textareaClassName = 'mezon-field mezon-textarea';
 
 export default function ClubsPage() {
  const [activeTab, setActiveTab] = useState<TabType>('clubs');
@@ -112,6 +112,8 @@ export default function ClubsPage() {
  const [selectedClubForReport, setSelectedClubForReport] = useState<Club | null>(null);
  const [report, setReport] = useState<ClubReport | null>(null);
  const [reportLoading, setReportLoading] = useState(false);
+ const clubFormId = 'club-editor-form';
+ const ratingFormId = 'club-rating-form';
 
  // Загрузка списка педагогов при монтировании
  useEffect(() => {
@@ -536,10 +538,31 @@ export default function ClubsPage() {
  isOpen={isModalOpen}
  onClose={() => setIsModalOpen(false)}
  title={editingClub ? 'Редактировать кружок' : 'Новый кружок'}
+ eyebrow="Каталог кружков"
+ description="Соберите карточку кружка так, чтобы администратору было удобно проверить педагога, описание, стоимость и лимит мест перед сохранением."
+ icon={<Users className="h-5 w-5"/>}
+ size="lg"
+ meta={editingClub ? <span className="mezon-badge macos-badge-neutral">{editingClub.name}</span> : <span className="mezon-badge">Создание</span>}
+ footer={
+ <ModalActions>
+ <Button
+ type="button"
+ variant="ghost"
+ onClick={() => setIsModalOpen(false)}
+ disabled={saving}
  >
- <form onSubmit={handleSubmit} className="space-y-4 p-4">
+ Отмена
+ </Button>
+ <Button form={clubFormId} type="submit"disabled={saving}>
+ {saving ? 'Сохранение...' : 'Сохранить'}
+ </Button>
+ </ModalActions>
+ }
+ >
+ <form id={clubFormId} onSubmit={handleSubmit} className="mezon-modal-form">
+ <ModalSection title="Основная информация" description="Название и описание должны быть понятны родителям и сотрудникам, которые будут искать кружок в списке.">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Название *</label>
+ <label className="mezon-form-label">Название *</label>
  <Input
  value={formData.name}
  onChange={(e) => setFormData({ ...formData, name: e.target.value})}
@@ -549,16 +572,24 @@ export default function ClubsPage() {
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Описание</label>
- <Input
+ <label className="mezon-form-label">Описание</label>
+ <textarea
+ className={textareaClassName}
  value={formData.description}
  onChange={(e) => setFormData({ ...formData, description: e.target.value})}
- placeholder="Творческое развитие детей"
+ rows={4}
+ placeholder="Творческое развитие детей, формат занятий, особенности программы"
  />
  </div>
 
+ <ModalNotice title="Подсказка" tone="info">
+ Чёткое описание помогает быстрее записывать детей в кружок и снижает количество уточняющих вопросов у родителей.
+ </ModalNotice>
+ </ModalSection>
+
+ <ModalSection title="Параметры записи" description="Эти поля влияют на доступность кружка и коммерческие расчёты.">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Педагог *</label>
+ <label className="mezon-form-label">Педагог *</label>
  <select
  className={selectClassName}
  value={formData.teacherId}
@@ -575,8 +606,9 @@ export default function ClubsPage() {
  </select>
  </div>
 
+ <div className="grid gap-4 md:grid-cols-2">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Стоимость (UZS/мес) *</label>
+ <label className="mezon-form-label">Стоимость (UZS/мес) *</label>
  <Input
  type="number"
  value={formData.cost}
@@ -588,7 +620,7 @@ export default function ClubsPage() {
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Максимум детей *</label>
+ <label className="mezon-form-label">Максимум детей *</label>
  <Input
  type="number"
  value={formData.maxStudents}
@@ -597,20 +629,8 @@ export default function ClubsPage() {
  placeholder="15"
  />
  </div>
-
- <div className="flex gap-2 justify-end pt-4">
- <Button
- type="button"
- variant="ghost"
- onClick={() => setIsModalOpen(false)}
- disabled={saving}
- >
- Отмена
- </Button>
- <Button type="submit"disabled={saving}>
- {saving ? 'Сохранение...' : 'Сохранить'}
- </Button>
  </div>
+ </ModalSection>
  </form>
  </Modal>
 
@@ -619,10 +639,26 @@ export default function ClubsPage() {
  isOpen={isRatingModalOpen}
  onClose={() => setIsRatingModalOpen(false)}
  title="Добавить оценку"
+ eyebrow="Обратная связь"
+ description="Оценка помогает быстро собрать мнение по занятиям и не потерять контекст, если у ребёнка есть комментарий по посещению кружка."
+ icon={<Star className="h-5 w-5"/>}
+ size="lg"
+ meta={selectedClubForRatings ? <span className="mezon-badge macos-badge-neutral">{selectedClubForRatings.name}</span> : null}
+ footer={
+ <ModalActions>
+ <Button type="button"variant="ghost"onClick={() => setIsRatingModalOpen(false)}>
+ Отмена
+ </Button>
+ <Button form={ratingFormId} type="submit"disabled={saving}>
+ {saving ? 'Сохранение...' : 'Сохранить'}
+ </Button>
+ </ModalActions>
+ }
  >
- <form onSubmit={handleRatingSubmit} className="space-y-4 p-4">
+ <form id={ratingFormId} onSubmit={handleRatingSubmit} className="mezon-modal-form">
+ <ModalSection title="Новая оценка" description="Заполните участника, балл и комментарий. Это упростит последующий разбор отзывов.">
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Ребёнок *</label>
+ <label className="mezon-form-label">Ребёнок *</label>
  <select
  className={selectClassName}
  value={ratingFormData.childId}
@@ -639,7 +675,7 @@ export default function ClubsPage() {
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Оценка *</label>
+ <label className="mezon-form-label">Оценка *</label>
  <select
  className={selectClassName}
  value={ratingFormData.rating}
@@ -653,7 +689,7 @@ export default function ClubsPage() {
  </div>
 
  <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Комментарий</label>
+ <label className="mezon-form-label">Комментарий</label>
  <textarea
  className={textareaClassName}
  value={ratingFormData.comment}
@@ -662,47 +698,54 @@ export default function ClubsPage() {
  placeholder="Отзыв о занятиях..."
  />
  </div>
-
- <div className="flex gap-2 justify-end pt-4">
- <Button type="button"variant="ghost"onClick={() => setIsRatingModalOpen(false)}>
- Отмена
- </Button>
- <Button type="submit"disabled={saving}>
- {saving ? 'Сохранение...' : 'Сохранить'}
- </Button>
- </div>
+ </ModalSection>
  </form>
  </Modal>
 
  {/* Delete confirmation modal */}
- <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Подтверждение удаления">
- <div className="p-4 space-y-4">
- <div className="flex items-start gap-3 rounded-lg border border-[rgba(255,59,48,0.18)] bg-[rgba(255,59,48,0.08)] p-4">
- <AlertTriangle className="mt-0.5 h-6 w-6 flex-shrink-0 text-[var(--macos-red)]"/>
- <div>
- <h4 className="font-semibold text-[var(--macos-red)]">Внимание!</h4>
- <p className="mt-1 text-sm text-[var(--macos-red)]">
- Вы собираетесь удалить кружок. Это действие нельзя отменить. 
- Все записи детей в этот кружок также будут удалены.
- </p>
- </div>
- </div>
- {deletingClub && (
- <div className="rounded-lg bg-[rgba(255,255,255,0.58)] p-3">
- <p><strong>Название:</strong> {deletingClub.name}</p>
- <p><strong>Педагог:</strong> {deletingClub.teacher.firstName} {deletingClub.teacher.lastName}</p>
- <p><strong>Стоимость:</strong> {currency.format(deletingClub.cost)}/мес</p>
- </div>
- )}
- <div className="flex justify-end gap-2 pt-2">
+ <Modal
+ isOpen={deleteModalOpen}
+ onClose={() => setDeleteModalOpen(false)}
+ title="Удаление кружка"
+ eyebrow="Опасное действие"
+ description="Удаление кружка повлияет на все записи детей. Проверьте карточку ниже перед подтверждением."
+ icon={<AlertTriangle className="h-5 w-5"/>}
+ tone="danger"
+ closeOnBackdrop={!deleting}
+ closeOnEscape={!deleting}
+ footer={
+ <ModalActions>
  <Button variant="outline"onClick={() => setDeleteModalOpen(false)} disabled={deleting}>
  Отмена
  </Button>
  <Button variant="destructive"onClick={handleDelete} disabled={deleting}>
  {deleting ? 'Удаление...' : 'Удалить'}
  </Button>
+ </ModalActions>
+ }
+ >
+ <ModalNotice title="Удаление необратимо" tone="danger">
+ Вместе с кружком будут удалены связанные записи детей. Это может повлиять на отчётность и историю участия.
+ </ModalNotice>
+
+ {deletingClub ? (
+ <ModalSection title="Карточка кружка" description="Ещё раз проверьте, что выбран правильный кружок.">
+ <div className="mezon-modal-facts">
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Название</span>
+ <span className="mezon-modal-fact__value">{deletingClub.name}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Педагог</span>
+ <span className="mezon-modal-fact__value">{deletingClub.teacher.firstName} {deletingClub.teacher.lastName}</span>
+ </div>
+ <div className="mezon-modal-fact">
+ <span className="mezon-modal-fact__label">Стоимость</span>
+ <span className="mezon-modal-fact__value">{currency.format(deletingClub.cost)}/мес</span>
  </div>
  </div>
+ </ModalSection>
+ ) : null}
  </Modal>
  </div>
  );

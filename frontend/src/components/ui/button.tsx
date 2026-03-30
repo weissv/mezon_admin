@@ -12,7 +12,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const base = [
   "inline-flex items-center justify-center gap-2 font-medium",
-  "macos-transition rounded-md outline-none",
+  "macos-transition rounded-[8px] outline-none",
   "disabled:opacity-40 disabled:cursor-not-allowed",
   "active:scale-[0.97] touch-manipulation",
   "tracking-[-0.01em] leading-none",
