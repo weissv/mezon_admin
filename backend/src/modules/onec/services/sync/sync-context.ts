@@ -33,13 +33,13 @@ export class SyncContext {
   ) {}
 
   /**
-   * Fetches ALL records from a 1C OData entity, handling pagination exhaustively.
+   * Fetches ALL records from a 1C OData entity using manual $skip/$top pagination.
    *
    * Strategy:
-   * 1. If the response contains `odata.nextLink`, follow it (preferred).
-   * 2. Otherwise, use `$skip` + `$top` pagination until a page returns fewer
-   *    items than PAGE_SIZE.
-   * 3. No artificial MAX_PAGES ceiling — fetches until the entity is fully drained.
+   * - Uses $skip + $top pagination until a page returns fewer items than PAGE_SIZE.
+   * - Does NOT follow odata.nextLink — 1C behind a proxy returns malformed nextLink
+   *   URLs (pointing to localhost) which cause fetch failures.
+   * - No artificial MAX_PAGES ceiling — fetches until the entity is fully drained.
    */
   async fetchAll<T = Record<string, unknown>>(
     entity: string,
@@ -57,31 +57,15 @@ export class SyncContext {
     if (filter) baseParams.$filter = filter;
     if (select) baseParams.$select = select;
 
-    // First request uses the entity URL with params
-    let nextUrl: string | null = null;
-
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      let items: T[];
-
-      if (nextUrl) {
-        // Follow the odata.nextLink URL directly (it includes $skip and params)
-        const resp: any = await this.client.get(nextUrl, {
-          timeout: FETCH_TIMEOUT_MS,
-        });
-        items = resp.data?.value ?? [];
-        nextUrl = resp.data?.["odata.nextLink"] ?? null;
-      } else {
-        // Standard $skip/$top pagination
-        const params = { ...baseParams, $skip: String(skip) };
-        const url = `/${encodeURIComponent(entity)}`;
-        const resp: any = await this.client.get(url, {
-          params,
-          timeout: FETCH_TIMEOUT_MS,
-        });
-        items = resp.data?.value ?? [];
-        nextUrl = resp.data?.["odata.nextLink"] ?? null;
-      }
+      const params = { ...baseParams, $skip: String(skip) };
+      const url = `/${encodeURIComponent(entity)}`;
+      const resp: any = await this.client.get(url, {
+        params,
+        timeout: FETCH_TIMEOUT_MS,
+      });
+      const items: T[] = resp.data?.value ?? [];
 
       results.push(...items);
       pageIndex++;
@@ -93,17 +77,12 @@ export class SyncContext {
         );
       }
 
-      // If we got a nextLink, follow it (ignore item count)
-      if (nextUrl) {
-        continue;
-      }
-
-      // No nextLink — check if this was a partial page (end of data)
+      // Partial page means we've reached the end of data
       if (items.length < PAGE_SIZE) {
         break;
       }
 
-      // Full page but no nextLink — advance $skip manually
+      // Full page — advance $skip for next request
       skip += PAGE_SIZE;
     }
 
