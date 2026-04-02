@@ -21,6 +21,7 @@ export default function FeedbackPage() {
 });
  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+ const [isViewModalOpen, setIsViewModalOpen] = useState(false);
  
  // Delete confirmation modal
  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -121,7 +122,7 @@ export default function FeedbackPage() {
  size="sm"
  onClick={() => {
  setSelectedFeedback(row);
- alert(`Ответ: ${row.response}`);
+ setIsViewModalOpen(true);
 }}
  >
  Просмотр
@@ -280,6 +281,25 @@ export default function FeedbackPage() {
  </ModalNotice>
  </ModalSection>
  ) : null}
+ </Modal>
+
+ {/* View response modal */}
+ <Modal
+ isOpen={isViewModalOpen}
+ onClose={() => setIsViewModalOpen(false)}
+ title="Ответ на обращение"
+ eyebrow="Просмотр"
+ icon={<MessageCircleWarning className="h-5 w-5" />}
+ size="md"
+ meta={selectedFeedback ? getStatusBadge(selectedFeedback.status) : null}
+ >
+ {selectedFeedback?.response && (
+   <ModalSection title="Текст ответа">
+     <p className="text-[14px] leading-relaxed text-secondary whitespace-pre-wrap">
+       {selectedFeedback.response}
+     </p>
+   </ModalSection>
+ )}
  </Modal>
  </div>
  );

@@ -1,6 +1,7 @@
 // src/components/Modal.tsx
 import { ReactNode, useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import clsx from "clsx";
 
 type ModalTone = "default" | "info" | "success" | "warning" | "danger";
@@ -174,13 +175,17 @@ export function ModalActions({
   );
 }
 
+export function ModalDivider({ className }: { className?: string }) {
+  return <hr className={clsx("mezon-modal-divider", className)} aria-hidden />;
+}
+
 export function Modal({
   isOpen,
   onClose,
   title,
   children,
   size = "md",
-  eyebrow = "Диалог",
+  eyebrow,
   description,
   icon,
   meta,
@@ -305,6 +310,8 @@ export function Modal({
           aria-describedby={description ? descriptionId : undefined}
           tabIndex={-1}
         >
+          <div className="mezon-modal-drag-indicator" aria-hidden />
+
           <div className={clsx("mezon-modal-accent", `mezon-modal-accent--${tone}`)} aria-hidden />
 
           <header className="mezon-modal-header">
@@ -341,7 +348,7 @@ export function Modal({
                 aria-label="Закрыть"
                 type="button"
               >
-                <span aria-hidden>&times;</span>
+                <X aria-hidden className="h-4 w-4" />
               </button>
             ) : null}
           </header>
