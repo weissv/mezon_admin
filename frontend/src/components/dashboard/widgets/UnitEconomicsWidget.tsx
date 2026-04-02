@@ -8,7 +8,7 @@ interface UnitEcon {
   breakdown: { label: string; amount: number; pct: number }[];
 }
 
-const fmt = (n: number) =>
+const formatCompact = (n: number) =>
   new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 
 const BAR_COLORS = ['#EC4899', '#3B82F6', '#F59E0B', '#6366F1', '#10B981', '#F43F5E'];
@@ -24,7 +24,7 @@ export default function UnitEconomicsWidget({ data }: { data: UnitEcon | undefin
         <div className="flex items-center gap-8">
           <div>
             <p className="bento-economics__label">Стоимость / ребёнок</p>
-            <p className="bento-economics__value">{fmt(data.costPerChild ?? 0)}</p>
+            <p className="bento-economics__value">{formatCompact(data.costPerChild ?? 0)}</p>
             <p className="bento-economics__sub">в месяц</p>
           </div>
           <div className="text-right">
