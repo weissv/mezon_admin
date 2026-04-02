@@ -58,8 +58,8 @@ const FINANCE_DOCUMENT_ENDPOINTS = [
 ] as const;
 
 const REGISTER_ENDPOINTS = {
-  contractorSettlements: "AccumulationRegister_ВзаиморасчетыСКонтрагентами",
-  cashBalances: "AccumulationRegister_ДенежныеСредства",
+  contractorSettlements: "AccumulationRegister_ВзаиморасчетыСКонтрагентами_Balance",
+  cashBalances: "AccumulationRegister_ДенежныеСредства_Balance",
 } as const;
 
 const CATALOG_SELECTS = {
