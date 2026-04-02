@@ -13,6 +13,8 @@ interface WidgetChromeProps {
   onToggleCollapse?: () => void;
   onRefresh?: () => void;
   deepLink?: string;
+  /** When true the card shows the edit-mode outline and grab cursor */
+  isEditMode?: boolean;
   children: ReactNode;
 }
 
@@ -25,10 +27,11 @@ export default function WidgetChrome({
   onToggleCollapse,
   onRefresh,
   deepLink,
+  isEditMode,
   children,
 }: WidgetChromeProps) {
   return (
-    <div className="bento-card" data-cat={category}>
+    <div className={`bento-card${isEditMode ? ' bento-card--edit-mode' : ''}`} data-cat={category}>
       {/* Header — draggable area */}
       <div className="bento-card__header dashboard-widget__header">
         <div className="bento-card__title-row">

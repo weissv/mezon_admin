@@ -23,7 +23,7 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: 'Отменено',
 };
 
-const fmtNum = (n: number) =>
+const formatCompact = (n: number) =>
   new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 
 export default function ProcurementStatusWidget({ data }: { data: ProcurementData | undefined }) {
@@ -55,7 +55,7 @@ export default function ProcurementStatusWidget({ data }: { data: ProcurementDat
               <p className="bento-list-item__title">{order.supplier}</p>
               <p className="bento-list-item__sub">{new Date(order.date).toLocaleDateString('ru-RU')}</p>
             </div>
-            <span className="text-[11px] font-semibold text-secondary flex-shrink-0">{fmtNum(order.total)}</span>
+            <span className="text-[11px] font-semibold text-secondary flex-shrink-0">{formatCompact(order.total)}</span>
           </div>
         ))}
       </div>

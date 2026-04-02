@@ -150,7 +150,7 @@ export default function DashboardLayout({
  isDraggable={isEditMode}
  isResizable={isEditMode}
  onLayoutChange={handleLayoutChange}
- draggableHandle=".dashboard-widget__header"
+ draggableHandle=".bento-card__header"
  compactType="vertical"
  margin={[16, 16]}
  >
@@ -159,6 +159,7 @@ export default function DashboardLayout({
  <WidgetRenderer
  definition={widget}
  isCollapsed={preferences.collapsedSections.includes(widget.id)}
+ isEditMode={isEditMode}
  onToggleCollapse={() => onToggleCollapse(widget.id)}
  filters={(preferences.widgetFilters[widget.id] as Record<string, unknown>) || undefined}
  quickActionsData={widget.id === 'quick-actions' ? quickActions : undefined}
