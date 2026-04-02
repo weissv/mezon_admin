@@ -36,9 +36,12 @@ export class SyncContext {
    * Fetches ALL records from a 1C OData entity using manual $skip/$top pagination.
    *
    * Strategy:
-   * - Uses $skip + $top pagination until a page returns fewer items than PAGE_SIZE.
+   * - Uses $skip + $top pagination until a page returns 0 items.
    * - Does NOT follow odata.nextLink — 1C behind a proxy returns malformed nextLink
    *   URLs (pointing to localhost) which cause fetch failures.
+   * - Advances $skip by the actual number of items received (not PAGE_SIZE) to handle
+   *   proxy-capped responses where the server returns fewer records than requested.
+   *   This prevents premature termination when the proxy caps page size below PAGE_SIZE.
    * - No artificial MAX_PAGES ceiling — fetches until the entity is fully drained.
    */
   async fetchAll<T = Record<string, unknown>>(
@@ -77,13 +80,19 @@ export class SyncContext {
         );
       }
 
-      // Partial page means we've reached the end of data
-      if (items.length < PAGE_SIZE) {
+      // Empty page means we've reached the end of data.
+      // NOTE: We stop on empty (not on partial) because the 1C OData endpoint sits behind
+      // a reverse-proxy that caps each response to fewer records than PAGE_SIZE. Stopping
+      // on `items.length < PAGE_SIZE` would terminate the loop after the very first page,
+      // causing entire date ranges (e.g. December 2025) to be silently skipped.
+      if (items.length === 0) {
         break;
       }
 
-      // Full page — advance $skip for next request
-      skip += PAGE_SIZE;
+      // Advance skip by the actual number of items received, not by PAGE_SIZE.
+      // When the proxy caps the page the two values differ, and using PAGE_SIZE would
+      // leave a gap between pages, missing records in that gap.
+      skip += items.length;
     }
 
     logger.info(
