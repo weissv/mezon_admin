@@ -7,6 +7,12 @@ import { logger } from "../../../../utils/logger";
  */
 const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
 
+function parseAmount(val: any): number | null {
+  if (val === null || val === undefined) return null;
+  const n = typeof val === "number" ? val : parseFloat(String(val));
+  return isNaN(n) ? null : n;
+}
+
 async function syncGenericHRDocument(
   ctx: SyncContext,
   entity: string,
@@ -82,7 +88,7 @@ function syncVacation(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     dateStart: r.ДатаНачалаОсновногоОтпуска ? new Date(r.ДатаНачалаОсновногоОтпуска) : null,
     dateEnd: r.ДатаОкончанияОсновногоОтпуска ? new Date(r.ДатаОкончанияОсновногоОтпуска) : null,
-    amount: parseFloat(r.Начислено) || null,
+    amount: parseAmount(r.Начислено),
     meta: { КоличествоДнейОсновногоОтпуска: r.КоличествоДнейОсновногоОтпуска },
   }));
 }
@@ -94,7 +100,7 @@ function syncSickLeave(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     dateStart: r.ДатаНачала ? new Date(r.ДатаНачала) : null,
     dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
-    amount: parseFloat(r.Начислено) || null,
+    amount: parseAmount(r.Начислено),
     meta: { ПричинаНетрудоспособности: r.ПричинаНетрудоспособности },
   }));
 }
@@ -124,7 +130,7 @@ function syncGPHContract(ctx: SyncContext) {
     positionRefKey: r.Должность_Key ?? null,
     dateStart: r.ДатаНачала ? new Date(r.ДатаНачала) : null,
     dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
-    amount: parseFloat(r.Размер) || null,
+    amount: parseAmount(r.Размер),
   }));
 }
 
@@ -135,7 +141,7 @@ function syncGPHAct(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     dateStart: r.ДатаНачала ? new Date(r.ДатаНачала) : null,
     dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
-    amount: parseFloat(r.Размер) || null,
+    amount: parseAmount(r.Размер),
   }));
 }
 
@@ -144,7 +150,7 @@ function syncExecutionList(ctx: SyncContext) {
     personRefKey: r.ФизическоеЛицо_Key ?? null,
     orgRefKey: r.Организация_Key ?? null,
     dateEnd: r.ДатаОкончания ? new Date(r.ДатаОкончания) : null,
-    amount: parseFloat(r.Сумма) || null,
+    amount: parseAmount(r.Сумма),
   }));
 }
 

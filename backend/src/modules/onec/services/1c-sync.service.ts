@@ -19,6 +19,7 @@ import { resolveCashFlowArticleId, resolveContractorId, resolvePersonId } from "
 import { SyncContext } from "./sync/sync-context";
 import { extendedCatalogSteps } from "./sync/catalog-sync";
 import { extendedFinanceDocSteps, warehouseDocSteps } from "./sync/document-sync";
+import { invoiceSyncSteps } from "./sync/invoice-sync";
 import { hrSyncSteps } from "./sync/hr-sync";
 import { payrollSyncSteps } from "./sync/payroll-sync";
 import { universalCatalogSteps, chartEntitySteps, registerSteps, extraRegisterSteps } from "./sync/universal-sync";
@@ -376,6 +377,10 @@ export class OneCSyncService {
       {
         label: "Phase 5: Extended Finance Documents",
         steps: extendedFinanceDocSteps(this.ctx),
+      },
+      {
+        label: "Phase 5b: Invoice Documents",
+        steps: invoiceSyncSteps(this.ctx),
       },
       {
         label: "Phase 6: Warehouse Documents",

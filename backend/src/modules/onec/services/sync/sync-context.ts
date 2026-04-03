@@ -140,7 +140,7 @@ export class SyncContext {
   }
 
   buildRegisterExternalId(registerType: string, row: Record<string, unknown>): string {
-    if (typeof row.Ref_Key === "string" && row.Ref_Key) {
+    if (typeof row.Ref_Key === "string" && row.Ref_Key && row.Ref_Key !== EMPTY_GUID) {
       return row.Ref_Key;
     }
 
