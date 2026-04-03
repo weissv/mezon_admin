@@ -33,13 +33,16 @@ export class SyncContext {
   ) {}
 
   /**
-   * Fetches ALL records from a 1C OData entity, handling pagination exhaustively.
+   * Fetches ALL records from a 1C OData entity using manual $skip/$top pagination.
    *
    * Strategy:
-   * 1. If the response contains `odata.nextLink`, follow it (preferred).
-   * 2. Otherwise, use `$skip` + `$top` pagination until a page returns fewer
-   *    items than PAGE_SIZE.
-   * 3. No artificial MAX_PAGES ceiling — fetches until the entity is fully drained.
+   * - Uses $skip + $top pagination until a page returns 0 items.
+   * - Does NOT follow odata.nextLink — 1C behind a proxy returns malformed nextLink
+   *   URLs (pointing to localhost) which cause fetch failures.
+   * - Advances $skip by the actual number of items received (not PAGE_SIZE) to handle
+   *   proxy-capped responses where the server returns fewer records than requested.
+   *   This prevents premature termination when the proxy caps page size below PAGE_SIZE.
+   * - No artificial MAX_PAGES ceiling — fetches until the entity is fully drained.
    */
   async fetchAll<T = Record<string, unknown>>(
     entity: string,
@@ -57,31 +60,15 @@ export class SyncContext {
     if (filter) baseParams.$filter = filter;
     if (select) baseParams.$select = select;
 
-    // First request uses the entity URL with params
-    let nextUrl: string | null = null;
-
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      let items: T[];
-
-      if (nextUrl) {
-        // Follow the odata.nextLink URL directly (it includes $skip and params)
-        const resp: any = await this.client.get(nextUrl, {
-          timeout: FETCH_TIMEOUT_MS,
-        });
-        items = resp.data?.value ?? [];
-        nextUrl = resp.data?.["odata.nextLink"] ?? null;
-      } else {
-        // Standard $skip/$top pagination
-        const params = { ...baseParams, $skip: String(skip) };
-        const url = `/${encodeURIComponent(entity)}`;
-        const resp: any = await this.client.get(url, {
-          params,
-          timeout: FETCH_TIMEOUT_MS,
-        });
-        items = resp.data?.value ?? [];
-        nextUrl = resp.data?.["odata.nextLink"] ?? null;
-      }
+      const params = { ...baseParams, $skip: String(skip) };
+      const url = `/${encodeURIComponent(entity)}`;
+      const resp: any = await this.client.get(url, {
+        params,
+        timeout: FETCH_TIMEOUT_MS,
+      });
+      const items: T[] = resp.data?.value ?? [];
 
       results.push(...items);
       pageIndex++;
@@ -93,18 +80,19 @@ export class SyncContext {
         );
       }
 
-      // If we got a nextLink, follow it (ignore item count)
-      if (nextUrl) {
-        continue;
-      }
-
-      // No nextLink — check if this was a partial page (end of data)
-      if (items.length < PAGE_SIZE) {
+      // Empty page means we've reached the end of data.
+      // NOTE: We stop on empty (not on partial) because the 1C OData endpoint sits behind
+      // a reverse-proxy that caps each response to fewer records than PAGE_SIZE. Stopping
+      // on `items.length < PAGE_SIZE` would terminate the loop after the very first page,
+      // causing entire date ranges (e.g. December 2025) to be silently skipped.
+      if (items.length === 0) {
         break;
       }
 
-      // Full page but no nextLink — advance $skip manually
-      skip += PAGE_SIZE;
+      // Advance skip by the actual number of items received, not by PAGE_SIZE.
+      // When the proxy caps the page the two values differ, and using PAGE_SIZE would
+      // leave a gap between pages, missing records in that gap.
+      skip += items.length;
     }
 
     logger.info(
