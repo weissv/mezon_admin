@@ -17,6 +17,11 @@ import type {
 import { createOneCClient, isNetworkError } from "./onec-client";
 import { resolveCashFlowArticleId, resolveContractorId, resolvePersonId } from "./sync/resolvers";
 import { SyncContext } from "./sync/sync-context";
+import { extendedCatalogSteps } from "./sync/catalog-sync";
+import { extendedFinanceDocSteps, warehouseDocSteps } from "./sync/document-sync";
+import { hrSyncSteps } from "./sync/hr-sync";
+import { payrollSyncSteps } from "./sync/payroll-sync";
+import { universalCatalogSteps, chartEntitySteps, registerSteps, extraRegisterSteps } from "./sync/universal-sync";
 
 type SyncResult = OneCSyncResult;
 type SyncReport = OneCSyncReport;
@@ -363,6 +368,42 @@ export class OneCSyncService {
           () => this.syncMoneyBalances(),
           () => this.syncContractorBalances(),
         ],
+      },
+      {
+        label: "Phase 4: Extended Catalogs",
+        steps: extendedCatalogSteps(this.ctx),
+      },
+      {
+        label: "Phase 5: Extended Finance Documents",
+        steps: extendedFinanceDocSteps(this.ctx),
+      },
+      {
+        label: "Phase 6: Warehouse Documents",
+        steps: warehouseDocSteps(this.ctx),
+      },
+      {
+        label: "Phase 7: HR Documents",
+        steps: hrSyncSteps(this.ctx),
+      },
+      {
+        label: "Phase 8: Payroll Documents",
+        steps: payrollSyncSteps(this.ctx),
+      },
+      {
+        label: "Phase 9: Universal Catalogs",
+        steps: universalCatalogSteps(this.ctx),
+      },
+      {
+        label: "Phase 10: Chart Entities",
+        steps: chartEntitySteps(this.ctx),
+      },
+      {
+        label: "Phase 11: Registers",
+        steps: registerSteps(this.ctx),
+      },
+      {
+        label: "Phase 12: Extra Registers",
+        steps: extraRegisterSteps(this.ctx),
       },
     ];
   }
