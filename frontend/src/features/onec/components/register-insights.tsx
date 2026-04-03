@@ -17,6 +17,7 @@ type NormalizedRegisterData = {
 };
 
 const MAX_VISIBLE_ROWS = 20;
+const ISO_8601_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/u;
 
 const FIELD_LABELS: Record<string, string> = {
   active: "Активно",
@@ -61,7 +62,7 @@ function formatPrimitive(value: unknown): string {
     const parsedDate = new Date(value);
     if (
       !Number.isNaN(parsedDate.getTime()) &&
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/u.test(value)
+      ISO_8601_PATTERN.test(value)
     ) {
       return parsedDate.toLocaleString("ru-RU");
     }
@@ -336,21 +337,25 @@ export function RegisterInsights({
                 description="Каждая строка представлена отдельной карточкой вместо сырого JSON."
               >
                 <div className="space-y-3">
-                  {selectedData.rows.slice(0, MAX_VISIBLE_ROWS).map((row, index) => (
-                    <div key={`${selected.id}-row-${index}`} className="rounded-2xl border border-gray-200 bg-white p-4">
+                  {selectedData.rows.slice(0, MAX_VISIBLE_ROWS).map((row, index) => {
+                    const rowSignature = row.map((field) => `${field.key}:${field.value}`).join("|");
+
+                    return (
+                    <div key={`${selected.id}-${rowSignature}`} className="rounded-2xl border border-gray-200 bg-white p-4">
                       <div className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-gray-400">
                         Строка {index + 1}
                       </div>
                       <div className="grid gap-3 md:grid-cols-2">
                         {row.map((field) => (
-                          <div key={`${selected.id}-row-${index}-${field.key}`} className="rounded-xl bg-gray-50 p-3">
+                          <div key={`${selected.id}-${rowSignature}-${field.key}`} className="rounded-xl bg-gray-50 p-3">
                             <div className="text-xs text-gray-500">{field.label}</div>
                             <div className="mt-1 break-words text-sm font-medium text-gray-900">{field.value}</div>
                           </div>
                         ))}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                   {selectedData.rows.length > MAX_VISIBLE_ROWS ? (
                     <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
                       Ещё {selectedData.rows.length - MAX_VISIBLE_ROWS} строк скрыто, чтобы не перегружать интерфейс.
