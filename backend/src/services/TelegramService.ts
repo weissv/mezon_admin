@@ -6,23 +6,41 @@ import { Role } from '@prisma/client';
 // Telegram Bot instance (singleton)
 let bot: Telegraf | null = null;
 
+function looksLikeTelegramToken(token: string): boolean {
+  return /^\d+:[A-Za-z0-9_-]{20,}$/.test(token);
+}
+
+function isTelegramUnauthorizedError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const response = (error as { response?: { error_code?: number } }).response;
+  return response?.error_code === 401;
+}
+
 /**
  * Инициализация Telegram бота
  * Обрабатывает команду /start для привязки аккаунта пользователя
  */
-export function initTelegramBot(): void {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+export async function initTelegramBot(): Promise<void> {
+  const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
   
   if (!token) {
     console.warn('⚠️ TELEGRAM_BOT_TOKEN не установлен. Telegram уведомления отключены.');
     return;
   }
 
+  if (!looksLikeTelegramToken(token)) {
+    console.warn('⚠️ TELEGRAM_BOT_TOKEN имеет некорректный формат. Telegram уведомления отключены.');
+    return;
+  }
+
   try {
-    bot = new Telegraf(token);
+    const telegramBot = new Telegraf(token);
 
     // Обработка команды /start <userId>
-    bot.start(async (ctx: Context) => {
+    telegramBot.start(async (ctx: Context) => {
       const message = ctx.message;
       if (!message || !('text' in message)) return;
 
@@ -98,7 +116,7 @@ export function initTelegramBot(): void {
     });
 
     // Команда /unlink для отвязки аккаунта
-    bot.command('unlink', async (ctx: Context) => {
+    telegramBot.command('unlink', async (ctx: Context) => {
       const chatId = ctx.chat?.id?.toString();
       
       if (!chatId) return;
@@ -127,7 +145,7 @@ export function initTelegramBot(): void {
     });
 
     // Команда /status для проверки привязки
-    bot.command('status', async (ctx: Context) => {
+    telegramBot.command('status', async (ctx: Context) => {
       const chatId = ctx.chat?.id?.toString();
       
       if (!chatId) return;
@@ -161,7 +179,7 @@ export function initTelegramBot(): void {
     });
 
     // Команда /help
-    bot.help(async (ctx: Context) => {
+    telegramBot.help(async (ctx: Context) => {
       await ctx.reply(
         '📖 Команды бота:\n\n' +
         '/start - Привязать Telegram к аккаунту (через ссылку из системы)\n' +
@@ -171,21 +189,28 @@ export function initTelegramBot(): void {
       );
     });
 
-    // Запускаем бота
-    bot.launch()
-      .then(() => {
-        console.log('🤖 Telegram бот успешно запущен');
-      })
-      .catch((error) => {
-        console.error('❌ Ошибка запуска Telegram бота:', error);
-      });
+    const me = await telegramBot.telegram.getMe();
+    await telegramBot.launch();
+    bot = telegramBot;
+
+    console.log(`🤖 Telegram бот успешно запущен${me.username ? ` как @${me.username}` : ''}`);
 
     // Graceful shutdown
-    process.once('SIGINT', () => bot?.stop('SIGINT'));
-    process.once('SIGTERM', () => bot?.stop('SIGTERM'));
+    process.once('SIGINT', () => telegramBot.stop('SIGINT'));
+    process.once('SIGTERM', () => telegramBot.stop('SIGTERM'));
 
   } catch (error) {
-    console.error('❌ Ошибка инициализации Telegram бота:', error);
+    bot = null;
+
+    if (isTelegramUnauthorizedError(error)) {
+      console.warn('⚠️ TELEGRAM_BOT_TOKEN недействителен. Telegram уведомления отключены.');
+      return;
+    }
+
+    console.error(
+      '❌ Ошибка инициализации Telegram бота:',
+      error instanceof Error ? error.message : String(error),
+    );
   }
 }
 

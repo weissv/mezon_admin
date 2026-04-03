@@ -1,29 +1,30 @@
 // src/pages/ExamEditorPage.tsx
 // Редактор контрольной работы
-import { useState, useEffect} from"react";
-import { useParams, useNavigate} from"react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
- ArrowLeft,
- Save,
- Plus,
- Trash2,
- GripVertical,
- ChevronDown,
- ChevronUp,
- CheckCircle,
- Type,
- ListChecks,
- ToggleLeft,
- Calculator,
- AlignLeft,
- Copy,
- Settings,
-} from"lucide-react";
-import { examsApi} from"../lib/exams-api";
-import { Exam, ExamQuestion, ExamQuestionType, ExamFormData, ExamQuestionFormData} from"../types/exam";
-import { toast} from"sonner";
+	AlignLeft,
+	ArrowLeft,
+	Calculator,
+	CheckCircle,
+	ChevronDown,
+	ChevronUp,
+	Copy,
+	GripVertical,
+	ListChecks,
+	Plus,
+	Save,
+	Settings,
+	ToggleLeft,
+	Trash2,
+	Type,
+} from "lucide-react";
+import { toast } from "sonner";
+import { MacosAlertDialog } from "../components/MacosAlertDialog";
+import { examsApi } from "../lib/exams-api";
+import { Exam, ExamFormData, ExamQuestionFormData, ExamQuestionType } from "../types/exam";
 
-const questionTypeLabels: Record<ExamQuestionType, { label: string; icon: any; description: string}> = {
+const questionTypeLabels: Record<ExamQuestionType, { label: string; icon: any; description: string }> = {
  SINGLE_CHOICE: {
  label:"Один вариант",
  icon: CheckCircle,
@@ -57,204 +58,363 @@ const questionTypeLabels: Record<ExamQuestionType, { label: string; icon: any; d
 };
 
 interface QuestionDraft extends Partial<ExamQuestionFormData> {
- id?: string;
- tempId?: string;
- isNew?: boolean;
- expanded?: boolean;
+	id?: string;
+	tempId?: string;
+	isNew?: boolean;
+	expanded?: boolean;
+}
+
+const initialExamState: ExamFormData = {
+	title: "",
+	description: "",
+	subject: "",
+	timeLimit: null,
+	shuffleQuestions: false,
+	shuffleOptions: false,
+	showResults: true,
+	passingScore: 60,
+	startDate: null,
+	endDate: null,
+};
+
+function buildExamSnapshot(exam: ExamFormData, questions: QuestionDraft[]) {
+	return JSON.stringify({
+		exam: {
+			title: exam.title.trim(),
+			description: (exam.description || "").trim(),
+			subject: (exam.subject || "").trim(),
+			timeLimit: exam.timeLimit ?? null,
+			shuffleQuestions: Boolean(exam.shuffleQuestions),
+			shuffleOptions: Boolean(exam.shuffleOptions),
+			showResults: exam.showResults !== false,
+			passingScore: exam.passingScore ?? 60,
+			startDate: exam.startDate ?? null,
+			endDate: exam.endDate ?? null,
+		},
+		questions: questions.map((question) => ({
+			type: question.type || "SINGLE_CHOICE",
+			content: question.content || "",
+			options: question.options ? [...question.options] : [],
+			correctAnswer: question.correctAnswer ?? null,
+			expectedAnswer: question.expectedAnswer || "",
+			keyPoints: question.keyPoints ? [...question.keyPoints] : [],
+			explanation: question.explanation || "",
+			points: question.points || 1,
+			partialCredit: Boolean(question.partialCredit),
+		})),
+	});
 }
 
 export default function ExamEditorPage() {
- const { id} = useParams<{ id: string}>();
- const navigate = useNavigate();
- const isNew = !id || id ==="new";
+	const { id } = useParams<{ id: string }>();
+	const navigate = useNavigate();
+	const isNew = !id || id === "new";
 
- const [loading, setLoading] = useState(!isNew);
- const [saving, setSaving] = useState(false);
- const [showSettings, setShowSettings] = useState(isNew);
+	const [loading, setLoading] = useState(!isNew);
+	const [saving, setSaving] = useState(false);
+	const [showSettings, setShowSettings] = useState(isNew);
+	const [exam, setExam] = useState<ExamFormData>(initialExamState);
+	const [questions, setQuestions] = useState<QuestionDraft[]>([]);
+	const [examId, setExamId] = useState<string | null>(isNew ? null : id || null);
+	const [deletedQuestionIds, setDeletedQuestionIds] = useState<string[]>([]);
+	const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
+	const savedSnapshotRef = useRef(buildExamSnapshot(initialExamState, []));
+	const pendingNavigationRef = useRef<string | null>(null);
+	const hasUnsavedChanges = buildExamSnapshot(exam, questions) !== savedSnapshotRef.current;
 
- const [exam, setExam] = useState<ExamFormData>({
- title:"",
- description:"",
- subject:"",
- timeLimit: null,
- shuffleQuestions: false,
- shuffleOptions: false,
- showResults: true,
- passingScore: 60,
- startDate: null,
- endDate: null,
-});
+	const applyExamState = (data: Exam) => {
+		const nextExam: ExamFormData = {
+			title: data.title,
+			description: data.description || "",
+			subject: data.subject || "",
+			timeLimit: data.timeLimit,
+			shuffleQuestions: data.shuffleQuestions,
+			shuffleOptions: data.shuffleOptions,
+			showResults: data.showResults,
+			passingScore: data.passingScore,
+			startDate: data.startDate,
+			endDate: data.endDate,
+		};
+		const nextQuestions = (data.questions || []).map((question) => ({
+			...question,
+			expanded: false,
+		}));
 
- const [questions, setQuestions] = useState<QuestionDraft[]>([]);
- const [examId, setExamId] = useState<string | null>(isNew ? null : id || null);
+		setExam(nextExam);
+		setQuestions(nextQuestions);
+		setExamId(data.id);
+		setDeletedQuestionIds([]);
+		savedSnapshotRef.current = buildExamSnapshot(nextExam, nextQuestions);
+	};
 
- useEffect(() => {
- if (!isNew && id) {
- fetchExam(id);
-}
-}, [id, isNew]);
+	useEffect(() => {
+		if (!isNew && id) {
+			fetchExam(id);
+			return;
+		}
 
- const fetchExam = async (examId: string) => {
- setLoading(true);
- try {
- const data = await examsApi.getExam(examId);
- setExam({
- title: data.title,
- description: data.description ||"",
- subject: data.subject ||"",
- timeLimit: data.timeLimit,
- shuffleQuestions: data.shuffleQuestions,
- shuffleOptions: data.shuffleOptions,
- showResults: data.showResults,
- passingScore: data.passingScore,
- startDate: data.startDate,
- endDate: data.endDate,
-});
- setQuestions(
- (data.questions || []).map((q) => ({
- ...q,
- expanded: false,
-}))
- );
-} catch (error) {
- toast.error("Не удалось загрузить контрольную");
- navigate("/exams");
-} finally {
- setLoading(false);
-}
-};
+		setExamId(null);
+		setDeletedQuestionIds([]);
+		setExam(initialExamState);
+		setQuestions([]);
+		savedSnapshotRef.current = buildExamSnapshot(initialExamState, []);
+	}, [id, isNew]);
 
- const saveExam = async () => {
- if (!exam.title.trim()) {
- toast.error("Введите название контрольной");
- return;
-}
+	useEffect(() => {
+		if (!hasUnsavedChanges || saving) {
+			return undefined;
+		}
 
- setSaving(true);
- try {
- let savedExamId = examId;
+		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+			event.preventDefault();
+			event.returnValue = "";
+		};
 
- if (!savedExamId) {
- // Создаём новую контрольную
- const created = await examsApi.createExam(exam);
- savedExamId = created.id;
- setExamId(savedExamId);
- toast.success("Контрольная создана");
-} else {
- // Обновляем существующую
- await examsApi.updateExam(savedExamId, exam);
- toast.success("Контрольная сохранена");
-}
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+	}, [hasUnsavedChanges, saving]);
 
- // Сохраняем новые вопросы
- const newQuestions = questions.filter((q) => q.isNew && q.content?.trim());
- if (newQuestions.length > 0) {
- const formatted = newQuestions.map((q) => ({
- type: q.type ||"SINGLE_CHOICE",
- content: q.content ||"",
- options: q.options,
- correctAnswer: q.correctAnswer,
- expectedAnswer: q.expectedAnswer,
- keyPoints: q.keyPoints,
- explanation: q.explanation,
- points: q.points || 1,
- partialCredit: q.partialCredit || false,
-}));
- await examsApi.addQuestions(savedExamId, formatted);
-}
+	useEffect(() => {
+		if (!hasUnsavedChanges || saving) {
+			return undefined;
+		}
 
- // Обновляем существующие вопросы
- for (const q of questions.filter((q) => !q.isNew && q.id)) {
- await examsApi.updateQuestion(savedExamId, q.id!, {
- type: q.type,
- content: q.content,
- options: q.options,
- correctAnswer: q.correctAnswer,
- expectedAnswer: q.expectedAnswer,
- keyPoints: q.keyPoints,
- explanation: q.explanation,
- points: q.points,
- partialCredit: q.partialCredit,
-});
-}
+		const handleDocumentClick = (event: MouseEvent) => {
+			if (event.defaultPrevented || event.button !== 0) {
+				return;
+			}
 
- // Перезагружаем данные
- if (savedExamId) {
- fetchExam(savedExamId);
- navigate(`/exams/${savedExamId}/edit`, { replace: true});
-}
-} catch (error: any) {
- toast.error(error.message ||"Ошибка при сохранении");
-} finally {
- setSaving(false);
-}
-};
+			if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+				return;
+			}
 
- const addQuestion = (type: ExamQuestionType) => {
- const newQuestion: QuestionDraft = {
- tempId: `new_${Date.now()}`,
- isNew: true,
- expanded: true,
- type,
- content:"",
- points: 1,
- partialCredit: false,
- options: type ==="TRUE_FALSE"? ["Верно","Неверно"] : type.includes("CHOICE") ? ["","","",""] : undefined,
- correctAnswer: type ==="TRUE_FALSE"?"Верно": undefined,
-};
- setQuestions([...questions, newQuestion]);
-};
+			const target = event.target;
+			if (!(target instanceof Element)) {
+				return;
+			}
 
- const updateQuestion = (index: number, updates: Partial<QuestionDraft>) => {
- const updated = [...questions];
- updated[index] = { ...updated[index], ...updates};
- setQuestions(updated);
-};
+			const anchor = target.closest("a[href]");
+			if (!(anchor instanceof HTMLAnchorElement)) {
+				return;
+			}
 
- const removeQuestion = async (index: number) => {
- const q = questions[index];
- if (q.id && examId) {
- try {
- await examsApi.deleteQuestion(examId, q.id);
- toast.success("Вопрос удалён");
-} catch (error) {
- toast.error("Ошибка при удалении вопроса");
- return;
-}
-}
- setQuestions(questions.filter((_, i) => i !== index));
-};
+			if (anchor.target && anchor.target !== "_self") {
+				return;
+			}
 
- const duplicateQuestion = (index: number) => {
- const q = questions[index];
- const copy: QuestionDraft = {
- ...q,
- id: undefined,
- tempId: `new_${Date.now()}`,
- isNew: true,
- expanded: true,
-};
- const updated = [...questions];
- updated.splice(index + 1, 0, copy);
- setQuestions(updated);
-};
+			const nextUrl = new URL(anchor.href, window.location.origin);
+			if (nextUrl.origin !== window.location.origin) {
+				return;
+			}
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[400px]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
- </div>
- );
-}
+			const currentLocation = `${window.location.pathname}${window.location.search}`;
+			const nextLocation = `${nextUrl.pathname}${nextUrl.search}`;
+			if (nextLocation === currentLocation) {
+				return;
+			}
 
- return (
- <div className="space-y-6">
+			event.preventDefault();
+			pendingNavigationRef.current = `${nextLocation}${nextUrl.hash}`;
+			setIsExitDialogOpen(true);
+		};
+
+		document.addEventListener("click", handleDocumentClick, true);
+		return () => document.removeEventListener("click", handleDocumentClick, true);
+	}, [hasUnsavedChanges, saving]);
+
+	const fetchExam = async (currentExamId: string) => {
+		setLoading(true);
+		try {
+			const data = await examsApi.getExam(currentExamId);
+			applyExamState(data);
+		} catch (error) {
+			toast.error("Не удалось загрузить контрольную");
+			navigate("/exams");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const saveExam = async ({ navigateTo }: { navigateTo?: string } = {}) => {
+		if (!exam.title.trim()) {
+			toast.error("Введите название контрольной");
+			return false;
+		}
+
+		setSaving(true);
+		try {
+			let savedExamId = examId;
+			const isCreatingExam = !savedExamId;
+
+			if (!savedExamId) {
+				const created = await examsApi.createExam(exam);
+				savedExamId = created.id;
+				setExamId(savedExamId);
+			} else {
+				await examsApi.updateExam(savedExamId, exam);
+			}
+
+			const newQuestions = questions.filter((question) => question.isNew && question.content?.trim());
+			if (newQuestions.length > 0) {
+				await examsApi.addQuestions(
+					savedExamId,
+					newQuestions.map((question) => ({
+						type: question.type || "SINGLE_CHOICE",
+						content: question.content || "",
+						options: question.options,
+						correctAnswer: question.correctAnswer,
+						expectedAnswer: question.expectedAnswer,
+						keyPoints: question.keyPoints,
+						explanation: question.explanation,
+						points: question.points || 1,
+						partialCredit: question.partialCredit || false,
+					}))
+				);
+			}
+
+			for (const question of questions.filter((item) => !item.isNew && item.id)) {
+				await examsApi.updateQuestion(savedExamId, question.id!, {
+					type: question.type,
+					content: question.content,
+					options: question.options,
+					correctAnswer: question.correctAnswer,
+					expectedAnswer: question.expectedAnswer,
+					keyPoints: question.keyPoints,
+					explanation: question.explanation,
+					points: question.points,
+					partialCredit: question.partialCredit,
+				});
+			}
+
+			for (const questionId of deletedQuestionIds) {
+				await examsApi.deleteQuestion(savedExamId, questionId);
+			}
+
+			toast.success(navigateTo ? "Изменения сохранены" : isCreatingExam ? "Контрольная создана" : "Контрольная сохранена");
+
+			if (navigateTo) {
+				setIsExitDialogOpen(false);
+				pendingNavigationRef.current = null;
+				navigate(navigateTo);
+				return true;
+			}
+
+			if (isCreatingExam) {
+				navigate(`/exams/${savedExamId}/edit`, { replace: true });
+				return true;
+			}
+
+			await fetchExam(savedExamId);
+			return true;
+		} catch (error: any) {
+			toast.error(error.message || "Ошибка при сохранении");
+			return false;
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	const requestExit = (nextPath: string) => {
+		if (saving) {
+			return;
+		}
+
+		if (!hasUnsavedChanges) {
+			navigate(nextPath);
+			return;
+		}
+
+		pendingNavigationRef.current = nextPath;
+		setIsExitDialogOpen(true);
+	};
+
+	const closeExitDialog = () => {
+		pendingNavigationRef.current = null;
+		setIsExitDialogOpen(false);
+	};
+
+	const discardChangesAndExit = () => {
+		const nextPath = pendingNavigationRef.current || "/exams";
+		pendingNavigationRef.current = null;
+		setIsExitDialogOpen(false);
+		navigate(nextPath);
+	};
+
+	const saveAndExit = async () => {
+		const nextPath = pendingNavigationRef.current || "/exams";
+		await saveExam({ navigateTo: nextPath });
+	};
+
+	const addQuestion = (type: ExamQuestionType) => {
+		const newQuestion: QuestionDraft = {
+			tempId: `new_${Date.now()}`,
+			isNew: true,
+			expanded: true,
+			type,
+			content: "",
+			points: 1,
+			partialCredit: false,
+			options:
+				type === "TRUE_FALSE"
+					? ["Верно", "Неверно"]
+					: type.includes("CHOICE")
+						? ["", "", "", ""]
+						: undefined,
+			correctAnswer: type === "TRUE_FALSE" ? "Верно" : undefined,
+		};
+		setQuestions([...questions, newQuestion]);
+	};
+
+	const updateQuestion = (index: number, updates: Partial<QuestionDraft>) => {
+		const updated = [...questions];
+		updated[index] = { ...updated[index], ...updates };
+		setQuestions(updated);
+	};
+
+	const removeQuestion = (index: number) => {
+		const question = questions[index];
+
+		if (question.id) {
+			setDeletedQuestionIds((current) =>
+				current.includes(question.id!) ? current : [...current, question.id!]
+			);
+		}
+
+		setQuestions(questions.filter((_, itemIndex) => itemIndex !== index));
+	};
+
+	const duplicateQuestion = (index: number) => {
+		const question = questions[index];
+		const copy: QuestionDraft = {
+			...question,
+			id: undefined,
+			tempId: `new_${Date.now()}`,
+			isNew: true,
+			expanded: true,
+		};
+		const updated = [...questions];
+		updated.splice(index + 1, 0, copy);
+		setQuestions(updated);
+	};
+
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center min-h-[400px]">
+				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+			</div>
+		);
+	}
+
+	return (
+		<>
+			<div className="space-y-6">
  {/* Заголовок */}
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-4">
  <button
- onClick={() => navigate("/exams")}
- className="p-2 text-secondary hover:text-primary hover:bg-fill-tertiary rounded-lg"
+ onClick={() => requestExit("/exams")}
+ disabled={saving}
+ className="p-2 text-secondary hover:text-primary hover:bg-fill-tertiary rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
  >
  <ArrowLeft className="h-5 w-5"/>
  </button>
@@ -276,9 +436,11 @@ export default function ExamEditorPage() {
  Настройки
  </button>
  <button
- onClick={saveExam}
+ onClick={() => {
+ void saveExam();
+ }}
  disabled={saving}
- className="inline-flex items-center gap-2 px-4 py-2 bg-macos-blue text-white rounded-lg hover:bg-macos-blue disabled:opacity-50"
+ className="inline-flex items-center gap-2 px-4 py-2 bg-macos-blue text-white rounded-lg hover:bg-macos-blue disabled:opacity-50 disabled:cursor-not-allowed"
  >
  <Save className="h-5 w-5"/>
  {saving ?"Сохранение...":"Сохранить"}
@@ -439,8 +601,33 @@ export default function ExamEditorPage() {
  </div>
  </div>
  </div>
- </div>
- );
+			</div>
+
+			<MacosAlertDialog
+				isOpen={isExitDialogOpen}
+				onClose={closeExitDialog}
+				title="Сохранить изменения перед выходом?"
+				description="Изменения ещё не сохранены. Вы можете сохранить их сейчас, выйти без сохранения или вернуться к редактированию."
+				closeOnBackdrop={!saving}
+				closeOnEscape={!saving}
+				primaryAction={{
+					label: saving ? "Сохранение..." : "Сохранить",
+					onClick: saveAndExit,
+					disabled: saving,
+				}}
+				destructiveAction={{
+					label: "Не сохранять",
+					onClick: discardChangesAndExit,
+					disabled: saving,
+				}}
+				cancelAction={{
+					label: "Отмена",
+					onClick: closeExitDialog,
+					disabled: saving,
+				}}
+			/>
+		</>
+	);
 }
 
 // Компонент редактора вопроса

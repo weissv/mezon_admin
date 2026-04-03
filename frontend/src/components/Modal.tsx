@@ -20,6 +20,8 @@ interface ModalProps {
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
   hideCloseButton?: boolean;
+  frameClassName?: string;
+  overlayClassName?: string;
   surfaceClassName?: string;
   bodyClassName?: string;
   contentClassName?: string;
@@ -189,6 +191,8 @@ export function Modal({
   closeOnBackdrop = true,
   closeOnEscape = true,
   hideCloseButton = false,
+  frameClassName,
+  overlayClassName,
   surfaceClassName,
   bodyClassName,
   contentClassName,
@@ -280,7 +284,7 @@ export function Modal({
   return createPortal(
     <div className="mezon-modal-root" role="presentation">
       <div
-        className="mezon-modal-overlay macos-animate-fade-in"
+        className={clsx("mezon-modal-overlay macos-animate-fade-in", overlayClassName)}
         aria-hidden
         onClick={() => {
           if (closeOnBackdrop) {
@@ -289,7 +293,7 @@ export function Modal({
         }}
       />
 
-      <div className="mezon-modal-frame">
+      <div className={clsx("mezon-modal-frame", frameClassName)}>
         <section
           ref={surfaceRef}
           className={clsx(

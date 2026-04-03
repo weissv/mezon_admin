@@ -12,6 +12,7 @@
 - [Локальная разработка](#локальная-разработка)
 - [Модули платформы](#модули-платформы)
 - [Интеграции и автоматизация](#интеграции-и-автоматизация)
+- [Figma MCP](#figma-mcp)
 - [Контур LMS](#контур-lms)
 - [Контур контрольных](#контур-контрольных)
 - [Переменные окружения](#переменные-окружения)
@@ -303,6 +304,15 @@ npx tsx prisma/seed_school.ts
 - inventory
 - finance
 
+### Figma MCP
+
+Для верстки по дизайнам и HTML-to-design capture в репозитории уже подготовлен Figma MCP-контур:
+
+- сервер `Figma-MCP` объявлен в `/.vscode/mcp.json`
+- при первом подключении IDE запросит скрытый `Figma access token` и передаст его в `Authorization: Bearer ...`
+- capture-скрипт Figma подключён в `frontend/index.html`
+- отдельная памятка по запуску и проверке лежит в [FIGMA_MCP.md](./FIGMA_MCP.md)
+
 ## Контур LMS
 
 Текущая LMS-реализация интегрирована в основное frontend-приложение под префиксом /lms и ориентирована на школьный сценарий.
@@ -361,6 +371,11 @@ npx tsx prisma/seed_school.ts
 - PORT
 - CORS_ORIGINS
 - FRONTEND_URL
+- ONEC_BASE_URL
+- ONEC_USER
+- ONEC_PASSWORD
+- ONEC_TIMEOUT_MS
+- ONEC_CRON_SCHEDULE
 
 ### Для backend
 
@@ -375,6 +390,8 @@ npx tsx prisma/seed_school.ts
 - ONEC_PASSWORD: пароль 1C
 - ONEC_TIMEOUT_MS: таймаут запросов к 1C
 - ONEC_CRON_SCHEDULE: cron для периодической синхронизации 1C
+
+При ручном запуске backend через node, ts-node-dev или tsx переменные из корневого .env автоматически не подгружаются. Перед прямым вызовом sync из shell их нужно экспортировать отдельно, например через source .env.
 
 ### Для frontend
 
@@ -482,6 +499,7 @@ cd ..
 - [LMS_DOCUMENTATION.md](./LMS_DOCUMENTATION.md)
 - [EXAM_PLATFORM_DEPLOYMENT.md](./EXAM_PLATFORM_DEPLOYMENT.md)
 - [backend/AI_KEYS_SETUP.md](./backend/AI_KEYS_SETUP.md)
+- [FIGMA_MCP.md](./FIGMA_MCP.md)
 
 ## License
 
