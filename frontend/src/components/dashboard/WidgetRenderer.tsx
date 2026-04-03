@@ -62,6 +62,7 @@ const WIDGET_DEEP_LINKS: Record<string, string> = {
 interface WidgetRendererProps {
  definition: WidgetDefinition;
  isCollapsed?: boolean;
+ isEditMode?: boolean;
  onToggleCollapse?: () => void;
  filters?: Record<string, unknown>;
  /** Быстрые действия передаются как data для quick-actions */
@@ -73,6 +74,7 @@ interface WidgetRendererProps {
 export default function WidgetRenderer({
  definition,
  isCollapsed,
+ isEditMode,
  onToggleCollapse,
  filters,
  quickActionsData,
@@ -105,6 +107,7 @@ export default function WidgetRenderer({
  isLoading={isLoading}
  error={error}
  isCollapsed={isCollapsed}
+ isEditMode={isEditMode}
  onToggleCollapse={onToggleCollapse}
  onRefresh={refetch}
  deepLink={WIDGET_DEEP_LINKS[definition.id]}

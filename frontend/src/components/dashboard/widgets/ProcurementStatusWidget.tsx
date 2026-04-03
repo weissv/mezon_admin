@@ -1,64 +1,64 @@
 // src/components/dashboard/widgets/ProcurementStatusWidget.tsx
-import { ShoppingCart, Clock, CheckCircle, XCircle, Truck} from 'lucide-react';
+import { ShoppingCart, Clock, CheckCircle, XCircle, Truck } from 'lucide-react';
 
 interface ProcurementData {
- byStatus: { status: string; count: number}[];
- recentOrders: { id: string; supplier: string; status: string; total: number; date: string}[];
- totalActive: number;
+  byStatus: { status: string; count: number }[];
+  recentOrders: { id: string; supplier: string; status: string; total: number; date: string }[];
+  totalActive: number;
 }
 
-const STATUS_ICONS: Record<string, { icon: typeof Clock; color: string}> = {
- pending: { icon: Clock, color: 'text-amber-500'},
- approved: { icon: CheckCircle, color: 'text-blue-500'},
- ordered: { icon: ShoppingCart, color: 'text-indigo-500'},
- delivered: { icon: Truck, color: 'text-macos-green'},
- cancelled: { icon: XCircle, color: 'text-red-400'},
+const STATUS_CFG: Record<string, { icon: typeof Clock; color: string }> = {
+  pending:   { icon: Clock,        color: '#D97706' },
+  approved:  { icon: CheckCircle,  color: '#3B82F6' },
+  ordered:   { icon: ShoppingCart, color: '#6366F1' },
+  delivered: { icon: Truck,        color: '#10B981' },
+  cancelled: { icon: XCircle,      color: '#EF4444' },
 };
 
 const STATUS_LABELS: Record<string, string> = {
- pending: 'Ожидание',
- approved: 'Одобрено',
- ordered: 'Заказано',
- delivered: 'Доставлено',
- cancelled: 'Отменено',
+  pending:   'Ожидание',
+  approved:  'Одобрено',
+  ordered:   'Заказано',
+  delivered: 'Доставлено',
+  cancelled: 'Отменено',
 };
 
-const fmt = (n: number) =>
- new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0}).format(n);
+const formatCompact = (n: number) =>
+  new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 
-export default function ProcurementStatusWidget({ data}: { data: ProcurementData | undefined}) {
- if (!data) return null;
+export default function ProcurementStatusWidget({ data }: { data: ProcurementData | undefined }) {
+  if (!data) return null;
 
- const byStatus = data.byStatus ?? [];
- const recentOrders = data.recentOrders ?? [];
+  const byStatus = data.byStatus ?? [];
+  const recentOrders = data.recentOrders ?? [];
 
- return (
- <div className="space-y-3">
- <div className="flex gap-2 flex-wrap">
- {byStatus.map(s => {
- const cfg = STATUS_ICONS[s.status] ?? STATUS_ICONS.pending;
- const Icon = cfg.icon;
- return (
- <div key={s.status} className="flex items-center gap-1 px-2 py-1 bg-fill-quaternary rounded-md text-xs">
- <Icon className={`h-3 w-3 ${cfg.color}`} />
- <span>{STATUS_LABELS[s.status] ?? s.status}</span>
- <span className="font-semibold">{s.count}</span>
- </div>
- );
-})}
- </div>
+  return (
+    <div className="bento-procurement">
+      <div className="bento-procurement__statuses">
+        {byStatus.map(s => {
+          const cfg = STATUS_CFG[s.status] ?? STATUS_CFG.pending;
+          const Icon = cfg.icon;
+          return (
+            <div key={s.status} className="bento-procurement__status-item">
+              <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: cfg.color }} />
+              <span>{STATUS_LABELS[s.status] ?? s.status}</span>
+              <span className="bento-procurement__status-count">{s.count}</span>
+            </div>
+          );
+        })}
+      </div>
 
- <div className="space-y-1.5">
- {recentOrders.slice(0, 4).map(order => (
- <div key={order.id} className="flex items-center justify-between text-xs py-1 border-b border-gray-50 last:border-0">
- <div className="truncate flex-1">
- <p className="font-medium">{order.supplier}</p>
- <p className="text-tertiary">{new Date(order.date).toLocaleDateString('ru-RU')}</p>
- </div>
- <span className="font-medium">{fmt(order.total)}</span>
- </div>
- ))}
- </div>
- </div>
- );
+      <div className="bento-list" style={{ gap: '5px' }}>
+        {recentOrders.slice(0, 4).map(order => (
+          <div key={order.id} className="bento-list-item">
+            <div className="bento-list-item__main">
+              <p className="bento-list-item__title">{order.supplier}</p>
+              <p className="bento-list-item__sub">{new Date(order.date).toLocaleDateString('ru-RU')}</p>
+            </div>
+            <span className="text-[11px] font-semibold text-secondary flex-shrink-0">{formatCompact(order.total)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
