@@ -204,5 +204,6 @@ export interface OneCUniversalCatalogFilters {
 
 export interface OneCRegisterFilters {
   registerType?: string;
+  registerTypes?: string;
   registerKind?: string;
 }
