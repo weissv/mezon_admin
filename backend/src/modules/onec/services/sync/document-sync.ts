@@ -1,4 +1,5 @@
 import type { SyncContext, SyncResult } from "./sync-context";
+import { parseAmount } from "./sync-context";
 import { logger } from "../../../../utils/logger";
 
 /**
@@ -6,17 +7,6 @@ import { logger } from "../../../../utils/logger";
  * Only posted, non-deleted documents are synced into the ERP.
  */
 const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
-
-/**
- * Parses a numeric amount from 1C OData safely.
- * Correctly handles zero (returns 0, not null).
- * Returns null for undefined/null/NaN values.
- */
-function parseAmount(val: any): number | null {
-  if (val === null || val === undefined) return null;
-  const n = typeof val === "number" ? val : parseFloat(String(val));
-  return isNaN(n) ? null : n;
-}
 
 async function syncGenericDocument(
   ctx: SyncContext,
