@@ -5,6 +5,7 @@ import type { OneCRegisterItem } from "../types";
 import { Pagination, formatDate } from "./shared";
 
 type DisplayField = {
+  key: string;
   label: string;
   value: string;
 };
@@ -83,6 +84,7 @@ function toDisplayFields(source: Record<string, unknown>, limit?: number): Displ
   const entries = Object.entries(source)
     .filter(([key, value]) => key !== "RecordSet" && value !== null && value !== undefined && value !== "")
     .map(([key, value]) => ({
+      key,
       label: toWords(key),
       value: formatPrimitive(value),
     }));
@@ -247,7 +249,7 @@ export function RegisterInsights({
                     {normalized.preview.length > 0 ? (
                       <dl className="mt-3 grid gap-3 sm:grid-cols-2">
                         {normalized.preview.map((field) => (
-                          <div key={`${item.id}-${field.label}`} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+                          <div key={`${item.id}-${field.key}`} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
                             <dt className="text-xs text-gray-500">{field.label}</dt>
                             <dd className="mt-1 break-words text-sm font-medium text-gray-800">{field.value}</dd>
                           </div>
@@ -296,7 +298,7 @@ export function RegisterInsights({
               {selectedData.preview.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2">
                   {selectedData.preview.map((field) => (
-                    <div key={`modal-preview-${field.label}`} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                    <div key={`modal-preview-${field.key}`} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                       <div className="text-xs text-gray-500">{field.label}</div>
                       <div className="mt-1 break-words text-sm font-medium text-gray-900">{field.value}</div>
                     </div>
@@ -311,7 +313,7 @@ export function RegisterInsights({
               <ModalSection title="Дополнительные поля" description="Служебные и дополнительные атрибуты записи.">
                 <div className="grid gap-3 md:grid-cols-2">
                   {selectedData.details.map((field) => (
-                    <div key={`modal-detail-${field.label}`} className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div key={`modal-detail-${field.key}`} className="rounded-2xl border border-gray-200 bg-white p-4">
                       <div className="text-xs text-gray-500">{field.label}</div>
                       <div className="mt-1 break-words text-sm font-medium text-gray-900">{field.value}</div>
                     </div>
@@ -335,13 +337,13 @@ export function RegisterInsights({
               >
                 <div className="space-y-3">
                   {selectedData.rows.slice(0, MAX_VISIBLE_ROWS).map((row, index) => (
-                    <div key={`row-${index}`} className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div key={`${selected.id}-row-${index}`} className="rounded-2xl border border-gray-200 bg-white p-4">
                       <div className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-gray-400">
                         Строка {index + 1}
                       </div>
                       <div className="grid gap-3 md:grid-cols-2">
                         {row.map((field) => (
-                          <div key={`row-${index}-${field.label}`} className="rounded-xl bg-gray-50 p-3">
+                          <div key={`${selected.id}-row-${index}-${field.key}`} className="rounded-xl bg-gray-50 p-3">
                             <div className="text-xs text-gray-500">{field.label}</div>
                             <div className="mt-1 break-words text-sm font-medium text-gray-900">{field.value}</div>
                           </div>
