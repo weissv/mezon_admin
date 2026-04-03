@@ -21,7 +21,8 @@ import {
  Search,
  UserCheck,
  Download,
- RefreshCw
+ RefreshCw,
+ Database,
 } from 'lucide-react';
 
 interface StaffingTable {
@@ -337,7 +338,7 @@ export default function StaffingPage() {
  variant={activeTab === 'registers' ? 'default' : 'outline'}
  onClick={() => setActiveTab('registers')}
  >
- <BarChart3 className="mr-2 h-4 w-4"/>
+ <Database className="mr-2 h-4 w-4"/>
  Регистры 1С
  </Button>
  </div>

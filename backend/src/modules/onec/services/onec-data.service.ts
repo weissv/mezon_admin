@@ -31,6 +31,13 @@ function getQueryValue(value: QueryValue): string | undefined {
   return value;
 }
 
+function parseQueryArray(value: QueryValue): string[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((v) => v.split(",")).filter(Boolean);
+  }
+  return value ? value.split(",").filter(Boolean) : [];
+}
+
 function groupCount(value: any): number {
   if (typeof value === "number") return value;
   if (value && typeof value._all === "number") return value._all;
@@ -259,11 +266,7 @@ export async function listOneCRegisters(query: QueryRecord) {
   const registerKind = getQueryValue(query.registerKind);
 
   const registerTypesRaw = query.registerTypes;
-  const registerTypes: string[] = Array.isArray(registerTypesRaw)
-    ? registerTypesRaw.flatMap((v) => v.split(",")).filter(Boolean)
-    : registerTypesRaw
-      ? registerTypesRaw.split(",").filter(Boolean)
-      : [];
+  const registerTypes = parseQueryArray(registerTypesRaw);
 
   const where: any = {};
 
