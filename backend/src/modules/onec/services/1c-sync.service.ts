@@ -15,7 +15,7 @@ import type {
   OneCSyncResult,
 } from "./contracts";
 import { createOneCClient, isNetworkError } from "./onec-client";
-import { resolveCashFlowArticleId, resolveContractorId, resolveCounterparty } from "./sync/resolvers";
+import { resolveCashFlowArticleId, resolveContractorId, resolvePersonId } from "./sync/resolvers";
 import { SyncContext } from "./sync/sync-context";
 
 type SyncResult = OneCSyncResult;
@@ -58,8 +58,8 @@ const FINANCE_DOCUMENT_ENDPOINTS = [
 ] as const;
 
 const REGISTER_ENDPOINTS = {
-  contractorSettlements: "AccumulationRegister_ВзаиморасчетыСКонтрагентами",
-  cashBalances: "AccumulationRegister_ДенежныеСредства",
+  contractorSettlements: "AccumulationRegister_ВзаиморасчетыСКонтрагентами_Balance",
+  cashBalances: "AccumulationRegister_ДенежныеСредства_Balance",
 } as const;
 
 const CATALOG_SELECTS = {
@@ -130,6 +130,8 @@ interface FinanceDocumentRow {
   Контрагент?: string | null;
   Контрагент_Key?: string | null;
   Контрагент_Type?: string | null;
+  ФизическоеЛицо?: string | null;
+  ФизическоеЛицо_Key?: string | null;
   СтатьяДвиженияДенежныхСредств_Key?: string | null;
   НазначениеПлатежа?: string | null;
   Основание?: string | null;
@@ -562,13 +564,12 @@ export class OneCSyncService {
         const rawAmount = toNullableNumber(row.СуммаДокумента) ?? 0;
         const amount = rawAmount * definition.sign;
         const date = toDateOrFallback(row.Date, this.getSnapshotDate());
-        const counterpartyRefKey = toNullableString(row.Контрагент) ?? toNullableString(row.Контрагент_Key);
+        const contractorRefKey = toNullableString(row.Контрагент_Key);
+        const personRefKey = toNullableString(row.ФизическоеЛицо_Key);
+        const counterpartyRefKey = contractorRefKey ?? personRefKey;
         const counterpartyType = toNullableString(row.Контрагент_Type);
-        const { contractorId, personId } = await resolveCounterparty(
-          this.ctx,
-          counterpartyRefKey,
-          counterpartyType,
-        );
+        const contractorId = await resolveContractorId(this.ctx, contractorRefKey);
+        const personId = await resolvePersonId(this.ctx, personRefKey);
         const cashFlowArticleId = await resolveCashFlowArticleId(
           this.ctx,
           toNullableString(row.СтатьяДвиженияДенежныхСредств_Key),
