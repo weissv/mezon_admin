@@ -257,9 +257,21 @@ export async function listOneCRegisters(query: QueryRecord) {
   const { page, pageSize, skip, take } = buildPagination(query);
   const registerType = getQueryValue(query.registerType);
   const registerKind = getQueryValue(query.registerKind);
+
+  const registerTypesRaw = query.registerTypes;
+  const registerTypes: string[] = Array.isArray(registerTypesRaw)
+    ? registerTypesRaw.flatMap((v) => v.split(",")).filter(Boolean)
+    : registerTypesRaw
+      ? registerTypesRaw.split(",").filter(Boolean)
+      : [];
+
   const where: any = {};
 
-  if (registerType) where.registerType = registerType;
+  if (registerType) {
+    where.registerType = registerType;
+  } else if (registerTypes.length > 0) {
+    where.registerType = { in: registerTypes };
+  }
   if (registerKind) where.registerKind = registerKind;
 
   const [items, total] = await Promise.all([
