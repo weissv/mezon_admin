@@ -7,6 +7,17 @@ import { logger } from "../../../../utils/logger";
  */
 const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
 
+/**
+ * Parses a numeric amount from 1C OData safely.
+ * Correctly handles zero (returns 0, not null).
+ * Returns null for undefined/null/NaN values.
+ */
+function parseAmount(val: any): number | null {
+  if (val === null || val === undefined) return null;
+  const n = typeof val === "number" ? val : parseFloat(String(val));
+  return isNaN(n) ? null : n;
+}
+
 async function syncGenericDocument(
   ctx: SyncContext,
   entity: string,
@@ -46,7 +57,7 @@ async function syncGenericDocument(
 
 function syncAccountingEntries(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_ОперацияБух", "ОперацияБух", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаОперации) || null,
+    amount: parseAmount(r.СуммаОперации),
     operationType: r.Содержание ?? null,
     meta: { СпособЗаполнения: r.СпособЗаполнения },
   }));
@@ -54,7 +65,7 @@ function syncAccountingEntries(ctx: SyncContext) {
 
 function syncDebtCorrections(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_КорректировкаДолга", "КорректировкаДолга", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаКтЗадолженности) || parseFloat(r.СуммаДтЗадолженности) || null,
+    amount: parseAmount(r.СуммаКтЗадолженности) ?? parseAmount(r.СуммаДтЗадолженности),
     operationType: r.ВидОперации ?? null,
     contractorRefKey: r.КонтрагентДебитор_Key ?? r.КонтрагентКредитор_Key ?? null,
   }));
@@ -62,7 +73,7 @@ function syncDebtCorrections(ctx: SyncContext) {
 
 function syncReceivedInvoices(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_СчетФактураПолученный", "СчетФактураПолученный", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     contractorRefKey: r.Контрагент_Key ?? null,
     operationType: r.ВидСчетаФактуры ?? null,
   }));
@@ -70,7 +81,7 @@ function syncReceivedInvoices(ctx: SyncContext) {
 
 function syncIssuedInvoices(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_СчетФактураВыданный", "СчетФактураВыданный", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     contractorRefKey: r.Контрагент_Key ?? null,
     operationType: r.ВидСчетаФактуры ?? null,
   }));
@@ -78,28 +89,28 @@ function syncIssuedInvoices(ctx: SyncContext) {
 
 function syncAdvanceReports(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_АвансовыйОтчет", "АвансовыйОтчет", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     personRefKey: r.ФизЛицо_Key ?? null,
   }));
 }
 
 function syncCustomerInvoices(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_СчетНаОплатуПокупателю", "СчетНаОплатуПокупателю", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     contractorRefKey: r.Контрагент_Key ?? null,
   }));
 }
 
 function syncContractorSettlements(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_ДокументРасчетовСКонтрагентом", "ДокументРасчетовСКонтрагентом", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     contractorRefKey: r.Контрагент_Key ?? null,
   }));
 }
 
 function syncPenaltyCharges(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_НачислениеПеней", "НачислениеПеней", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     contractorRefKey: r.Контрагент_Key ?? null,
     meta: { СтавкаПени: r.СтавкаПени, ПериодРасчета: r.ПериодРасчета },
   }));
@@ -120,8 +131,8 @@ function syncRegOperations(ctx: SyncContext) {
 
 function syncPaymentOrder(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_ПлатежноеПоручение", "ПлатежноеПоручение", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
-    contractorRefKey: r.Контрагент ?? null,
+    amount: parseAmount(r.СуммаДокумента),
+    contractorRefKey: r.Контрагент_Key ?? null,
     meta: { НазначениеПлатежа: r.НазначениеПлатежа },
   }));
 }
@@ -150,7 +161,7 @@ function syncWarrant(ctx: SyncContext) {
 
 function syncGoodsWriteOff(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_СписаниеТоваров", "СписаниеТоваров", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     meta: { Основание: r.Основание },
   }));
 }
@@ -175,28 +186,28 @@ function syncGoodsTransfer(ctx: SyncContext) {
 
 function syncNomenclatureAssembly(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_КомплектацияНоменклатуры", "КомплектацияНоменклатуры", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     operationType: r.ВидОперации ?? null,
   }));
 }
 
 function syncFixedAssetAcceptance(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_ПринятиеКУчетуОС", "ПринятиеКУчетуОС", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СтоимостьБУ) || null,
+    amount: parseAmount(r.СтоимостьБУ),
     operationType: r.ВидОперации ?? null,
   }));
 }
 
 function syncAdditionalExpenses(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_ПоступлениеДопРасходов", "ПоступлениеДопРасходов", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
     contractorRefKey: r.Контрагент_Key ?? null,
   }));
 }
 
 function syncRetailSalesReport(ctx: SyncContext) {
   return syncGenericDocument(ctx, "Document_ОтчетОРозничныхПродажах", "ОтчетОРозничныхПродажах", "oneCDocument", (r) => ({
-    amount: parseFloat(r.СуммаДокумента) || null,
+    amount: parseAmount(r.СуммаДокумента),
   }));
 }
 

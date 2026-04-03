@@ -6,6 +6,12 @@ import { logger } from "../../../../utils/logger";
  */
 const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
 
+function parseAmount(val: any): number | null {
+  if (val === null || val === undefined) return null;
+  const n = typeof val === "number" ? val : parseFloat(String(val));
+  return isNaN(n) ? null : n;
+}
+
 async function syncGenericPayrollDocument(
   ctx: SyncContext,
   entity: string,
@@ -45,7 +51,7 @@ function syncPayrollAccrual(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     departmentRefKey: r.Подразделение_Key ?? null,
     period: r.МесяцНачисления ? new Date(r.МесяцНачисления) : null,
-    amount: parseFloat(r.Начислено) || null,
+    amount: parseAmount(r.Начислено),
   }));
 }
 
@@ -54,7 +60,7 @@ function syncPayrollBankStatement(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     departmentRefKey: r.Подразделение_Key ?? null,
     period: r.ПериодРегистрации ? new Date(r.ПериодРегистрации) : null,
-    amount: parseFloat(r.СуммаПоДокументу) || null,
+    amount: parseAmount(r.СуммаПоДокументу),
   }));
 }
 
@@ -63,7 +69,7 @@ function syncPayrollCashStatement(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     departmentRefKey: r.Подразделение_Key ?? null,
     period: r.ПериодРегистрации ? new Date(r.ПериодРегистрации) : null,
-    amount: parseFloat(r.СуммаПоДокументу) || null,
+    amount: parseAmount(r.СуммаПоДокументу),
   }));
 }
 
