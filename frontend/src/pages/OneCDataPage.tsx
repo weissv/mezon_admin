@@ -1,6 +1,5 @@
 import React, { useMemo, useState} from"react";
 import {
- BarChart3,
  BookOpen,
  Building2,
  Database,
@@ -17,12 +16,11 @@ import {
  HRTab,
  OneCSummaryCards,
  PayrollTab,
- RegistersTab,
  useOneCSummary,
  useOneCSync,
 } from"../features/onec";
 
-type TabId ="catalogs"|"documents"|"hr"|"payroll"|"extra-catalogs"|"registers";
+type TabId ="catalogs"|"documents"|"hr"|"payroll"|"extra-catalogs";
 
 const tabs: { id: TabId; label: string; icon: React.ReactNode}[] = [
  { id:"catalogs", label:"Справочники", icon: <Building2 className="h-4 w-4"/>},
@@ -30,7 +28,6 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode}[] = [
  { id:"documents", label:"Документы", icon: <FileText className="h-4 w-4"/>},
  { id:"hr", label:"Кадры", icon: <Users className="h-4 w-4"/>},
  { id:"payroll", label:"Зарплата", icon: <Wallet className="h-4 w-4"/>},
- { id:"registers", label:"Регистры", icon: <BarChart3 className="h-4 w-4"/>},
 ];
 
 export default function OneCDataPage() {
@@ -140,7 +137,6 @@ export default function OneCDataPage() {
  {activeTab ==="documents"&& <DocumentsTab summary={summary} />}
  {activeTab ==="hr"&& <HRTab summary={summary} />}
  {activeTab ==="payroll"&& <PayrollTab summary={summary} />}
- {activeTab ==="registers"&& <RegistersTab summary={summary} />}
  </div>
  </div>
  );
