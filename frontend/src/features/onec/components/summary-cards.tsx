@@ -28,7 +28,7 @@ export function OneCSummaryCards({ summary }: { summary: OneCSummary }) {
       hint: `${summary.payrollDocuments.byType.length} типов`,
     },
     {
-      label: "Регистры",
+      label: "Учётные данные",
       total: summary.registers.total,
       hint: `${summary.registers.byType.length} типов`,
     },
