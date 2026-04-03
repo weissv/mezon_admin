@@ -1,22 +1,25 @@
 import React, { useState} from"react";
 import {
- LayoutDashboard,
- ArrowLeftRight,
- FileText,
- Users,
+  LayoutDashboard,
+  ArrowLeftRight,
+  FileText,
+  Users,
+  BarChart3,
 } from"lucide-react";
 import DashboardView from"./views/DashboardView";
 import TransactionsView from"./views/TransactionsView";
 import InvoicesView from"./views/InvoicesView";
 import DebtorsView from"./views/DebtorsView";
+import FinanceRegistersView from"./views/FinanceRegistersView";
 
-type TabId ="dashboard"|"transactions"|"invoices"|"debtors";
+type TabId ="dashboard"|"transactions"|"invoices"|"debtors"|"registers";
 
 const tabs: { id: TabId; label: string; icon: React.ReactNode}[] = [
  { id:"dashboard", label:"Обзор", icon: <LayoutDashboard className="h-4 w-4"/>},
  { id:"transactions", label:"Транзакции", icon: <ArrowLeftRight className="h-4 w-4"/>},
  { id:"invoices", label:"Накладные", icon: <FileText className="h-4 w-4"/>},
  { id:"debtors", label:"Дебиторы", icon: <Users className="h-4 w-4"/>},
+ { id:"registers", label:"Регистры 1С", icon: <BarChart3 className="h-4 w-4"/>},
 ];
 
 export default function FinancePage() {
@@ -61,6 +64,7 @@ export default function FinancePage() {
  {activeTab ==="transactions"&& <TransactionsView />}
  {activeTab ==="invoices"&& <InvoicesView />}
  {activeTab ==="debtors"&& <DebtorsView />}
+ {activeTab ==="registers"&& <FinanceRegistersView />}
  </div>
  </div>
  );

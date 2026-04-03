@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { PAYROLL_REGISTER_TYPES } from "../register-groups";
 import { listOneCPayrollDocuments } from "../api";
 import { usePaginatedOneCResource } from "../hooks";
 import type { OneCPayrollDocumentItem, OneCSummary } from "../types";
 import { FilterChips, SectionTable, formatAmount, formatDate, type TableColumn } from "./shared";
+import { ScopedRegistersTab } from "./scoped-registers-tab";
 
-export function PayrollTab({ summary }: { summary: OneCSummary | null }) {
+type PayrollSubTab = "documents" | "registers";
+
+function PayrollDocumentsSection({ summary }: { summary: OneCSummary | null }) {
   const [selected, setSelected] = useState("");
   const resource = usePaginatedOneCResource<OneCPayrollDocumentItem, { docType?: string }>({
     loader: listOneCPayrollDocuments,
@@ -47,7 +51,12 @@ export function PayrollTab({ summary }: { summary: OneCSummary | null }) {
 
   return (
     <div className="space-y-4">
-      <FilterChips items={summary?.payrollDocuments.byType ?? []} selected={selected} total={summary?.payrollDocuments.total ?? 0} onSelect={setSelected} />
+      <FilterChips
+        items={summary?.payrollDocuments.byType ?? []}
+        selected={selected}
+        total={summary?.payrollDocuments.total ?? 0}
+        onSelect={setSelected}
+      />
       <SectionTable
         columns={columns}
         items={resource.items}
@@ -59,6 +68,35 @@ export function PayrollTab({ summary }: { summary: OneCSummary | null }) {
         emptyMessage="Нет зарплатных документов"
         onPageChange={resource.setPage}
       />
+    </div>
+  );
+}
+
+export function PayrollTab({ summary }: { summary: OneCSummary | null }) {
+  const [subTab, setSubTab] = useState<PayrollSubTab>("documents");
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1 w-fit">
+        {(["documents", "registers"] as PayrollSubTab[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setSubTab(tab)}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              subTab === tab
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {tab === "documents" ? "Документы" : "Регистры 1С"}
+          </button>
+        ))}
+      </div>
+      {subTab === "documents" ? (
+        <PayrollDocumentsSection summary={summary} />
+      ) : (
+        <ScopedRegistersTab registerTypes={PAYROLL_REGISTER_TYPES} summary={summary} />
+      )}
     </div>
   );
 }
