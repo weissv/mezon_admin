@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { listOneCRegisters } from "../api";
 import { usePaginatedOneCResource } from "../hooks";
 import type { OneCRegisterItem, OneCSummary } from "../types";
-import { FilterChips, SectionTable, formatDate, type TableColumn } from "./shared";
+import { FilterChips } from "./shared";
+import { RegisterInsights } from "./register-insights";
 
 type RegisterFilters = {
   registerType?: string;
@@ -44,59 +45,6 @@ export function ScopedRegistersTab({ registerTypes, summary }: ScopedRegistersTa
     [filteredByType],
   );
 
-  const columns = useMemo<TableColumn<OneCRegisterItem>[]>(
-    () => [
-      {
-        key: "registerType",
-        header: "Тип",
-        cellClassName: "text-xs text-green-700",
-        render: (item) => item.registerType,
-      },
-      {
-        key: "registerKind",
-        header: "Вид",
-        cellClassName: "text-xs",
-        render: (item) => (
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs ${
-              item.registerKind === "Accumulation"
-                ? "bg-orange-100 text-orange-700"
-                : "bg-sky-100 text-sky-700"
-            }`}
-          >
-            {item.registerKind === "Accumulation" ? "Накопления" : "Сведения"}
-          </span>
-        ),
-      },
-      {
-        key: "period",
-        header: "Период",
-        cellClassName: "text-xs",
-        render: (item) => formatDate(item.period),
-      },
-      {
-        key: "recorder",
-        header: "Регистратор",
-        cellClassName: "max-w-[140px] truncate font-mono text-xs text-gray-500",
-        render: (item) => item.recorder || "—",
-      },
-      {
-        key: "data",
-        header: "Данные",
-        cellClassName: "max-w-[320px] truncate text-xs text-gray-500",
-        render: (item) => {
-          if (!item.data) return "—";
-          try {
-            return JSON.stringify(item.data).slice(0, 120);
-          } catch {
-            return "—";
-          }
-        },
-      },
-    ],
-    [],
-  );
-
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
@@ -123,8 +71,7 @@ export function ScopedRegistersTab({ registerTypes, summary }: ScopedRegistersTa
         onSelect={setSelected}
       />
 
-      <SectionTable
-        columns={columns}
+      <RegisterInsights
         items={resource.items}
         loading={resource.loading}
         error={resource.error}

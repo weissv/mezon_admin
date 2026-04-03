@@ -51,7 +51,7 @@ export default function StaffingPage() {
  const [report, setReport] = useState<StaffingReport[]>([]);
  const [employees, setEmployees] = useState<Employee[]>([]);
  const [loading, setLoading] = useState(true);
- const [activeTab, setActiveTab] = useState<'table' | 'report' | 'employees' | 'registers'>('table');
+ const [activeTab, setActiveTab] = useState<'table' | 'report' | 'employees' | 'insights'>('table');
  const [searchQuery, setSearchQuery] = useState('');
  const { data: oneCSummary} = useOneCSummary();
  
@@ -335,12 +335,12 @@ export default function StaffingPage() {
  По сотрудникам
  </Button>
  <Button
- variant={activeTab === 'registers' ? 'default' : 'outline'}
- onClick={() => setActiveTab('registers')}
- >
- <Database className="mr-2 h-4 w-4"/>
- Регистры 1С
- </Button>
+  variant={activeTab === 'insights' ? 'default' : 'outline'}
+  onClick={() => setActiveTab('insights')}
+  >
+  <Database className="mr-2 h-4 w-4"/>
+  Графики и учёт 1С
+  </Button>
  </div>
  <div className="relative w-full sm:w-64">
  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-tertiary"/>
@@ -355,8 +355,8 @@ export default function StaffingPage() {
  </div>
 
  {/* Content */}
- {activeTab === 'registers' ? (
- <ScopedRegistersTab registerTypes={HR_REGISTER_TYPES} summary={oneCSummary} />
+ {activeTab === 'insights' ? (
+  <ScopedRegistersTab registerTypes={HR_REGISTER_TYPES} summary={oneCSummary} />
  ) : activeTab === 'table' ? (
  <div className="space-y-6">
  {filteredTables.length === 0 ? (

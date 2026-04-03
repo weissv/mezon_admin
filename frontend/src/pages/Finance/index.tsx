@@ -19,7 +19,7 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode}[] = [
  { id:"transactions", label:"Транзакции", icon: <ArrowLeftRight className="h-4 w-4"/>},
  { id:"invoices", label:"Накладные", icon: <FileText className="h-4 w-4"/>},
  { id:"debtors", label:"Дебиторы", icon: <Users className="h-4 w-4"/>},
- { id:"registers", label:"Регистры 1С", icon: <BarChart3 className="h-4 w-4"/>},
+  { id:"registers", label:"НДС и активы", icon: <BarChart3 className="h-4 w-4"/>},
 ];
 
 export default function FinancePage() {
