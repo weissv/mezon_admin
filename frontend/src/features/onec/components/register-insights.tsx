@@ -113,7 +113,7 @@ function normalizeRegisterData(data: unknown): NormalizedRegisterData {
   };
 }
 
-function summaryLabel(item: OneCRegisterItem, normalized: NormalizedRegisterData) {
+function summaryLabel(normalized: NormalizedRegisterData) {
   if (normalized.rows.length > 0) {
     return normalized.rows.length === 1
       ? "1 строка данных"
@@ -203,7 +203,7 @@ export function RegisterInsights({
                           {kindLabel(item.registerKind)}
                         </span>
                         <span className="rounded-full bg-white px-2.5 py-1 text-xs text-gray-500">
-                          {summaryLabel(item, normalized)}
+                          {summaryLabel(normalized)}
                         </span>
                       </div>
                       <div>
