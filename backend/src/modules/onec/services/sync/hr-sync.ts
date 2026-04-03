@@ -1,4 +1,5 @@
 import type { SyncContext, SyncResult } from "./sync-context";
+import { parseAmount } from "./sync-context";
 import { logger } from "../../../../utils/logger";
 
 /**
@@ -7,11 +8,6 @@ import { logger } from "../../../../utils/logger";
  */
 const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
 
-function parseAmount(val: any): number | null {
-  if (val === null || val === undefined) return null;
-  const n = typeof val === "number" ? val : parseFloat(String(val));
-  return isNaN(n) ? null : n;
-}
 
 async function syncGenericHRDocument(
   ctx: SyncContext,
