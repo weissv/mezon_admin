@@ -15,6 +15,8 @@ type NormalizedRegisterData = {
   rows: DisplayField[][];
 };
 
+const MAX_VISIBLE_ROWS = 20;
+
 const FIELD_LABELS: Record<string, string> = {
   active: "Активно",
   lineNumber: "Строка",
@@ -56,7 +58,10 @@ function formatPrimitive(value: unknown): string {
 
   if (typeof value === "string") {
     const parsedDate = new Date(value);
-    if (!Number.isNaN(parsedDate.getTime()) && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    if (
+      !Number.isNaN(parsedDate.getTime()) &&
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/u.test(value)
+    ) {
       return parsedDate.toLocaleString("ru-RU");
     }
 
@@ -249,7 +254,9 @@ export function RegisterInsights({
                         ))}
                       </dl>
                     ) : (
-                      <p className="mt-3 text-sm text-gray-500">Для этой записи пока нет структурированных полей для превью.</p>
+                      <p className="mt-3 text-sm text-gray-500">
+                        Для этой записи пока нет структурированных полей для предварительного просмотра.
+                      </p>
                     )}
                   </div>
                 </article>
@@ -327,7 +334,7 @@ export function RegisterInsights({
                 description="Каждая строка представлена отдельной карточкой вместо сырого JSON."
               >
                 <div className="space-y-3">
-                  {selectedData.rows.slice(0, 20).map((row, index) => (
+                  {selectedData.rows.slice(0, MAX_VISIBLE_ROWS).map((row, index) => (
                     <div key={`row-${index}`} className="rounded-2xl border border-gray-200 bg-white p-4">
                       <div className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-gray-400">
                         Строка {index + 1}
@@ -342,9 +349,9 @@ export function RegisterInsights({
                       </div>
                     </div>
                   ))}
-                  {selectedData.rows.length > 20 ? (
+                  {selectedData.rows.length > MAX_VISIBLE_ROWS ? (
                     <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
-                      Ещё {selectedData.rows.length - 20} строк скрыто, чтобы не перегружать интерфейс.
+                      Ещё {selectedData.rows.length - MAX_VISIBLE_ROWS} строк скрыто, чтобы не перегружать интерфейс.
                     </div>
                   ) : null}
                 </div>
