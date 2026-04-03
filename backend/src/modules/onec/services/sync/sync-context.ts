@@ -7,6 +7,17 @@ import { logger } from "../../../../utils/logger";
 export type { SyncResult };
 
 /**
+ * Parses a numeric amount from 1C OData safely.
+ * Correctly handles zero (returns 0, not null).
+ * Returns null for undefined/null/NaN values.
+ */
+export function parseAmount(val: unknown): number | null {
+  if (val === null || val === undefined) return null;
+  const n = typeof val === "number" ? val : parseFloat(String(val));
+  return isNaN(n) ? null : n;
+}
+
+/**
  * Number of records per OData page request.
  * 1C typically limits to 1000, we use 1000 to minimize round-trips.
  */
@@ -140,7 +151,7 @@ export class SyncContext {
   }
 
   buildRegisterExternalId(registerType: string, row: Record<string, unknown>): string {
-    if (typeof row.Ref_Key === "string" && row.Ref_Key) {
+    if (typeof row.Ref_Key === "string" && row.Ref_Key && row.Ref_Key !== EMPTY_GUID) {
       return row.Ref_Key;
     }
 

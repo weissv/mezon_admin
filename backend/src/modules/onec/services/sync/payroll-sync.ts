@@ -1,10 +1,12 @@
 import type { SyncContext, SyncResult } from "./sync-context";
+import { parseAmount } from "./sync-context";
 import { logger } from "../../../../utils/logger";
 
 /**
  * Payroll Documents: only posted, non-deleted documents are synced.
  */
 const DOCUMENT_FILTER = "DeletionMark eq false and Posted eq true";
+
 
 async function syncGenericPayrollDocument(
   ctx: SyncContext,
@@ -45,7 +47,7 @@ function syncPayrollAccrual(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     departmentRefKey: r.Подразделение_Key ?? null,
     period: r.МесяцНачисления ? new Date(r.МесяцНачисления) : null,
-    amount: parseFloat(r.Начислено) || null,
+    amount: parseAmount(r.Начислено),
   }));
 }
 
@@ -54,7 +56,7 @@ function syncPayrollBankStatement(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     departmentRefKey: r.Подразделение_Key ?? null,
     period: r.ПериодРегистрации ? new Date(r.ПериодРегистрации) : null,
-    amount: parseFloat(r.СуммаПоДокументу) || null,
+    amount: parseAmount(r.СуммаПоДокументу),
   }));
 }
 
@@ -63,7 +65,7 @@ function syncPayrollCashStatement(ctx: SyncContext) {
     orgRefKey: r.Организация_Key ?? null,
     departmentRefKey: r.Подразделение_Key ?? null,
     period: r.ПериодРегистрации ? new Date(r.ПериодРегистрации) : null,
-    amount: parseFloat(r.СуммаПоДокументу) || null,
+    amount: parseAmount(r.СуммаПоДокументу),
   }));
 }
 
