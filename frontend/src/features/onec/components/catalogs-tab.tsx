@@ -17,18 +17,28 @@ export const catalogTypes: { key: string; label: string }[] = [
   { key: "departments", label: "Подразделения" },
 ];
 
+type CatalogFilters = { type: string; search?: string };
+
+function catalogLoader(params: CatalogFilters & { page: number; pageSize: number }) {
+  const { type, ...rest } = params;
+  return listOneCCatalog(type, rest);
+}
+
 export function CatalogsTab({ summary }: { summary: OneCSummary | null }) {
   const [selected, setSelected] = useState(catalogTypes[0].key);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim());
-  const resource = usePaginatedOneCResource<OneCCatalogItem, { search?: string }>({
-    loader: (params) => listOneCCatalog(selected, params),
-    initialFilters: {},
+  const resource = usePaginatedOneCResource<OneCCatalogItem, CatalogFilters>({
+    loader: catalogLoader,
+    initialFilters: { type: catalogTypes[0].key },
     initialPageSize: 50,
   });
 
   useEffect(() => {
-    resource.setFilters(deferredSearch ? { search: deferredSearch } : {});
+    resource.setFilters({
+      type: selected,
+      ...(deferredSearch ? { search: deferredSearch } : {}),
+    });
   }, [deferredSearch, selected, resource.setFilters]);
 
   const columns = useMemo<TableColumn<OneCCatalogItem>[]>(

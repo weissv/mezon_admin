@@ -1,4 +1,4 @@
-import React, { useMemo, useState} from"react";
+import React, { useEffect, useMemo, useState} from"react";
 import { toast} from"sonner";
 import { DataTable, Column} from"../../../components/DataTable/DataTable";
 import { Card} from"../../../components/Card";
@@ -61,7 +61,11 @@ export default function TransactionsView() {
 }),
  [filters],
  );
- const { items: transactions, total, page, setPage} = useOneCTransactions(transactionFilters, 20);
+  const { items: transactions, total, page, setPage, setFilters: setTransactionFilters} = useOneCTransactions({}, 20);
+
+  useEffect(() => {
+    setTransactionFilters(transactionFilters);
+  }, [transactionFilters, setTransactionFilters]);
 
  const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
