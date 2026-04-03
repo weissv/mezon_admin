@@ -37,7 +37,7 @@ app.listen(config.port, () => {
   console.log(`API running on http://0.0.0.0:${config.port}`);
   
   // Инициализируем Telegram бота
-  initTelegramBot();
+  void initTelegramBot();
   
   // Запускаем синхронизацию Google Drive через 5 секунд после старта
   // чтобы дать время для инициализации базы данных

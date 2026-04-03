@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import type { AxiosInstance } from "axios";
+import axios, { type AxiosInstance } from "axios";
 import {
   type Prisma,
   PrismaClient,
@@ -276,6 +276,7 @@ function requireExternalId(entity: string, refKey: string | null | undefined): s
 
 export class OneCSyncService {
   private readonly ctx: SyncContext;
+  private readonly missingOneCEntityWarnings = new Set<string>();
   private running = false;
   private currentSnapshotDate: Date | null = null;
 
@@ -295,6 +296,18 @@ export class OneCSyncService {
         results: [],
         aborted: true,
         error: "Sync already in progress",
+      };
+    }
+
+    const configError = this.getOneCConfigurationError();
+    if (configError) {
+      logger.warn(`[1C-Sync] ${configError} — aborting sync cycle before requests`);
+      return {
+        startedAt: new Date(),
+        finishedAt: new Date(),
+        results: [],
+        aborted: true,
+        error: configError,
       };
     }
 
@@ -375,6 +388,13 @@ export class OneCSyncService {
           return;
         }
 
+        if (this.isOneCAuthorizationError(error)) {
+          abortReason = "1C authorization failed (401). Check ONEC_USER and ONEC_PASSWORD.";
+          aborted = true;
+          logger.warn(`[1C-Sync] ${abortReason}`);
+          return;
+        }
+
         logger.error("[1C-Sync] Unexpected error:", error instanceof Error ? error.message : String(error));
         results.push({ entity: "unknown", fetched: 0, upserted: 0, errors: 1 });
       }
@@ -408,6 +428,14 @@ export class OneCSyncService {
 
   private getSnapshotDate(): Date {
     return this.currentSnapshotDate ?? normalizeSnapshotDate(new Date());
+  }
+
+  private getOneCConfigurationError(): string | null {
+    if (!config.oneCPassword.trim()) {
+      return "ONEC_PASSWORD is not configured";
+    }
+
+    return null;
   }
 
   private async syncCashFlowArticles(): Promise<SyncResult> {
@@ -451,7 +479,7 @@ export class OneCSyncService {
     try {
       const rows = await this.ctx.fetchAll<ContractorRow>(
         entity,
-        CATALOG_FILTER,
+        undefined,
         CATALOG_SELECTS.contractors,
       );
 
@@ -494,7 +522,7 @@ export class OneCSyncService {
     try {
       const rows = await this.ctx.fetchAll<PersonRow>(
         entity,
-        CATALOG_FILTER,
+        undefined,
         CATALOG_SELECTS.persons,
       );
 
@@ -645,6 +673,16 @@ export class OneCSyncService {
 
       return { entity, fetched: rows.length, upserted: 2, errors };
     } catch (error) {
+      if (this.isMissingOneCEntityError(error)) {
+        this.logMissingOneCEntityFallback(entity);
+
+        try {
+          return await this.syncMoneyBalancesFromTransactions(entity);
+        } catch (fallbackError) {
+          return this.handleStepError(entity, fallbackError);
+        }
+      }
+
       return this.handleStepError(entity, error);
     }
   }
@@ -698,8 +736,120 @@ export class OneCSyncService {
 
       return { entity, fetched: rows.length, upserted, errors };
     } catch (error) {
+      if (this.isMissingOneCEntityError(error)) {
+        this.logMissingOneCEntityFallback(entity);
+
+        try {
+          return await this.syncContractorBalancesFromTransactions(entity);
+        } catch (fallbackError) {
+          return this.handleStepError(entity, fallbackError);
+        }
+      }
+
       return this.handleStepError(entity, error);
     }
+  }
+
+  private isMissingOneCEntityError(error: unknown): boolean {
+    return axios.isAxiosError(error) && error.response?.status === 404;
+  }
+
+  private isOneCAuthorizationError(error: unknown): boolean {
+    return axios.isAxiosError(error) && error.response?.status === 401;
+  }
+
+  private logMissingOneCEntityFallback(entity: string): void {
+    if (this.missingOneCEntityWarnings.has(entity)) {
+      return;
+    }
+
+    this.missingOneCEntityWarnings.add(entity);
+    logger.warn(
+      `[1C-Sync] ${entity}: endpoint not available in current 1C OData, using calculated fallback from synced finance documents`,
+    );
+  }
+
+  private async syncMoneyBalancesFromTransactions(entity: string): Promise<SyncResult> {
+    const snapshotDate = this.getSnapshotDate();
+    const [cashAgg, bankAgg] = await Promise.all([
+      this.ctx.db.financeTransaction.aggregate({
+        where: { channel: TransactionChannel.CASH },
+        _sum: { amount: true },
+      }),
+      this.ctx.db.financeTransaction.aggregate({
+        where: { channel: TransactionChannel.BANK },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    await this.upsertBalanceSnapshot({
+      snapshotDate,
+      balanceType: BalanceType.CASH,
+      amount: Number(cashAgg._sum.amount ?? 0),
+      contractorId: null,
+      label: "Касса",
+    });
+
+    await this.upsertBalanceSnapshot({
+      snapshotDate,
+      balanceType: BalanceType.BANK,
+      amount: Number(bankAgg._sum.amount ?? 0),
+      contractorId: null,
+      label: "Расчетный счет",
+    });
+
+    return { entity, fetched: 0, upserted: 2, errors: 0 };
+  }
+
+  private async syncContractorBalancesFromTransactions(entity: string): Promise<SyncResult> {
+    const snapshotDate = this.getSnapshotDate();
+    const transactions = await this.ctx.db.financeTransaction.findMany({
+      where: { contractorId: { not: null } },
+      select: { contractorId: true, amount: true },
+    });
+
+    const contractorDebts = new Map<number, number>();
+
+    for (const transaction of transactions) {
+      if (!transaction.contractorId) {
+        continue;
+      }
+
+      contractorDebts.set(
+        transaction.contractorId,
+        (contractorDebts.get(transaction.contractorId) ?? 0) + Number(transaction.amount ?? 0),
+      );
+    }
+
+    let upserted = 0;
+    let errors = 0;
+
+    for (const [contractorId, amount] of contractorDebts.entries()) {
+      try {
+        const contractor = await this.ctx.db.contractor.findUnique({
+          where: { id: contractorId },
+          select: { name: true },
+        });
+
+        await this.upsertBalanceSnapshot({
+          snapshotDate,
+          balanceType: BalanceType.CONTRACTOR_DEBT,
+          amount,
+          contractorId,
+          label: contractor?.name ?? `Контрагент #${contractorId}`,
+        });
+
+        upserted++;
+      } catch (fallbackError) {
+        errors++;
+        logger.error(
+          `[1C-Sync] ${entity} calculated fallback error:`,
+          fallbackError instanceof Error ? fallbackError.message : String(fallbackError),
+        );
+      }
+    }
+
+    return { entity, fetched: 0, upserted, errors };
   }
 
   private async upsertBalanceSnapshot(data: Prisma.BalanceSnapshotUncheckedCreateInput): Promise<void> {
@@ -716,7 +866,7 @@ export class OneCSyncService {
   }
 
   private handleStepError(entity: string, error: unknown): SyncResult {
-    if (isNetworkError(error)) {
+    if (isNetworkError(error) || this.isOneCAuthorizationError(error)) {
       throw error;
     }
 
