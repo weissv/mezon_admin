@@ -160,7 +160,7 @@ export function useOneCBalances() {
 export function useOneCTransactions(initialFilters: OneCTransactionFilters = {}, initialPageSize = 20) {
   const [stableFilters] = useState(() => initialFilters);
   const resource = usePaginatedOneCResource<FinanceTransaction, OneCTransactionFilters>({
-    loader: (params) => listOneCTransactions(params),
+    loader: listOneCTransactions,
     initialFilters: stableFilters,
     initialPageSize,
   });
@@ -171,7 +171,7 @@ export function useOneCTransactions(initialFilters: OneCTransactionFilters = {},
 export function useOneCInvoices(initialFilters: OneCInvoiceFilters = {}, initialPageSize = 20) {
   const [stableFilters] = useState(() => initialFilters);
   const resource = usePaginatedOneCResource<Invoice, OneCInvoiceFilters>({
-    loader: (params) => listOneCInvoices(params),
+    loader: listOneCInvoices,
     initialFilters: stableFilters,
     initialPageSize,
   });
@@ -181,9 +181,7 @@ export function useOneCInvoices(initialFilters: OneCInvoiceFilters = {}, initial
 
 export function useOneCDebtors(initialPageSize = 50) {
   const resource = usePaginatedOneCResource<OneCDebtorItem, Record<string, never>>({
-    loader: async (params) => {
-      return listOneCDebtors(params);
-    },
+    loader: listOneCDebtors,
     initialFilters: {},
     initialPageSize,
   });
