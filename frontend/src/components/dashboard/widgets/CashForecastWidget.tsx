@@ -1,70 +1,69 @@
 // src/components/dashboard/widgets/CashForecastWidget.tsx
-import { TrendingUp, TrendingDown, Minus} from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface ForecastDay {
- date: string;
- income: number;
- expense: number;
- cumulative: number;
+  date: string;
+  income: number;
+  expense: number;
+  cumulative: number;
 }
 
 interface CashForecastData {
- days: ForecastDay[];
- totalIncome: number;
- totalExpense: number;
- netChange: number;
+  days: ForecastDay[];
+  totalIncome: number;
+  totalExpense: number;
+  netChange: number;
 }
 
 const fmt = (n: number) =>
- new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0}).format(n);
+  new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 
-export default function CashForecastWidget({ data}: { data: CashForecastData | undefined}) {
- if (!data) return null;
+export default function CashForecastWidget({ data }: { data: CashForecastData | undefined }) {
+  if (!data) return null;
 
- const days = data.days ?? [];
- const maxAbs = Math.max(...days.map(d => Math.abs(d.cumulative)), 1);
+  const days = data.days ?? [];
+  const maxAbs = Math.max(...days.map(d => Math.abs(d.cumulative)), 1);
 
- return (
- <div className="space-y-3">
- <div className="flex justify-between text-xs text-secondary">
- <span>Прогноз на 30 дней</span>
- <span className={data.netChange >= 0 ? 'text-macos-green' : 'text-macos-red'}>
- {data.netChange >= 0 ? '+' : ''}{fmt(data.netChange)}
- </span>
- </div>
+  return (
+    <div className="bento-forecast">
+      <div className="bento-forecast__net">
+        <p className="bento-forecast__net-label">Прогноз нетто · 30 дн.</p>
+        <p className={`bento-forecast__net-value ${data.netChange >= 0 ? 'bento-forecast__net-value--pos' : 'bento-forecast__net-value--neg'}`}>
+          {data.netChange >= 0 ? '+' : ''}{fmt(data.netChange)}
+        </p>
+      </div>
 
- {/* Mini bar chart */}
- <div className="flex items-end gap-px h-16">
- {days.map((d, i) => {
- const h = Math.round((Math.abs(d.cumulative) / maxAbs) * 100);
- return (
- <div
- key={i}
- className={`flex-1 rounded-t macos-transition ${d.cumulative >= 0 ? 'bg-green-400' : 'bg-red-400'}`}
- style={{ height: `${Math.max(h, 4)}%`}}
- title={`${d.date}: ${fmt(d.cumulative)}`}
- />
- );
-})}
- </div>
+      <div className="bento-forecast__bars">
+        {days.map((d, i) => {
+          const h = Math.round((Math.abs(d.cumulative) / maxAbs) * 100);
+          return (
+            <div
+              key={i}
+              className={`bento-forecast__bar ${d.cumulative >= 0 ? 'bento-forecast__bar--pos' : 'bento-forecast__bar--neg'}`}
+              style={{ height: `${Math.max(h, 4)}%` }}
+              title={`${d.date}: ${fmt(d.cumulative)}`}
+            />
+          );
+        })}
+      </div>
 
- <div className="grid grid-cols-3 gap-2 text-center text-xs">
- <div>
- <TrendingUp className="h-3 w-3 mx-auto text-macos-green"/>
- <p className="font-medium">{fmt(data.totalIncome)}</p>
- <p className="text-tertiary">Доход</p>
- </div>
- <div>
- <TrendingDown className="h-3 w-3 mx-auto text-macos-red"/>
- <p className="font-medium">{fmt(data.totalExpense)}</p>
- <p className="text-tertiary">Расход</p>
- </div>
- <div>
- <Minus className="h-3 w-3 mx-auto text-blue-500"/>
- <p className="font-medium">{fmt(data.netChange)}</p>
- <p className="text-tertiary">Нетто</p>
- </div>
- </div>
- </div>
- );
+      <div className="bento-forecast__row">
+        <div className="bento-forecast__cell">
+          <TrendingUp className="h-3 w-3 text-emerald-600 mx-auto mb-1" />
+          <p className="bento-forecast__cell-val">{fmt(data.totalIncome)}</p>
+          <p className="bento-forecast__cell-lbl">Доход</p>
+        </div>
+        <div className="bento-forecast__cell">
+          <TrendingDown className="h-3 w-3 text-red-500 mx-auto mb-1" />
+          <p className="bento-forecast__cell-val">{fmt(data.totalExpense)}</p>
+          <p className="bento-forecast__cell-lbl">Расход</p>
+        </div>
+        <div className="bento-forecast__cell">
+          <Minus className="h-3 w-3 text-blue-500 mx-auto mb-1" />
+          <p className="bento-forecast__cell-val">{fmt(data.netChange)}</p>
+          <p className="bento-forecast__cell-lbl">Нетто</p>
+        </div>
+      </div>
+    </div>
+  );
 }

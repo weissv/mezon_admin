@@ -117,31 +117,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="dashboard-root space-y-6">
+    <div className="dashboard-root space-y-5">
       {/* ---- Header ---- */}
-      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-[0.01em] uppercase bg-fill-quaternary text-secondary">Mezon ERP</span>
-          <h1 className="text-[24px] font-bold tracking-[-0.025em] text-primary leading-tight mt-2">Дашборд</h1>
-          <p className="text-[15px] font-medium text-secondary leading-relaxed tracking-[-0.01em] mt-1">
-            Единая рабочая поверхность для метрик, сигналов и быстрых действий по операционному контуру.
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-primary leading-tight">Дашборд</h1>
+          <p className="text-[13px] text-secondary mt-0.5">
+            {activeView ? `Вид: ${activeView.name}` : 'Mezon ERP — операционная рабочая поверхность'}
           </p>
-          <div className="flex flex-wrap items-center gap-3 mt-3">
-            <span className="text-[11px] font-semibold tracking-[0.02em] uppercase text-tertiary">
-              Виджетов: {bootstrap.overview.visibleWidgetCount}
-            </span>
-            <span className="text-[11px] font-semibold tracking-[0.02em] uppercase text-tertiary">
-              Действий: {bootstrap.overview.quickActionCount}
-            </span>
-            {activeView && (
-              <span className="text-[11px] font-semibold tracking-[0.02em] uppercase text-macos-blue">
-                Вид: {activeView.name}
-              </span>
-            )}
-          </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-4 sm:mt-0 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button variant="outline" size="sm" onClick={refetch} title="Обновить">
             <RefreshCw className="h-4 w-4" />
           </Button>

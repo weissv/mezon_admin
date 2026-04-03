@@ -1,63 +1,67 @@
 // src/components/dashboard/widgets/HrAlertsWidget.tsx
-import { UserCheck, Calendar, AlertTriangle, FileText} from 'lucide-react';
+import { UserCheck, Calendar, FileText, AlertTriangle } from 'lucide-react';
 
 interface HrAlert {
- type: 'medical' | 'contract' | 'document';
- employeeName: string;
- detail: string;
- dueDate: string;
- overdue: boolean;
+  type: 'medical' | 'contract' | 'document';
+  employeeName: string;
+  detail: string;
+  dueDate: string;
+  overdue: boolean;
 }
 
 interface HrAlertsData {
- alerts: HrAlert[];
- medicalExpiring: number;
- contractsExpiring: number;
+  alerts: HrAlert[];
+  medicalExpiring: number;
+  contractsExpiring: number;
 }
 
-const ALERT_CONFIG: Record<string, { icon: typeof UserCheck; color: string; label: string}> = {
- medical: { icon: UserCheck, color: 'text-macos-red', label: 'Мед. осмотр'},
- contract: { icon: FileText, color: 'text-amber-500', label: 'Договор'},
- document: { icon: Calendar, color: 'text-blue-500', label: 'Документ'},
+const ALERT_CONFIG: Record<string, { icon: typeof UserCheck; badgeCls: string; label: string }> = {
+  medical:  { icon: UserCheck, badgeCls: 'bento-badge--red',   label: 'Мед. осмотр' },
+  contract: { icon: FileText,  badgeCls: 'bento-badge--amber', label: 'Договор' },
+  document: { icon: Calendar,  badgeCls: 'bento-badge--blue',  label: 'Документ' },
 };
 
-export default function HrAlertsWidget({ data}: { data: HrAlertsData | undefined}) {
- if (!data) return null;
+export default function HrAlertsWidget({ data }: { data: HrAlertsData | undefined }) {
+  if (!data) return null;
 
- const alerts = data.alerts ?? [];
+  const alerts = data.alerts ?? [];
 
- return (
- <div className="space-y-3">
- <div className="grid grid-cols-2 gap-2">
- <div className="p-2 bg-red-50 rounded-lg text-center">
- <p className="text-lg font-bold text-macos-red">{data.medicalExpiring ?? 0}</p>
- <p className="text-xs text-macos-red">Мед. осмотры</p>
- </div>
- <div className="p-2 bg-amber-50 rounded-lg text-center">
- <p className="text-lg font-bold text-amber-600">{data.contractsExpiring}</p>
- <p className="text-xs text-amber-500">Договоры</p>
- </div>
- </div>
+  return (
+    <div className="bento-hr">
+      <div className="bento-hr__counts">
+        <div className="bento-hr__count-cell">
+          <p className="bento-hr__count-num" style={{ color: '#DC2626' }}>{data.medicalExpiring ?? 0}</p>
+          <p className="bento-hr__count-lbl">Мед. осмотры</p>
+        </div>
+        <div className="bento-hr__count-cell">
+          <p className="bento-hr__count-num" style={{ color: '#D97706' }}>{data.contractsExpiring}</p>
+          <p className="bento-hr__count-lbl">Договоры</p>
+        </div>
+      </div>
 
- <div className="space-y-1.5">
- {alerts.slice(0, 5).map((alert, i) => {
- const cfg = ALERT_CONFIG[alert.type] ?? ALERT_CONFIG.document;
- const Icon = cfg.icon;
- return (
- <div key={i} className="flex items-center gap-2 text-xs">
- <Icon className={`h-3 w-3 flex-shrink-0 ${cfg.color}`} />
- <div className="truncate flex-1">
- <span className="font-medium">{alert.employeeName}</span>
- <span className="text-tertiary"> — {alert.detail}</span>
- </div>
- <span className={`whitespace-nowrap ${alert.overdue ? 'text-macos-red font-medium' : 'text-tertiary'}`}>
- {new Date(alert.dueDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short'})}
- </span>
- {alert.overdue && <AlertTriangle className="h-3 w-3 text-macos-red flex-shrink-0"/>}
- </div>
- );
-})}
- </div>
- </div>
- );
+      <div className="bento-list">
+        {alerts.slice(0, 5).map((alert, i) => {
+          const cfg = ALERT_CONFIG[alert.type] ?? ALERT_CONFIG.document;
+          const Icon = cfg.icon;
+          return (
+            <div key={i} className="bento-list-item">
+              <div className="bento-list-icon" style={{ background: 'rgba(255,255,255,0.7)' }}>
+                <Icon className="h-3.5 w-3.5 text-secondary" />
+              </div>
+              <div className="bento-list-item__main">
+                <p className="bento-list-item__title">{alert.employeeName}</p>
+                <p className="bento-list-item__sub">{alert.detail}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] whitespace-nowrap ${alert.overdue ? 'text-red-600 font-semibold' : 'text-tertiary'}`}>
+                  {new Date(alert.dueDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+                </span>
+                {alert.overdue && <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
