@@ -41,6 +41,10 @@ interface Employee {
 const selectClassName = 'mezon-field';
 const pageSize = 10;
 
+function getResolvedGrade(group: Group) {
+  return group.grade ?? Number(group.name.match(/\d+/)?.[0] || 0);
+}
+
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -104,7 +108,7 @@ export default function GroupsPage() {
       Array.from(
         new Set(
           groups
-            .map((group) => group.grade ?? Number(group.name.match(/\d+/)?.[0] || 0))
+            .map(getResolvedGrade)
             .filter((grade) => grade > 0),
         ),
       ).sort((a, b) => a - b),
@@ -115,7 +119,7 @@ export default function GroupsPage() {
     const query = search.trim().toLowerCase();
 
     return groups.filter((group) => {
-      const resolvedGrade = group.grade ?? Number(group.name.match(/\d+/)?.[0] || 0);
+      const resolvedGrade = getResolvedGrade(group);
       const matchesGrade = gradeFilter === 'ALL' || String(resolvedGrade) === gradeFilter;
       const haystack = [
         group.name,

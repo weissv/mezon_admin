@@ -84,8 +84,10 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
     try {
       const employees = await api.get('/api/users/employees/available');
       setAvailableEmployees(employees);
-    } catch {
-      toast.error('Не удалось загрузить список сотрудников');
+    } catch (error: any) {
+      toast.error('Не удалось загрузить список сотрудников', {
+        description: error?.message,
+      });
     } finally {
       setIsLoadingEmployees(false);
     }
