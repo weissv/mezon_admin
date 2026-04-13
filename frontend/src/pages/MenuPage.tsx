@@ -17,6 +17,7 @@ import {
 import { Button} from '../components/ui/button';
 import { Input} from '../components/ui/input';
 import { FormError} from '../components/ui/FormError';
+import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
 import { Calculator, ShoppingCart, Trash2, AlertTriangle} from 'lucide-react';
 
 const mealSchema = z.object({
@@ -114,20 +115,20 @@ export default function MenuPage() {
  setIsModalOpen(true);
  };
 
- const onSubmit = async (data: MenuFormData) => {
- try {
+  const onSubmit = async (data: MenuFormData) => {
+  try {
  const payload = {
  ...data,
  date: new Date(data.date).toISOString(),
  };
- await api.post('/menu', payload);
- setIsModalOpen(false);
- fetchMenu(weekStart);
- } catch (error) {
- console.error('Failed to save menu:', error);
- alert('Не удалось сохранить меню. Посмотрите в консоль для деталей.');
- }
- };
+  await api.post('/menu', payload);
+  setIsModalOpen(false);
+  fetchMenu(weekStart);
+  } catch (error) {
+  console.error('Failed to save menu:', error);
+  toast.error('Не удалось сохранить меню');
+  }
+  };
 
  const changeWeek = (offset: number) => {
  const newWeekStart = new Date(weekStart);
@@ -234,22 +235,28 @@ export default function MenuPage() {
  return date;
  });
 
- return (
- <div>
- <div className="flex justify-between items-center mb-4">
- <h1 className="mezon-section-title text-2xl">Меню на неделю</h1>
- <div className="flex items-center gap-2">
- <Button onClick={() => changeWeek(-7)}>Пред. неделя</Button>
- <span className="font-semibold">
- {weekStart.toLocaleDateString('ru-RU')} - {new Date(weekStart.getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU')}
- </span>
- <Button onClick={() => changeWeek(7)}>След. неделя</Button>
- </div>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Kitchen · неделя"
+  title="Меню на неделю"
+  description="Собирайте недельное меню по дням, быстро переходите к КБЖУ и формируйте список покупок для закупки."
+  icon={<ShoppingCart className="h-5 w-5" />}
+  meta={<span className="mezon-badge macos-badge-neutral">{menus.length} дней с меню</span>}
+  />
+  <PageToolbar>
+  <div className="mezon-toolbar-group">
+  <Button onClick={() => changeWeek(-7)}>Пред. неделя</Button>
+  <span className="font-semibold">
+  {weekStart.toLocaleDateString('ru-RU')} - {new Date(weekStart.getTime() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU')}
+  </span>
+  <Button onClick={() => changeWeek(7)}>След. неделя</Button>
+  </div>
+  </PageToolbar>
 
- <div className="flex gap-4 overflow-x-auto pb-4">
- {weekDates.map((date) => renderDay(date))}
- </div>
+  <PageSection className="flex gap-4 overflow-x-auto pb-4">
+  {weekDates.map((date) => renderDay(date))}
+  </PageSection>
 
  <Modal
  isOpen={!!kbzhuData}
@@ -470,6 +477,6 @@ export default function MenuPage() {
  </>
  ) : null}
  </Modal>
- </div>
- );
+  </PageStack>
+  );
 }

@@ -8,6 +8,8 @@ import { useOneCSync} from"../features/onec";
 import { api} from"../lib/api";
 import { useLocation} from"react-router-dom";
 import clsx from"clsx";
+import { Input } from "../components/ui/input";
+import { PageHeader, PageSection, PageStack } from "../components/ui/page";
 
 const ENTITIES = [
  { key:"children", label:"Дети", description:"Полная база воспитанников и статусов"},
@@ -157,16 +159,19 @@ export default function IntegrationPage() {
  handleExcelImport(entity, file);
 };
 
- return (
- <div className="space-y-6">
- <div className="flex flex-col gap-2">
- <h1 className="text-3xl font-bold">Импорт / Экспорт данных</h1>
- <p className="text-secondary">Скачайте актуальные шаблоны, отредактируйте их в Excel или Google Sheets и загрузите обратно в систему.</p>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Интеграции"
+  title="Импорт / экспорт данных"
+  description="Скачайте шаблоны, обновите их в Excel или Google Sheets и загрузите обратно в систему без перехода по разным экранам."
+  icon={<RefreshCw className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{ENTITIES.length} сущности</span>}
+  />
 
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
- {ENTITIES.map((entity) => (
- <div
+  <PageSection className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+  {ENTITIES.map((entity) => (
+  <div
  key={entity.key}
  id={`integration-${entity.key}`}
  className={clsx(
@@ -174,10 +179,10 @@ export default function IntegrationPage() {
  highlightedEntity === entity.key &&"ring-2 ring-blue-400 shadow-lg"
  )}
  >
- <Card className="space-y-4">
- <div>
- <h2 className="text-xl font-semibold">{entity.label}</h2>
- <p className="text-sm text-secondary">{entity.description}</p>
+  <Card className="space-y-4">
+  <div>
+  <h2 className="text-xl font-semibold">{entity.label}</h2>
+  <p className="text-sm text-secondary">{entity.description}</p>
  </div>
 
  <div className="flex flex-wrap gap-3">
@@ -221,44 +226,44 @@ export default function IntegrationPage() {
  onDragEnter={(event) => handleDrag(entity.key, event)}
  onDragOver={(event) => handleDrag(entity.key, event)}
  onDragLeave={(event) => handleDrag(entity.key, event)}
- onDrop={(event) => handleDrop(entity.key, event)}
- >
- <div className="flex flex-col items-center gap-2">
- <UploadCloud className="h-6 w-6 text-secondary"/>
- <p className="font-medium">Перетащите XLSX-файл сюда</p>
- <p className="text-sm text-secondary">или нажмите, чтобы выбрать файл в проводнике</p>
- </div>
- </div>
+  onDrop={(event) => handleDrop(entity.key, event)}
+  >
+  <div className="flex flex-col items-center gap-2">
+  <UploadCloud className="h-6 w-6 text-secondary"/>
+  <p className="font-medium">Перетащите XLSX-файл сюда</p>
+  <p className="text-sm text-secondary">или нажмите, чтобы выбрать файл в проводнике</p>
+   </div>
+   </div>
 
- <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Google Sheets (публичная ссылка на CSV)</label>
- <div className="flex flex-col gap-2 sm:flex-row">
- <input
- type="url"
- placeholder="https://docs.google.com/spreadsheets/..."
- className="flex-1 px-3 py-2 border border-field rounded-md"
- value={sheetUrls[entity.key]}
- onChange={(event) => setSheetUrls((prev) => ({ ...prev, [entity.key]: event.target.value}))}
- />
+  <div>
+  <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">Google Sheets (публичная ссылка на CSV)</label>
+  <div className="flex flex-col gap-2 sm:flex-row">
+  <Input
+  type="url"
+  placeholder="https://docs.google.com/spreadsheets/..."
+  className="flex-1"
+  value={sheetUrls[entity.key]}
+  onChange={(event) => setSheetUrls((prev) => ({ ...prev, [entity.key]: event.target.value}))}
+  />
  <Button
  type="button"
  onClick={() => handleSheetImport(entity.key)}
  disabled={sheetImporting[entity.key]}
  className="flex-none"
- >
- <Link2 className="h-4 w-4 mr-2"/>
- {sheetImporting[entity.key] ?"Импорт...":"Забрать данные"}
- </Button>
- </div>
- </div>
- </Card>
- </div>
- ))}
- </div>
+  >
+  <Link2 className="h-4 w-4 mr-2"/>
+  {sheetImporting[entity.key] ?"Импорт...":"Забрать данные"}
+  </Button>
+   </div>
+   </div>
+   </Card>
+   </div>
+   ))}
+   </PageSection>
 
- {/* 1C: Enterprise Integration */}
- <OneCIntegrationPanel />
- </div>
- );
+  <PageSection>
+  <OneCIntegrationPanel />
+  </PageSection>
+  </PageStack>
+  );
 }
-

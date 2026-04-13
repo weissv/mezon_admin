@@ -5,6 +5,9 @@ import { Card} from '../components/Card';
 import { Button} from '../components/ui/button';
 import { Modal} from '../components/Modal';
 import { Input} from '../components/ui/input';
+import { EmptyListState } from '../components/ui/EmptyState';
+import { LoadingCard } from '../components/ui/LoadingState';
+import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
 import { ScopedRegistersTab} from '../features/onec/components/scoped-registers-tab';
 import { useOneCSummary} from '../features/onec';
 import { HR_REGISTER_TYPES} from '../features/onec/register-groups';
@@ -39,12 +42,19 @@ interface StaffingReport {
 }
 
 interface Employee {
- id: number;
- firstName: string;
- lastName: string;
- position: string;
- rate: number;
+  id: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+  rate: number;
 }
+
+const tabLabels = {
+  table: 'Штатная таблица',
+  report: 'Отчёт',
+  employees: 'По сотрудникам',
+  insights: 'Графики и учёт 1С',
+} as const;
 
 export default function StaffingPage() {
  const [tables, setTables] = useState<StaffingTable[]>([]);
@@ -240,37 +250,35 @@ export default function StaffingPage() {
  toast.success('Отчёт экспортирован');
 };
 
- if (loading) {
- return (
- <div className="flex items-center justify-center h-64">
- <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем штатное расписание..." height={240} />
+  );
 }
 
- return (
- <div className="space-y-6">
- <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight flex items-center gap-2">
- <Users className="h-6 w-6"/>
- Штатное расписание
- </h1>
- <div className="flex gap-2">
- <Button variant="outline"onClick={() => fetchData()}>
- <RefreshCw className="mr-2 h-4 w-4"/> Обновить
- </Button>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="HR · штат"
+  title="Штатное расписание"
+  description="Контроль укомплектованности, штатной таблицы и фактической нагрузки сотрудников в одном плотном HR-экране."
+  icon={<Users className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{tabLabels[activeTab]}</span>}
+  actions={<div className="flex gap-2">
+  <Button variant="outline"onClick={() => fetchData()}>
+  <RefreshCw className="mr-2 h-4 w-4"/> Обновить
+  </Button>
  <Button variant="outline"onClick={exportToCSV}>
  <Download className="mr-2 h-4 w-4"/> Экспорт
  </Button>
- <Button onClick={openCreateModal}>
- <PlusCircle className="mr-2 h-4 w-4"/> Добавить позицию
- </Button>
- </div>
- </div>
+  <Button onClick={openCreateModal}>
+  <PlusCircle className="mr-2 h-4 w-4"/> Добавить позицию
+  </Button>
+  </div>}
+  />
 
- {/* Summary Cards */}
- <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
- <Card>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <Card>
  <div className="p-4 flex items-center gap-4">
  <div className="p-3 bg-[rgba(0,122,255,0.12)] rounded-full">
  <Users className="h-6 w-6 text-macos-blue"/>
@@ -308,12 +316,11 @@ export default function StaffingPage() {
  </p>
  </div>
  </div>
- </Card>
- </div>
+  </Card>
+  </div>
 
- {/* Tabs */}
- <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
- <div className="flex gap-2">
+  <PageToolbar className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+  <div className="flex gap-2">
  <Button
  variant={activeTab === 'table' ? 'default' : 'outline'}
  onClick={() => setActiveTab('table')}
@@ -348,25 +355,31 @@ export default function StaffingPage() {
  type="text"
  placeholder="Поиск по должности..."
  value={searchQuery}
- onChange={(e) => setSearchQuery(e.target.value)}
- className="pl-9"
- />
- </div>
- </div>
+  onChange={(e) => setSearchQuery(e.target.value)}
+  className="pl-9"
+  />
+  </div>
+  </PageToolbar>
 
- {/* Content */}
- {activeTab === 'insights' ? (
-  <ScopedRegistersTab registerTypes={HR_REGISTER_TYPES} summary={oneCSummary} />
- ) : activeTab === 'table' ? (
- <div className="space-y-6">
- {filteredTables.length === 0 ? (
- <Card>
- <div className="p-8 text-center text-secondary">
- {searchQuery ? 'Позиции не найдены' : 'Штатное расписание пусто. Добавьте первую позицию.'}
- </div>
- </Card>
- ) : (
- <Card>
+  {/* Content */}
+  {activeTab === 'insights' ? (
+   <PageSection>
+   <ScopedRegistersTab registerTypes={HR_REGISTER_TYPES} summary={oneCSummary} />
+   </PageSection>
+  ) : activeTab === 'table' ? (
+  <div className="space-y-6">
+  {filteredTables.length === 0 ? (
+  <PageSection>
+  <EmptyListState
+  title={searchQuery ? 'Позиции не найдены' : 'Штатное расписание пусто'}
+  description={searchQuery ? 'Измените запрос поиска.' : 'Добавьте первую позицию, чтобы сформировать таблицу и отчёт.'}
+  onAction={!searchQuery ? openCreateModal : undefined}
+  actionLabel="Добавить позицию"
+  className="py-10"
+  />
+  </PageSection>
+  ) : (
+  <Card>
  <div className="divide-y">
  {filteredTables.map((item) => {
  const reportItem = report.find(r => r.position === item.position);
@@ -444,14 +457,16 @@ export default function StaffingPage() {
  </div>
  ) : activeTab === 'report' ? (
  <div className="space-y-6">
- {filteredReport.length === 0 ? (
- <Card>
- <div className="p-8 text-center text-secondary">
- {searchQuery ? 'Позиции не найдены' : 'Нет данных для отчёта. Добавьте штатные позиции.'}
- </div>
- </Card>
- ) : (
- <Card>
+  {filteredReport.length === 0 ? (
+  <PageSection>
+  <EmptyListState
+  title={searchQuery ? 'Позиции не найдены' : 'Нет данных для отчёта'}
+  description={searchQuery ? 'Измените строку поиска.' : 'Добавьте штатные позиции, чтобы увидеть отчёт.'}
+  className="py-10"
+  />
+  </PageSection>
+  ) : (
+  <Card>
  <div className="overflow-x-auto">
  <table className="w-full">
  <thead className="bg-fill-quaternary text-sm">
@@ -530,14 +545,18 @@ export default function StaffingPage() {
  ) : (
  /* Employees tab */
  <div className="space-y-6">
- {tables.length === 0 ? (
- <Card>
- <div className="p-8 text-center text-secondary">
- Добавьте штатные позиции для просмотра сотрудников.
- </div>
- </Card>
- ) : (
- <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {tables.length === 0 ? (
+  <PageSection>
+  <EmptyListState
+  title="Нет штатных позиций"
+  description="Добавьте позиции, чтобы просматривать сотрудников по ролям."
+  onAction={openCreateModal}
+  actionLabel="Добавить позицию"
+  className="py-10"
+  />
+  </PageSection>
+  ) : (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
  {filteredTables.map((item) => {
  const positionEmployees = getEmployeesByPosition(item.position);
  const currentRate = positionEmployees.reduce((sum, e) => sum + e.rate, 0);
@@ -738,6 +757,6 @@ export default function StaffingPage() {
  </div>
  </div>
  </Modal>
- </div>
- );
+  </PageStack>
+  );
 }
