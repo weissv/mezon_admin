@@ -1,24 +1,12 @@
 // src/layouts/LmsLayout.tsx
-import { useState} from"react";
 import { Link, Outlet} from"react-router-dom";
-import { Phone, Mail, Facebook, Instagram, Send, Menu, LayoutDashboard} from"lucide-react";
+import { ArrowRight, BookOpenCheck, Menu, LayoutDashboard} from"lucide-react";
 import LmsSideNav from"../components/LmsSideNav";
 import { Toaster} from"sonner";
 import { useAuth} from"../hooks/useAuth";
 
 export default function LmsLayout() {
  const { user, isLoading} = useAuth();
-
- const contacts = [
- { icon: Phone, label:"+ 71 // 207 17 30"},
- { icon: Mail, label:"info@mezon.uz"},
- ];
-
- const socials = [
- { icon: Facebook, href:"https://www.facebook.com/MezonSchool/"},
- { icon: Instagram, href:"https://instagram.com/mezonschool"},
- { icon: Send, href:"http://t.me/mezon_school"},
- ];
 
   if (isLoading) {
     return (
@@ -47,10 +35,10 @@ export default function LmsLayout() {
     );
   }
 
- return (
- <div className="mezon-app">
- <header className="mezon-top-bar">
-      {/* Mobile menu button */}
+  return (
+  <div className="mezon-app">
+  <header className="mezon-top-bar">
+      <div className="mezon-top-bar__leading">
       <button 
         className="mezon-mobile-menu-btn"
         onClick={() => {
@@ -62,31 +50,33 @@ export default function LmsLayout() {
       >
         <Menu className="h-5 w-5" />
       </button>
-      
+      <div className="mezon-window-controls" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+      <div className="mezon-top-bar__title">
+        <span>Mezon LMS</span>
+        <strong>Учебный контур и дневные сценарии</strong>
+      </div>
+      </div>
+
       <div className="mezon-top-bar__cluster mezon-top-bar__cluster--compact">
-        {contacts.map(({ icon: Icon, label }) => (
-          <span key={label} className="mezon-chip">
-            <Icon className="h-3.5 w-3.5" />
-            {label}
-          </span>
-        ))}
+        <span className="mezon-chip">
+          <BookOpenCheck className="h-3.5 w-3.5" />
+          Учебный процесс
+        </span>
+        <span className="mezon-chip">LMS</span>
       </div>
       <div className="mezon-top-bar__cluster">
-        {/* Кнопка "Вернуться в ERP" доступна всем ролям включая учителей */}
         <Link
           to="/dashboard"
           className="mezon-chip mezon-chip--teal flex items-center gap-2 cursor-pointer"
         >
           <LayoutDashboard className="h-3.5 w-3.5" />
           Вернуться в ERP
+          <ArrowRight className="h-3 w-3" />
         </Link>
-        <div className="mezon-top-bar__social">
-          {socials.map(({ icon: Icon, href }) => (
-            <a key={href} href={href} target="_blank" rel="noreferrer">
-              <Icon className="h-4 w-4" />
-            </a>
-          ))}
-        </div>
       </div>
     </header>
     <div className="mezon-shell">

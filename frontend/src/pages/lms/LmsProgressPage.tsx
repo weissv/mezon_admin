@@ -11,6 +11,9 @@ import {
 import { lmsApi} from"../../lib/lms-api";
 import { LmsStudentAttendance} from"../../types/lms";
 import { toast} from"sonner";
+import { EmptyListState } from "../../components/ui/EmptyState";
+import { LoadingCard } from "../../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
 
 export default function LmsProgressPage() {
  const [attendance, setAttendance] = useState<LmsStudentAttendance[]>([]);
@@ -56,21 +59,21 @@ export default function LmsProgressPage() {
 }
 };
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[400px]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем посещаемость..." height={320} />
+  );
 }
 
- return (
- <div className="space-y-6">
- {/* Header */}
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Посещаемость</h1>
- <p className="text-secondary mt-1">История посещений занятий</p>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="LMS · посещаемость"
+  title="Посещаемость"
+  description="История посещений занятий с быстрым фильтром по статусу."
+  icon={<Calendar className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{filteredAttendance.length} записей</span>}
+  />
 
  {/* Stats Cards */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -93,8 +96,8 @@ export default function LmsProgressPage() {
  </div>
 
  {/* Filters */}
- <div className="flex justify-end">
- <div className="inline-flex items-center bg-white mezon-field rounded-lg p-1">
+  <PageToolbar className="justify-end">
+  <div className="inline-flex items-center bg-white mezon-field rounded-lg p-1">
  <Filter className="h-4 w-4 text-tertiary ml-2 mr-1"/>
  <select 
  value={filter} 
@@ -107,11 +110,11 @@ export default function LmsProgressPage() {
  <option value="late">Опоздал</option>
  <option value="excused">Уважительная причина</option>
  </select>
- </div>
- </div>
+  </div>
+  </PageToolbar>
 
  {/* List */}
- <div className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
+  <PageSection className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
  {filteredAttendance.length > 0 ? (
  <div className="divide-y divide-gray-100">
  {filteredAttendance.map((record) => {
@@ -141,12 +144,9 @@ export default function LmsProgressPage() {
 })}
  </div>
  ) : (
- <div className="p-12 text-center text-secondary">
- <Calendar className="h-12 w-12 mx-auto mb-3 text-tertiary"/>
- Записей не найдено
- </div>
- )}
- </div>
- </div>
- );
+  <EmptyListState title="Записей не найдено" description="Попробуйте изменить фильтр посещаемости." className="py-10" />
+  )}
+  </PageSection>
+  </PageStack>
+  );
 }

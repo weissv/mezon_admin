@@ -13,6 +13,10 @@ import { toast} from"sonner";
 import { useLmsClasses} from"../../hooks/lms/useLmsClasses";
 import { useLmsSubjects} from"../../hooks/lms/useLmsSubjects";
 import { useLmsSchedule} from"../../hooks/lms/useLmsSchedule";
+import { EmptyListState } from "../../components/ui/EmptyState";
+import { LoadingCard } from "../../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
+import { Button } from "../../components/ui/button";
 
 const DAYS = ["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
 const TIME_SLOTS = [
@@ -70,34 +74,25 @@ export default function LmsSchedulePage() {
 
  const loading = classesLoading || subjectsLoading || (selectedClass ? scheduleLoading : false);
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[400px]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем расписание..." height={320} />
+  );
 }
 
- return (
- <div className="space-y-6">
- <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Расписание уроков</h1>
- <p className="text-secondary">Недельное расписание занятий</p>
- </div>
- {isAdmin && selectedClass && (
- <button
- onClick={() => setShowAddModal(true)}
- className="inline-flex items-center gap-2 bg-macos-blue text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 macos-transition"
- >
- <Plus className="h-5 w-5"/>
- Добавить урок
- </button>
- )}
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="LMS · расписание"
+  title="Расписание уроков"
+  description="Недельная сетка уроков по классам с быстрым добавлением и удалением слотов."
+  icon={<Calendar className="h-5 w-5" />}
+  meta={<span className="mezon-badge macos-badge-neutral">{selectedClass ? 'Класс выбран' : 'Без класса'}</span>}
+  actions={isAdmin && selectedClass ? <Button onClick={() => setShowAddModal(true)}><Plus className="h-4 w-4"/> Добавить урок</Button> : undefined}
+  />
 
- <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
- <div className="flex items-center gap-4">
+  <PageToolbar className="bg-white rounded-xl shadow-subtle border border-card p-4">
+  <div className="flex items-center gap-4">
  <label className="text-[11px] font-medium uppercase tracking-widest text-primary">
  <Users className="inline h-4 w-4 mr-1"/>
  Класс:
@@ -113,13 +108,13 @@ export default function LmsSchedulePage() {
  {cls.name}
  </option>
  ))}
- </select>
- </div>
- </div>
+  </select>
+  </div>
+  </PageToolbar>
 
- {selectedClass ? (
- <div className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
- <div className="overflow-x-auto">
+  {selectedClass ? (
+  <PageSection className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
+  <div className="overflow-x-auto">
  <table className="w-full min-w-[800px]">
  <thead className="bg-fill-quaternary">
  <tr>
@@ -183,15 +178,14 @@ export default function LmsSchedulePage() {
  </tr>
  ))}
  </tbody>
- </table>
- </div>
- </div>
- ) : (
- <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
- <Calendar className="h-12 w-12 text-tertiary mx-auto mb-4"/>
- <p className="text-secondary">Выберите класс для просмотра расписания</p>
- </div>
- )}
+  </table>
+  </div>
+  </PageSection>
+  ) : (
+  <PageSection>
+  <EmptyListState title="Выберите класс" description="Сначала выберите класс, чтобы открыть недельную сетку уроков." className="py-10" />
+  </PageSection>
+  )}
 
  {showAddModal && selectedClass && (
  <AddScheduleModal
@@ -211,8 +205,8 @@ export default function LmsSchedulePage() {
 }}
  />
  )}
- </div>
- );
+  </PageStack>
+  );
 }
 
 function AddScheduleModal({

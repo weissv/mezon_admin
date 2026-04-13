@@ -1,10 +1,12 @@
 import { useState, useCallback} from 'react';
-import { Settings, Pencil, X, RefreshCw} from 'lucide-react';
+import { Settings, Pencil, X, RefreshCw, LayoutDashboard } from 'lucide-react';
 import { Button} from '../components/ui/button';
 import { useDashboardPreferences} from '../hooks/useDashboardPreferences';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import DashboardOverview from '../components/dashboard/DashboardOverview';
 import PersonalizationPanel from '../components/dashboard/PersonalizationPanel';
+import { ErrorState } from '../components/ui/EmptyState';
+import { PageHeader, PageSection, PageStack } from '../components/ui/page';
 import type { LayoutItem, SavedView} from '../types/dashboard';
 
 export default function DashboardPage() {
@@ -94,11 +96,11 @@ export default function DashboardPage() {
 
  /* ---- Render states ---- */
 
- if (isLoading) {
- return (
- <div className="space-y-4 animate-pulse">
- <div className="h-10 rounded-lg w-1/3 dashboard-skeleton"/>
- <div className="grid grid-cols-4 gap-4">
+  if (isLoading) {
+  return (
+  <div className="space-y-4 animate-pulse">
+  <div className="h-10 rounded-lg w-1/3 dashboard-skeleton"/>
+  <div className="grid grid-cols-4 gap-4">
  {Array.from({ length: 8}).map((_, i) => (
  <div key={i} className="h-40 rounded-xl dashboard-skeleton"/>
  ))}
@@ -109,25 +111,28 @@ export default function DashboardPage() {
 
   if (error || !bootstrap || !preferences) {
     return (
-      <div className="rounded-xl border border-card bg-surface-primary shadow-subtle p-5 text-center py-12">
-        <p className="font-semibold text-[14px] tracking-[-0.01em] text-macos-red mb-4">{error ?? 'Не удалось загрузить дашборд'}</p>
-        <Button onClick={refetch}>Повторить</Button>
-      </div>
+      <PageSection>
+        <ErrorState message={error ?? 'Не удалось загрузить дашборд'} onRetry={refetch} />
+      </PageSection>
     );
   }
 
   return (
-    <div className="dashboard-root space-y-5">
-      {/* ---- Header ---- */}
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-primary leading-tight">Дашборд</h1>
-          <p className="text-[13px] text-secondary mt-0.5">
-            {activeView ? `Вид: ${activeView.name}` : 'Mezon ERP — операционная рабочая поверхность'}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 flex-shrink-0">
+    <PageStack className="dashboard-root">
+      <PageHeader
+        eyebrow="Рабочее место"
+        title="Операционный дашборд"
+        icon={<LayoutDashboard className="h-5 w-5" />}
+        meta={
+          activeView ? (
+            <span className="mezon-badge macos-badge-neutral">Вид: {activeView.name}</span>
+          ) : (
+            <span className="mezon-badge">Живые показатели</span>
+          )
+        }
+        description="Главные сигналы по школе, быстрые действия и рабочие виджеты в одном ритме. Панель стала плотнее, чище и лучше приспособлена для ежедневных операторских сценариев."
+        actions={
+          <>
           <Button variant="outline" size="sm" onClick={refetch} title="Обновить">
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -145,37 +150,37 @@ export default function DashboardPage() {
             <Settings className="h-4 w-4 mr-1" />
             Настроить
           </Button>
-        </div>
-      </header>
+          </>
+        }
+      />
 
- {/* ---- Overview strip ---- */}
- {bootstrap.overview && (
- <DashboardOverview overview={bootstrap.overview} />
- )}
+      {bootstrap.overview && (
+        <PageSection inset>
+          <DashboardOverview overview={bootstrap.overview} />
+        </PageSection>
+      )}
 
- {/* ---- Grid ---- */}
- <DashboardLayout
- preferences={preferences}
- availableWidgets={bootstrap.availableWidgets}
- quickActions={bootstrap.quickActions}
- isEditMode={isEditMode}
- onLayoutChange={handleLayoutChange}
- onToggleCollapse={handleToggleCollapse}
- />
+      <DashboardLayout
+        preferences={preferences}
+        availableWidgets={bootstrap.availableWidgets}
+        quickActions={bootstrap.quickActions}
+        isEditMode={isEditMode}
+        onLayoutChange={handleLayoutChange}
+        onToggleCollapse={handleToggleCollapse}
+      />
 
- {/* ---- Personalization side-panel ---- */}
- <PersonalizationPanel
- isOpen={isPanelOpen}
- onClose={() => setIsPanelOpen(false)}
- availableWidgets={bootstrap.availableWidgets}
- preferences={preferences}
- quickActions={bootstrap.quickActions}
- onToggleWidget={handleToggleWidget}
- onSaveView={handleSaveView}
- onLoadView={handleLoadView}
- onResetDefaults={resetPreferences}
- onTogglePinnedAction={handleTogglePinnedAction}
- />
- </div>
- );
+      <PersonalizationPanel
+        isOpen={isPanelOpen}
+        onClose={() => setIsPanelOpen(false)}
+        availableWidgets={bootstrap.availableWidgets}
+        preferences={preferences}
+        quickActions={bootstrap.quickActions}
+        onToggleWidget={handleToggleWidget}
+        onSaveView={handleSaveView}
+        onLoadView={handleLoadView}
+        onResetDefaults={resetPreferences}
+        onTogglePinnedAction={handleTogglePinnedAction}
+      />
+    </PageStack>
+  );
 }

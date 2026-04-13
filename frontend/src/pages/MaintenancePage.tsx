@@ -13,6 +13,7 @@ import { InventoryAutocomplete} from '../components/ui/InventoryAutocomplete';
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2, X, Check, PlusCircle, MinusCircle} from 'lucide-react';
 import { useAuth} from '../hooks/useAuth';
+import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
 // Импортируем централизованные типы и схемы
 import {
  MaintenanceRequest,
@@ -625,57 +626,55 @@ export default function MaintenancePage() {
  { id: 'equipment' as TabType, label: 'Оборудование', icon: Settings},
  ];
 
- return (
- <div className="space-y-6">
- {/* Header with tabs */}
- <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight flex items-center gap-2">
- <ClipboardList className="h-6 w-6"/>
- Техобслуживание
- </h1>
- {activeTab === 'requests' && (
- <Button onClick={handleCreate}>
- <Plus className="mr-2 h-4 w-4"/> Создать заявку
- </Button>
- )}
- {activeTab === 'cleaning' && (
- <Button onClick={() => openCleaningModal()}>
- <Plus className="mr-2 h-4 w-4"/> Добавить зону уборки
- </Button>
- )}
- {activeTab === 'equipment' && (
- <Button onClick={() => openEquipmentModal()}>
- <Plus className="mr-2 h-4 w-4"/> Добавить оборудование
- </Button>
- )}
- </div>
-
- {/* Tabs */}
- <div className="border-b border-[rgba(0,0,0,0.08)]">
- <nav className="-mb-px flex space-x-8">
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Maintenance"
+  title="Обслуживание"
+  description="Заявки, графики уборки и оборудование в одном пространстве техобслуживания."
+  icon={<Wrench className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{activeTab === 'requests' ? 'Заявки' : activeTab === 'cleaning' ? 'Уборка' : 'Оборудование'}</span>}
+  />
+ <PageToolbar className="flex flex-wrap items-center justify-between gap-4">
+ <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-card bg-surface-primary p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
+ <nav className="flex gap-1">
  {tabs.map((tab) => {
  const Icon = tab.icon;
  return (
  <button
  key={tab.id}
  onClick={() => setActiveTab(tab.id)}
- className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm macos-transition ${
+ className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[11px] font-medium uppercase tracking-widest macos-transition ${
  activeTab === tab.id
- ? 'border-blue-500 text-macos-blue'
- : 'border-transparent text-secondary hover:text-primary hover:border-field'
+ ? 'bg-[rgba(255,255,255,0.9)] text-primary shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
+ : 'text-secondary hover:bg-[rgba(255,255,255,0.58)] hover:text-primary'
 }`}
  >
  <Icon className="h-5 w-5"/>
  {tab.label}
  </button>
  );
-})}
+ })}
  </nav>
  </div>
+ {activeTab === 'requests' ? (
+ <Button onClick={handleCreate}>
+ <Plus className="mr-2 h-4 w-4"/> Создать заявку
+ </Button>
+ ) : activeTab === 'cleaning' ? (
+ <Button onClick={() => openCleaningModal()}>
+ <Plus className="mr-2 h-4 w-4"/> Добавить зону уборки
+ </Button>
+ ) : (
+ <Button onClick={() => openEquipmentModal()}>
+ <Plus className="mr-2 h-4 w-4"/> Добавить оборудование
+ </Button>
+ )}
+ </PageToolbar>
 
  {/* Requests Tab */}
  {activeTab === 'requests' && (
- <>
+ <PageSection className="space-y-4">
  {/* Статистика */}
  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
  <div 
@@ -779,12 +778,12 @@ export default function MaintenancePage() {
  <DataTable columns={columns} data={filteredRequests} page={1} pageSize={filteredRequests.length} total={filteredRequests.length} onPageChange={() => {}} />
  )}
  </Card>
- </>
- )}
+ </PageSection>
+  )}
 
  {/* Cleaning Tab */}
  {activeTab === 'cleaning' && (
- <Card>
+ <PageSection className="p-0"><Card>
  {cleaningLoading ? (
  <div className="p-8 text-center">
  <Loader2 className="h-8 w-8 animate-spin mx-auto text-macos-blue"/>
@@ -833,12 +832,12 @@ export default function MaintenancePage() {
  ))}
  </div>
  )}
- </Card>
- )}
+ </Card></PageSection>
+  )}
 
  {/* Equipment Tab */}
  {activeTab === 'equipment' && (
- <Card>
+ <PageSection className="p-0"><Card>
  {equipmentLoading ? (
  <div className="p-8 text-center">
  <Loader2 className="h-8 w-8 animate-spin mx-auto text-macos-blue"/>
@@ -897,8 +896,8 @@ export default function MaintenancePage() {
  </table>
  </div>
  )}
- </Card>
- )}
+ </Card></PageSection>
+  )}
 
  {/* Create/Edit Modal */}
  <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingRequest ? 'Редактировать заявку' : 'Новая заявка на выдачу'}>
@@ -1285,6 +1284,6 @@ export default function MaintenancePage() {
  </div>
  </form>
  </Modal>
- </div>
+ </PageStack>
  );
 }

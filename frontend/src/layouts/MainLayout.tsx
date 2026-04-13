@@ -1,7 +1,7 @@
 // src/layouts/MainLayout.tsx
 import { useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { Phone, Mail, Facebook, Instagram, Send, Menu, GraduationCap } from "lucide-react";
+import { ArrowRight, LayoutGrid, Menu, GraduationCap } from "lucide-react";
 import SideNav from "../components/SideNav";
 import DoomGame from "../components/DoomGame";
 import { Toaster } from "sonner";
@@ -21,18 +21,6 @@ export default function MainLayout() {
   useKonamiCode(() => {
     if (user) setShowDoom(true);
   });
-
-  const contacts = [
-    { icon: Phone, label: "+ 71 // 207 17 30" },
-    { icon: Phone, label: "+ 90 // 006 31 37" },
-    { icon: Mail, label: "info@mezon.uz" },
-  ];
-
-  const socials = [
-    { icon: Facebook, href: "https://www.facebook.com/MezonSchool/" },
-    { icon: Instagram, href: "https://instagram.com/mezonschool" },
-    { icon: Send, href: "http://t.me/mezon_school" },
-  ];
 
   if (isLoading) {
     return (
@@ -78,9 +66,9 @@ export default function MainLayout() {
       {showDoom && <DoomGame onClose={() => setShowDoom(false)} />}
 
       {/* ── Top Bar ── */}
-      <header className="mezon-top-bar">
-        <div className="mezon-top-bar__leading">
-          <button
+        <header className="mezon-top-bar">
+          <div className="mezon-top-bar__leading">
+            <button
             className="mezon-mobile-menu-btn"
             onClick={() => {
               (window as any).toggleMobileMenu?.();
@@ -89,29 +77,28 @@ export default function MainLayout() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="mezon-window-controls" aria-hidden="true">
-            <span />
-            <span />
-            <span />
+            <div className="mezon-window-controls" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="mezon-top-bar__title">
+              <span>Mezon ERP</span>
+              <strong>Операционный контур школы</strong>
+            </div>
           </div>
-          <div className="mezon-top-bar__title">
-            <span>Mezon Admin</span>
-            <strong>Единое рабочее пространство</strong>
-          </div>
-        </div>
 
         <div className="mezon-top-bar__cluster mezon-top-bar__cluster--compact">
-          {contacts.map(({ icon: Icon, label }) => (
-            <span key={label} className="mezon-chip">
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </span>
-          ))}
+          <span className="mezon-chip">
+            <LayoutGrid className="h-3.5 w-3.5" />
+            Рабочее место
+          </span>
+          <span className="mezon-chip">ERP</span>
         </div>
 
         <div className="mezon-top-bar__cluster">
           {user && (
-            <span className="mezon-toolbar-pill">
+            <span className="mezon-toolbar-pill mezon-toolbar-pill--strong">
               <span className="mezon-toolbar-pill__dot" />
               <span className="truncate max-w-[180px]">{userName}</span>
               <span className="hidden text-[var(--text-tertiary)] sm:inline">· {userRoleLabel}</span>
@@ -123,14 +110,8 @@ export default function MainLayout() {
           >
             <GraduationCap className="h-3.5 w-3.5" />
             Школьная LMS
+            <ArrowRight className="h-3 w-3" />
           </Link>
-          <div className="mezon-top-bar__social">
-            {socials.map(({ icon: Icon, href }) => (
-              <a key={href} href={href} target="_blank" rel="noreferrer">
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
-          </div>
         </div>
       </header>
 

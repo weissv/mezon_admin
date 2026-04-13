@@ -6,6 +6,7 @@ import { useAuth} from"../hooks/useAuth";
 import { api} from"../lib/api";
 import { Modal} from"../components/Modal";
 import { Button} from"../components/ui/button";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../components/ui/page";
 
 // Google Drive папка с базой знаний
 const GOOGLE_DRIVE_FOLDER_ID ="1d9_a3NQ2hHioMJsaUJ53NIj-CS1rVeDd";
@@ -359,9 +360,16 @@ export default function AiAssistantPage() {
  const canEditPrompt = user?.role ==="ADMIN"|| user?.role ==="DIRECTOR";
 
  return (
- <div className="flex flex-col">
- {/* Tabs */}
- <div className="mb-4 flex gap-2 border-b pb-2">
+ <PageStack>
+ <PageHeader
+ eyebrow="AI assistant"
+ title="ИИ-методист"
+ description="Методическая помощь, работа с базой знаний и синхронизация учебных материалов."
+ icon={<Bot className="h-5 w-5"/>}
+ meta={<span className="mezon-badge macos-badge-neutral">{activeTab === "chat" ? "Чат" : "База знаний"}</span>}
+ />
+ <PageToolbar>
+ <div className="flex gap-2">
  <button
  onClick={() => setActiveTab("chat")}
  className={`flex items-center gap-2 rounded-lg px-4 py-2 macos-transition ${
@@ -385,9 +393,10 @@ export default function AiAssistantPage() {
  База знаний
  </button>
  </div>
+ </PageToolbar>
 
- {activeTab ==="chat"? (
- <>
+  {activeTab ==="chat"? (
+ <PageSection className="space-y-4">
  {/* Chat Messages */}
  <div className="min-h-[400px] rounded-lg border bg-fill-quaternary p-4">
  {messages.length === 0 ? (
@@ -597,9 +606,9 @@ export default function AiAssistantPage() {
  </details>
  </div>
  )}
- </>
- ) : (
- <>
+ </PageSection>
+  ) : (
+ <PageSection className="space-y-4">
  {/* Knowledge Base */}
  <div>
  {/* Google Drive Section */}
@@ -739,8 +748,8 @@ export default function AiAssistantPage() {
  )}
  </div>
  </div>
- </>
- )}
+ </PageSection>
+  )}
 
  {/* Add Document Modal */}
  {showAddDocModal && (
@@ -998,6 +1007,6 @@ export default function AiAssistantPage() {
  </div>
  </div>
  </Modal>
- </div>
- );
+ </PageStack>
+  );
 }
