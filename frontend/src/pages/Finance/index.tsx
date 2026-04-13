@@ -11,6 +11,7 @@ import TransactionsView from"./views/TransactionsView";
 import InvoicesView from"./views/InvoicesView";
 import DebtorsView from"./views/DebtorsView";
 import FinanceRegistersView from"./views/FinanceRegistersView";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
 
 type TabId ="dashboard"|"transactions"|"invoices"|"debtors"|"registers";
 
@@ -25,22 +26,19 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode}[] = [
 export default function FinancePage() {
  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
 
- return (
- <div className="space-y-6">
- <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-macos-blue shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
- <LayoutDashboard className="h-5 w-5"/>
- </div>
- <div>
- <div className="mezon-badge mb-2">Finance · обзор</div>
- <h1 className="mezon-section-title mb-1">Финансы</h1>
- <p className="mezon-subtitle">Ключевые показатели, транзакции, накладные и дебиторская задолженность в едином рабочем пространстве.</p>
- </div>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Finance · обзор"
+  title="Финансы"
+  description="Ключевые показатели, транзакции, накладные и дебиторская задолженность в едином рабочем пространстве."
+  icon={<LayoutDashboard className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{tabs.find((tab) => tab.id === activeTab)?.label}</span>}
+  />
 
- {/* Tabs */}
- <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-card bg-surface-primary p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
- <nav className="flex gap-1"aria-label="Finance tabs">
+  <PageToolbar>
+  <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-card bg-surface-primary p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
+  <nav className="flex gap-1"aria-label="Finance tabs">
  {tabs.map((tab) => (
  <button
  key={tab.id}
@@ -53,19 +51,19 @@ export default function FinancePage() {
  >
  {tab.icon}
  {tab.label}
- </button>
- ))}
- </nav>
- </div>
+  </button>
+  ))}
+  </nav>
+  </div>
+  </PageToolbar>
 
- {/* Tab Content */}
- <div>
- {activeTab ==="dashboard"&& <DashboardView />}
- {activeTab ==="transactions"&& <TransactionsView />}
- {activeTab ==="invoices"&& <InvoicesView />}
- {activeTab ==="debtors"&& <DebtorsView />}
- {activeTab ==="registers"&& <FinanceRegistersView />}
- </div>
- </div>
- );
+  <PageSection>
+  {activeTab ==="dashboard"&& <DashboardView />}
+  {activeTab ==="transactions"&& <TransactionsView />}
+  {activeTab ==="invoices"&& <InvoicesView />}
+  {activeTab ==="debtors"&& <DebtorsView />}
+  {activeTab ==="registers"&& <FinanceRegistersView />}
+  </PageSection>
+  </PageStack>
+  );
 }

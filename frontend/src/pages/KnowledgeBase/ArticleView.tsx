@@ -20,6 +20,9 @@ import { knowledgeBaseApi} from"../../lib/api";
 import { useAuth} from"../../hooks/useAuth";
 import type { KnowledgeBaseArticle, UpdateArticleInput} from"../../types/knowledge-base";
 import { Button} from"../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { LoadingCard } from "../../components/ui/LoadingState";
+import { PageHeader, PageStack } from "../../components/ui/page";
 
 // ============================================================================
 // Простой рендерер Markdown (без внешних зависимостей)
@@ -27,7 +30,7 @@ import { Button} from"../../components/ui/button";
 // Для полноценного Markdown рекомендуется установить react-markdown
 // ============================================================================
 function renderMarkdown(md: string): string {
- let html = md
+ const html = md
  // Блоки кода
  .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto my-4 text-sm"><code>$2</code></pre>')
  // Инлайн-код
@@ -47,7 +50,7 @@ function renderMarkdown(md: string): string {
  // Ссылки
  .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2"target="_blank"rel="noopener"class="text-macos-blue hover:underline">$1</a>')
  // Маркированные списки
- .replace(/^[\-\*] (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
+ .replace(/^[-*] (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
  // Нумерованные списки
  .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal">$1</li>')
  // Абзацы
@@ -160,66 +163,43 @@ export default function ArticleView() {
 };
 
  // ========== Рендер ==========
- if (loading) {
- return (
- <div className="flex justify-center py-20">
- <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"/>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем статью..." height={220} />
+  );
 }
 
  if (!article) return null;
 
  return (
- <div>
- {/* Навигация и действия */}
- <div className="flex items-center justify-between mb-6">
- <button
- onClick={() => navigate("/knowledge-base")}
- className="flex items-center gap-2 text-secondary hover:text-gray-800 macos-transition"
- >
- <ArrowLeft className="h-4 w-4"/>
- Назад к списку
- </button>
+  <PageStack>
+  <PageHeader
+  eyebrow="Knowledge base · статья"
+  title={article.title}
+  description={!isEditing && article.author ? `${article.author.employee.firstName} ${article.author.employee.lastName}` : "Просмотр и редактирование статьи базы знаний"}
+  icon={<BookOpen className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{new Date(article.updatedAt).toLocaleDateString("ru-RU")}</span>}
+  actions={<div className="flex gap-2">
+  <Button variant="ghost"size="sm"onClick={() => navigate("/knowledge-base")}><ArrowLeft className="mr-1 h-4 w-4"/> Назад</Button>
+  {canEdit && !isEditing && <><Button variant="outline"size="sm"onClick={startEditing}><Edit className="mr-1 h-4 w-4"/> Редактировать</Button><Button variant="outline"size="sm"onClick={handleDelete} className="text-macos-red hover:text-macos-red"><Trash2 className="mr-1 h-4 w-4"/> Удалить</Button></>}
+  {isEditing && <><Button variant="outline"size="sm"onClick={cancelEditing}><X className="mr-1 h-4 w-4"/> Отмена</Button><Button size="sm"onClick={handleSave} disabled={saving}><Save className="mr-1 h-4 w-4"/> {saving ?"Сохранение...":"Сохранить"}</Button></>}
+  </div>}
+  />
 
- {canEdit && !isEditing && (
- <div className="flex gap-2">
- <Button variant="outline"size="sm"onClick={startEditing}>
- <Edit className="mr-1 h-4 w-4"/> Редактировать
- </Button>
- <Button variant="outline"size="sm"onClick={handleDelete} className="text-macos-red hover:text-macos-red">
- <Trash2 className="mr-1 h-4 w-4"/> Удалить
- </Button>
- </div>
- )}
-
- {isEditing && (
- <div className="flex gap-2">
- <Button variant="outline"size="sm"onClick={cancelEditing}>
- <X className="mr-1 h-4 w-4"/> Отмена
- </Button>
- <Button size="sm"onClick={handleSave} disabled={saving}>
- <Save className="mr-1 h-4 w-4"/> {saving ?"Сохранение...":"Сохранить"}
- </Button>
- </div>
- )}
- </div>
-
- <div className="flex flex-col lg:flex-row gap-6">
+  <div className="flex flex-col lg:flex-row gap-6">
  {/* ===== Основной контент ===== */}
  <div className="flex-1 min-w-0">
- <div className="bg-white rounded-xl border border-[rgba(0,0,0,0.08)] p-6 lg:p-8">
- {isEditing ? (
- /* Режим редактирования */
- <div className="space-y-4">
+  <div className="bg-white rounded-xl border border-[rgba(0,0,0,0.08)] p-6 lg:p-8">
+  {isEditing ? (
+  <div className="space-y-4">
  <div>
  <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Заголовок</label>
- <input
- type="text"
- value={editForm.title ||""}
- onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value}))}
- className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-[14px] font-semibold tracking-[-0.01em]"
- />
+  <Input
+  type="text"
+  value={editForm.title ||""}
+  onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value}))}
+  className="w-full text-[14px] font-semibold tracking-[-0.01em]"
+  />
  </div>
 
  <div>
@@ -235,36 +215,35 @@ export default function ArticleView() {
  <div>
  <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Теги</label>
  <div className="flex gap-2">
- <input
- type="text"
- value={editTagInput}
- onChange={(e) => setEditTagInput(e.target.value)}
- onKeyDown={(e) => e.key ==="Enter"&& (e.preventDefault(), addEditTag())}
- className="flex-1 px-3 py-2 border rounded-lg outline-none"
- placeholder="Введите тег"
- />
+  <Input
+  type="text"
+  value={editTagInput}
+  onChange={(e) => setEditTagInput(e.target.value)}
+  onKeyDown={(e) => e.key ==="Enter"&& (e.preventDefault(), addEditTag())}
+  className="flex-1"
+  placeholder="Введите тег"
+  />
  <Button variant="outline"onClick={addEditTag} type="button">
  +
  </Button>
  </div>
  {(editForm.tags?.length ?? 0) > 0 && (
  <div className="flex flex-wrap gap-1 mt-2">
- {editForm.tags!.map((tag) => (
+  {editForm.tags!.map((tag) => (
  <span
  key={tag}
  className="px-2 py-1 bg-tint-blue text-macos-blue text-xs rounded-full flex items-center gap-1"
  >
  {tag}
  <button onClick={() => removeEditTag(tag)} className="hover:text-macos-red">×</button>
- </span>
- ))}
- </div>
- )}
- </div>
- </div>
- ) : (
- /* Режим просмотра */
- <>
+   </span>
+   ))}
+   </div>
+   )}
+    </div>
+    </div>
+   ) : (
+  <>
  <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
 
  {/* Мета-информация */}
@@ -304,17 +283,17 @@ export default function ArticleView() {
  {/* Контент (Markdown) */}
  <article
  className="prose prose-gray max-w-none leading-relaxed"
- dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content)}}
- />
- </>
- )}
- </div>
- </div>
+  dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content)}}
+  />
+  </>
+  )}
+  </div>
+  </div>
 
  {/* ===== Сайдбар: Похожие статьи ===== */}
  {!isEditing && related.length > 0 && (
  <aside className="lg:w-80 flex-shrink-0">
- <div className="bg-white rounded-xl border border-[rgba(0,0,0,0.08)] p-5 sticky top-6">
+   <div className="bg-white rounded-xl border border-[rgba(0,0,0,0.08)] p-5 sticky top-6">
  <h3 className="font-semibold text-sm text-primary mb-4 flex items-center gap-2">
  <Sparkles className="h-4 w-4 text-blue-500"/>
  Похожие статьи
@@ -337,10 +316,10 @@ export default function ArticleView() {
  </Link>
  ))}
  </div>
- </div>
- </aside>
- )}
- </div>
- </div>
- );
+   </div>
+  </aside>
+  )}
+  </div>
+  </PageStack>
+  );
 }

@@ -5,6 +5,8 @@ import { api} from '../../lib/api';
 import { useAuth} from '../../hooks/useAuth';
 import { Button} from '../../components/ui/button';
 import type { SchoolStats} from '../../types/lms';
+import { LoadingCard } from '../../components/ui/LoadingState';
+import { PageHeader, PageSection, PageStack } from '../../components/ui/page';
 
 type KPIColor = 'blue' | 'green' | 'purple' | 'orange';
 
@@ -67,29 +69,26 @@ export default function LmsSchoolDashboard() {
  fetchStats();
 }, []);
 
- if (loading) {
- return <div className="mezon-card h-64 animate-pulse text-secondary">Загрузка статистики...</div>;
-}
+  if (loading) {
+  return <LoadingCard message="Загрузка статистики..." height={240} />;
+  }
 
- return (
- <div className="space-y-8">
- <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
- <div>
- <div className="mezon-badge mb-3">LMS · школьная аналитика</div>
- <h1 className="mezon-section-title mb-1">Школьный обзор</h1>
- <p className="mezon-subtitle">
- Сводка по учебному процессу на сегодня{teacherName ? `для ${teacherName}`: ''}.
- </p>
- </div>
- <div className="flex gap-2">
- <Link to="/lms/school/schedule">
- <Button variant="outline">Расписание</Button>
- </Link>
- <Link to="/lms/diary">
- <Button>Мой дневник</Button>
- </Link>
- </div>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="LMS · школьная аналитика"
+  title="Школьный обзор"
+  description={`Сводка по учебному процессу на сегодня${teacherName ? ` для ${teacherName}`: ''}.`}
+  icon={<Users className="h-5 w-5"/>}
+  actions={<div className="flex gap-2">
+  <Link to="/lms/school/schedule">
+  <Button variant="outline">Расписание</Button>
+  </Link>
+  <Link to="/lms/diary">
+  <Button>Мой дневник</Button>
+  </Link>
+  </div>}
+  />
 
  {/* KPI Cards */}
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -123,7 +122,7 @@ export default function LmsSchoolDashboard() {
  />
  </div>
 
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <PageSection className="grid grid-cols-1 lg:grid-cols-3 gap-8">
  {/* Recent Activity / Grades */}
  <div className="lg:col-span-2 space-y-6">
  <div className="flex items-center justify-between">
@@ -204,7 +203,7 @@ export default function LmsSchoolDashboard() {
 
 
  </div>
- </div>
- </div>
- );
+  </PageSection>
+  </PageStack>
+  );
 }

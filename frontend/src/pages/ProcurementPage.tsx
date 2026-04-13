@@ -23,25 +23,25 @@ import { SupplierForm} from '../components/forms/SupplierForm';
 import { useOneCProcurementInvoices} from '../features/onec';
 import { api} from '../lib/api';
 import { useAuth} from '../hooks/useAuth';
+import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
 
 const currency = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'UZS', maximumFractionDigits: 0});
 
 export default function ProcurementPage() {
- const [viewMode, setViewMode] = useState<'orders' | 'suppliers' | 'invoices'>('orders');
+  const [viewMode, setViewMode] = useState<'orders' | 'suppliers' | 'invoices'>('orders');
 
- return (
- <div className="space-y-4">
- {/* Header */}
- <div className="flex justify-between items-center">
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight flex items-center gap-2 text-gray-800">
- <ShoppingCart className="h-6 w-6 text-macos-blue"/>
- Закупки
- </h1>
- <p className="text-sm text-secondary mt-0.5">Управление заказами, поставщиками и накладными</p>
- </div>
- <div className="flex gap-1 bg-fill-tertiary p-1 rounded-lg">
- <button
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Procurement"
+  title="Закупки"
+  description="Управление заказами, поставщиками и накладными в одном рабочем пространстве."
+  icon={<ShoppingCart className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{viewMode === 'orders' ? 'Заказы' : viewMode === 'suppliers' ? 'Поставщики' : 'Накладные 1С'}</span>}
+  />
+  <PageToolbar>
+  <div className="flex gap-1 bg-fill-tertiary p-1 rounded-lg">
+  <button
  onClick={() => setViewMode('orders')}
  className={`flex items-center gap-2 px-4 py-2 rounded-md text-[11px] font-medium uppercase tracking-widest macos-transition ${
  viewMode === 'orders'
@@ -72,16 +72,18 @@ export default function ProcurementPage() {
 }`}
  >
  <FileText className="h-4 w-4"/>
- Накладные 1С
- </button>
- </div>
- </div>
+  Накладные 1С
+  </button>
+  </div>
+  </PageToolbar>
 
- {viewMode === 'orders' && <OrdersView />}
- {viewMode === 'suppliers' && <SuppliersView />}
- {viewMode === 'invoices' && <IncomingInvoicesView />}
- </div>
- );
+  <PageSection>
+  {viewMode === 'orders' && <OrdersView />}
+  {viewMode === 'suppliers' && <SuppliersView />}
+  {viewMode === 'invoices' && <IncomingInvoicesView />}
+  </PageSection>
+  </PageStack>
+  );
 }
 
 // =====================================================
