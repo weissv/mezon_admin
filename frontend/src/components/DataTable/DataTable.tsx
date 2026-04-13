@@ -1,7 +1,9 @@
 // src/components/DataTable/DataTable.tsx
 import Papa from "papaparse";
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import clsx from "clsx";
+import { ChevronLeft, ChevronRight, Download, Rows3 } from "lucide-react";
+import { EmptyState } from "../ui/EmptyState";
 
 export type Column<T> = {
   key: string;
@@ -17,6 +19,11 @@ export function DataTable<T extends Record<string, any>>({
   total,
   onPageChange,
   wrapCells = false,
+  title,
+  description,
+  toolbar,
+  emptyState,
+  density = "comfortable",
 }: {
   data: T[];
   columns: Column<T>[];
@@ -25,16 +32,36 @@ export function DataTable<T extends Record<string, any>>({
   total: number;
   onPageChange: (page: number) => void;
   wrapCells?: boolean;
+  title?: string;
+  description?: string;
+  toolbar?: React.ReactNode;
+  emptyState?: React.ReactNode;
+  density?: "comfortable" | "compact";
 }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
+  const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(page * pageSize, total);
+  const isCompact = density === "compact";
 
   const headerCellCls = wrapCells
-    ? "text-left p-3 whitespace-normal break-words align-top text-[11px] font-bold uppercase tracking-[0.06em] text-tertiary"
-    : "text-left p-3 whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.06em] text-tertiary";
+    ? clsx(
+        "text-left whitespace-normal break-words align-top text-[11px] font-bold uppercase tracking-[0.06em] text-tertiary",
+        isCompact ? "px-3 py-2.5" : "p-3",
+      )
+    : clsx(
+        "text-left whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.06em] text-tertiary",
+        isCompact ? "px-3 py-2.5" : "p-3",
+      );
 
   const bodyCellCls = wrapCells
-    ? "p-3 whitespace-normal break-words align-top text-[14px] text-primary"
-    : "p-3 whitespace-nowrap text-[14px] text-primary";
+    ? clsx(
+        "whitespace-normal break-words align-top text-primary",
+        isCompact ? "px-3 py-2.5 text-[13px]" : "p-3 text-[14px]",
+      )
+    : clsx(
+        "whitespace-nowrap text-primary",
+        isCompact ? "px-3 py-2.5 text-[13px]" : "p-3 text-[14px]",
+      );
 
   const tableCls = wrapCells ? "w-full table-fixed" : "w-full";
 
@@ -55,21 +82,37 @@ export function DataTable<T extends Record<string, any>>({
   };
 
   return (
-    <div className="rounded-[var(--radius-xl)] border border-[var(--border-card)] bg-[var(--surface-primary)] overflow-hidden shadow-[var(--shadow-card)]">
-      {/* Toolbar */}
-      <div className="flex justify-end px-4 py-2.5 border-b border-[var(--separator)]">
+    <div className="mezon-data-table">
+      {(title || description || toolbar) && (
+        <div className="mezon-data-table__intro">
+          <div className="min-w-0">
+            {title ? <h2 className="mezon-data-table__title">{title}</h2> : null}
+            {description ? <p className="mezon-data-table__description">{description}</p> : null}
+          </div>
+          {toolbar ? <div className="mezon-data-table__toolbar-extra">{toolbar}</div> : null}
+        </div>
+      )}
+
+      <div className="mezon-data-table__toolbar">
+        <div className="mezon-data-table__toolbar-summary">
+          <span className="mezon-data-table__toolbar-pill">
+            <Rows3 className="h-3.5 w-3.5" />
+            {total === 0 ? "Нет записей" : `${rangeStart}–${rangeEnd} из ${total}`}
+          </span>
+        </div>
         <button
-          className="text-[12px] font-medium px-3 py-1.5 rounded-[var(--radius-md)] bg-fill-quaternary hover:bg-fill-tertiary text-secondary macos-transition"
+          className="mezon-data-table__toolbar-button"
           onClick={downloadCsv}
+          type="button"
         >
+          <Download className="h-3.5 w-3.5" />
           Экспорт CSV
         </button>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className={tableCls}>
-          <thead>
+          <thead className="sticky top-0 z-[1]">
             <tr className="border-b border-[var(--separator)] bg-[var(--bg-inset)]">
               {columns.map((c) => (
                 <th key={c.key} className={headerCellCls}>
@@ -82,10 +125,18 @@ export function DataTable<T extends Record<string, any>>({
             {data.length === 0 ? (
               <tr>
                 <td
-                  className="p-10 text-center text-tertiary text-[14px]"
+                  className="p-0"
                   colSpan={columns.length}
                 >
-                  Нет данных
+                  {emptyState ?? (
+                    <EmptyState
+                      icon={Rows3}
+                      title="Нет данных"
+                      description="Таблица пока не содержит записей по выбранным параметрам."
+                      size="sm"
+                      className="py-10"
+                    />
+                  )}
                 </td>
               </tr>
             ) : (
@@ -112,8 +163,7 @@ export function DataTable<T extends Record<string, any>>({
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex flex-col sm:flex-row justify-between items-center px-4 py-3 text-[13px] gap-2 border-t border-[var(--separator)]">
+      <div className="mezon-data-table__pagination">
         <div className="text-tertiary">
           Всего: <span className="font-semibold text-primary">{total}</span>
         </div>
@@ -121,7 +171,7 @@ export function DataTable<T extends Record<string, any>>({
           <button
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-md)] bg-fill-quaternary text-primary disabled:opacity-30 disabled:cursor-not-allowed hover:bg-fill-tertiary macos-transition font-medium"
+            className="mezon-data-table__pagination-button"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             Назад
@@ -132,7 +182,7 @@ export function DataTable<T extends Record<string, any>>({
           <button
             disabled={page >= pages}
             onClick={() => onPageChange(page + 1)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-md)] bg-fill-quaternary text-primary disabled:opacity-30 disabled:cursor-not-allowed hover:bg-fill-tertiary macos-transition font-medium"
+            className="mezon-data-table__pagination-button"
           >
             Вперёд
             <ChevronRight className="w-3.5 h-3.5" />

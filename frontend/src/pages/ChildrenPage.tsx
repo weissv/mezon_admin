@@ -24,6 +24,7 @@ import { ChildForm} from '../components/forms/ChildForm';
 import { useChildren, useChildMutations, useGroups} from '../hooks/useChildren';
 import { api} from '../lib/api';
 import { toast} from 'sonner';
+import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
 import type { Child, ChildFilters, Gender} from '../types/child';
 
 const selectClassName = 'mezon-field';
@@ -207,23 +208,25 @@ export default function ChildrenPage() {
 },
  ];
 
- return (
- <div>
- <div className="mb-4 flex items-start justify-between gap-4">
- <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-[rgba(0,122,255,0.08)] text-macos-blue">
- <Users className="h-5 w-5"/>
- </div>
- <div>
- <div className="mezon-badge macos-badge-neutral mb-1">Children · контингент</div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight">Управление контингентом детей</h1>
- <p className="text-[15px] font-medium leading-relaxed tracking-[-0.01em] mt-1">Профили учеников, статусы, родители и массовый импорт в одном рабочем пространстве.</p>
- </div>
- </div>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Контингент"
+  title="Управление профилями детей"
+  icon={<Users className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{total} записей</span>}
+  description="Единый список учеников, статусов и семейных контактов. Экран приведён к общему ERP-паттерну: короткий header, плотная панель действий и предсказуемые фильтры."
+  actions={
+    <div className="mezon-kicker-list">
+      <span className="mezon-chip">Профили</span>
+      <span className="mezon-chip">Родители</span>
+      <span className="mezon-chip">Импорт</span>
+    </div>
+  }
+  />
 
- {/* Import/Export Card */}
- <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-subtle">
+  {/* Import/Export Card */}
+  <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-subtle">
  <div>
  <p className="text-[14px] font-semibold tracking-[-0.01em]">Массовая загрузка списков</p>
  <p className="text-[14px] leading-relaxed text-secondary mt-1">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон.</p>
@@ -235,20 +238,19 @@ export default function ChildrenPage() {
  <Button onClick={() => navigate('/integration#children')}>
  <UploadCloud className="mr-2 h-4 w-4"/> Перейти к импорту
  </Button>
- </div>
- </Card>
+  </div>
+  </Card>
 
- {/* Search + Filters + Add */}
- <div className="mb-4 flex flex-col gap-3 rounded-[18px] border border-card bg-surface-primary p-4 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px] sm:flex-row sm:items-center sm:justify-between">
- <div className="flex items-center gap-2 flex-1">
- <div className="relative flex-1 max-w-sm">
- <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4"/>
- <Input
- placeholder="Поиск по ФИО..."
- className="pl-8"
- value={searchInput}
- onChange={(e) => setSearchInput(e.target.value)}
- />
+  {/* Search + Filters + Add */}
+  <PageToolbar className="mb-4">
+  <div className="mezon-toolbar-group flex-1">
+  <div className="mezon-input-shell max-w-sm">
+  <Search className="mezon-input-shell__icon h-4 w-4"/>
+  <Input
+  placeholder="Поиск по ФИО..."
+  value={searchInput}
+  onChange={(e) => setSearchInput(e.target.value)}
+  />
  </div>
  <Button
  variant={showFilters ? 'default' : 'outline'}
@@ -258,21 +260,21 @@ export default function ChildrenPage() {
  <Filter className="h-4 w-4 mr-1"/> Фильтры
  {hasActiveFilters && <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-xs text-black">!</span>}
  </Button>
- {hasActiveFilters && (
- <Button variant="ghost"size="sm"onClick={clearFilters}>
- <X className="h-4 w-4 mr-1"/> Сбросить
- </Button>
- )}
- </div>
- <Button onClick={handleCreate} className="w-full sm:w-auto">
- <PlusCircle className="mr-2 h-4 w-4"/> Добавить ребенка
- </Button>
- </div>
+  {hasActiveFilters && (
+  <Button variant="ghost"size="sm"onClick={clearFilters}>
+  <X className="h-4 w-4 mr-1"/> Сбросить
+  </Button>
+  )}
+  </div>
+  <Button onClick={handleCreate} className="w-full sm:w-auto">
+  <PlusCircle className="mr-2 h-4 w-4"/> Добавить ребенка
+  </Button>
+  </PageToolbar>
 
- {/* Filters panel */}
- {showFilters && (
- <Card className="mb-4 p-4 shadow-subtle">
- <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+  {/* Filters panel */}
+  {showFilters && (
+  <PageSection className="mb-4">
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
  <div>
  <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">Статус</label>
  <select
@@ -320,20 +322,23 @@ export default function ChildrenPage() {
  <option value="FEMALE">Женский</option>
  </select>
  </div>
- </div>
- </Card>
- )}
+  </div>
+  </PageSection>
+  )}
 
- {/* Table */}
- <DataTable
- columns={columns}
- data={data}
- page={page}
- pageSize={10}
- total={total}
- onPageChange={setPage}
- wrapCells={true}
- />
+  {/* Table */}
+  <DataTable
+  title="Список учеников"
+  description="Просматривайте статусы, родителей и класс без переключения между отдельными карточками."
+  columns={columns}
+  data={data}
+  page={page}
+  pageSize={10}
+  total={total}
+  onPageChange={setPage}
+  wrapCells={true}
+  density="compact"
+  />
 
  {/* Create/Edit Modal */}
  <Modal
@@ -396,8 +401,8 @@ export default function ChildrenPage() {
  </div>
  </ModalSection>
  </>
- ) : null}
- </Modal>
- </div>
- );
+  ) : null}
+  </Modal>
+  </PageStack>
+  );
 }
