@@ -26,6 +26,9 @@ import { Card} from"../components/Card";
 import { Button} from"../components/ui/button";
 import { Input} from"../components/ui/input";
 import { Modal} from"../components/Modal";
+import { EmptyListState } from "../components/ui/EmptyState";
+import { LoadingCard } from "../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../components/ui/page";
 
 // ========== TYPES ==========
 
@@ -580,12 +583,10 @@ export default function SchedulePage() {
 
  // ========== RENDER ==========
 
- if (loading) {
- return (
- <div className="flex items-center justify-center h-64">
- <div className="text-tertiary">Загрузка расписания...</div>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем расписание..." height={260} />
+  );
 }
 
  const currentSelector = viewMode ==="group"? selectedGroupId : selectedTeacherId;
@@ -613,26 +614,20 @@ export default function SchedulePage() {
 }
 };
 
- return (
- <div>
- {/* Header */}
- <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
- <div className="flex items-center gap-2">
- <Calendar className="h-6 w-6"/>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight">Расписание</h1>
- {allConflicts.length > 0 && (
- <span className="ml-2 px-2 py-1 bg-[rgba(255,59,48,0.1)] text-macos-red text-xs rounded-full flex items-center gap-1">
- <AlertCircle className="h-3 w-3"/>
- {allConflicts.length} конфликтов
- </span>
- )}
- </div>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Schedule"
+  title="Расписание"
+  description="Сетка занятий, предметы, кабинеты, звонки и контроль конфликтов в одном пространстве."
+  icon={<Calendar className="h-5 w-5"/>}
+  meta={allConflicts.length > 0 ? <span className="mezon-badge macos-badge-warning">{allConflicts.length} конфликтов</span> : <span className="mezon-badge macos-badge-neutral">{activeTab === "schedule" ? "Сетка" : activeTab === "subjects" ? "Предметы" : activeTab === "rooms" ? "Кабинеты" : activeTab === "timeslots" ? "Звонки" : "Конфликты"}</span>}
+  />
 
- {/* Tabs */}
- <div className="flex flex-wrap gap-2 mb-6 border-b pb-4">
- <Button
- variant={activeTab ==="schedule"?"default":"outline"}
+  <PageToolbar>
+  <div className="flex flex-wrap gap-2">
+  <Button
+  variant={activeTab ==="schedule"?"default":"outline"}
  size="sm"
  onClick={() => setActiveTab("schedule")}
  >
@@ -675,13 +670,14 @@ export default function SchedulePage() {
  <span className="ml-1 px-1.5 py-0.5 bg-[rgba(255,59,48,0.1)] text-macos-red text-xs rounded">
  {allConflicts.length}
  </span>
- )}
- </Button>
- </div>
+  )}
+  </Button>
+  </div>
+  </PageToolbar>
 
- {/* Schedule Tab */}
- {activeTab ==="schedule"&& (
- <>
+  {/* Schedule Tab */}
+  {activeTab ==="schedule"&& (
+  <PageSection className="space-y-4">
  {/* Controls */}
  <Card className="p-4 mb-4">
  <div className="flex flex-wrap items-center gap-4">
@@ -760,21 +756,12 @@ export default function SchedulePage() {
  </div>
  </Card>
 
- {/* Schedule Grid */}
- {timeSlots.length === 0 ? (
- <Card className="p-8 text-center text-tertiary">
- <Clock className="h-12 w-12 mx-auto mb-4 text-tertiary"/>
- <p className="mb-4">Сначала настройте расписание звонков</p>
- <Button onClick={() => setActiveTab("timeslots")}>
- <Settings className="h-4 w-4 mr-2"/>
- Настроить звонки
- </Button>
- </Card>
- ) : !currentSelector ? (
- <Card className="p-8 text-center text-tertiary">
- {viewMode ==="group"?"Выберите класс для просмотра расписания":"Выберите учителя для просмотра расписания"}
- </Card>
- ) : (
+  {/* Schedule Grid */}
+  {timeSlots.length === 0 ? (
+  <EmptyListState title="Сначала настройте звонки" description="Без расписания звонков невозможно построить учебную сетку." onAction={() => setActiveTab("timeslots")} actionLabel="Настроить звонки" className="py-10" />
+  ) : !currentSelector ? (
+  <EmptyListState title={viewMode ==="group"?"Выберите класс":"Выберите учителя"} description={viewMode ==="group"?"Выберите класс для просмотра расписания.":"Выберите учителя для просмотра расписания."} className="py-10" />
+  ) : (
  <Card className="overflow-x-auto">
  <table className="w-full min-w-[800px]">
  <thead>
@@ -862,14 +849,14 @@ export default function SchedulePage() {
  ))}
  </tbody>
  </table>
- </Card>
- )}
- </>
- )}
+  </Card>
+  )}
+  </PageSection>
+  )}
 
  {/* Subjects Tab */}
  {activeTab ==="subjects"&& (
- <Card className="p-4">
+ <PageSection className="p-0"><Card className="p-4">
  <div className="flex justify-between items-center mb-4">
  <h2 className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
  <BookOpen className="h-5 w-5"/>
@@ -919,12 +906,12 @@ export default function SchedulePage() {
  ))}
  </div>
  )}
- </Card>
- )}
+ </Card></PageSection>
+  )}
 
  {/* Rooms Tab */}
  {activeTab ==="rooms"&& (
- <Card className="p-4">
+ <PageSection className="p-0"><Card className="p-4">
  <div className="flex justify-between items-center mb-4">
  <h2 className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
  <DoorOpen className="h-5 w-5"/>
@@ -968,12 +955,12 @@ export default function SchedulePage() {
  ))}
  </div>
  )}
- </Card>
- )}
+ </Card></PageSection>
+  )}
 
  {/* Time Slots Tab */}
  {activeTab ==="timeslots"&& (
- <Card className="p-4">
+ <PageSection className="p-0"><Card className="p-4">
  <div className="flex justify-between items-center mb-4">
  <h2 className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
  <Clock className="h-5 w-5"/>
@@ -1024,12 +1011,12 @@ export default function SchedulePage() {
  ))}
  </div>
  )}
- </Card>
- )}
+ </Card></PageSection>
+  )}
 
  {/* Conflicts Tab */}
  {activeTab ==="conflicts"&& (
- <Card className="p-4">
+ <PageSection className="p-0"><Card className="p-4">
  <div className="flex justify-between items-center mb-4">
  <h2 className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
  <AlertTriangle className="h-5 w-5 text-macos-orange"/>
@@ -1080,8 +1067,8 @@ export default function SchedulePage() {
  ))}
  </div>
  )}
- </Card>
- )}
+ </Card></PageSection>
+  )}
 
  {/* ========== MODALS ========== */}
 
@@ -1363,6 +1350,6 @@ export default function SchedulePage() {
  </div>
  </div>
  </Modal>
- </div>
+ </PageStack>
  );
 }
