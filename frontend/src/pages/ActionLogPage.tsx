@@ -1,99 +1,145 @@
-import { useEffect, useState} from 'react';
-import { toast} from 'sonner';
-import { api} from '../lib/api';
-import { Card} from '../components/Card';
-import { FileText, User, Clock} from 'lucide-react';
+import { useEffect, useMemo, useState } from "react";
+import { Clock, FileText, Search, User } from "lucide-react";
+import { toast } from "sonner";
+import { DataTable, type Column } from "../components/DataTable/DataTable";
+import { EmptyListState, ErrorState } from "../components/ui/EmptyState";
+import { Input } from "../components/ui/input";
+import { LoadingCard } from "../components/ui/LoadingState";
+import { PageHeader, PageStack, PageToolbar } from "../components/ui/page";
+import { api } from "../lib/api";
 
-type Log = { 
- id: number; 
- action: string; 
- details: any; 
- timestamp: string; 
- user: { email: string} 
+type Log = {
+  id: number;
+  action: string;
+  details: any;
+  timestamp: string;
+  user: { email: string };
 };
 
 export default function ActionLogPage() {
- const [logs, setLogs] = useState<Log[]>([]);
- const [loading, setLoading] = useState(true);
+  const [logs, setLogs] = useState<Log[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
- useEffect(() => {
- api.get('/api/actionlog')
- .then(setLogs)
- .catch(err => toast.error('Ошибка загрузки журнала', { description: err?.message}))
- .finally(() => setLoading(false));
-}, []);
+  const loadLogs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.get("/api/actionlog");
+      setLogs(data || []);
+    } catch (err: any) {
+      const message = err?.message || "Ошибка загрузки журнала";
+      setError(message);
+      toast.error("Ошибка загрузки журнала", { description: message });
+    } finally {
+      setLoading(false);
+    }
+  };
 
- if (loading) return (
- <div className="flex items-center justify-center h-64">
- <div className="text-secondary">Загрузка журнала действий...</div>
- </div>
- );
+  useEffect(() => {
+    loadLogs();
+  }, []);
 
- return (
- <div className="space-y-6">
- <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-macos-blue shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
- <FileText className="h-5 w-5"/>
- </div>
- <div>
- <div className="mezon-badge mb-2">Audit · действия</div>
- <h1 className="mezon-section-title mb-1">Журнал действий</h1>
- <p className="mezon-subtitle">Действия пользователей, системные события и детали аудита в единой ленте изменений.</p>
- </div>
- </div>
- 
- <Card>
- <div className="divide-y divide-[rgba(60,60,67,0.12)]">
- {logs.length === 0 ? (
- <div className="p-8 text-center text-secondary">
- Нет записей в журнале
- </div>
- ) : (
- logs.map((log) => (
- <div key={log.id} className="p-4 macos-transition hover:bg-[rgba(255,255,255,0.5)]">
- <div className="flex items-start gap-4">
- <div className="flex-shrink-0 mt-1">
- <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(10,132,255,0.12)]">
- <User className="h-5 w-5 text-macos-blue"/>
- </div>
- </div>
- 
- <div className="flex-1 min-w-0">
- <div className="flex items-center justify-between mb-1">
- <p className="font-semibold text-primary">{log.action}</p>
- <div className="flex items-center text-sm text-secondary">
- <Clock className="h-4 w-4 mr-1"/>
- {new Date(log.timestamp).toLocaleString('ru-RU')}
- </div>
- </div>
- 
- <p className="mb-2 text-sm text-secondary">
- Пользователь: <span className="font-medium">{log.user.email}</span>
- </p>
- 
- {log.details && Object.keys(log.details).length > 0 && (
- <details className="mt-2">
- <summary className="cursor-pointer text-sm text-macos-blue hover:text-primary">
- Подробности
- </summary>
- <div className="mt-2 rounded-md bg-[rgba(255,255,255,0.58)] p-3">
- <pre className="text-xs overflow-x-auto">
- {JSON.stringify(log.details, null, 2)}
- </pre>
- </div>
- </details>
- )}
- </div>
- </div>
- </div>
- ))
- )}
- </div>
- </Card>
- 
- <div className="text-center text-sm text-secondary">
- Показаны последние {logs.length} записей
- </div>
- </div>
- );
+  const filteredLogs = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return logs;
+    return logs.filter((log) =>
+      [log.action, log.user?.email, JSON.stringify(log.details ?? {})].join(" ").toLowerCase().includes(query),
+    );
+  }, [logs, search]);
+
+  const columns: Column<Log>[] = [
+    {
+      key: "action",
+      header: "Действие",
+      render: (row) => (
+        <div className="space-y-1">
+          <div className="font-semibold text-primary">{row.action}</div>
+          <div className="inline-flex items-center gap-1 text-sm text-secondary">
+            <User className="h-4 w-4" />
+            {row.user.email}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "timestamp",
+      header: "Время",
+      render: (row) => (
+        <span className="inline-flex items-center gap-1 text-secondary">
+          <Clock className="h-4 w-4" />
+          {new Date(row.timestamp).toLocaleString("ru-RU")}
+        </span>
+      ),
+    },
+    {
+      key: "details",
+      header: "Подробности",
+      render: (row) =>
+        row.details && Object.keys(row.details).length > 0 ? (
+          <details>
+            <summary className="cursor-pointer text-sm text-macos-blue">Открыть JSON</summary>
+            <pre className="mt-2 overflow-x-auto rounded-md bg-[rgba(255,255,255,0.58)] p-3 text-xs">
+              {JSON.stringify(row.details, null, 2)}
+            </pre>
+          </details>
+        ) : (
+          "—"
+        ),
+    },
+  ];
+
+  return (
+    <PageStack>
+      <PageHeader
+        eyebrow="Audit · действия"
+        title="Журнал действий"
+        icon={<FileText className="h-5 w-5" />}
+        meta={<span className="mezon-badge macos-badge-neutral">{filteredLogs.length} записей</span>}
+        description="Плотный аудит-реестр для просмотра действий пользователей и системных событий с быстрым поиском по действию, пользователю и деталям."
+      />
+
+      <PageToolbar>
+        <div className="mezon-toolbar-group">
+          <div className="mezon-input-shell">
+            <Search className="mezon-input-shell__icon h-4 w-4" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Поиск по действию, пользователю или деталям"
+              className="min-w-[280px]"
+            />
+          </div>
+        </div>
+      </PageToolbar>
+
+      <DataTable
+        title="Лента аудита"
+        description="Последние изменения, административные действия и системные события в едином реестре для разбора инцидентов."
+        toolbar={<span className="mezon-data-table__toolbar-pill">Всего: {logs.length}</span>}
+        columns={columns}
+        data={filteredLogs}
+        page={1}
+        pageSize={Math.max(filteredLogs.length || 1, 1)}
+        total={filteredLogs.length}
+        onPageChange={() => {}}
+        density="compact"
+        wrapCells
+        emptyState={
+          loading ? (
+            <LoadingCard message="Загрузка журнала действий..." height={220} />
+          ) : error ? (
+            <ErrorState message={error} onRetry={loadLogs} className="py-10" />
+          ) : (
+            <EmptyListState
+              title="Журнал пуст"
+              description="В журнале пока нет записей о действиях пользователей или системных событиях."
+              className="py-10"
+            />
+          )
+        }
+      />
+    </PageStack>
+  );
 }
