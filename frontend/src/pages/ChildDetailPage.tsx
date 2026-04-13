@@ -6,6 +6,9 @@ import { ArrowLeft, Edit, Archive, CalendarX, Users, BookOpen} from 'lucide-reac
 import { Button} from '../components/ui/button';
 import { Card} from '../components/Card';
 import { Modal, ModalNotice, ModalSection} from '../components/Modal';
+import { ErrorState } from '../components/ui/EmptyState';
+import { LoadingCard } from '../components/ui/LoadingState';
+import { PageHeader, PageSection, PageStack } from '../components/ui/page';
 import { ChildForm} from '../components/forms/ChildForm';
 import { AbsencesView} from '../components/children/AbsencesView';
 import { useChild, useChildMutations} from '../hooks/useChildren';
@@ -57,45 +60,33 @@ export default function ChildDetailPage() {
  const [isEditOpen, setIsEditOpen] = useState(false);
  const [showAbsences, setShowAbsences] = useState(false);
 
- if (loading) {
- return <div className="flex items-center justify-center min-h-[200px] text-secondary">Загрузка...</div>;
-}
+  if (loading) {
+  return <LoadingCard message="Загружаем карточку ребёнка..." height={220} />;
+  }
 
- if (error || !child) {
- return (
- <div className="p-6 text-center">
- <p className="text-macos-red mb-3">Ребёнок не найден</p>
- <Button variant="outline"onClick={() => navigate('/children')}>
- <ArrowLeft className="mr-2 h-4 w-4"/> К списку
- </Button>
- </div>
- );
+  if (error || !child) {
+  return (
+  <ErrorState message="Ребёнок не найден" onRetry={() => navigate('/children')} className="py-10" />
+  );
 }
 
  const fullName = [child.lastName, child.firstName, child.middleName].filter(Boolean).join(' ');
 
- return (
- <div className="max-w-4xl mx-auto">
- {/* Header */}
- <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
- <div className="flex items-center gap-3">
- <Button variant="ghost"size="sm"onClick={() => navigate('/children')}>
- <ArrowLeft className="h-4 w-4"/>
- </Button>
- <div>
- <h1 className="text-xl sm:text-[24px] font-bold tracking-[-0.025em] leading-tight">{fullName}</h1>
- <div className="flex items-center gap-2 mt-1">
- <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor(child.status)}`}>
- {statusLabel(child.status)}
- </span>
- <span className="text-sm text-secondary">{child.group.name}</span>
- </div>
- </div>
- </div>
- <div className="flex flex-wrap gap-2">
- <Button size="sm"onClick={() => setIsEditOpen(true)}>
- <Edit className="mr-1 h-4 w-4"/> Редактировать
- </Button>
+  return (
+  <PageStack className="max-w-4xl mx-auto">
+  <PageHeader
+  eyebrow="Профиль ребёнка"
+  title={fullName}
+  description={<span className="text-sm text-secondary">{child.group.name}</span>}
+  icon={<BookOpen className="h-5 w-5"/>}
+  meta={<span className={`mezon-badge ${child.status === 'ACTIVE' ? 'macos-badge-success' : child.status === 'LEFT' ? 'macos-badge-warning' : 'macos-badge-neutral'}`}>{statusLabel(child.status)}</span>}
+  actions={<div className="flex flex-wrap gap-2">
+  <Button variant="ghost"size="sm"onClick={() => navigate('/children')}>
+  <ArrowLeft className="h-4 w-4"/> К списку
+  </Button>
+  <Button size="sm"onClick={() => setIsEditOpen(true)}>
+  <Edit className="mr-1 h-4 w-4"/> Редактировать
+  </Button>
  <Button variant="outline"size="sm"onClick={() => setShowAbsences(true)}>
  <CalendarX className="mr-1 h-4 w-4"/> Отсутствия
  </Button>
@@ -108,15 +99,14 @@ export default function ChildDetailPage() {
  await archiveChild(child.id);
  refresh();
 }}
- >
- <Archive className="mr-1 h-4 w-4"/> В архив
- </Button>
- )}
- </div>
- </div>
+  >
+  <Archive className="mr-1 h-4 w-4"/> В архив
+  </Button>
+  )}
+  </div>}
+  />
 
- {/* Info Cards Grid */}
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <PageSection className="grid grid-cols-1 md:grid-cols-2 gap-4">
  {/* Основные данные */}
  <Card className="p-4">
  <h3 className="font-semibold text-sm text-primary mb-3">Основные данные</h3>
@@ -205,9 +195,9 @@ export default function ChildDetailPage() {
  </div>
  ))}
  </div>
- </Card>
- )}
- </div>
+  </Card>
+  )}
+  </PageSection>
 
  {/* Edit Modal */}
  <Modal
@@ -246,8 +236,8 @@ export default function ChildDetailPage() {
  <AbsencesView childId={child.id} />
  </ModalSection>
  </Modal>
- </div>
- );
+  </PageStack>
+  );
 }
 
 function Row({ label, value}: { label: string; value: string}) {
