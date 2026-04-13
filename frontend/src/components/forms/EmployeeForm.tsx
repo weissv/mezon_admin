@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, CalendarDays, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, Save, UserRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -136,7 +136,7 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
           Отмена
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          <CalendarDays className="h-4 w-4" />
+          <Save className="h-4 w-4" />
           {isSubmitting ? 'Сохранение...' : 'Сохранить'}
         </Button>
       </div>
