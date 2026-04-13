@@ -12,6 +12,10 @@ import {
 import { lmsApi} from"../../lib/lms-api";
 import { LmsHomework} from"../../types/lms";
 import { toast} from"sonner";
+import { EmptyListState } from "../../components/ui/EmptyState";
+import { LoadingCard } from "../../components/ui/LoadingState";
+import { Input } from "../../components/ui/input";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
 
 export default function LmsAssignmentsPage() {
  const [homework, setHomework] = useState<LmsHomework[]>([]);
@@ -50,47 +54,42 @@ export default function LmsAssignmentsPage() {
 });
 };
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[400px]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем домашние задания..." height={320} />
+  );
 }
 
- return (
- <div className="space-y-6">
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Домашние задания</h1>
- <p className="text-secondary mt-1">
- Текущие и выполненные задания
- </p>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="LMS · задания"
+  title="Домашние задания"
+  description="Текущие и выполненные задания с быстрым поиском по предмету и названию."
+  icon={<ClipboardList className="h-5 w-5" />}
+  meta={<span className="mezon-badge macos-badge-neutral">{filteredHomework.length} заданий</span>}
+  />
 
- <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
- <div className="relative">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-tertiary"/>
- <input
- type="text"
- placeholder="Поиск по предмету или названию..."
- value={searchQuery}
- onChange={(e) => setSearchQuery(e.target.value)}
- className="w-full pl-10 pr-4 py-2.5 mezon-field rounded-lg focus-visible:ring-4 focus-visible:ring-macos-blue/30 focus:border-transparent"
- />
- </div>
- </div>
+  <PageToolbar className="bg-white rounded-xl shadow-subtle border border-card p-4">
+  <div className="relative">
+  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-tertiary"/>
+  <Input
+  type="text"
+  placeholder="Поиск по предмету или названию..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  className="w-full pl-10"
+  />
+  </div>
+  </PageToolbar>
 
- {filteredHomework.length === 0 ? (
- <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
- <ClipboardList className="h-16 w-16 mx-auto mb-4 text-tertiary"/>
- <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-primary mb-2">Заданий нет</h3>
- <p className="text-secondary">
- На данный момент у вас нет активных домашних заданий.
- </p>
- </div>
- ) : (
- <div className="space-y-4">
- {filteredHomework.map((h) => {
+  {filteredHomework.length === 0 ? (
+  <PageSection>
+  <EmptyListState title="Заданий нет" description="На данный момент у вас нет активных домашних заданий." className="py-10" />
+  </PageSection>
+  ) : (
+  <PageSection className="space-y-4">
+  {filteredHomework.map((h) => {
  const isOverdue = new Date(h.dueDate) < new Date();
  
  return (
@@ -145,10 +144,10 @@ export default function LmsAssignmentsPage() {
  </div>
  </div>
  </div>
- );
+  );
 })}
- </div>
- )}
- </div>
- );
+  </PageSection>
+  )}
+  </PageStack>
+  );
 }

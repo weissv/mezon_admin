@@ -8,6 +8,9 @@ import { lmsApi} from"../../lib/lms-api";
 import { useAuth} from"../../hooks/useAuth";
 import type { LmsScheduleItem, LmsSchoolClass} from"../../types/lms";
 import { toast} from"sonner";
+import { EmptyListState } from "../../components/ui/EmptyState";
+import { LoadingCard } from "../../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
 
 export default function LmsDiaryPage() {
  const { user} = useAuth();
@@ -67,18 +70,19 @@ export default function LmsDiaryPage() {
  .sort((a, b) => a.startTime.localeCompare(b.startTime));
 };
 
- return (
- <div className="space-y-6">
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Дневник</h1>
- <p className="text-secondary mt-1">
- Расписание на неделю
- </p>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="LMS · дневник"
+  title="Дневник"
+  description="Недельный дневник класса с навигацией по неделям и просмотром уроков по дням."
+  icon={<BookOpen className="h-5 w-5" />}
+  meta={<span className="mezon-badge macos-badge-neutral">{selectedClass ? 'Класс выбран' : 'Без класса'}</span>}
+  />
 
- {/* Week Navigation and Class Selector */}
- <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
- <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+  {/* Week Navigation and Class Selector */}
+  <PageToolbar className="bg-white rounded-xl shadow-subtle border border-card p-4">
+  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
  <div className="flex items-center gap-2">
  <select
  value={selectedClass ||""}
@@ -109,22 +113,19 @@ export default function LmsDiaryPage() {
  Сегодня
  </Button>
  </div>
- </div>
- </div>
+  </div>
+  </PageToolbar>
 
- {/* Weekly Schedule */}
- {loading ? (
- <div className="flex items-center justify-center min-h-[200px]">
- <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
- </div>
- ) : !selectedClass ? (
- <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
- <Calendar className="h-12 w-12 text-tertiary mx-auto mb-4"/>
- <p className="text-secondary">Выберите класс для просмотра дневника</p>
- </div>
- ) : (
- <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
- {weekDays.map((day, index) => {
+  {/* Weekly Schedule */}
+  {loading ? (
+  <LoadingCard message="Загружаем дневник..." height={220} />
+  ) : !selectedClass ? (
+  <PageSection>
+  <EmptyListState title="Выберите класс" description="Сначала выберите класс, чтобы открыть дневник недели." className="py-10" />
+  </PageSection>
+  ) : (
+  <PageSection className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {weekDays.map((day, index) => {
  const dayOfWeek = index + 1; // 1 = Monday
  const daySchedule = getScheduleForDay(dayOfWeek);
  const isToday = isSameDay(day, new Date());
@@ -187,11 +188,11 @@ export default function LmsDiaryPage() {
  </div>
  )}
  </div>
- </div>
- );
+  </div>
+  );
 })}
- </div>
- )}
- </div>
- );
+  </PageSection>
+  )}
+  </PageStack>
+  );
 }
