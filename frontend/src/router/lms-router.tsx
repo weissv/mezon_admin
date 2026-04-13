@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import LmsLayout from "../layouts/LmsLayout";
 import LoginPage from "../pages/LoginPage";
 import AuthLayout from "../layouts/AuthLayout";
+import { Spinner } from "../components/ui/LoadingState";
 
 // LMS Pages - School (Primary)
 import LmsSchoolDashboard from "../pages/lms/LmsSchoolDashboard";
@@ -15,10 +16,10 @@ import LmsDiaryPage from "../pages/lms/LmsDiaryPage";
 
 function LoadingScreen() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--mezon-accent)] mx-auto mb-4"></div>
-        <span className="text-sm text-gray-500">Загрузка LMS...</span>
+    <div className="flex min-h-screen items-center justify-center bg-bg-canvas">
+      <div className="flex flex-col items-center gap-3">
+        <Spinner size="lg" />
+        <span className="text-[13px] text-text-tertiary">Загружаем учебный контур…</span>
       </div>
     </div>
   );

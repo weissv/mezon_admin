@@ -8,6 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { FormError } from '../components/ui/FormError';
+import { PageSection } from '../components/ui/page';
 
 const loginSchema = z.object({
   login: z.string().min(1, 'Логин обязателен'),
@@ -42,10 +43,10 @@ export default function LoginPage() {
 
   return (
     <div className="relative mx-auto flex min-h-[85vh] max-w-5xl flex-col justify-center px-6">
-      <div className="relative grid gap-10 rounded-[20px] bg-surface-primary border border-card shadow-floating p-10 lg:grid-cols-2">
+      <div className="relative grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
 
         {/* Left — Brand */}
-        <div className="relative flex flex-col justify-between">
+        <PageSection className="relative flex flex-col justify-between p-8 lg:p-10">
           <div>
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-[0.01em] uppercase bg-tint-blue text-macos-blue">Mezon // inspired.School</span>
             <h1 className="mt-4 text-[28px] lg:text-[34px] font-bold tracking-[-0.03em] text-primary leading-tight">
@@ -66,12 +67,12 @@ export default function LoginPage() {
                 </span>
                 <span className="text-[14px] font-medium tracking-[-0.01em]">{point}</span>
               </li>
-            ))}
-          </ul>
-        </div>
+              ))}
+           </ul>
+        </PageSection>
 
         {/* Right — Login form */}
-        <div className="relative rounded-xl bg-inset border border-card shadow-subtle p-6">
+        <PageSection inset className="relative p-6 lg:p-8">
           <div className="mb-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.06em] font-bold text-tertiary">Вход в ERP</p>
             <p className="text-[20px] font-semibold text-primary tracking-[-0.02em] mt-1">Авторизация</p>
@@ -95,7 +96,7 @@ export default function LoginPage() {
               {isSubmitting ? 'Входим...' : 'Войти'}
             </Button>
           </form>
-        </div>
+        </PageSection>
       </div>
     </div>
   );

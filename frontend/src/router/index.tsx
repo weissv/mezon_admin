@@ -32,6 +32,7 @@ import SchedulePage from "../pages/SchedulePage";
 import { useAuth } from "../hooks/useAuth";
 import NotFoundPage from "../pages/NotFoundPage";
 import { FULL_ACCESS_ROLES } from "../types/common";
+import { Spinner } from "../components/ui/LoadingState";
 
 // LMS Pages
 import LmsSchoolDashboard from "../pages/lms/LmsSchoolDashboard";
@@ -54,8 +55,11 @@ import ArticleView from "../pages/KnowledgeBase/ArticleView";
 
 function LoadingScreen() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <span className="text-sm text-gray-500">Оно грузится. Терпите....</span>
+    <div className="flex min-h-screen items-center justify-center bg-bg-canvas">
+      <div className="flex flex-col items-center gap-3">
+        <Spinner size="lg" />
+        <span className="text-[13px] text-text-tertiary">Загружаем рабочее пространство…</span>
+      </div>
     </div>
   );
 }
