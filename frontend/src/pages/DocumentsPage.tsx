@@ -14,7 +14,7 @@ import { useApi } from '../hooks/useApi';
 import { api } from '../lib/api';
 import { Document, DocumentTemplate } from '../types/document';
 
-const TEMPLATE_PREVIEW_LIMIT = 80;
+const TEMPLATE_CONTENT_PREVIEW_LENGTH = 80;
 
 export default function DocumentsPage() {
   const [viewMode, setViewMode] = useState<'documents' | 'templates'>('documents');
@@ -355,8 +355,8 @@ function TemplatesView() {
       key: 'content',
       header: 'Описание',
       render: (row) =>
-        row.content.length > TEMPLATE_PREVIEW_LIMIT
-          ? `${row.content.slice(0, TEMPLATE_PREVIEW_LIMIT)}...`
+        row.content.length > TEMPLATE_CONTENT_PREVIEW_LENGTH
+          ? `${row.content.slice(0, TEMPLATE_CONTENT_PREVIEW_LENGTH)}...`
           : row.content,
     },
     {
@@ -489,8 +489,8 @@ function TemplatesView() {
                 <div className="mezon-modal-fact">
                   <span className="mezon-modal-fact__label">Содержимое</span>
                   <span className="mezon-modal-fact__value">
-                    {deletingTemplate.content.slice(0, TEMPLATE_PREVIEW_LIMIT)}
-                    {deletingTemplate.content.length > TEMPLATE_PREVIEW_LIMIT ? '...' : ''}
+                    {deletingTemplate.content.slice(0, TEMPLATE_CONTENT_PREVIEW_LENGTH)}
+                    {deletingTemplate.content.length > TEMPLATE_CONTENT_PREVIEW_LENGTH ? '...' : ''}
                   </span>
                 </div>
               </div>

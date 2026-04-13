@@ -45,7 +45,8 @@ export default function EmployeesPage() {
     try {
       const data = await api.get('/api/employees/reminders');
       setReminders(data);
-    } catch {
+    } catch (error) {
+      console.error('Failed to load employee reminders', error);
       setReminders(null);
     }
   };
