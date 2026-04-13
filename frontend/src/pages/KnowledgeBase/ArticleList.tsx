@@ -10,6 +10,10 @@ import { useAuth} from"../../hooks/useAuth";
 import type { KnowledgeBaseArticle, CreateArticleInput} from"../../types/knowledge-base";
 import { Modal} from"../../components/Modal";
 import { Button} from"../../components/ui/button";
+import { EmptyListState } from "../../components/ui/EmptyState";
+import { LoadingCard } from "../../components/ui/LoadingState";
+import { Input } from "../../components/ui/input";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -131,59 +135,52 @@ export default function ArticleList() {
 };
 
  // ========== Рендер ==========
- return (
- <div>
- {/* Заголовок */}
- <div className="flex justify-between items-center mb-6">
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight flex items-center gap-2">
- <BookOpen className="h-6 w-6"/>
- База знаний
- </h1>
- {canCreate && (
- <Button onClick={() => setIsCreateOpen(true)}>
- <Plus className="mr-2 h-4 w-4"/> Новая статья
- </Button>
- )}
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Knowledge base"
+  title="База знаний"
+  description="Семантический поиск, фильтрация по тегам и быстрое создание статей для внутренней базы знаний."
+  icon={<BookOpen className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{total} статей</span>}
+  actions={canCreate ? <Button onClick={() => setIsCreateOpen(true)}><Plus className="mr-2 h-4 w-4"/> Новая статья</Button> : undefined}
+  />
 
- {/* Поиск и фильтры */}
- <div className="flex flex-col sm:flex-row gap-3 mb-6">
- <div className="relative flex-1">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-tertiary"/>
- <input
- type="text"
- placeholder="Семантический поиск по базе знаний..."
- value={query}
- onChange={(e) => setQuery(e.target.value)}
- className="w-full pl-10 pr-4 py-2 border border-field rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
- />
- </div>
- <div className="relative sm:w-64">
- <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-tertiary"/>
- <input
- type="text"
- placeholder="Фильтр по тегам (через ,)"
- value={tagFilter}
- onChange={(e) => setTagFilter(e.target.value)}
- className="w-full pl-10 pr-4 py-2 border border-field rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
- />
- </div>
- </div>
+  <PageToolbar className="flex flex-col sm:flex-row gap-3">
+  <div className="relative flex-1">
+  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-tertiary"/>
+  <Input
+  type="text"
+  placeholder="Семантический поиск по базе знаний..."
+  value={query}
+  onChange={(e) => setQuery(e.target.value)}
+  className="w-full pl-10"
+  />
+  </div>
+  <div className="relative sm:w-64">
+  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-tertiary"/>
+  <Input
+  type="text"
+  placeholder="Фильтр по тегам (через ,)"
+  value={tagFilter}
+  onChange={(e) => setTagFilter(e.target.value)}
+  className="w-full pl-10"
+  />
+  </div>
+  </PageToolbar>
 
- {/* Результаты */}
- {loading ? (
- <div className="flex justify-center py-20">
- <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"/>
- </div>
- ) : articles.length === 0 ? (
- <div className="text-center py-20 text-secondary">
- <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50"/>
- <p className="text-lg mb-1">Статьи не найдены</p>
- <p className="text-sm">
- {query ?"Попробуйте изменить запрос":"Пока нет ни одной статьи"}
- </p>
- </div>
- ) : (
+  <PageSection>
+  {loading ? (
+  <LoadingCard message="Загружаем статьи..." height={220} />
+  ) : articles.length === 0 ? (
+  <EmptyListState
+  title="Статьи не найдены"
+  description={query ? "Попробуйте изменить поисковый запрос или фильтр по тегам." : "Пока нет ни одной статьи в базе знаний."}
+  onAction={canCreate ? () => setIsCreateOpen(true) : undefined}
+  actionLabel="Новая статья"
+  className="py-10"
+  />
+  ) : (
  <>
  <p className="text-sm text-secondary mb-4">
  Найдено: {total} {total === 1 ?"статья": total < 5 ?"статьи":"статей"}
@@ -257,8 +254,9 @@ export default function ArticleList() {
  </div>
  ))}
  </div>
- </>
- )}
+  </>
+  )}
+  </PageSection>
 
  {/* ===== Модалка создания ===== */}
  <Modal
@@ -334,6 +332,6 @@ export default function ArticleList() {
  </div>
  </div>
  </Modal>
- </div>
- );
+  </PageStack>
+  );
 }

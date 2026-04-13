@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { MacosAlertDialog } from "../components/MacosAlertDialog";
+import { LoadingCard } from "../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack } from "../components/ui/page";
 import { examsApi } from "../lib/exams-api";
 import { Exam, ExamFormData, ExamQuestionFormData, ExamQuestionType } from "../types/exam";
 
@@ -399,35 +401,28 @@ export default function ExamEditorPage() {
 
 	if (loading) {
 		return (
-			<div className="flex items-center justify-center min-h-[400px]">
-				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
-			</div>
+			<LoadingCard message="Загружаем редактор контрольной..." height={320} />
 		);
 	}
 
 	return (
 		<>
-			<div className="space-y-6">
- {/* Заголовок */}
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-4">
+			<PageStack>
+ <PageHeader
+ eyebrow="Exams · редактор"
+ title={isNew ?"Новая контрольная":"Редактирование контрольной"}
+ description={`${questions.filter((q) => q.content?.trim()).length} вопросов`}
+ icon={<ListChecks className="h-5 w-5" />}
+ meta={<span className="mezon-badge macos-badge-neutral">{showSettings ? "Настройки открыты" : "Настройки скрыты"}</span>}
+ actions={<div className="flex items-center gap-2">
  <button
  onClick={() => requestExit("/exams")}
  disabled={saving}
- className="p-2 text-secondary hover:text-primary hover:bg-fill-tertiary rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+ className="inline-flex items-center gap-2 px-4 py-2 text-primary bg-fill-tertiary rounded-lg hover:bg-fill-secondary disabled:opacity-50 disabled:cursor-not-allowed"
  >
- <ArrowLeft className="h-5 w-5"/>
+ <ArrowLeft className="h-4 w-4"/>
+ Назад
  </button>
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">
- {isNew ?"Новая контрольная":"Редактирование контрольной"}
- </h1>
- <p className="text-secondary text-sm mt-1">
- {questions.filter((q) => q.content?.trim()).length} вопросов
- </p>
- </div>
- </div>
- <div className="flex items-center gap-2">
  <button
  onClick={() => setShowSettings(!showSettings)}
  className="inline-flex items-center gap-2 px-4 py-2 text-primary bg-fill-tertiary rounded-lg hover:bg-fill-secondary"
@@ -445,12 +440,12 @@ export default function ExamEditorPage() {
  <Save className="h-5 w-5"/>
  {saving ?"Сохранение...":"Сохранить"}
  </button>
- </div>
- </div>
+ </div>}
+ />
 
  {/* Настройки контрольной */}
- {showSettings && (
- <div className="bg-white rounded-xl shadow-subtle border border-card p-6 space-y-4">
+  {showSettings && (
+  <PageSection className="bg-white rounded-xl shadow-subtle border border-card p-6 space-y-4">
  <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-primary">Основные настройки</h2>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <div>
@@ -563,11 +558,11 @@ export default function ExamEditorPage() {
  <span className="text-sm text-primary">Показывать результаты после сдачи</span>
  </label>
  </div>
- </div>
- )}
+  </PageSection>
+  )}
 
  {/* Список вопросов */}
- <div className="space-y-4">
+ <PageSection className="space-y-4">
  <div className="flex items-center justify-between">
  <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-primary">Вопросы</h2>
  </div>
@@ -587,7 +582,7 @@ export default function ExamEditorPage() {
  <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <p className="text-[11px] font-medium uppercase tracking-widest text-primary mb-3">Добавить вопрос:</p>
  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
- {Object.entries(questionTypeLabels).map(([type, { label, icon: Icon, description}]) => (
+  {Object.entries(questionTypeLabels).map(([type, { label, icon: Icon, description}]) => (
  <button
  key={type}
  onClick={() => addQuestion(type as ExamQuestionType)}
@@ -596,12 +591,12 @@ export default function ExamEditorPage() {
  >
  <Icon className="h-5 w-5"/>
  <span className="text-xs text-center">{label}</span>
- </button>
- ))}
- </div>
- </div>
- </div>
-			</div>
+  </button>
+  ))}
+  </div>
+  </div>
+			</PageSection>
+			</PageStack>
 
 			<MacosAlertDialog
 				isOpen={isExitDialogOpen}

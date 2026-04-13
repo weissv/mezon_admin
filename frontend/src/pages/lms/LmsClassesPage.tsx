@@ -12,6 +12,10 @@ import { useAuth} from"../../hooks/useAuth";
 import type { LmsSchoolClass} from"../../types/lms";
 import { toast} from"sonner";
 import { useLmsClasses} from"../../hooks/lms/useLmsClasses";
+import { EmptyListState } from "../../components/ui/EmptyState";
+import { LoadingCard } from "../../components/ui/LoadingState";
+import { Input } from "../../components/ui/input";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
 
 export default function LmsClassesPage() {
  const { user} = useAuth();
@@ -46,32 +50,24 @@ export default function LmsClassesPage() {
  return acc;
 }, {} as Record<number, LmsSchoolClass[]>);
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[400px]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем классы..." height={320} />
+  );
 }
 
- return (
- <div className="space-y-6">
- {/* Header */}
- <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Классы</h1>
- <p className="text-secondary">
- Управление школьными классами и учениками
- <span className="text-xs text-tertiary ml-2">
- (синхронизировано с ERP)
- </span>
- </p>
- </div>
- {isAdmin && (
- <div className="flex gap-2">
- <a
- href="/groups"
- className="inline-flex items-center gap-2 border border-field text-primary px-4 py-2 rounded-lg font-medium hover:bg-fill-quaternary macos-transition"
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="LMS · классы"
+  title="Классы"
+  description={<span className="text-secondary">Управление школьными классами и учениками <span className="text-xs text-tertiary ml-2">(синхронизировано с ERP)</span></span>}
+  icon={<Users className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{filteredClasses.length} классов</span>}
+  actions={isAdmin ? <div className="flex gap-2">
+  <a
+  href="/groups"
+  className="inline-flex items-center gap-2 border border-field text-primary px-4 py-2 rounded-lg font-medium hover:bg-fill-quaternary macos-transition"
  >
  <Edit className="h-4 w-4"/>
  Управление в ERP
@@ -80,25 +76,23 @@ export default function LmsClassesPage() {
  onClick={() => setShowCreateModal(true)}
  className="inline-flex items-center gap-2 bg-macos-blue text-white px-4 py-2 rounded-lg font-medium hover:bg-macos-blue macos-transition"
  >
- <Plus className="h-5 w-5"/>
- Добавить класс
- </button>
- </div>
- )}
- </div>
+  <Plus className="h-5 w-5"/>
+  Добавить класс
+  </button>
+  </div> : undefined}
+  />
 
- {/* Filters */}
- <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
- <div className="flex flex-col sm:flex-row gap-4">
- <div className="relative flex-1">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-tertiary"/>
- <input
- type="text"
- placeholder="Поиск по названию класса..."
- value={searchTerm}
- onChange={(e) => setSearchTerm(e.target.value)}
- className="w-full pl-10 pr-4 py-2 mezon-field rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-macos-blue/30"
- />
+  <PageToolbar className="bg-white rounded-xl shadow-subtle border border-card p-4">
+  <div className="flex flex-col sm:flex-row gap-4">
+  <div className="relative flex-1">
+  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-tertiary"/>
+  <Input
+  type="text"
+  placeholder="Поиск по названию класса..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className="w-full pl-10"
+  />
  </div>
  <div className="flex gap-2 flex-wrap">
  <button
@@ -123,28 +117,17 @@ export default function LmsClassesPage() {
  >
  {grade} класс
  </button>
- ))}
- </div>
- </div>
- </div>
+  ))}
+  </div>
+  </div>
+  </PageToolbar>
 
- {/* Classes Grid */}
- {Object.keys(classesByGrade).length === 0 ? (
- <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
- <Users className="h-12 w-12 text-tertiary mx-auto mb-4"/>
- <p className="text-secondary">Классы не найдены</p>
- {isAdmin && (
- <button
- onClick={() => setShowCreateModal(true)}
- className="mt-4 inline-flex items-center gap-2 text-macos-blue hover:text-macos-blue"
- >
- <Plus className="h-5 w-5"/>
- Добавить первый класс
- </button>
- )}
- </div>
- ) : (
- <div className="space-y-8">
+  {Object.keys(classesByGrade).length === 0 ? (
+  <PageSection>
+  <EmptyListState title="Классы не найдены" description="Попробуйте изменить фильтры или добавьте первый класс." onAction={isAdmin ? () => setShowCreateModal(true) : undefined} actionLabel="Добавить класс" className="py-10" />
+  </PageSection>
+  ) : (
+  <PageSection className="space-y-8">
  {Object.entries(classesByGrade)
  .sort(([a], [b]) => Number(a) - Number(b))
  .map(([grade, gradeClasses]) => (
@@ -183,9 +166,9 @@ export default function LmsClassesPage() {
  ))}
  </div>
  </div>
- ))}
- </div>
- )}
+  ))}
+  </PageSection>
+  )}
 
  {/* Create Class Modal */}
  {showCreateModal && (
@@ -213,8 +196,8 @@ export default function LmsClassesPage() {
 }}
  />
  )}
- </div>
- );
+  </PageStack>
+  );
 }
 
 function CreateClassModal({

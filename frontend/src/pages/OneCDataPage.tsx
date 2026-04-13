@@ -10,15 +10,18 @@ import {
 } from"lucide-react";
 import { toast} from"sonner";
 import {
- CatalogsTab,
- DocumentsTab,
- ExtraCatalogsTab,
+  CatalogsTab,
+  DocumentsTab,
+  ExtraCatalogsTab,
  HRTab,
  OneCSummaryCards,
  PayrollTab,
- useOneCSummary,
- useOneCSync,
+  useOneCSummary,
+  useOneCSync,
 } from"../features/onec";
+import { Button } from "../components/ui/button";
+import { LoadingCard } from "../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../components/ui/page";
 
 type TabId ="catalogs"|"documents"|"hr"|"payroll"|"extra-catalogs";
 
@@ -77,67 +80,58 @@ export default function OneCDataPage() {
 }
 };
 
- return (
- <div className="space-y-6">
- <div className="flex items-center justify-between flex-wrap gap-4">
- <div>
- <h1 className="text-3xl font-bold flex items-center gap-3">
- <Database className="h-8 w-8 text-macos-blue"/>
- Данные 1С
- </h1>
- <p className="text-sm text-secondary mt-1">
- {summaryLoading ?"Загрузка...": `${totalRecords.toLocaleString("ru-RU")} записей синхронизировано`}
- </p>
- </div>
- <button
- onClick={handleSync}
- disabled={syncing}
- className="inline-flex items-center gap-2 px-4 py-2 bg-macos-blue text-white text-[11px] font-medium uppercase tracking-widest rounded-lg hover:bg-blue-700 disabled:opacity-50 macos-transition"
- >
- <RefreshCw className={`h-4 w-4 ${syncing ?"animate-spin":""}`} />
- {syncing ?"Синхронизация...":"Синхронизировать"}
- </button>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="1С · синхронизация"
+  title="Данные 1С"
+  description={summaryLoading ? "Загружаем сводку по синхронизации..." : `${totalRecords.toLocaleString("ru-RU")} записей синхронизировано`}
+  icon={<Database className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{tabs.find((tab) => tab.id === activeTab)?.label}</span>}
+  actions={
+  <Button onClick={handleSync} disabled={syncing}>
+  <RefreshCw className={`h-4 w-4 ${syncing ?"animate-spin":""}`} />
+  {syncing ?"Синхронизация...":"Синхронизировать"}
+  </Button>
+  }
+  />
 
- {summaryLoading && !summary && (
- <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
- {Array.from({ length: 6}).map((_, i) => (
- <div key={i} className="rounded-lg border bg-white p-4 animate-pulse">
- <div className="h-3 w-16 rounded bg-fill-secondary"/>
- <div className="mt-2 h-7 w-12 rounded bg-fill-secondary"/>
- <div className="mt-1 h-3 w-20 rounded bg-fill-secondary"/>
- </div>
- ))}
- </div>
- )}
- {summary && <OneCSummaryCards summary={summary} />}
+  <PageSection inset>
+  {summaryLoading && !summary ? (
+  <LoadingCard message="Загружаем показатели 1С..." height={180} />
+  ) : summary ? (
+  <OneCSummaryCards summary={summary} />
+  ) : null}
+  </PageSection>
 
- <div className="border-b border-[rgba(0,0,0,0.08)]">
- <nav className="-mb-px flex space-x-6 overflow-x-auto"aria-label="1C Data tabs">
- {tabs.map((tab) => (
- <button
- key={tab.id}
- onClick={() => setActiveTab(tab.id)}
- className={`${
- activeTab === tab.id
- ?"border-blue-500 text-macos-blue"
- :"border-transparent text-secondary hover:text-primary hover:border-field"
-} whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2 macos-transition`}
- >
- {tab.icon}
- {tab.label}
- </button>
- ))}
- </nav>
- </div>
+  <PageToolbar>
+  <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-card bg-surface-primary p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
+  <nav className="flex gap-1"aria-label="1C Data tabs">
+  {tabs.map((tab) => (
+  <button
+  key={tab.id}
+  onClick={() => setActiveTab(tab.id)}
+  className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[11px] font-medium uppercase tracking-widest macos-transition ${
+  activeTab === tab.id
+  ? 'bg-[rgba(255,255,255,0.9)] text-primary shadow-[0_8px_20px_rgba(15,23,42,0.08)]'
+  : 'text-secondary hover:bg-[rgba(255,255,255,0.58)] hover:text-primary'
+}`}
+  >
+  {tab.icon}
+  {tab.label}
+  </button>
+  ))}
+  </nav>
+  </div>
+  </PageToolbar>
 
- <div>
- {activeTab ==="catalogs"&& <CatalogsTab summary={summary} />}
- {activeTab ==="extra-catalogs"&& <ExtraCatalogsTab summary={summary} />}
- {activeTab ==="documents"&& <DocumentsTab summary={summary} />}
- {activeTab ==="hr"&& <HRTab summary={summary} />}
- {activeTab ==="payroll"&& <PayrollTab summary={summary} />}
- </div>
- </div>
- );
+  <PageSection>
+  {activeTab ==="catalogs"&& <CatalogsTab summary={summary} />}
+  {activeTab ==="extra-catalogs"&& <ExtraCatalogsTab summary={summary} />}
+  {activeTab ==="documents"&& <DocumentsTab summary={summary} />}
+  {activeTab ==="hr"&& <HRTab summary={summary} />}
+  {activeTab ==="payroll"&& <PayrollTab summary={summary} />}
+  </PageSection>
+  </PageStack>
+  );
 }

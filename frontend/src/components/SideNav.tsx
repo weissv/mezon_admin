@@ -2,11 +2,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import clsx from "clsx";
-import { Facebook, Instagram, Send, X } from "lucide-react";
+import { ChevronRight, Compass, LifeBuoy, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
 import { usePermissions } from "../contexts/PermissionsContext";
-import { getLinksWithPermissions, FULL_ACCESS_ROLES } from "../lib/modules";
+import { getLinksWithPermissions, FULL_ACCESS_ROLES, groupModuleLinks } from "../lib/modules";
 import { ROLE_LABELS, type UserRole } from "../types/auth";
 
 export default function SideNav() {
@@ -28,6 +28,7 @@ export default function SideNav() {
     permissions?.isFullAccess || FULL_ACCESS_ROLES.includes(role),
     user?.email
   );
+  const groupedLinks = groupModuleLinks(links);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
@@ -53,12 +54,6 @@ export default function SideNav() {
       setTimeout(() => setIsLogoSpinning(false), 1000);
     }
   };
-
-  const socialLinks = [
-    { icon: Facebook, href: "https://www.facebook.com/MezonSchool/" },
-    { icon: Instagram, href: "https://instagram.com/mezonschool" },
-    { icon: Send, href: "http://t.me/mezon_school" },
-  ];
 
   return (
     <>
@@ -91,6 +86,10 @@ export default function SideNav() {
             </button>
           </div>
           <p>Управление школой из одного окна</p>
+          <span className="mezon-sidenav__eyebrow">
+            <Compass className="h-3.5 w-3.5" />
+            ERP workspace
+          </span>
         </div>
 
         {/* User card */}
@@ -101,49 +100,51 @@ export default function SideNav() {
 
         {/* Navigation */}
         <div className="mezon-sidenav__nav">
-          <p className="mezon-nav-label">Модули</p>
-          <div className="flex flex-col gap-0.5">
-            {links.map((l) => {
-              const isActive = loc.pathname === l.path || loc.pathname.startsWith(`${l.path}/`);
+          {groupedLinks.map((group) => (
+            <div key={group.id}>
+              <p className="mezon-nav-label">{group.label}</p>
+              <div className="flex flex-col gap-0.5">
+                {group.links.map((l) => {
+                  const isActive = loc.pathname === l.path || loc.pathname.startsWith(`${l.path}/`);
 
-              if (l.isExternal) {
-                return (
-                  <a
-                    key={l.path}
-                    href={l.path}
-                    className="mezon-nav-link"
-                    onClick={closeMobileMenu}
-                  >
-                    {l.label}
-                  </a>
-                );
-              }
+                  if (l.isExternal) {
+                    return (
+                      <a
+                        key={l.path}
+                        href={l.path}
+                        className="mezon-nav-link"
+                        onClick={closeMobileMenu}
+                      >
+                        <span className="mezon-nav-link__label">{l.label}</span>
+                        <ChevronRight className="mezon-nav-link__indicator h-4 w-4" />
+                      </a>
+                    );
+                  }
 
-              return (
-                <Link
-                  key={l.path}
-                  to={l.path}
-                  className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}
-                  onClick={closeMobileMenu}
-                >
-                  {l.label}
-                </Link>
-              );
-            })}
-          </div>
+                  return (
+                    <Link
+                      key={l.path}
+                      to={l.path}
+                      className={clsx("mezon-nav-link", isActive && "mezon-nav-link--active")}
+                      onClick={closeMobileMenu}
+                    >
+                      <span className="mezon-nav-link__label">{l.label}</span>
+                      <ChevronRight className="mezon-nav-link__indicator h-4 w-4" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Footer */}
         <div className="mezon-sidenav__footer">
-          <p>Есть вопрос? Свяжитесь:</p>
-          <p className="font-semibold text-macos-blue text-[12px]">+ 71 // 207 17 30</p>
-          <div className="mt-1.5 mezon-top-bar__social">
-            {socialLinks.map(({ icon: Icon, href }) => (
-              <a key={href} href={href} target="_blank" rel="noreferrer">
-                <Icon className="h-3.5 w-3.5" />
-              </a>
-            ))}
-          </div>
+          <p className="inline-flex items-center gap-2">
+            <LifeBuoy className="h-3.5 w-3.5" />
+            Быстрый доступ к поддержке
+          </p>
+          <p className="font-semibold text-macos-blue text-[12px]">feedback · bugs · product notes</p>
           <Button type="button" className="mt-3 w-full" variant="outline" size="sm" onClick={logout}>
             Выйти
           </Button>

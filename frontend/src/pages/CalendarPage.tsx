@@ -9,6 +9,7 @@ import { Event } from '../types/calendar';
 import { EventForm } from '../components/forms/EventForm';
 import { api } from '../lib/api';
 import { CalendarGrid } from '../components/CalendarGrid';
+import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
 
 type ViewMode = 'calendar' | 'list';
 
@@ -102,14 +103,17 @@ export default function CalendarPage() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div>
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight flex items-center gap-2">
-          <CalendarDays className="h-6 w-6" />
-          Календарь событий
-        </h1>
+    <PageStack>
+      <PageHeader
+        eyebrow="Calendar · события"
+        title="Календарь событий"
+        description="Переключайтесь между календарной сеткой и реестром событий, не меняя сценарий создания и удаления."
+        icon={<CalendarDays className="h-5 w-5" />}
+        meta={<span className="mezon-badge macos-badge-neutral">{total} событий</span>}
+        actions={<Button onClick={handleCreate}><PlusCircle className="mr-2 h-4 w-4" />Добавить событие</Button>}
+      />
 
+      <PageToolbar className="justify-end">
         <div className="flex items-center gap-3">
           {/* View mode switcher */}
           <div className="flex bg-fill-tertiary p-1 rounded-lg">
@@ -138,15 +142,11 @@ export default function CalendarPage() {
               <List className="w-4 h-4" />
             </button>
           </div>
-
-          <Button onClick={handleCreate}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Добавить событие
-          </Button>
         </div>
-      </div>
+      </PageToolbar>
 
       {/* Content */}
+      <PageSection>
       {viewMode === 'calendar' ? (
         <CalendarGrid
           events={data}
@@ -164,6 +164,7 @@ export default function CalendarPage() {
           wrapCells
         />
       )}
+      </PageSection>
 
       {/* ── Create / Edit modal ──────────────────────────────────────────── */}
       <Modal
@@ -227,6 +228,6 @@ export default function CalendarPage() {
           </div>
         </div>
       </Modal>
-    </div>
+    </PageStack>
   );
 }

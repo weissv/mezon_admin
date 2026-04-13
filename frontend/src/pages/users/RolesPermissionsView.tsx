@@ -3,6 +3,8 @@ import { Check, Edit3, Lock, ShieldAlert, X} from 'lucide-react';
 import { toast} from 'sonner';
 import { Card} from '../../components/Card';
 import { Button} from '../../components/ui/button';
+import { LoadingCard } from '../../components/ui/LoadingState';
+import { PageHeader, PageSection, PageStack } from '../../components/ui/page';
 import { api} from '../../lib/api';
 import { PERMISSION_MODULES, ROLE_COLORS, ROLE_LABELS} from '../../lib/roles';
 import type { Role} from '../../types/common';
@@ -83,28 +85,30 @@ export function RolesPermissionsView() {
 }
 };
 
- return (
-  <div className="space-y-6">
-    <Card className="p-5">
-      <p className="text-[11px] font-semibold text-macos-blue uppercase tracking-widest">Роли и права</p>
-      <h2 className="mt-1 text-xl font-semibold">Матрица доступа к модулям</h2>
-      <p className="mt-2 text-sm text-secondary">Управляйте доступом по ролям отдельно от учётных записей. Защищённые роли можно просматривать, но не изменять без повышенных прав.</p>
-    </Card>
+  return (
+   <PageStack>
+     <PageHeader
+       eyebrow="Доступ и роли"
+       title="Матрица доступа к модулям"
+       description="Управляйте правами ролей отдельно от учётных записей. Защищённые роли можно только просматривать."
+       icon={<ShieldAlert className="h-5 w-5" />}
+       meta={<span className="mezon-badge macos-badge-neutral">{summary.roles} ролей</span>}
+     />
 
-    <div className="grid gap-4 md:grid-cols-3">
+     <div className="grid gap-4 md:grid-cols-3">
       <Card className="p-4"><p className="text-sm text-secondary">Всего ролей</p><p className="mt-1 text-2xl font-semibold">{summary.roles}</p></Card>
       <Card className="p-4"><p className="text-sm text-secondary">Редактируемые</p><p className="mt-1 text-2xl font-semibold">{summary.editable}</p></Card>
       <Card className="p-4"><p className="text-sm text-secondary">Полный доступ</p><p className="mt-1 text-2xl font-semibold">{summary.fullAccess}</p></Card>
     </div>
 
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
-      <Card className="overflow-hidden p-0">
+     <PageSection className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
+       <Card className="overflow-hidden p-0">
         <div className="border-b px-4 py-3">
           <p className="font-medium">Роли системы</p>
           <p className="text-sm text-secondary">Выберите роль, чтобы посмотреть или изменить её матрицу доступа.</p>
         </div>
         {loading ? (
-          <div className="p-6 text-sm text-secondary">Загрузка прав ролей...</div>
+          <LoadingCard message="Загрузка прав ролей..." height={180} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -199,9 +203,9 @@ export function RolesPermissionsView() {
  <Button onClick={handleSave} disabled={saving || !selectedRole.canBeEdited}>{saving ? 'Сохранение...' : 'Сохранить права'}</Button>
  </div>
  </div>
- )}
- </Card>
- </div>
- </div>
- );
+      )}
+  </Card>
+  </PageSection>
+  </PageStack>
+  );
 }

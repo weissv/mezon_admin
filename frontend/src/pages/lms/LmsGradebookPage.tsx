@@ -13,6 +13,9 @@ import { toast} from"sonner";
 import { useLmsClasses} from"../../hooks/lms/useLmsClasses";
 import { useLmsSubjects} from"../../hooks/lms/useLmsSubjects";
 import { useLmsGradebook} from"../../hooks/lms/useLmsGradebook";
+import { EmptyListState } from "../../components/ui/EmptyState";
+import { LoadingCard } from "../../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
 
 export default function LmsGradebookPage() {
  const { user} = useAuth();
@@ -73,23 +76,24 @@ export default function LmsGradebookPage() {
  return"bg-[rgba(255,59,48,0.12)] text-macos-red";
 };
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[400px]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем журнал оценок..." height={320} />
+  );
 }
 
- return (
- <div className="space-y-6">
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">Журнал оценок</h1>
- <p className="text-secondary">Выставление и просмотр оценок учеников</p>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="LMS · оценки"
+  title="Журнал оценок"
+  description="Выставление и просмотр оценок учеников по классам и предметам."
+  icon={<BookOpen className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{selectedClass && selectedSubject ? 'Фильтры выбраны' : 'Выберите класс и предмет'}</span>}
+  />
 
- <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
- <div className="flex flex-col sm:flex-row gap-4">
+  <PageToolbar className="bg-white rounded-xl shadow-subtle border border-card p-4">
+  <div className="flex flex-col sm:flex-row gap-4">
  <div className="flex-1">
  <label className="block text-[11px] font-medium uppercase tracking-widest text-primary mb-1">
  <Users className="inline h-4 w-4 mr-1"/>
@@ -126,11 +130,11 @@ export default function LmsGradebookPage() {
  ))}
  </select>
  </div>
- </div>
- </div>
+  </div>
+  </PageToolbar>
 
- {selectedClass && selectedSubject ? (
- <div className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
+  {selectedClass && selectedSubject ? (
+  <PageSection className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
  {gradebook && gradebook.students?.length > 0 ? (
  <div className="overflow-x-auto">
  <table className="w-full">
@@ -201,31 +205,20 @@ export default function LmsGradebookPage() {
  </table>
  </div>
  ) : (
- <div className="p-12 text-center">
- <BookOpen className="h-12 w-12 text-tertiary mx-auto mb-4"/>
- <p className="text-secondary mb-4">
- {gradebook?.students.length === 0
- ?"В этом классе пока нет учеников"
- :"Оценки пока не выставлены"}
- </p>
- {isTeacher && (
- <button
- onClick={() => setShowAddGradeModal(true)}
- className="inline-flex items-center gap-2 text-macos-blue hover:text-macos-blue"
- >
- <Plus className="h-5 w-5"/>
- Добавить оценку
- </button>
- )}
- </div>
- )}
- </div>
- ) : (
- <div className="bg-white rounded-xl shadow-subtle border border-card p-12 text-center">
- <Filter className="h-12 w-12 text-tertiary mx-auto mb-4"/>
- <p className="text-secondary">Выберите класс и предмет для просмотра журнала</p>
- </div>
- )}
+  <EmptyListState
+  title={gradebook?.students.length === 0 ?"В этом классе пока нет учеников":"Оценки пока не выставлены"}
+  description="Добавьте первую оценку или выберите другой класс."
+  onAction={isTeacher ? () => setShowAddGradeModal(true) : undefined}
+  actionLabel="Добавить оценку"
+  className="py-10"
+  />
+  )}
+  </PageSection>
+  ) : (
+  <PageSection>
+  <EmptyListState title="Выберите класс и предмет" description="После выбора фильтров откроется журнал оценок." className="py-10" />
+  </PageSection>
+  )}
 
  {showAddGradeModal && selectedClass && selectedSubject && (
  <AddGradeModal
@@ -240,8 +233,8 @@ export default function LmsGradebookPage() {
  onSave={handleAddGrade}
  />
  )}
- </div>
- );
+  </PageStack>
+  );
 }
 
 interface StudentForSelect {

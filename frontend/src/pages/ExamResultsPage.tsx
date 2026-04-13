@@ -19,6 +19,10 @@ import {
 import { examsApi} from"../lib/exams-api";
 import { Exam, ExamSubmission, ExamAnswer} from"../types/exam";
 import { toast} from"sonner";
+import { EmptyListState } from "../components/ui/EmptyState";
+import { LoadingCard } from "../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack } from "../components/ui/page";
+import { Button } from "../components/ui/button";
 
 export default function ExamResultsPage() {
  const { id} = useParams<{ id: string}>();
@@ -135,46 +139,36 @@ export default function ExamResultsPage() {
 });
 };
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[400px]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
- </div>
- );
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем результаты контрольной..." height={320} />
+  );
 }
 
  if (!exam) return null;
 
- return (
- <div className="space-y-6">
- {/* Заголовок */}
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-4">
- <button
- onClick={() => navigate("/exams")}
- className="p-2 text-secondary hover:text-primary hover:bg-fill-tertiary rounded-lg"
- >
- <ArrowLeft className="h-5 w-5"/>
- </button>
- <div>
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">
- Результаты: {exam.title}
- </h1>
- <p className="text-secondary text-sm mt-1">{exam.subject}</p>
- </div>
- </div>
- <button
- onClick={exportResults}
- className="flex items-center gap-2 px-4 py-2 bg-fill-tertiary text-primary rounded-lg hover:bg-fill-secondary"
- >
- <Download className="h-5 w-5"/>
- Экспорт CSV
- </button>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Exams · результаты"
+  title={`Результаты: ${exam.title}`}
+  description={exam.subject}
+  icon={<BarChart className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{submissions.length} прохождений</span>}
+  actions={<div className="flex gap-2">
+  <Button variant="ghost" onClick={() => navigate("/exams")}>
+  <ArrowLeft className="h-4 w-4"/> К списку
+  </Button>
+  <Button variant="outline" onClick={exportResults}>
+  <Download className="h-4 w-4"/>
+  Экспорт CSV
+  </Button>
+  </div>}
+  />
 
  {/* Статистика */}
- {stats && (
- <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+  {stats && (
+  <PageSection className="grid grid-cols-2 md:grid-cols-5 gap-4">
  <div className="bg-white rounded-xl shadow-subtle border border-card p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-[rgba(0,122,255,0.12)] rounded-lg">
@@ -234,21 +228,21 @@ export default function ExamResultsPage() {
  </div>
  </div>
  </div>
- </div>
- )}
+  </PageSection>
+  )}
 
- {/* Список прохождений */}
- <div className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
- <div className="p-4 border-b bg-fill-quaternary">
- <h2 className="font-semibold text-primary">Прохождения ({submissions.length})</h2>
- </div>
+  <PageSection className="bg-white rounded-xl shadow-subtle border border-card overflow-hidden">
+  <div className="p-4 border-b bg-fill-quaternary">
+  <h2 className="font-semibold text-primary">Прохождения ({submissions.length})</h2>
+  </div>
 
- {submissions.length === 0 ? (
- <div className="p-8 text-center text-secondary">
- <Users className="h-12 w-12 mx-auto mb-4 text-tertiary"/>
- <p>Пока никто не проходил контрольную</p>
- </div>
- ) : (
+  {submissions.length === 0 ? (
+  <EmptyListState
+  title="Пока никто не проходил контрольную"
+  description="Опубликуйте контрольную и дождитесь первых прохождений, чтобы увидеть результаты здесь."
+  className="py-10"
+  />
+  ) : (
  <div className="divide-y">
  {submissions.map((submission) => (
  <div key={submission.id}>
@@ -326,10 +320,10 @@ export default function ExamResultsPage() {
  </div>
  ))}
  </div>
- )}
- </div>
- </div>
- );
+  )}
+  </PageSection>
+  </PageStack>
+  );
 }
 
 // Компонент карточки ответа

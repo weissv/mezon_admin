@@ -20,6 +20,9 @@ import {
 } from '../types/inventory';
 import { api} from '../lib/api';
 import { PlusCircle, AlertTriangle, Apple, Package, Archive, Pencil, History, ArrowDownCircle, ArrowUpCircle, Trash2, BarChart3} from 'lucide-react';
+import { EmptyListState } from '../components/ui/EmptyState';
+import { LoadingCard } from '../components/ui/LoadingState';
+import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
 
 type FilterType = 'ALL' | InventoryType;
 const selectClassName = 'mezon-field';
@@ -288,33 +291,27 @@ export default function InventoryPage() {
 }
 };
 
- return (
- <div className="space-y-6">
- <div className="flex justify-between items-center">
- <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-macos-blue shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
- <Archive className="h-5 w-5"/>
- </div>
- <div>
- <div className="mezon-badge mb-2">Inventory · склад</div>
- <h1 className="mezon-section-title mb-1">Складской учёт</h1>
- <p className="mezon-subtitle">Остатки, движения и закупки по продуктам, хозяйственным и канцелярским товарам.</p>
- </div>
- </div>
- <div className="flex gap-2">
- <Button onClick={handleCreate}>
- <PlusCircle className="mr-2 h-4 w-4"/> Добавить товар
- </Button>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Inventory · склад"
+  title="Складской учёт"
+  description="Остатки, движения и закупки по продуктам, хозяйственным и канцелярским товарам."
+  icon={<Archive className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{filteredItems.length} позиций</span>}
+  actions={<div className="flex gap-2">
+  <Button onClick={handleCreate}>
+  <PlusCircle className="mr-2 h-4 w-4"/> Добавить товар
+  </Button>
  <Button variant="outline"onClick={handleShowAllTransactions}>
- <History className="mr-2 h-4 w-4"/> Журнал движений
- </Button>
- <Button onClick={() => setIsModalOpen(true)}>Сформировать список закупок</Button>
- </div>
- </div>
+  <History className="mr-2 h-4 w-4"/> Журнал движений
+  </Button>
+  <Button onClick={() => setIsModalOpen(true)}>Сформировать список закупок</Button>
+  </div>}
+  />
 
- {/* Filter tabs */}
- <div className="grid grid-cols-4 gap-4">
- {filterCards.map(({ type, label, count, icon: Icon, accent, iconBg, ring}) => (
+  <PageToolbar className="grid grid-cols-1 gap-4 md:grid-cols-4">
+  {filterCards.map(({ type, label, count, icon: Icon, accent, iconBg, ring}) => (
  <Card
  key={type}
  className={`p-0 macos-transition ${filterType === type ? `ring-2 ${ring}`: 'hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]'}`}
@@ -332,24 +329,29 @@ export default function InventoryPage() {
  <p className={`mt-1 text-[24px] font-bold tracking-[-0.025em] leading-tight ${type === 'ALL' ? 'text-primary' : accent}`}>{count}</p>
  </div>
  </button>
- </Card>
- ))}
- </div>
+  </Card>
+  ))}
+  </PageToolbar>
 
- <Card>
- <h2 className="flex items-center gap-2 p-4 text-xl font-semibold text-primary">
+  <PageSection className="p-0">
+  <Card>
+  <h2 className="flex items-center gap-2 p-4 text-xl font-semibold text-primary">
  {filterType === 'FOOD' && <Apple className="h-5 w-5 text-[var(--macos-green)]"/>}
  {filterType === 'HOUSEHOLD' && <Package className="h-5 w-5 text-[var(--macos-orange)]"/>}
  {filterType === 'STATIONERY' && <Pencil className="h-5 w-5 text-[var(--macos-purple)]"/>}
- {filterType === 'ALL' ? 'Все остатки' : inventoryTypeLabels[filterType]}
- </h2>
- {loading ? (
- <div className="p-4">Загрузка...</div>
- ) : filteredItems.length === 0 ? (
- <div className="p-8 text-center text-secondary">
- {filterType === 'ALL' ? 'Нет товаров на складе' : `Нет товаров в категории"${inventoryTypeLabels[filterType]}"`}
- </div>
- ) : (
+  {filterType === 'ALL' ? 'Все остатки' : inventoryTypeLabels[filterType]}
+  </h2>
+  {loading ? (
+  <LoadingCard message="Загружаем остатки..." height={220} />
+  ) : filteredItems.length === 0 ? (
+  <EmptyListState
+  title={filterType === 'ALL' ? 'Нет товаров на складе' : `Нет товаров в категории «${inventoryTypeLabels[filterType]}»`}
+  description="Добавьте первую позицию или переключитесь на другую категорию."
+  onAction={handleCreate}
+  actionLabel="Добавить товар"
+  className="py-10"
+  />
+  ) : (
  <table className="w-full text-sm">
  <thead className="bg-[rgba(255,255,255,0.6)] text-secondary">
  <tr>
@@ -398,8 +400,9 @@ export default function InventoryPage() {
  ))}
  </tbody>
  </table>
- )}
- </Card>
+  )}
+  </Card>
+  </PageSection>
 
  {shoppingList && (
  <Card className="mt-6">
@@ -733,6 +736,6 @@ export default function InventoryPage() {
  )}
  </div>
  </Modal>
- </div>
- );
+  </PageStack>
+  );
 }
