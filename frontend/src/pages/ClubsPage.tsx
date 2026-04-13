@@ -6,6 +6,7 @@ import { Button} from '../components/ui/button';
 import { Modal, ModalActions, ModalNotice, ModalSection} from '../components/Modal';
 import { Input} from '../components/ui/input';
 import { Card} from '../components/Card';
+import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
 import { PlusCircle, AlertTriangle, Star, BarChart3, Users, FileText, Loader2} from 'lucide-react';
 import { api} from '../lib/api';
 
@@ -324,29 +325,20 @@ export default function ClubsPage() {
  { id: 'reports' as TabType, label: 'Отчёты', icon: BarChart3},
  ];
 
- return (
- <div className="space-y-6">
- <div className="flex items-start justify-between gap-4">
- <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(191,90,242,0.14)] text-[var(--macos-purple)] shadow-[0_10px_24px_rgba(191,90,242,0.12)]">
- <Star className="h-5 w-5"/>
- </div>
- <div>
- <div className="mezon-badge mb-2">Clubs · развитие</div>
- <h1 className="mezon-section-title mb-1">Кружки и секции</h1>
- <p className="mezon-subtitle">Каталог кружков, рейтинги детей и отчёты по загрузке и финансам в едином рабочем пространстве.</p>
- </div>
- </div>
- {activeTab === 'clubs' && (
- <Button onClick={handleCreate}>
- <PlusCircle className="mr-2 h-4 w-4"/> Добавить кружок
- </Button>
- )}
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Clubs · развитие"
+  title="Кружки и секции"
+  description="Каталог кружков, рейтинги детей и отчёты по загрузке и финансам собраны в едином рабочем пространстве."
+  icon={<Star className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{tabs.find((tab) => tab.id === activeTab)?.label}</span>}
+  actions={activeTab === 'clubs' ? <Button onClick={handleCreate}><PlusCircle className="mr-2 h-4 w-4"/> Добавить кружок</Button> : undefined}
+  />
 
- {/* Tabs */}
- <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-card bg-surface-primary p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
- <nav className="flex gap-1">
+  <PageToolbar>
+  <div className="inline-flex w-fit max-w-full gap-1 overflow-x-auto rounded-[16px] border border-card bg-surface-primary p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[24px]">
+  <nav className="flex gap-1">
  {tabs.map((tab) => (
  <button
  key={tab.id}
@@ -359,27 +351,33 @@ export default function ClubsPage() {
  >
  <tab.icon className="h-4 w-4"/>
  {tab.label}
- </button>
- ))}
- </nav>
- </div>
+  </button>
+  ))}
+  </nav>
+  </div>
+  </PageToolbar>
 
- {/* Clubs Tab */}
- {activeTab === 'clubs' && (
- <DataTable
- columns={columns}
- data={clubs}
- page={page}
+  {/* Clubs Tab */}
+  {activeTab === 'clubs' && (
+  <PageSection>
+  <DataTable
+  title="Каталог кружков"
+  description="Быстрый реестр кружков с редактированием карточки и удалением по общей модальной схеме."
+  columns={columns}
+  data={clubs}
+  page={page}
  pageSize={10}
- total={total}
- onPageChange={setPage}
- />
- )}
+  total={total}
+  onPageChange={setPage}
+  density="compact"
+  />
+  </PageSection>
+  )}
 
- {/* Ratings Tab */}
- {activeTab === 'ratings' && (
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
- <Card className="lg:col-span-1">
+  {/* Ratings Tab */}
+  {activeTab === 'ratings' && (
+  <PageSection className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <Card className="lg:col-span-1">
  <h3 className="border-b border-[rgba(60,60,67,0.12)] p-4 text-[14px] font-semibold tracking-[-0.01em] text-primary">Выберите кружок</h3>
  <div className="max-h-[500px] divide-y divide-[rgba(60,60,67,0.12)] overflow-auto">
  {clubs.map((club) => (
@@ -450,15 +448,15 @@ export default function ClubsPage() {
  )}
  </div>
  </div>
- )}
- </Card>
- </div>
- )}
+  )}
+  </Card>
+  </PageSection>
+  )}
 
- {/* Reports Tab */}
- {activeTab === 'reports' && (
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
- <Card className="lg:col-span-1">
+  {/* Reports Tab */}
+  {activeTab === 'reports' && (
+  <PageSection className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <Card className="lg:col-span-1">
  <h3 className="border-b border-[rgba(60,60,67,0.12)] p-4 text-[14px] font-semibold tracking-[-0.01em] text-primary">Выберите кружок</h3>
  <div className="max-h-[500px] divide-y divide-[rgba(60,60,67,0.12)] overflow-auto">
  {clubs.map((club) => (
@@ -529,10 +527,10 @@ export default function ClubsPage() {
  </div>
  </div>
  </div>
- ) : null}
- </Card>
- </div>
- )}
+  ) : null}
+  </Card>
+  </PageSection>
+  )}
 
  <Modal
  isOpen={isModalOpen}
@@ -747,6 +745,6 @@ export default function ClubsPage() {
  </ModalSection>
  ) : null}
  </Modal>
- </div>
- );
+  </PageStack>
+  );
 }

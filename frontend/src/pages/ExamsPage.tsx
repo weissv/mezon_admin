@@ -22,6 +22,10 @@ import { Exam, ExamStatus} from"../types/exam";
 import { toast} from"sonner";
 import { Link, useNavigate} from"react-router-dom";
 import { Button} from"../components/ui/button";
+import { EmptyListState } from "../components/ui/EmptyState";
+import { Input } from "../components/ui/input";
+import { LoadingCard } from "../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../components/ui/page";
 
 const statusLabels: Record<ExamStatus, string> = {
  DRAFT:"Черновик",
@@ -118,70 +122,68 @@ export default function ExamsPage() {
 });
 };
 
- if (loading) {
- return (
- <div className="flex items-center justify-center min-h-[400px]">
- <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
- </div>
- );
-}
+  if (loading) {
+  return (
+  <LoadingCard message="Загружаем контрольные..." height={320} />
+  );
+  }
 
- return (
- <div className="space-y-6">
-      {/* Заголовок */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-[24px] font-bold tracking-[-0.025em] text-primary leading-tight mt-2">Контрольные работы</h1>
-          <p className="text-[15px] font-medium text-secondary leading-relaxed tracking-[-0.01em] mt-1">Создавайте и управляйте контрольными</p>
-        </div>
-        <Button onClick={() => navigate("/exams/new")}>
-          <Plus className="h-5 w-5 mr-1" />
-          Создать контрольную
-        </Button>
-      </div>
+  return (
+  <PageStack>
+       <PageHeader
+         eyebrow="Exams · контроль"
+         title="Контрольные работы"
+         description="Создавайте, публикуйте и закрывайте контрольные в едином плотном реестре с быстрым переходом к редактированию и результатам."
+         icon={<FileText className="h-5 w-5" />}
+         meta={<span className="mezon-badge macos-badge-neutral">{filteredExams.length} записей</span>}
+         actions={
+           <Button onClick={() => navigate("/exams/new")}>
+             <Plus className="h-5 w-5 mr-1" />
+             Создать контрольную
+           </Button>
+         }
+       />
 
-      {/* Фильтры */}
-      <div className="bg-surface-primary rounded-xl shadow-subtle p-4 border border-card">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-tertiary" />
-            <input
-              type="text"
-              placeholder="Поиск по названию или предмету..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 mezon-field"
-            />
-          </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 mezon-field sm:w-auto"
-          >
-            <option value="">Все статусы</option>
-            <option value="DRAFT">Черновики</option>
-            <option value="PUBLISHED">Опубликованные</option>
-            <option value="CLOSED">Закрытые</option>
-            <option value="ARCHIVED">В архиве</option>
-          </select>
-        </div>
-      </div>
+       <PageToolbar>
+         <div className="mezon-toolbar-group">
+           <div className="mezon-input-shell">
+             <Search className="mezon-input-shell__icon h-4 w-4" />
+             <Input
+               type="text"
+               placeholder="Поиск по названию или предмету..."
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               className="min-w-[280px] pl-10"
+             />
+           </div>
+           <select
+             value={statusFilter}
+             onChange={(e) => setStatusFilter(e.target.value)}
+             className="mezon-field sm:w-auto"
+           >
+             <option value="">Все статусы</option>
+             <option value="DRAFT">Черновики</option>
+             <option value="PUBLISHED">Опубликованные</option>
+             <option value="CLOSED">Закрытые</option>
+             <option value="ARCHIVED">В архиве</option>
+           </select>
+         </div>
+       </PageToolbar>
 
-      {/* Список контрольных */}
-      {filteredExams.length === 0 ? (
-        <div className="bg-surface-primary rounded-xl shadow-subtle p-12 text-center border border-card">
-          <FileText className="h-16 w-16 text-tertiary mx-auto mb-4" />
-          <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-primary mb-2">Нет контрольных</h3>
-          <p className="text-[14px] text-secondary mb-6">Создайте первую контрольную работу</p>
-          <Button onClick={() => navigate("/exams/new")}>
-            <Plus className="h-5 w-5 mr-1" />
-            Создать контрольную
-          </Button>
-        </div>
- ) : (
-        <div className="grid gap-4">
-          {filteredExams.map((exam) => (
-            <div key={exam.id} className="bg-surface-primary border border-card rounded-xl shadow-subtle p-6">
+       {filteredExams.length === 0 ? (
+         <PageSection>
+           <EmptyListState
+             title="Нет контрольных"
+             description="Создайте первую контрольную работу, чтобы журнал публикации и результатов появился на странице."
+             onAction={() => navigate("/exams/new")}
+             actionLabel="Создать контрольную"
+             className="py-10"
+           />
+         </PageSection>
+  ) : (
+         <div className="grid gap-4">
+           {filteredExams.map((exam) => (
+             <div key={exam.id} className="bg-surface-primary border border-card rounded-xl shadow-subtle p-6">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 {/* Основная информация */}
                 <div className="flex-1">
@@ -294,10 +296,10 @@ export default function ExamsPage() {
  )}
  </div>
  </div>
- </div>
- ))}
- </div>
- )}
- </div>
- );
+             </div>
+           ))}
+         </div>
+       )}
+  </PageStack>
+  );
 }

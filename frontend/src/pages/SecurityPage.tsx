@@ -11,6 +11,9 @@ import { Button} from '../components/ui/button';
 import { Input} from '../components/ui/input';
 import { FormError} from '../components/ui/FormError';
 import { DataTable} from '../components/DataTable/DataTable';
+import { EmptyListState } from '../components/ui/EmptyState';
+import { LoadingCard } from '../components/ui/LoadingState';
+import { PageHeader, PageStack, PageToolbar } from '../components/ui/page';
 import { Trash2, AlertCircle, Edit, Plus, Filter, Shield} from 'lucide-react';
 
 const selectClassName = 'mezon-field';
@@ -198,23 +201,16 @@ export default function SecurityPage() {
 },
  ];
 
- return (
- <div className="space-y-6">
- <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
- <div className="flex items-center gap-3">
- <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[rgba(10,132,255,0.12)] text-macos-blue shadow-[0_10px_24px_rgba(10,132,255,0.12)]">
- <Shield className="h-5 w-5"/>
- </div>
- <div>
- <div className="mezon-badge mb-2">Safety · журнал</div>
- <h1 className="mezon-section-title mb-1">Журнал безопасности</h1>
- <p className="mezon-subtitle">Происшествия, проверки, посетители и документы по охране в одном реестре.</p>
- </div>
- </div>
- <Button onClick={handleCreate}>
- <Plus className="mr-2 h-4 w-4"/> Добавить запись
- </Button>
- </div>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Safety · журнал"
+  title="Журнал безопасности"
+  description="Происшествия, проверки, посетители и документы по охране сведены в единый операторский реестр."
+  icon={<Shield className="h-5 w-5"/>}
+  meta={<span className="mezon-badge macos-badge-neutral">{filteredLogs.length} записей</span>}
+  actions={<Button onClick={handleCreate}><Plus className="mr-2 h-4 w-4"/> Добавить запись</Button>}
+  />
 
  {/* Статистика */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -240,38 +236,41 @@ export default function SecurityPage() {
  ))}
  </div>
 
- {/* Фильтр */}
- {filterType && (
- <div className="flex items-center gap-2 rounded-lg bg-[rgba(10,132,255,0.08)] px-3 py-2 text-sm text-macos-blue">
- <Filter className="h-4 w-4"/>
- <span>Фильтр: {eventTypeLabels[filterType]}</span>
- <button onClick={() => setFilterType('')} className="ml-2 underline hover:no-underline">
- Сбросить
- </button>
- </div>
- )}
+  {filterType && (
+  <PageToolbar className="rounded-lg bg-[rgba(10,132,255,0.08)] px-3 py-2 text-sm text-macos-blue">
+  <Filter className="h-4 w-4"/>
+  <span>Фильтр: {eventTypeLabels[filterType]}</span>
+  <button onClick={() => setFilterType('')} className="ml-2 underline hover:no-underline">
+  Сбросить
+  </button>
+  </PageToolbar>
+  )}
 
- <Card>
- {loading ? (
- <div className="p-8 text-center">
- <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-macos-blue"></div>
- <p className="mt-2 text-secondary">Загрузка...</p>
- </div>
- ) : filteredLogs.length === 0 ? (
- <div className="p-8 text-center text-secondary">
- {filterType ? 'Нет записей выбранного типа' : 'Журнал пуст. Добавьте первую запись.'}
- </div>
- ) : (
- <DataTable 
- columns={columns} 
- data={filteredLogs} 
- page={1} 
- pageSize={filteredLogs.length} 
- total={filteredLogs.length} 
- onPageChange={() => {}} 
- />
- )}
- </Card>
+  <DataTable 
+  title="Реестр событий"
+  description="Быстрый журнал для разбора происшествий, проверок и связанной документации."
+  columns={columns} 
+  data={filteredLogs} 
+  page={1} 
+  pageSize={filteredLogs.length} 
+  total={filteredLogs.length} 
+  onPageChange={() => {}} 
+  density="compact"
+  wrapCells
+  emptyState={
+  loading ? (
+  <LoadingCard message="Загружаем журнал безопасности..." height={220} />
+  ) : (
+  <EmptyListState
+  title={filterType ? 'Нет записей выбранного типа' : 'Журнал пуст'}
+  description={filterType ? 'Измените фильтр или добавьте новую запись этого типа.' : 'Добавьте первую запись, чтобы журнал начал заполняться.'}
+  onAction={!filterType ? handleCreate : undefined}
+  actionLabel="Добавить запись"
+  className="py-10"
+  />
+  )
+  }
+  />
 
  {/* Create/Edit Modal */}
  <Modal 
@@ -360,6 +359,6 @@ export default function SecurityPage() {
  </div>
  </div>
  </Modal>
- </div>
- );
+  </PageStack>
+  );
 }
