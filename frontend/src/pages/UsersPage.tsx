@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Shield, Users, Lock } from 'lucide-react';
-import { UsersDirectoryView } from './users/UsersDirectoryView';
+import { Lock, Shield, Users } from 'lucide-react';
+import { PageHeader, PageStack, PageToolbar } from '../components/ui/page';
+import { Button } from '../components/ui/button';
 import { RolesPermissionsView } from './users/RolesPermissionsView';
+import { UsersDirectoryView } from './users/UsersDirectoryView';
 
 type ViewTab = 'users' | 'roles';
 
@@ -9,44 +11,39 @@ export default function UsersPage() {
   const [activeTab, setActiveTab] = useState<ViewTab>('users');
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-tint-blue text-macos-blue shadow-subtle">
-          <Shield className="h-5 w-5" />
-        </div>
-        <div>
-          <h1 className="text-[24px] font-bold tracking-[-0.025em] text-primary leading-tight mb-0">Управление пользователями</h1>
-          <p className="text-[15px] font-medium text-secondary leading-relaxed tracking-[-0.01em]">Каталог сотрудников, роли и права доступа в одном рабочем пространстве.</p>
-        </div>
-      </div>
+    <PageStack>
+      <PageHeader
+        eyebrow="Доступ и безопасность"
+        title="Пользователи"
+        icon={<Shield className="h-5 w-5" />}
+        meta={
+          <span className="mezon-badge macos-badge-neutral">
+            {activeTab === 'users' ? 'Каталог учётных записей' : 'Матрица ролей'}
+          </span>
+        }
+        description="Учётные записи, роли и права доступа теперь собраны в одном плотном контуре. Переключайтесь между каталогом пользователей и матрицей ролей без визуального разрыва."
+      />
 
-      <div className="inline-flex w-fit gap-1 rounded-xl border border-separator bg-inset p-1 shadow-subtle">
-        <button
-          onClick={() => setActiveTab('users')}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-colors ${
-            activeTab === 'users'
-              ? 'bg-surface-primary text-primary shadow-sm border border-card'
-              : 'text-secondary hover:bg-fill-quaternary hover:text-primary border border-transparent'
-          }`}
-        >
-          <Users className="h-4 w-4" />
-          Пользователи
-        </button>
-        <button
-          onClick={() => setActiveTab('roles')}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-colors ${
-            activeTab === 'roles'
-              ? 'bg-surface-primary text-primary shadow-sm border border-card'
-              : 'text-secondary hover:bg-fill-quaternary hover:text-primary border border-transparent'
-          }`}
-        >
-          <Lock className="h-4 w-4" />
-          Роли и права
-        </button>
-      </div>
+      <PageToolbar>
+        <div className="mezon-toolbar-group">
+          <Button
+            variant={activeTab === 'users' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('users')}
+          >
+            <Users className="h-4 w-4" />
+            Пользователи
+          </Button>
+          <Button
+            variant={activeTab === 'roles' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('roles')}
+          >
+            <Lock className="h-4 w-4" />
+            Роли и права
+          </Button>
+        </div>
+      </PageToolbar>
 
-      {/* Active View */}
       {activeTab === 'users' ? <UsersDirectoryView /> : <RolesPermissionsView />}
-    </div>
+    </PageStack>
   );
 }
