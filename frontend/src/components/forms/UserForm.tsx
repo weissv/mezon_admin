@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, ExternalLink, LockKeyhole, MessageCircle, Shield, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../../lib/api';
-import { AvailableEmployee, User } from '../../types/user';
+import { AvailableEmployee, UpdateUserPayload, User } from '../../types/user';
 import { ModalNotice, ModalSection } from '../Modal';
 import { Button } from '../ui/button';
 import { FormError } from '../ui/FormError';
@@ -94,7 +94,7 @@ export function UserForm({ initialData, onSuccess, onCancel }: UserFormProps) {
   const onSubmit = async (data: CreateUserFormData | UpdateUserFormData) => {
     try {
       if (isEditing) {
-        const updatePayload: Record<string, string> = {};
+        const updatePayload: UpdateUserPayload = {};
         if (data.email) updatePayload.email = data.email;
         if (data.role) updatePayload.role = data.role;
         if (data.password && data.password.length > 0) updatePayload.password = data.password;
