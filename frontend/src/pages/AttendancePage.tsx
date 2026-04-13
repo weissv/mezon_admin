@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback} from"react";
 import { api} from"../lib/api";
 import { Card} from"../components/Card";
 import { Button} from"../components/ui/button";
+import { ErrorState, EmptyListState } from "../components/ui/EmptyState";
+import { LoadingCard } from "../components/ui/LoadingState";
+import { PageHeader, PageSection, PageStack, PageToolbar } from "../components/ui/page";
 
 interface Child {
  id: number;
@@ -72,12 +75,18 @@ export default function AttendancePage() {
 }
 }, [date]);
 
- return (
- <div className="space-y-6">
- <h1 className="text-[24px] font-bold tracking-[-0.025em] leading-tight">Посещаемость</h1>
+  return (
+  <PageStack>
+  <PageHeader
+  eyebrow="Attendance"
+  title="Посещаемость"
+  description="Отмечайте присутствие детей по дате и классу в одном компактном сценарии."
+  meta={<span className="mezon-badge macos-badge-neutral">{children.length} детей</span>}
+  />
 
- <Card className="p-4 shadow-subtle">
- <div className="flex flex-wrap items-center gap-4">
+  <PageToolbar>
+  <Card className="p-4 shadow-subtle w-full">
+  <div className="flex flex-wrap items-center gap-4">
  <div>
  <label htmlFor="date-select"className="block text-[11px] font-medium uppercase tracking-widest mb-1">
  Дата
@@ -108,20 +117,20 @@ export default function AttendancePage() {
  ))}
  </select>
  </div>
- </div>
- </Card>
+  </div>
+  </Card>
+  </PageToolbar>
 
- {error && (
- <div className="text-[14px] font-semibold tracking-[-0.01em] text-[var(--macos-red)] bg-[rgba(255,59,48,0.06)] border border-[rgba(255,59,48,0.15)] p-3 rounded-[var(--radius-md)]">
- {error}
- </div>
- )}
+  {error && (
+  <ErrorState message={error} className="py-2" />
+  )}
 
- <Card className="shadow-subtle">
- {loading ? (
- <div className="p-4 text-center text-[14px] leading-relaxed text-tertiary">Загрузка...</div>
- ) : (
- <ul className="divide-y divide-[var(--separator)]">
+  <PageSection className="p-0">
+  <Card className="shadow-subtle">
+  {loading ? (
+  <LoadingCard message="Загружаем детей..." height={180} />
+  ) : (
+  <ul className="divide-y divide-[var(--separator)]">
  {children.map((child) => (
  <li key={child.id} className="p-4 flex justify-between items-center">
  <span className="text-[14px] font-semibold tracking-[-0.01em] text-primary">{child.lastName} {child.firstName}</span>
@@ -147,14 +156,15 @@ export default function AttendancePage() {
  Отсутствует
  </Button>
  </div>
- </li>
- ))}
- {children.length === 0 && !loading && (
- <li className="p-4 text-center text-[14px] leading-relaxed text-tertiary">В этом классе нет детей или класс не выбран.</li>
- )}
- </ul>
- )}
- </Card>
- </div>
- );
+  </li>
+  ))}
+  {children.length === 0 && !loading && (
+  <li><EmptyListState title="Нет детей для отметки" description="В выбранном классе пока нет детей или класс не выбран." className="py-10" /></li>
+  )}
+  </ul>
+  )}
+  </Card>
+  </PageSection>
+  </PageStack>
+  );
 }
