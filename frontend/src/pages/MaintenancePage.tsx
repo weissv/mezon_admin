@@ -833,7 +833,7 @@ export default function MaintenancePage() {
  </div>
  )}
 
- <Card>
+ <Card className="min-w-0 overflow-x-auto">
  {loading ? (
  <div className="p-8 text-center">
  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
