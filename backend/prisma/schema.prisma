@@ -101,6 +101,7 @@ enum MaintenanceStatus {
   REJECTED     // Отклонена
   IN_PROGRESS  // В работе (у Завхоза)
   DONE         // Выполнена
+  COMPLETED    // Завершена
 }
 
 enum MaintenanceType {
@@ -198,6 +199,7 @@ model Employee {
   classGroups                 Group[]              @relation("ClassTeacher")
   maintenanceRequests         MaintenanceRequest[] @relation("Requester")
   approvedMaintenanceRequests MaintenanceRequest[] @relation("Approver")
+  receivedMaintenanceRequests MaintenanceRequest[] @relation("Receiver")
   inventoryTransactions       InventoryTransaction[]
   createdPurchaseOrders       PurchaseOrder[]       @relation("PurchaseOrderCreator")
   approvedPurchaseOrders      PurchaseOrder[]       @relation("PurchaseOrderApprover")
@@ -432,6 +434,11 @@ model MaintenanceRequest {
   approvedBy       Employee?         @relation(fields: [approvedById], references: [id], name: "Approver")
   approvedAt       DateTime?
   rejectionReason  String?
+
+  // Поля для подтверждения получения
+  receivedById     Int?
+  receivedBy       Employee?         @relation(fields: [receivedById], references: [id], name: "Receiver")
+  receivedAt       DateTime?
 
   // Связь с транзакциями склада
   inventoryTransactions InventoryTransaction[]

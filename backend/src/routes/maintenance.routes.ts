@@ -88,6 +88,9 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"
       approvedBy: {
         select: { id: true, firstName: true, lastName: true }
       },
+      receivedBy: {
+        select: { id: true, firstName: true, lastName: true }
+      },
       items: {
         include: {
           inventoryItem: {
@@ -438,6 +441,45 @@ router.post("/:id/reject", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), async
     include: {
       requester: true,
       approvedBy: true
+    }
+  });
+  
+  res.json(updated);
+});
+
+// POST /api/maintenance/:id/confirm-receipt - подтвердить получение
+router.post("/:id/confirm-receipt", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ", "ACCOUNTANT"]), async (req, res) => {
+  const id = Number(req.params.id);
+  const user = req.user!;
+  
+  const request = await prisma.maintenanceRequest.findUnique({
+    where: { id },
+    include: { requester: true }
+  });
+  
+  if (!request) {
+    return res.status(404).json({ message: "Заявка не найдена" });
+  }
+  
+  if (request.status !== "DONE") {
+    return res.status(400).json({ message: "Заявка еще не выдана (не DONE)" });
+  }
+  
+  // Только создатель может подтвердить получение
+  if (request.requesterId !== user.employeeId && user.role !== "DEVELOPER" && user.role !== "ADMIN") {
+    return res.status(403).json({ message: "Только создатель заявки может подтвердить получение" });
+  }
+  
+  const updated = await prisma.maintenanceRequest.update({
+    where: { id },
+    data: {
+      status: "COMPLETED",
+      receivedById: user.employeeId,
+      receivedAt: new Date(),
+    },
+    include: {
+      requester: true,
+      receivedBy: true
     }
   });
   

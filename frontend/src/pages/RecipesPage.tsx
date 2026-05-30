@@ -18,7 +18,7 @@ export default function RecipesPage() {
   <PageStack>
   <PageHeader
   eyebrow="Kitchen · справочник"
-  title="Рецепты и ингредиенты"
+  title="Блюда"
   description="Единый реестр блюд и ингредиентов для кухни: переключение между сущностями, быстрый CRUD и просмотр КБЖУ."
   icon={viewMode === 'dishes' ? <ChefHat className="h-5 w-5"/> : <Apple className="h-5 w-5"/>}
   meta={<span className="mezon-badge macos-badge-neutral">{viewMode === 'dishes' ? 'Блюда' : 'Ингредиенты'}</span>}

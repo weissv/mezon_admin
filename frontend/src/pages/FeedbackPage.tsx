@@ -242,7 +242,6 @@ export default function FeedbackPage() {
             pageSize={10}
             total={filteredData.length}
             onPageChange={setPage}
-            wrapCells
             density="compact"
             emptyState={
               loading ? (

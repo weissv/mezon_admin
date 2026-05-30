@@ -77,6 +77,7 @@ export default function MaintenancePage() {
  const [actionRequest, setActionRequest] = useState<MaintenanceRequest | null>(null);
  const [rejectionReason, setRejectionReason] = useState('');
  const [actionLoading, setActionLoading] = useState(false);
+ const [confirmReceiptLoading, setConfirmReceiptLoading] = useState<number | null>(null);
 
  // Cleaning state
  const [cleaningSchedules, setCleaningSchedules] = useState<CleaningSchedule[]>([]);
@@ -329,6 +330,42 @@ export default function MaintenancePage() {
 }
 };
 
+ const handleConfirmReceipt = async (id: number) => {
+ setConfirmReceiptLoading(id);
+ try {
+ await api.post(`/api/maintenance/${id}/confirm-receipt`);
+ toast.success('Получение подтверждено');
+ fetchRequests();
+ } catch (error: any) {
+ toast.error('Ошибка подтверждения', { description: error?.message});
+ } finally {
+ setConfirmReceiptLoading(null);
+ }
+ };
+
+ const handleQuickStatusChange = async (id: number, status: 'IN_PROGRESS' | 'DONE') => {
+ try {
+ const result = await api.put(`/api/maintenance/${id}`, { status });
+ toast.success('Статус изменен');
+ // Показываем информацию о складской синхронизации
+ if (result?.stockDeduction) {
+ const sd = result.stockDeduction;
+ if (sd.transactions && sd.transactions.length > 0) {
+ const items = sd.transactions.map((t: any) => `${t.itemName}: -${t.deducted}`).join(', ');
+ toast.info(`Списано со склада: ${items}`, { duration: 5000});
+ }
+ if (sd.warnings && sd.warnings.length > 0) {
+ for (const w of sd.warnings) {
+ toast.warning(w, { duration: 6000});
+ }
+ }
+ }
+ fetchRequests();
+ } catch (error: any) {
+ toast.error('Ошибка изменения статуса', { description: error?.message});
+ }
+ };
+
  // Cleaning handlers
  const openCleaningModal = (schedule?: CleaningSchedule) => {
  if (schedule) {
@@ -468,6 +505,7 @@ export default function MaintenancePage() {
  rejected: requests.filter(r => r.status === 'REJECTED').length,
  inProgress: requests.filter(r => r.status === 'IN_PROGRESS').length,
  done: requests.filter(r => r.status === 'DONE').length,
+ completed: requests.filter(r => r.status === 'COMPLETED').length,
  repair: requests.filter(r => r.type === 'REPAIR').length,
  issue: requests.filter(r => r.type === 'ISSUE').length,
 };
@@ -524,6 +562,11 @@ export default function MaintenancePage() {
  </span>
  ) : '—',
 },
+ {
+  key: 'receivedBy' as keyof MaintenanceRequest,
+  header: 'Кто получил',
+  render: (row: MaintenanceRequest) => row.status === 'COMPLETED' && row.receivedBy ? `${row.receivedBy.lastName} ${row.receivedBy.firstName}`: '—',
+ },
  // Кто создал (для всех кроме учителей)
  ...(showCreatorApprover ? [{
  key: 'requester' as keyof MaintenanceRequest,
@@ -592,10 +635,36 @@ export default function MaintenancePage() {
  </>
  )}
  
+ {/* Быстрые действия для завхоза */}
+  {isZavhoz && row.status === 'APPROVED' && (
+  <Button variant="outline" size="sm" onClick={() => handleQuickStatusChange(row.id, 'IN_PROGRESS')} title="Взять в работу">
+  <Clock className="h-4 w-4 text-macos-blue"/>
+  </Button>
+  )}
+  {isZavhoz && row.status === 'IN_PROGRESS' && (
+  <Button variant="outline" size="sm" onClick={() => handleQuickStatusChange(row.id, 'DONE')} title="Выполнить">
+  <CheckCircle className="h-4 w-4 text-macos-green"/>
+  </Button>
+  )}
+
+  {/* Кнопка подтверждения получения для создателя, если статус DONE */}
+  {(row.status === 'DONE' && (row.requesterId === user?.employee?.id || canEditAll)) && (
+  <Button 
+  variant="outline"
+  size="sm"
+  onClick={() => handleConfirmReceipt(row.id)} 
+  disabled={confirmReceiptLoading === row.id}
+  title="Подтвердить получение"
+  className="border-macos-green text-macos-green hover:bg-macos-green hover:text-white"
+  >
+  {confirmReceiptLoading === row.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4 mr-1"/>} Получил
+  </Button>
+  )}
+
  {/* Редактирование: DEVELOPER и ADMIN всегда, ZAVHOZ для одобренных, учитель для своих не-одобренных, директор и завуч могут редактировать свои заявки */}
  {(canEditAll || 
  (isZavhoz && (row.status === 'APPROVED' || row.status === 'IN_PROGRESS' || row.status === 'DONE')) ||
- (userRole === 'TEACHER' && row.status !== 'APPROVED' && row.status !== 'IN_PROGRESS' && row.status !== 'DONE') ||
+ (userRole === 'TEACHER' && row.status !== 'APPROVED' && row.status !== 'IN_PROGRESS' && row.status !== 'DONE' && row.status !== 'COMPLETED') ||
  ((userRole === 'DIRECTOR' || userRole === 'DEPUTY') && row.requesterId === user?.employee?.id)
  ) && (
  <Button variant="outline"size="sm"onClick={() => handleEdit(row)}>
