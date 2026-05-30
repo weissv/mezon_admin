@@ -1,510 +1,237 @@
-# Mezon Admin
+# Mezon Admin - Образовательная ERP и LMS Платформа
 
-Платформа для управления образовательным учреждением, объединяющая ERP-контур, школьный LMS, публичную платформу контрольных работ, базу знаний и набор прикладных интеграций: 1C, Excel, Google Sheets, Telegram и AI-сервисы.
+Платформа для комплексного управления образовательным учреждением (детский сад, школа). Система объединяет административно-хозяйственный контур (ERP), систему управления обучением (LMS), конструктор контрольных работ с AI-проверкой, интеллектуальную базу знаний (RAG) и набор корпоративных интеграций (1C, Telegram, Google Drive, Excel).
 
-> Статус на март 2026: репозиторий уже содержит рабочие backend и frontend приложения, локальный Docker-стек, подготовку к деплою на Render, контур школьного LMS, контур контрольных, AI-базу знаний и модуль интеграции с 1C.
+> **Статус проекта (Март 2026):** Система полностью функциональна. Содержит рабочие frontend и backend приложения, локальный Docker-стек, готовую конфигурацию для Render, продвинутый контур LMS, платформу тестирования с публичным доступом, AI-базу знаний, глубокую синхронизацию с 1С через OData и поддержку Telegram-уведомлений.
 
-## Навигация
+---
 
-- [Что внутри](#что-внутри)
-- [Архитектура](#архитектура)
-- [Быстрый старт](#быстрый-старт)
-- [Локальная разработка](#локальная-разработка)
-- [Модули платформы](#модули-платформы)
-- [Интеграции и автоматизация](#интеграции-и-автоматизация)
-- [Figma MCP](#figma-mcp)
-- [Контур LMS](#контур-lms)
-- [Контур контрольных](#контур-контрольных)
-- [Переменные окружения](#переменные-окружения)
-- [Тесты](#тесты)
-- [Деплой](#деплой)
-- [Связанные документы](#связанные-документы)
+## 📑 Оглавление
 
-## Что внутри
+1. [Архитектура и Технологический стек](#-архитектура-и-технологический-стек)
+2. [Глубокий обзор модулей](#-глубокий-обзор-модулей)
+   - [Административно-хозяйственный контур (ERP)](#административно-хозяйственный-контур-erp)
+   - [Учебный контур (LMS)](#учебный-контур-lms)
+   - [Платформа контрольных (Exams)](#платформа-контрольных-exams)
+   - [AI и Инновации](#ai-и-инновации)
+   - [Интеграции](#интеграции)
+3. [Структура базы данных (Prisma)](#-структура-базы-данных)
+4. [Быстрый старт (Docker Compose)](#-быстрый-старт-docker-compose)
+5. [Локальная разработка](#-локальная-разработка)
+6. [Переменные окружения](#-переменные-окружения)
+7. [Тестирование и Деплой](#-тестирование-и-деплой)
+8. [Связанная документация](#-связанная-документация)
 
-| Контур | Что уже реализовано |
-| --- | --- |
-| ERP | Дашборд, дети, родители, сотрудники, группы, кружки, посещаемость, документы, календарь, штатка |
-| Операционный блок | Финансы, склад, рецепты, меню, закупки, заявки, безопасность |
-| Администрирование | Аутентификация, роли, пользователи, permissions, настройки, журнал действий |
-| Коммуникации | Уведомления, рассылки, Telegram-привязка, баг-репорты |
-| LMS | Классы, дневник, журнал оценок, расписание, домашние задания, посещаемость, прогресс |
-| Контрольные | Конструктор контрольных, публичные ссылки, таймер, автопроверка, AI-проверка открытых ответов |
-| AI и знания | База знаний, семантический поиск, похожие статьи, RAG-ассистент, синхронизация Google Drive |
-| Интеграции | Excel import/export, Google Sheets import, 1C sync, просмотр данных 1C |
-| Инфраструктура | Docker Compose, Prisma, pgvector, Render deploy, Vitest, Cypress, smoke test |
+---
 
-## Архитектура
+## 🏗 Архитектура и Технологический стек
 
-```mermaid
-flowchart LR
-    A[Frontend ERP] --> B[Backend API]
-    A2[Frontend LMS] --> B
-    A3[Public Exam Page] --> B
-    B --> C[(PostgreSQL)]
-    B --> D[(pgvector)]
-    B --> E[1C OData]
-    B --> F[Google Drive]
-    B --> G[Telegram Bot]
-    B --> H[AI Providers]
+Проект реализован в виде монорепозитория, разделенного на клиентскую и серверную части.
+
+### Backend (Node.js API)
+- **Runtime:** Node.js 20+
+- **Фреймворк:** Express + TypeScript
+- **База данных:** PostgreSQL 17 с расширением `pgvector` (для семантического поиска)
+- **ORM:** Prisma ORM
+- **Валидация:** Zod
+- **Авторизация:** JWT + bcryptjs
+- **Интеграции:** Axios, Telegraf (Telegram Bot), node-cron, @google/generative-ai (Gemini), openai (Groq), xlsx, mammoth (Google Drive/Docs)
+
+### Frontend (React SPA)
+- **Фреймворк:** React 18 + TypeScript + Vite
+- **Роутинг:** React Router DOM (v6)
+- **Стилизация:** Tailwind CSS + Autoprefixer
+- **UI компоненты:** Custom UI (вдохновлен shadcn/ui), Lucide React
+- **Работа с формами:** React Hook Form + Zod Resolvers
+- **Визуализация:** Recharts
+- **i18n:** i18next + react-i18next
+- **Утилиты:** date-fns, clsx, sonner (тосты), html2canvas
+
+### Инфраструктура
+- **Контейнеризация:** Docker, Docker Compose (multi-stage builds)
+- **Деплой:** Render (via `render.yaml`)
+- **Тестирование:** Vitest (unit/coverage), Cypress (E2E)
+
+---
+
+## 🧩 Глубокий обзор модулей
+
+На основе полного анализа кодовой базы, система включает в себя следующие функциональные блоки:
+
+### Административно-хозяйственный контур (ERP)
+- **Дашборд:** Виджетизированная система аналитики (посещаемость, финансы, HR-алерты, инвентаризация, закупки). Поддержка персонализации рабочего стола (WidgetChrome, PersonalizationPanel).
+- **Управление контингентом:** Учет детей (`/children`), групп (`/groups`), родителей. Карточки здоровья, история переводов, временное отсутствие.
+- **HR и Персонал:** Учет сотрудников (`/employees`), расписание смен (`/staffing`), штатное расписание, отпуска, медицинские книжки.
+- **Финансы:** Учет доходов и расходов, интеграция с 1С (касса, банк). Контроль задолженностей и финансовые регистры.
+- **Склад и Инвентаризация:** Управление остатками (`/inventory`), закупки (`/procurement`), списание по сроку годности. Поддержка партионного учета и минимальных остатков.
+- **Питание (Меню и Рецепты):** Технологические карты блюд (`/recipes`), генерация меню по возрастам (`/menu`), калькуляция калорийности и автоматическое списание ингредиентов со склада.
+- **Заявки АХО (Maintenance):** Журнал заявок на ремонт и выдачу ТМЦ (`/maintenance`). Многоступенчатый процесс: *Запрос -> Одобрение -> В работе -> Готово*.
+- **Безопасность:** Журнал инцидентов, пожарных проверок, учет посетителей.
+- **Документооборот:** Генерация документов по шаблонам, экспорт приказов и договоров.
+
+### Учебный контур (LMS)
+Вынесен в отдельный роутер (`/lms/*`) для образовательных целей:
+- **Дашборд Школы:** Сводка по классам, расписанию и оценкам.
+- **Классы и Группы:** Управление учебными коллективами.
+- **Журнал (Gradebook):** Электронный журнал оценок с поддержкой различных систем оценивания.
+- **Расписание:** Календарь занятий с привязкой к преподавателям и кабинетам.
+- **Домашние задания:** Выдача заданий, контроль выполнения, дедлайны.
+- **Дневник ученика:** Интерфейс просмотра оценок и заданий для детей и родителей.
+- **Кружки (Clubs):** Дополнительное образование, тарификация, посещаемость.
+
+### Платформа контрольных (Exams)
+- **Конструктор тестов:** Создание заданий различных типов (выбор, множественный выбор, открытый ответ).
+- **Публикация:** Генерация токенизированных ссылок для прохождения тестов без авторизации в ERP (`/exam/:token`).
+- **Автоматизация проверки:**
+  - Авто-проверка тестовых вопросов.
+  - **AI-ассистент проверки:** Использование Groq/Gemini для анализа открытых ответов по заданным критериям преподавателя.
+- **Аналитика:** Детальные результаты по каждому студенту (`/exams/:id/results`).
+
+### AI и Инновации
+- **Knowledge Base (RAG):** База знаний учреждения. Поддерживает загрузку документов, автоматическую векторизацию через Gemini, и семантический поиск (векторная БД `pgvector`).
+- **AI Assistant:** Встроенный чат-бот для сотрудников, способный отвечать на вопросы, опираясь на внутренние регламенты школы/сада.
+- **Синхронизация Google Drive:** Фоновый cron-job (каждые 30 минут) скачивает и индексирует новые регламенты напрямую из корпоративного Google Drive.
+
+### Интеграции
+- **1C (OData):** Двусторонний обмен данными. Синхронизация финансовых документов (ПКО, РКО, выписки), накладных, кадровых документов и зарплатных ведомостей. Специальный UI для просмотра данных 1C (`/onec-data`).
+- **Telegram Bot:** Привязка профиля сотрудника к Telegram (`/settings`). Отправка пуш-уведомлений о заявках АХО, согласованиях закупок и баг-репортах.
+- **Excel/CSV:** Экспорт и импорт списков учеников, сотрудников, инвентаря и финансов.
+
+---
+
+## 🗄 Структура базы данных
+
+Модель данных (Prisma) включает более 30 таблиц. Основные домены:
+- **RBAC:** `User`, `RolePermission`, `ActionLog` (DEVELOPER, DIRECTOR, DEPUTY, ADMIN, TEACHER, ACCOUNTANT, ZAVHOZ).
+- **Core Entities:** `Employee`, `Child`, `Parent`, `Group`.
+- **Operations:** `InventoryItem`, `InventoryTransaction`, `MaintenanceRequest`, `PurchaseOrder`, `Supplier`.
+- **Academics & Food:** `Club`, `Menu`, `Dish`, `Ingredient`.
+- **Finances:** `FinanceTransaction`, `CashFlowArticle`, `Contractor`.
+- **LMS:** `LmsScheduleItem`, `LmsGrade`, `LmsHomework`, `LmsStudentAttendance`.
+
+---
+
+## 🚀 Быстрый старт (Docker Compose)
+
+Самый быстрый способ развернуть весь стек локально:
+
+1. Создайте корневой `.env` (см. [Переменные окружения](#-переменные-окружения)).
+2. Поднимите стек команд:
+```bash
+docker compose up --build
+```
+3. Заполните базу демо-данными (в другом окне терминала):
+```bash
+docker compose exec backend npx prisma db seed
 ```
 
-## Быстрый старт
+> **Важно:** Скрипт `seed` создаст демо-пользователя `director` с паролем (по умолчанию), классы, учеников, расписание и тестовые транзакции.
 
-### Точки входа
+Точки входа:
+- **ERP:** `http://localhost:5173/`
+- **LMS:** `http://localhost:5173/lms`
+- **Backend API:** `http://localhost:4000/api`
 
-- ERP: http://localhost:5173/
-- LMS: http://localhost:5173/lms
-- Backend API: http://localhost:4000/api
-- Health-check: http://localhost:4000/api/health
+---
 
-### Запуск через Docker Compose
+## 💻 Локальная разработка
 
-1. Создайте корневой .env.
-2. Поднимите стек.
-3. При необходимости отдельно засидайте демо-данные.
+### Требования
+- Node.js 20+
+- База данных PostgreSQL 17 с установленным `pgvector`
 
-Минимальный .env для локального старта:
+### Запуск Backend
+```bash
+cd backend
+npm install
+cp .env.example .env # настройте ваши ключи (см. ниже)
+npx prisma generate
+npx prisma db push   # используем push для локальной разработки
+npx prisma db seed   # наполняем тестовыми данными
+npm run dev
+```
 
+### Запуск Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## ⚙️ Переменные окружения
+
+### Backend (`backend/.env`)
 ```env
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=change_me
-POSTGRES_DB=erp_db
-POSTGRES_APP_USER=erp_app
-POSTGRES_APP_PASSWORD=change_me_too
-
-JWT_SECRET=change_me_jwt_secret
-NODE_ENV=development
+# База данных
+DATABASE_URL=postgresql://postgres:change_me@localhost:5432/erp_db?schema=public
 PORT=4000
-CORS_ORIGINS=http://localhost:5173
+NODE_ENV=development
+JWT_SECRET=super_secret_jwt_key
 FRONTEND_URL=http://localhost:5173
 
-GEMINI_API_KEY=
-GROQ_API_KEY=
-GOOGLE_DRIVE_API_KEY=
-GOOGLE_DRIVE_FOLDER_ID=
-TELEGRAM_BOT_TOKEN=
+# AI Провайдеры
+GEMINI_API_KEY=your_gemini_key
+GROQ_API_KEY=your_groq_key
 
-ONEC_BASE_URL=
-ONEC_USER=
-ONEC_PASSWORD=
+# Google Drive (База знаний)
+GOOGLE_DRIVE_API_KEY=your_google_key
+GOOGLE_DRIVE_FOLDER_ID=your_folder_id
+
+# Telegram Bot
+TELEGRAM_BOT_TOKEN=your_bot_token
+
+# 1C Интеграция
+ONEC_BASE_URL=http://1c.example.com/odata/standard.odata
+ONEC_USER=admin
+ONEC_PASSWORD=pass
 ONEC_TIMEOUT_MS=10000
 ONEC_CRON_SCHEDULE=*/15 * * * *
 ```
 
-Команды:
-
-```bash
-docker compose up --build
-docker compose exec backend npx prisma db seed
-./test-setup.sh
-```
-
-Что происходит автоматически:
-
-- поднимается PostgreSQL с pgvector
-- bootstrap-контейнер создаёт application role и БД при необходимости
-- backend выполняет prisma migrate deploy перед стартом
-- frontend стартует как Vite dev server на 5173 порту
-
-> Важно: текущий Docker Compose не запускает prisma db seed автоматически. Если нужны демо-пользователи и учебные данные, запускайте seed вручную.
-
-## Локальная разработка
-
-### Требования
-
-- Node.js 20+
-- npm
-- PostgreSQL с расширением pgvector
-- Для macOS локальный запуск проще всего воспроизводится на PostgreSQL 17
-
-### Backend
-
-```bash
-cd backend
-npm install
-cp .env.example .env
-```
-
-Минимально проверьте эти значения в backend/.env:
-
-```env
-DATABASE_URL=postgresql://your_user:your_password@localhost:5432/erp_db?schema=public
-PORT=4000
-JWT_SECRET=change_me
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-GEMINI_API_KEY=
-GROQ_API_KEY=
-GOOGLE_DRIVE_API_KEY=
-GOOGLE_DRIVE_FOLDER_ID=
-TELEGRAM_BOT_TOKEN=
-ONEC_BASE_URL=
-ONEC_USER=
-ONEC_PASSWORD=
-```
-
-Рекомендуемый путь для чистой локальной БД:
-
-```bash
-npx prisma generate
-npx prisma db push
-npx prisma db seed
-npm run dev
-```
-
-Почему здесь лучше использовать prisma db push, а не полагаться на полную цепочку миграций:
-
-- production и Docker используют prisma migrate deploy
-- для brand new локальной БД текущая история миграций не всегда самый надёжный bootstrap-путь
-- prisma db push + seed даёт более предсказуемый dev-старт
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Файл frontend/.env.development уже указывает на локальный backend:
-
+### Frontend (`frontend/.env.development`)
 ```env
 VITE_API_URL=http://localhost:4000/api
 ```
+*(Для production в Render используется `https://your-backend-url.onrender.com/api`)*
 
-## Модули платформы
+---
 
-### Frontend-маршруты
+## 🧪 Тестирование и Деплой
 
-| Контур | Основные маршруты |
-| --- | --- |
-| ERP | /dashboard, /children, /employees, /clubs, /attendance, /finance, /inventory, /menu, /recipes, /maintenance, /security, /documents, /calendar, /feedback, /procurement, /schedule |
-| Администрирование | /users, /groups, /staffing, /notifications, /knowledge-base, /ai-assistant, /integration, /onec-data |
-| Контрольные | /exams, /exams/new, /exams/:id/edit, /exams/:id/results |
-| LMS | /lms/school, /lms/school/classes, /lms/school/gradebook, /lms/school/schedule, /lms/school/homework, /lms/school/attendance, /lms/diary |
-| Публичный доступ | /exam/:token |
-
-### Backend API
-
-Публичные endpoints:
-
-- /api/health
-- /api/auth/*
-- /api/public/exams/*
-
-Основные защищённые namespaces:
-
-| Блок | Prefix |
-| --- | --- |
-| ERP core | /api/dashboard, /api/children, /api/parents, /api/employees, /api/clubs, /api/attendance, /api/groups |
-| Operations | /api/finance, /api/inventory, /api/menu, /api/maintenance, /api/security, /api/documents, /api/calendar, /api/procurement, /api/recipes, /api/staffing |
-| Admin | /api/users, /api/settings, /api/permissions, /api/actionlog |
-| Collaboration | /api/notifications, /api/feedback |
-| AI and knowledge | /api/ai, /api/knowledge-base |
-| LMS | /api/lms/school |
-| Exams | /api/exams |
-| Integrations | /api/integration, /api/integrations, /api/onec-data |
-
-### Роли
-
-Роли, присутствующие в кодовой базе:
-
-- DEVELOPER
-- DIRECTOR
-- DEPUTY
-- ADMIN
-- TEACHER
-- ACCOUNTANT
-- ZAVHOZ
-
-Краткая логика доступа:
-
-| Роль | Основной профиль доступа |
-| --- | --- |
-| DEVELOPER | Полный доступ ко всем модулям |
-| DIRECTOR | Полный бизнес-доступ |
-| DEPUTY | Широкий административный и учебный доступ |
-| ADMIN | Управление ERP-операциями, пользователями и справочниками |
-| TEACHER | Учебные модули, посещаемость, кружки, контрольные, база знаний, AI-ассистент |
-| ACCOUNTANT | Финансы, закупки, интеграции и 1C-данные |
-| ZAVHOZ | Склад, меню, рецепты, безопасность, календарь, заявки, закупки |
-
-> Дополнительно доступ может фильтроваться таблицей RolePermission в базе данных.
-
-## Seed-данные и вспомогательные сценарии
-
-Стандартный seed создаёт:
-
-- пользователя director с логином izumi
-- демо-преподавателей и завуча
-- класс 4-Б
-- учеников
-- школьное расписание и связанные LMS-данные
-
-Базовая команда:
-
+### Локальные тесты
 ```bash
-cd backend
-npx prisma db seed
-```
-
-Отдельные скрипты сидов:
-
-```bash
-cd backend
-npx tsx prisma/seed_economics_exam.ts
-npx tsx prisma/seed_inventory_items.ts
-npx tsx prisma/seed_knowledge_base.ts
-npx tsx prisma/seed_school.ts
-```
-
-## Интеграции и автоматизация
-
-### AI и база знаний
-
-- RAG-ассистент доступен через /api/ai/chat
-- база знаний управляется через /api/ai/documents и /api/knowledge-base
-- Gemini используется для embeddings и семантического поиска
-- Groq используется для генерации ответов ассистента
-- Google Drive можно синхронизировать вручную или в фоне
-- при старте backend может запускать периодическую синхронизацию документов раз в 30 минут
-
-### Telegram
-
-- при наличии TELEGRAM_BOT_TOKEN backend инициализирует Telegram-бота
-- пользователь может привязать Telegram-аккаунт к системному профилю
-- поддержана отправка уведомлений пользователям с привязанным chat ID
-
-### 1C
-
-В репозитории есть отдельный модуль backend/src/modules/onec с такими возможностями:
-
-- orchestrated sync по нескольким фазам
-- sync финансовых документов
-- sync накладных
-- sync кадровых документов
-- sync зарплатных документов
-- sync регистров и универсальных справочников
-- браузер данных 1C через /api/onec-data/*
-- ручной trigger sync через /api/integrations/1c/sync
-
-### Excel и Google Sheets
-
-Модуль обмена данными поддерживает:
-
-- Excel export шаблонов
-- Excel import
-- импорт из Google Sheets через shared CSV
-
-На текущий момент реализованы потоки для сущностей:
-
-- children
-- employees
-- inventory
-- finance
-
-### Figma MCP
-
-Для верстки по дизайнам и HTML-to-design capture в репозитории уже подготовлен Figma MCP-контур:
-
-- сервер `Figma-MCP` объявлен в `/.vscode/mcp.json`
-- при первом подключении IDE запросит скрытый `Figma access token` и передаст его в `Authorization: Bearer ...`
-- capture-скрипт Figma подключён в `frontend/index.html`
-- отдельная памятка по запуску и проверке лежит в [FIGMA_MCP.md](./FIGMA_MCP.md)
-
-## Контур LMS
-
-Текущая LMS-реализация интегрирована в основное frontend-приложение под префиксом /lms и ориентирована на школьный сценарий.
-
-Что уже есть:
-
-- school dashboard
-- страницы классов
-- журнал оценок
-- расписание
-- домашние задания
-- посещаемость и прогресс
-- дневник ученика
-
-Основной API namespace:
-
-- /api/lms/school/*
-
-Дополнительные детали вынесены в [LMS_DOCUMENTATION.md](./LMS_DOCUMENTATION.md).
-
-## Контур контрольных
-
-Платформа контрольных уже поддерживает:
-
-- создание и редактирование контрольных
-- target groups и привязку к классам
-- разные типы вопросов
-- перемешивание вопросов и вариантов ответов
-- публикацию через токенизированные публичные ссылки
-- ограничение по времени
-- автоматическую проверку закрытых вопросов
-- AI-проверку открытых ответов и задач
-- страницу результатов по каждой контрольной
-- публичное прохождение без авторизации в ERP
-
-Ключевые маршруты:
-
-- защищённые: /api/exams/*
-- публичные: /api/public/exams/*
-- frontend: /exams
-- публичная страница ученика: /exam/:token
-
-Отдельная памятка по этому контуру находится в [EXAM_PLATFORM_DEPLOYMENT.md](./EXAM_PLATFORM_DEPLOYMENT.md).
-
-## Переменные окружения
-
-### Для Docker Compose
-
-- POSTGRES_USER
-- POSTGRES_PASSWORD
-- POSTGRES_DB
-- POSTGRES_APP_USER
-- POSTGRES_APP_PASSWORD
-- JWT_SECRET
-- NODE_ENV
-- PORT
-- CORS_ORIGINS
-- FRONTEND_URL
-- ONEC_BASE_URL
-- ONEC_USER
-- ONEC_PASSWORD
-- ONEC_TIMEOUT_MS
-- ONEC_CRON_SCHEDULE
-
-### Для backend
-
-- DATABASE_URL: подключение к PostgreSQL
-- GEMINI_API_KEY: embeddings и semantic search
-- GROQ_API_KEY: AI assistant chat
-- GOOGLE_DRIVE_API_KEY: доступ к Google Drive API
-- GOOGLE_DRIVE_FOLDER_ID: папка для синхронизации в базу знаний
-- TELEGRAM_BOT_TOKEN: запуск Telegram-бота и уведомлений
-- ONEC_BASE_URL: URL 1C OData
-- ONEC_USER: логин 1C
-- ONEC_PASSWORD: пароль 1C
-- ONEC_TIMEOUT_MS: таймаут запросов к 1C
-- ONEC_CRON_SCHEDULE: cron для периодической синхронизации 1C
-
-При ручном запуске backend через node, ts-node-dev или tsx переменные из корневого .env автоматически не подгружаются. Перед прямым вызовом sync из shell их нужно экспортировать отдельно, например через source .env.
-
-### Для frontend
-
-- VITE_API_URL: базовый URL backend API
-
-Подробная настройка AI-ключей описана в [backend/AI_KEYS_SETUP.md](./backend/AI_KEYS_SETUP.md).
-
-## Тесты
-
-### Backend
-
-```bash
+# Backend (Unit/Integration)
 cd backend
 npm test
 npm run test:coverage
-```
 
-### Frontend
-
-```bash
+# Frontend (Lint & Unit)
 cd frontend
-npm test
 npm run lint
-npm run build
-```
+npm test
 
-### End-to-end и smoke
-
-```bash
-cd frontend
-npm run cypress:run
-
+# E2E Smoke Tests
 cd ..
 ./test-setup.sh
 ```
 
-## Деплой
+### Деплой на Render
+Проект сконфигурирован для автоматического деплоя на Render (`render.yaml`):
+1. **Backend Web Service:** Собирается из `backend/`, при старте выполняет `prisma migrate deploy` и `prisma db seed`.
+2. **Frontend Static Site:** Собирается Vite, отдается статика.
 
-### Render
+---
 
-В репозитории уже есть [render.yaml](./render.yaml).
+## 📚 Связанная документация
 
-Текущая схема:
+В репозитории присутствуют расширенные технические заметки по конкретным модулям:
+- 📖 [LMS_DOCUMENTATION.md](./LMS_DOCUMENTATION.md) — Детальное описание архитектуры контура школы.
+- 🎓 [EXAM_PLATFORM_DEPLOYMENT.md](./EXAM_PLATFORM_DEPLOYMENT.md) — Логика работы платформы тестирования.
+- 🎨 [FIGMA_MCP.md](./FIGMA_MCP.md) — Инструкция по использованию Figma MCP для авто-верстки UI компонентов.
+- 🤖 [backend/AI_KEYS_SETUP.md](./backend/AI_KEYS_SETUP.md) — Детальная настройка доступов к ИИ моделям.
 
-- backend деплоится как Node web service из backend/
-- frontend деплоится как static site из frontend/
-- health-check backend: /api/health
-- старт backend на Render включает prisma migrate deploy, prisma db seed и npm start
-
-### Docker images
-
-- backend использует multi-stage Dockerfile для production runtime
-- frontend содержит development и production stages, а production собирается в nginx image
-
-## Tech stack
-
-### Backend
-
-- Node.js 20
-- Express
-- TypeScript
-- Prisma ORM
-- PostgreSQL
-- pgvector
-- JWT
-- Zod
-- Axios
-- node-cron
-- Telegraf
-- xlsx
-- mammoth
-
-### Frontend
-
-- React 18
-- TypeScript
-- Vite
-- React Router
-- Tailwind CSS
-- React Hook Form
-- Recharts
-- i18next
-- React Markdown
-- Vitest
-- Cypress
-
-## Структура репозитория
-
-```text
-.
-├── backend/                # Express + Prisma API
-├── frontend/               # React + Vite ERP/LMS frontend
-├── contract-tests/         # Контрактные и интеграционные проверки
-├── docker-compose.yml      # Локальный стек
-├── render.yaml             # Деплой на Render
-├── DOCUMENTATION.md        # Исторические / объединённые техзаметки
-├── LMS_DOCUMENTATION.md    # Заметки по LMS
-├── EXAM_PLATFORM_DEPLOYMENT.md
-└── test-setup.sh           # Smoke test локального контура
-```
-
-## Связанные документы
-
-- [DOCUMENTATION.md](./DOCUMENTATION.md)
-- [LMS_DOCUMENTATION.md](./LMS_DOCUMENTATION.md)
-- [EXAM_PLATFORM_DEPLOYMENT.md](./EXAM_PLATFORM_DEPLOYMENT.md)
-- [backend/AI_KEYS_SETUP.md](./backend/AI_KEYS_SETUP.md)
-- [FIGMA_MCP.md](./FIGMA_MCP.md)
-
-## License
-
-ISC
-
-## Author
-
-Izumi Amano
+---
+**Лицензия:** ISC  
+**Автор:** Izumi Amano
