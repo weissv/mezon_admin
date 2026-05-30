@@ -63,7 +63,7 @@ export default function MenuPage() {
  resolver: zodResolver(menuFormSchema),
  defaultValues: {
  date: '',
- ageGroup: '1-3 года',
+ ageGroup: '7-10 лет',
  meals: [{ name: 'Завтрак', dish: '', calories: 0}],
  },
 });
@@ -106,7 +106,7 @@ export default function MenuPage() {
  } else {
  reset({
  date: date.toISOString().split('T')[0],
- ageGroup: '1-3 года',
+ ageGroup: '7-10 лет',
  meals: [{ name: 'Завтрак', dish: '', calories: 0}],
  });
  }
@@ -367,8 +367,8 @@ export default function MenuPage() {
  <div>
  <label htmlFor="ageGroup"className="mezon-form-label">Возрастная группа</label>
  <select {...register('ageGroup')} id="ageGroup"className="mezon-field w-full">
- <option>1-3 года</option>
- <option>3-7 лет</option>
+ <option>7-10 лет</option>
+ <option>11-17 лет</option>
  </select>
  {errors.ageGroup ? <FormError message={errors.ageGroup.message} /> : null}
  </div>

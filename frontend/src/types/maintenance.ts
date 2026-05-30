@@ -9,7 +9,8 @@ export type MaintenanceStatus =
   | 'APPROVED'     // Одобрена (показывается Завхозу)
   | 'REJECTED'     // Отклонена
   | 'IN_PROGRESS'  // В работе (у Завхоза)
-  | 'DONE';        // Выполнена
+  | 'DONE'         // Выполнена
+  | 'COMPLETED';   // Завершена (Получена)
 
 // MaintenanceType enum
 export type MaintenanceType = 
@@ -29,6 +30,7 @@ export const maintenanceStatusLabels: Record<MaintenanceStatus, string> = {
   REJECTED: 'Отклонена',
   IN_PROGRESS: 'В работе',
   DONE: 'Выполнено',
+  COMPLETED: 'Завершена',
 };
 
 export const maintenanceStatusColors: Record<MaintenanceStatus, string> = {
@@ -37,6 +39,7 @@ export const maintenanceStatusColors: Record<MaintenanceStatus, string> = {
   REJECTED: 'bg-red-100 text-red-800',
   IN_PROGRESS: 'bg-blue-100 text-blue-800',
   DONE: 'bg-gray-100 text-gray-800',
+  COMPLETED: 'bg-emerald-100 text-emerald-800',
 };
 
 // Маппинг для типов заявок
@@ -109,6 +112,13 @@ export type MaintenanceRequest = {
   } | null;
   approvedAt?: string | null;
   rejectionReason?: string | null;
+  receivedById?: number | null;
+  receivedBy?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  } | null;
+  receivedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -127,7 +137,7 @@ export const createMaintenanceSchema = z.object({
   title: z.string().min(3, 'Наименование обязательно (минимум 3 символа)'),
   description: z.string().optional(),
   type: z.enum(['REPAIR', 'ISSUE']),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE']).optional(), // Добавляем статус для завхоза
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE', 'COMPLETED']).optional(), // Добавляем статус для завхоза
   // Массив позиций для заявок типа ISSUE
   items: z.array(maintenanceItemFormSchema).optional(),
 }).superRefine((data, ctx) => {
@@ -158,7 +168,7 @@ export const updateMaintenanceSchema = z.object({
   title: z.string().min(3, 'Наименование обязательно (минимум 3 символа)').optional(),
   description: z.string().optional(),
   type: z.enum(['REPAIR', 'ISSUE']).optional(),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE']).optional(),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE', 'COMPLETED']).optional(),
   items: z.array(maintenanceItemFormSchema).optional(),
   rejectionReason: z.string().optional(),
 });
