@@ -1,157 +1,170 @@
-# Mezon Admin - Образовательная ERP и LMS Платформа
+# Mezon Admin - Educational ERP & LMS Platform
 
-Платформа для комплексного управления образовательным учреждением (детский сад, школа). Система объединяет административно-хозяйственный контур (ERP), систему управления обучением (LMS), конструктор контрольных работ с AI-проверкой, интеллектуальную базу знаний (RAG) и набор корпоративных интеграций (1C, Telegram, Google Drive, Excel).
+**Mezon Admin** is a large-scale, monorepo platform for comprehensive management of educational institutions (kindergartens, schools, learning centers).
+The system completely covers all administrative, operational, educational, financial, and HR needs.
 
-> **Статус проекта (Март 2026):** Система полностью функциональна. Содержит рабочие frontend и backend приложения, локальный Docker-стек, готовую конфигурацию для Render, продвинутый контур LMS, платформу тестирования с публичным доступом, AI-базу знаний, глубокую синхронизацию с 1С через OData и поддержку Telegram-уведомлений.
-
----
-
-## 📑 Оглавление
-
-1. [Архитектура и Технологический стек](#-архитектура-и-технологический-стек)
-2. [Глубокий обзор модулей](#-глубокий-обзор-модулей)
-   - [Административно-хозяйственный контур (ERP)](#административно-хозяйственный-контур-erp)
-   - [Учебный контур (LMS)](#учебный-контур-lms)
-   - [Платформа контрольных (Exams)](#платформа-контрольных-exams)
-   - [AI и Инновации](#ai-и-инновации)
-   - [Интеграции](#интеграции)
-3. [Структура базы данных (Prisma)](#-структура-базы-данных)
-4. [Быстрый старт (Docker Compose)](#-быстрый-старт-docker-compose)
-5. [Локальная разработка](#-локальная-разработка)
-6. [Переменные окружения](#-переменные-окружения)
-7. [Тестирование и Деплой](#-тестирование-и-деплой)
-8. [Связанная документация](#-связанная-документация)
+> **Project Status (Updated):** The project comprises over 68,000 lines of code and 300+ components. The ERP, LMS, testing platform with AI grading, Google Drive-based knowledge base (RAG), bidirectional 1C synchronization (OData), and full mobile adaptation have been fully implemented.
 
 ---
 
-## 🏗 Архитектура и Технологический стек
+## 📑 Table of Contents
 
-Проект реализован в виде монорепозитория, разделенного на клиентскую и серверную части.
+1. [Architecture & Tech Stack](#-architecture--tech-stack)
+2. [Functional Modules Overview (ERP)](#-functional-modules-overview-erp)
+3. [Educational System (LMS)](#-educational-system-lms)
+4. [Innovations: AI & Automation](#-innovations-ai--automation)
+5. [Integrations (1C, Telegram)](#-integrations-1c-telegram)
+6. [Mobile Adaptation](#-mobile-adaptation)
+7. [Database & Structure (Prisma)](#-database--structure-prisma)
+8. [Setup & Local Development](#-setup--local-development)
+9. [Scripts & Deployment](#-scripts--deployment)
+
+---
+
+## 🏗 Architecture & Tech Stack
+
+The project is built as a scalable monorepo, strictly separating the Backend (API gateway) and the Frontend (SPA).
 
 ### Backend (Node.js API)
-- **Runtime:** Node.js 20+
-- **Фреймворк:** Express + TypeScript
-- **База данных:** PostgreSQL 17 с расширением `pgvector` (для семантического поиска)
-- **ORM:** Prisma ORM
-- **Валидация:** Zod
-- **Авторизация:** JWT + bcryptjs
-- **Интеграции:** Axios, Telegraf (Telegram Bot), node-cron, @google/generative-ai (Gemini), openai (Groq), xlsx, mammoth (Google Drive/Docs)
+- **Core:** Node.js 20+, Express.js, TypeScript.
+- **Database:** PostgreSQL 17 with the `pgvector` extension for working with embeddings.
+- **ORM:** Prisma ORM (v5). Complex data schema consisting of 30+ interconnected tables.
+- **Validation & Security:** Zod, JWT (authorization with RBAC role model), bcryptjs, CORS policies.
+- **AI Ecosystem:** `@google/generative-ai` (Gemini), `openai` (via Groq API for lightning-fast LLM inference).
+- **Tools:** `node-cron` for background tasks, `mammoth` (parsing `.docx`), `xlsx` for exports.
 
 ### Frontend (React SPA)
-- **Фреймворк:** React 18 + TypeScript + Vite
-- **Роутинг:** React Router DOM (v6)
-- **Стилизация:** Tailwind CSS + Autoprefixer
-- **UI компоненты:** Custom UI (вдохновлен shadcn/ui), Lucide React
-- **Работа с формами:** React Hook Form + Zod Resolvers
-- **Визуализация:** Recharts
-- **i18n:** i18next + react-i18next
-- **Утилиты:** date-fns, clsx, sonner (тосты), html2canvas
-
-### Инфраструктура
-- **Контейнеризация:** Docker, Docker Compose (multi-stage builds)
-- **Деплой:** Render (via `render.yaml`)
-- **Тестирование:** Vitest (unit/coverage), Cypress (E2E)
+- **Framework:** React 18, Vite, TypeScript.
+- **Routing:** React Router DOM v6 (split into main ERP router and `/lms` router).
+- **UI/UX & Styling:** Tailwind CSS, custom UI components based on CSS variables (Glassmorphism), Lucide React.
+- **State & Form Management:** React Hook Form, Zod Resolvers, custom React Contexts (`AuthContext`, `PermissionsContext`).
+- **Mobile Experience:** Support for all iOS/Android browsers (Touch targets, Swipe-menus, Responsive tables).
 
 ---
 
-## 🧩 Глубокий обзор модулей
+## 🧩 Functional Modules Overview (ERP)
 
-На основе полного анализа кодовой базы, система включает в себя следующие функциональные блоки:
+The administrative and operational department includes 15+ sections.
 
-### Административно-хозяйственный контур (ERP)
-- **Дашборд:** Виджетизированная система аналитики (посещаемость, финансы, HR-алерты, инвентаризация, закупки). Поддержка персонализации рабочего стола (WidgetChrome, PersonalizationPanel).
-- **Управление контингентом:** Учет детей (`/children`), групп (`/groups`), родителей. Карточки здоровья, история переводов, временное отсутствие.
-- **HR и Персонал:** Учет сотрудников (`/employees`), расписание смен (`/staffing`), штатное расписание, отпуска, медицинские книжки.
-- **Финансы:** Учет доходов и расходов, интеграция с 1С (касса, банк). Контроль задолженностей и финансовые регистры.
-- **Склад и Инвентаризация:** Управление остатками (`/inventory`), закупки (`/procurement`), списание по сроку годности. Поддержка партионного учета и минимальных остатков.
-- **Питание (Меню и Рецепты):** Технологические карты блюд (`/recipes`), генерация меню по возрастам (`/menu`), калькуляция калорийности и автоматическое списание ингредиентов со склада.
-- **Заявки АХО (Maintenance):** Журнал заявок на ремонт и выдачу ТМЦ (`/maintenance`). Многоступенчатый процесс: *Запрос -> Одобрение -> В работе -> Готово*.
-- **Безопасность:** Журнал инцидентов, пожарных проверок, учет посетителей.
-- **Документооборот:** Генерация документов по шаблонам, экспорт приказов и договоров.
-
-### Учебный контур (LMS)
-Вынесен в отдельный роутер (`/lms/*`) для образовательных целей:
-- **Дашборд Школы:** Сводка по классам, расписанию и оценкам.
-- **Классы и Группы:** Управление учебными коллективами.
-- **Журнал (Gradebook):** Электронный журнал оценок с поддержкой различных систем оценивания.
-- **Расписание:** Календарь занятий с привязкой к преподавателям и кабинетам.
-- **Домашние задания:** Выдача заданий, контроль выполнения, дедлайны.
-- **Дневник ученика:** Интерфейс просмотра оценок и заданий для детей и родителей.
-- **Кружки (Clubs):** Дополнительное образование, тарификация, посещаемость.
-
-### Платформа контрольных (Exams)
-- **Конструктор тестов:** Создание заданий различных типов (выбор, множественный выбор, открытый ответ).
-- **Публикация:** Генерация токенизированных ссылок для прохождения тестов без авторизации в ERP (`/exam/:token`).
-- **Автоматизация проверки:**
-  - Авто-проверка тестовых вопросов.
-  - **AI-ассистент проверки:** Использование Groq/Gemini для анализа открытых ответов по заданным критериям преподавателя.
-- **Аналитика:** Детальные результаты по каждому студенту (`/exams/:id/results`).
-
-### AI и Инновации
-- **Knowledge Base (RAG):** База знаний учреждения. Поддерживает загрузку документов, автоматическую векторизацию через Gemini, и семантический поиск (векторная БД `pgvector`).
-- **AI Assistant:** Встроенный чат-бот для сотрудников, способный отвечать на вопросы, опираясь на внутренние регламенты школы/сада.
-- **Синхронизация Google Drive:** Фоновый cron-job (каждые 30 минут) скачивает и индексирует новые регламенты напрямую из корпоративного Google Drive.
-
-### Интеграции
-- **1C (OData):** Двусторонний обмен данными. Синхронизация финансовых документов (ПКО, РКО, выписки), накладных, кадровых документов и зарплатных ведомостей. Специальный UI для просмотра данных 1C (`/onec-data`).
-- **Telegram Bot:** Привязка профиля сотрудника к Telegram (`/settings`). Отправка пуш-уведомлений о заявках АХО, согласованиях закупок и баг-репортах.
-- **Excel/CSV:** Экспорт и импорт списков учеников, сотрудников, инвентаря и финансов.
+1. **Dashboard:** Widgetized analytics with customizable layout (`PersonalizationPanel`). Statistics on finances, attendance, security incidents, and HR.
+2. **Contingent (Children/Parents):** Personal files, transfer histories (Child Status: ACTIVE, LEFT, ARCHIVED), tracking absences with medical certificates, health records.
+3. **Groups & Classes:** Distributing the contingent across educational streams (Grades 1-11, Preschool, Infant), homeroom teachers.
+4. **HR & Staffing:** Employee management, staffing tables, tracking expiration dates for medical books and contracts.
+5. **Finances:** Cash flow (Incomes/Expenses), accounting for cash (PKO/RKO) and bank operations, monitoring accounts receivable.
+6. **Warehouse & Inventory:** Multi-warehouse batch tracking (Food, Household, Stationery), tracking critical stock levels and expirations. Supports inventory transactions (Inflow, Outflow, Adjustment, Write-off).
+7. **Kitchen (Recipes & Menus):** Creating technical dish cards with macronutrient (CFC) calculations, generating daily menus by age groups, automatic deduction of ingredients.
+8. **Maintenance (Requests):** Electronic log of requests for inventory issuance or repairs. Built-in workflow: *Creation → Approval (Director) → In Progress (Supply Manager) → Issued/Completed*.
+9. **Procurement:** Creating orders (Planned, Operational), managing suppliers, tracking logistics statuses.
+10. **Document Management & Calendar:** Generating orders and contracts based on templates. Event planning.
+11. **Security:** Incident log, visitor log, fire safety checks.
 
 ---
 
-## 🗄 Структура базы данных
+## 🎓 Educational System (LMS)
 
-Модель данных (Prisma) включает более 30 таблиц. Основные домены:
-- **RBAC:** `User`, `RolePermission`, `ActionLog` (DEVELOPER, DIRECTOR, DEPUTY, ADMIN, TEACHER, ACCOUNTANT, ZAVHOZ).
-- **Core Entities:** `Employee`, `Child`, `Parent`, `Group`.
-- **Operations:** `InventoryItem`, `InventoryTransaction`, `MaintenanceRequest`, `PurchaseOrder`, `Supplier`.
-- **Academics & Food:** `Club`, `Menu`, `Dish`, `Ingredient`.
-- **Finances:** `FinanceTransaction`, `CashFlowArticle`, `Contractor`.
-- **LMS:** `LmsScheduleItem`, `LmsGrade`, `LmsHomework`, `LmsStudentAttendance`.
+A specialized section (accessible via the `/lms` route) for the educational block:
+
+- **LMS Dashboard:** Summary statistics of the educational process.
+- **Gradebook:** Electronic journal with the ability to set various types of grades and comment on student work.
+- **Schedule:** Calendar grid of lessons, linking teachers to classrooms.
+- **Diary & Progress:** Tracking academic performance, displaying homework assignments (with deadlines and attached files).
+- **Clubs & Extracurriculars:** Enrollment in clubs (Waitlist/Active), fee calculation, tracking attendance.
+- **Exams Platform:** 
+  - Test builder (Text, Multiple Choice, Open Response).
+  - Generating secure one-time links (`/api/public/exams`).
+  - **AI Grading:** Automatic evaluation of open-ended answers using Artificial Intelligence based on the teacher's grading rubrics/keys.
 
 ---
 
-## 🚀 Быстрый старт (Docker Compose)
+## 🤖 Innovations: AI & Automation
 
-Самый быстрый способ развернуть весь стек локально:
+1. **AI Knowledge Base (RAG):**
+   - Full integration with corporate **Google Drive**.
+   - `AiService` runs a background Cron-job (every 30 mins) that scans the specified folder for new regulations (Word, TXT).
+   - Texts are automatically chunked, passed through Gemini Embeddings, and stored in `pgvector`.
+   - The interface features a built-in "AI Assistant" that answers employee questions strictly based on internal school documentation.
+2. **AI Assignment Grading:** Integration with Groq (Llama-3/Gemma) for instant parsing and grading of students' creative assignments in the LMS.
 
-1. Создайте корневой `.env` (см. [Переменные окружения](#-переменные-окружения)).
-2. Поднимите стек команд:
+---
+
+## 🔄 Integrations (1C, Telegram)
+
+### 1C:Enterprise (OData)
+The platform acts as a convenient frontend for 1C:
+- Synchronization of cash receipts/disbursements and bank statements (`FinanceTransaction`).
+- Import of nomenclature and counterparties.
+- Special interface `/onec-data` for directly viewing 1C information registers and documents (HR, Payroll).
+
+### Telegram Bot
+Every employee can link their Telegram account via their personal profile:
+- Instant Push notifications about new maintenance requests.
+- Purchase approval requests sent to the director.
+- Critical alerts (fire safety checks, security incidents).
+
+---
+
+## 📱 Mobile Adaptation
+
+The system follows a **Mobile-First** philosophy:
+- Completely rewritten navigation (`SideNav.tsx`) with a side Slide-Out menu and Backdrop effects.
+- Adaptive grids (Mezon Grid) and responsive data tables (horizontal scroll).
+- Optimized Touch targets (minimum height of inputs and buttons is 44px, disabling interface zooming on iOS).
+- Intelligent collapsing of side panels when switching to mobile resolutions.
+
+---
+
+## 🗄 Database & Structure (Prisma)
+
+The role model is built on RBAC (`RolePermission`): `DEVELOPER, DIRECTOR, DEPUTY, ADMIN, TEACHER, ACCOUNTANT, ZAVHOZ`.
+The `ActionLog` model is used to log all operations, allowing you to track who changed what data in the system and when (with JSON payload capturing).
+
+The `backend/prisma/schema.prisma` file contains over 1600 lines and describes:
+- Users, Roles, Employees (`User`, `Employee`).
+- Students, Parents, Clubs (`Child`, `Parent`, `Group`, `Club`).
+- Inventory operations and Nomenclature (`InventoryItem`, `MaintenanceRequest`).
+- Cash registers and Finances (`FinanceTransaction`, `CashFlowArticle`).
+
+---
+
+## 🚀 Setup & Local Development
+
+### Prerequisites
+- Node.js v20.x
+- PostgreSQL v17+ (REQUIRED with `pgvector` installed)
+- Docker & Docker Compose (for quick start)
+
+### Quick Start via Docker
 ```bash
+# 1. Clone the repository
+git clone https://github.com/weissv/mezon_admin.git
+cd mezon_admin
+
+# 2. Setup environment
+cp backend/.env.example backend/.env
+
+# 3. Spin up the stack
 docker compose up --build
-```
-3. Заполните базу демо-данными (в другом окне терминала):
-```bash
+
+# 4. Seed the database (in another terminal window)
 docker compose exec backend npx prisma db seed
 ```
+**Access:**
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:4000/api`
+- Default login: `director@mezon.uz` / Password is generated in the seed file.
 
-> **Важно:** Скрипт `seed` создаст демо-пользователя `director` с паролем (по умолчанию), классы, учеников, расписание и тестовые транзакции.
+### Local Development (Without Docker)
 
-Точки входа:
-- **ERP:** `http://localhost:5173/`
-- **LMS:** `http://localhost:5173/lms`
-- **Backend API:** `http://localhost:4000/api`
-
----
-
-## 💻 Локальная разработка
-
-### Требования
-- Node.js 20+
-- База данных PostgreSQL 17 с установленным `pgvector`
-
-### Запуск Backend
+**Backend:**
 ```bash
 cd backend
 npm install
-cp .env.example .env # настройте ваши ключи (см. ниже)
 npx prisma generate
-npx prisma db push   # используем push для локальной разработки
-npx prisma db seed   # наполняем тестовыми данными
+npx prisma db push
 npm run dev
 ```
 
-### Запуск Frontend
+**Frontend:**
 ```bash
 cd frontend
 npm install
@@ -160,78 +173,12 @@ npm run dev
 
 ---
 
-## ⚙️ Переменные окружения
+## 🔧 Scripts & Deployment
 
-### Backend (`backend/.env`)
-```env
-# База данных
-DATABASE_URL=postgresql://postgres:change_me@localhost:5432/erp_db?schema=public
-PORT=4000
-NODE_ENV=development
-JWT_SECRET=super_secret_jwt_key
-FRONTEND_URL=http://localhost:5173
-
-# AI Провайдеры
-GEMINI_API_KEY=your_gemini_key
-GROQ_API_KEY=your_groq_key
-
-# Google Drive (База знаний)
-GOOGLE_DRIVE_API_KEY=your_google_key
-GOOGLE_DRIVE_FOLDER_ID=your_folder_id
-
-# Telegram Bot
-TELEGRAM_BOT_TOKEN=your_bot_token
-
-# 1C Интеграция
-ONEC_BASE_URL=http://1c.example.com/odata/standard.odata
-ONEC_USER=admin
-ONEC_PASSWORD=pass
-ONEC_TIMEOUT_MS=10000
-ONEC_CRON_SCHEDULE=*/15 * * * *
-```
-
-### Frontend (`frontend/.env.development`)
-```env
-VITE_API_URL=http://localhost:4000/api
-```
-*(Для production в Render используется `https://your-backend-url.onrender.com/api`)*
+- The project is configured for deployment on **Render** (`render.yaml`).
+- E2E Testing is configured via `./test-setup.sh`.
+- Built-in scripts for generating test environments (Vite Tests, Prisma Studio).
 
 ---
-
-## 🧪 Тестирование и Деплой
-
-### Локальные тесты
-```bash
-# Backend (Unit/Integration)
-cd backend
-npm test
-npm run test:coverage
-
-# Frontend (Lint & Unit)
-cd frontend
-npm run lint
-npm test
-
-# E2E Smoke Tests
-cd ..
-./test-setup.sh
-```
-
-### Деплой на Render
-Проект сконфигурирован для автоматического деплоя на Render (`render.yaml`):
-1. **Backend Web Service:** Собирается из `backend/`, при старте выполняет `prisma migrate deploy` и `prisma db seed`.
-2. **Frontend Static Site:** Собирается Vite, отдается статика.
-
----
-
-## 📚 Связанная документация
-
-В репозитории присутствуют расширенные технические заметки по конкретным модулям:
-- 📖 [LMS_DOCUMENTATION.md](./LMS_DOCUMENTATION.md) — Детальное описание архитектуры контура школы.
-- 🎓 [EXAM_PLATFORM_DEPLOYMENT.md](./EXAM_PLATFORM_DEPLOYMENT.md) — Логика работы платформы тестирования.
-- 🎨 [FIGMA_MCP.md](./FIGMA_MCP.md) — Инструкция по использованию Figma MCP для авто-верстки UI компонентов.
-- 🤖 [backend/AI_KEYS_SETUP.md](./backend/AI_KEYS_SETUP.md) — Детальная настройка доступов к ИИ моделям.
-
----
-**Лицензия:** ISC  
-**Автор:** Izumi Amano
+*Documentation generated based on deep static analysis of the codebase.*
+*License: ISC | Author: Izumi Amano*
