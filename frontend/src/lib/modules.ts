@@ -39,7 +39,7 @@ export const MODULE_LINKS: ModuleLink[] = [
   { path: "/finance", label: "Финансы", roles: [...FULL_ACCESS_ROLES, "ADMIN", "ACCOUNTANT"], section: "operations" },
   { path: "/inventory", label: "Склад", roles: [...FULL_ACCESS_ROLES, "ADMIN", "ZAVHOZ"], section: "operations" },
   { path: "/menu", label: "Меню", roles: [...FULL_ACCESS_ROLES, "ADMIN", "ZAVHOZ"], section: "operations" },
-  { path: "/recipes", label: "Рецепты", roles: [...FULL_ACCESS_ROLES, "ADMIN", "ZAVHOZ"], section: "operations" },
+  { path: "/recipes", label: "Блюда", roles: [...FULL_ACCESS_ROLES, "ADMIN", "ZAVHOZ"], section: "operations" },
   { path: "/procurement", label: "Закупки", roles: [...FULL_ACCESS_ROLES, "ADMIN", "ACCOUNTANT", "ZAVHOZ"], section: "operations" },
   { path: "/maintenance", label: "Заявки", roles: [...FULL_ACCESS_ROLES, "ADMIN", "ZAVHOZ"], section: "operations" },
   { path: "/security", label: "Безопасность", roles: [...FULL_ACCESS_ROLES, "ADMIN", "ZAVHOZ"], section: "operations" },
