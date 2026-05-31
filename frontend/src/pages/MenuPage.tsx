@@ -43,6 +43,7 @@ const getStartOfWeek = (date: Date) => {
 };
 
 export default function MenuPage() {
+ const [apiDishes, setApiDishes] = useState<any[]>([]);
  const [menus, setMenus] = useState<any[]>([]);
  const [isModalOpen, setIsModalOpen] = useState(false);
  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -94,6 +95,7 @@ export default function MenuPage() {
 
  useEffect(() => {
  fetchMenu(weekStart);
+ api.get('/api/recipes/dishes').then(res => setApiDishes(res.data)).catch(console.error);
  }, [weekStart]);
 
  const handleOpenModal = (date: Date) => {
@@ -427,10 +429,10 @@ export default function MenuPage() {
  <label className="mezon-form-label">Блюдо</label>
  <select {...register(`meals.${index}.dish`)} className="mezon-field w-full">
  <option value="">Выберите блюдо</option>
- {(mealsWatch?.[index]?.name && DISHES_BY_MEAL_TIME[mealsWatch[index].name] 
-   ? DISHES_BY_MEAL_TIME[mealsWatch[index].name] 
-   : ALL_DISHES).map((dish) => (
- <option key={dish} value={dish}>{dish}</option>
+ {(apiDishes.filter(d => !mealsWatch?.[index]?.name || d.category === mealsWatch[index].name).length > 0 
+  ? apiDishes.filter(d => !mealsWatch?.[index]?.name || d.category === mealsWatch[index].name) 
+  : apiDishes).map((dish: any) => (
+ <option key={dish.id} value={dish.name}>{dish.name}</option>
  ))}
  </select>
  {errors.meals?.[index]?.dish ? <FormError message={errors.meals[index]?.dish?.message} /> : null}
