@@ -1,11 +1,12 @@
 // src/pages/MenuPage.tsx
 import { useState, useEffect} from 'react';
-import { useForm, useFieldArray} from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver} from '@hookform/resolvers/zod';
 import { z} from 'zod';
 import { toast} from 'sonner';
 import { api} from '../lib/api';
 import { Card} from '../components/Card';
+import { MEAL_TIMES, DISHES_BY_MEAL_TIME, ALL_DISHES } from '../constants/dishes';
 import {
  Modal,
  ModalActions,
@@ -71,6 +72,11 @@ export default function MenuPage() {
  const { fields, append, remove} = useFieldArray({
  control,
  name: 'meals',
+});
+
+ const mealsWatch = useWatch({
+ control,
+ name: 'meals'
 });
 
  const fetchMenu = async (start: Date) => {
@@ -402,7 +408,12 @@ export default function MenuPage() {
  <div className="grid gap-4 md:grid-cols-2">
  <div>
  <label className="mezon-form-label">Название</label>
- <Input {...register(`meals.${index}.name`)} placeholder="Например, Завтрак"/>
+ <select {...register(`meals.${index}.name`)} className="mezon-field w-full">
+ <option value="">Выберите время приёма</option>
+ {MEAL_TIMES.map((time) => (
+ <option key={time} value={time}>{time}</option>
+ ))}
+ </select>
  {errors.meals?.[index]?.name ? <FormError message={errors.meals[index]?.name?.message} /> : null}
  </div>
 
@@ -414,7 +425,14 @@ export default function MenuPage() {
 
  <div className="md:col-span-2">
  <label className="mezon-form-label">Блюдо</label>
- <Input {...register(`meals.${index}.dish`)} placeholder="Например, Каша овсяная"/>
+ <select {...register(`meals.${index}.dish`)} className="mezon-field w-full">
+ <option value="">Выберите блюдо</option>
+ {(mealsWatch?.[index]?.name && DISHES_BY_MEAL_TIME[mealsWatch[index].name] 
+   ? DISHES_BY_MEAL_TIME[mealsWatch[index].name] 
+   : ALL_DISHES).map((dish) => (
+ <option key={dish} value={dish}>{dish}</option>
+ ))}
+ </select>
  {errors.meals?.[index]?.dish ? <FormError message={errors.meals[index]?.dish?.message} /> : null}
  </div>
  </div>

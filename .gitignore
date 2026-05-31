@@ -86,3 +86,4 @@ backend/1c_*.txt
 # Системный мусор
 .DS_Store
 Thumbs.db
+Список блюд.csv
