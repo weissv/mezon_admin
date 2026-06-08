@@ -200,6 +200,11 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
           dismissalOrderDate: data.dismissalOrderDate ? this.parseDate(data.dismissalOrderDate, 'дата приказа выбытия') : undefined,
           nextSchool: data.nextSchool,
           
+          // Legacy fields
+          fatherName: data.fatherName,
+          motherName: data.motherName,
+          parentPhone: data.parentPhone,
+          
           // contracts handled below
         },
         include: childDetailInclude,
@@ -235,7 +240,7 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
           let documentId = undefined;
           if (c.documentUrl) {
             const doc = await this.prisma.document.create({
-              data: { name: c.documentName || \`Договор №\${c.number}\`, fileUrl: c.documentUrl, childId: childRec.id }
+              data: { name: c.documentName || `Договор №${c.number}`, fileUrl: c.documentUrl, childId: childRec.id }
             });
             documentId = doc.id;
           }
@@ -253,10 +258,6 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
       
       return childRec;
     });
-          // Legacy fields
-          fatherName: data.fatherName,
-          motherName: data.motherName,
-          parentPhone: data.parentPhone,
 
     // Create parents if provided
     if (data.parents?.length) {
@@ -338,7 +339,7 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
         let documentId = undefined;
         if (contract.documentUrl) {
           const doc = await this.prisma.document.create({
-            data: { name: contract.documentName || \`Договор №\${contract.number}\`, fileUrl: contract.documentUrl, childId: numericId }
+            data: { name: contract.documentName || `Договор №${contract.number}`, fileUrl: contract.documentUrl, childId: numericId }
           });
           documentId = doc.id;
         }

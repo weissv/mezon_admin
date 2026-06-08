@@ -176,7 +176,7 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
           let documentId = undefined;
           if (c.documentUrl) {
             const doc = await tx.document.create({
-              data: { name: c.documentName || \`Договор №\${c.number}\`, fileUrl: c.documentUrl, employeeId: emp.id }
+              data: { name: c.documentName || `Договор №${c.number}`, fileUrl: c.documentUrl, employeeId: emp.id }
             });
             documentId = doc.id;
           }
@@ -274,7 +274,7 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
         let documentId = undefined;
         if (contract.documentUrl) {
           const doc = await this.prisma.document.create({
-            data: { name: contract.documentName || \`Договор №\${contract.number}\`, fileUrl: contract.documentUrl, employeeId: numericId }
+            data: { name: contract.documentName || `Договор №${contract.number}`, fileUrl: contract.documentUrl, employeeId: numericId }
           });
           documentId = doc.id;
         }
