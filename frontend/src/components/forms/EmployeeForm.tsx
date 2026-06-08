@@ -33,8 +33,6 @@ const formSchema = z.object({
   hireOrderDate: z.string().optional(),
   fireOrderNumber: z.string().optional(),
   fireOrderDate: z.string().optional(),
- 
-  fireOrderDate: z.string().optional(),
   hireOrderFileUrl: z.string().optional(),
   hireOrderFileName: z.string().optional(),
   fireOrderFileUrl: z.string().optional(),
