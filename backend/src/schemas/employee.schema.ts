@@ -1,6 +1,14 @@
 // src/schemas/employee.schema.ts
 import { z } from "zod";
 
+export const employeeContractInputSchema = z.object({
+  id: z.number().int().positive().optional(),
+  type: z.enum(["MAIN", "PART_TIME", "CONTRACTOR"]),
+  number: z.string().min(1, "Номер договора обязателен"),
+  date: z.string().datetime("Неверный формат даты"),
+  isActive: z.boolean().optional().default(true),
+});
+
 export const createEmployeeSchema = z.object({
   body: z.object({
     firstName: z.string().min(2, "Имя обязательно"),
@@ -11,9 +19,16 @@ export const createEmployeeSchema = z.object({
     rate: z.number().positive("Ставка должна быть > 0"),
     hireDate: z.string().datetime("Неверный формат даты"),
     fireDate: z.string().datetime().nullable().optional(),
+    hireOrderNumber: z.string().optional(),
+    hireOrderDate: z.string().datetime().nullable().optional(),
+    fireOrderNumber: z.string().optional(),
+    fireOrderDate: z.string().datetime().nullable().optional(),
     contractEndDate: z.string().datetime().nullable().optional(),
     medicalCheckupDate: z.string().datetime().nullable().optional(),
     attestationDate: z.string().datetime().nullable().optional(),
+    status: z.enum(["ACTIVE", "ARCHIVED"]).optional(),
+    contracts: z.array(employeeContractInputSchema).optional(),
+    subjectIds: z.array(z.number().int().positive()).optional(),
     user: z
       .object({
         email: z.string().email(),

@@ -21,9 +21,16 @@ export interface CreateEmployeeInput {
   rate: number;
   hireDate: string | Date;
   fireDate?: string | Date;
+  hireOrderNumber?: string;
+  hireOrderDate?: string | Date;
+  fireOrderNumber?: string;
+  fireOrderDate?: string | Date;
   contractEndDate?: string | Date;
   medicalCheckupDate?: string | Date;
   attestationDate?: string | Date;
+  status?: string;
+  contracts?: { id?: number; type: any; number: string; date: string | Date; isActive?: boolean }[];
+  subjectIds?: number[];
   user?: {
     email: string;
     password: string;
@@ -73,7 +80,8 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
         include: { 
           user: { 
             select: { id: true, email: true, role: true } 
-          } 
+          },
+          contracts: true
         },
       }),
       this.prisma.employee.count({ where }),
@@ -93,7 +101,9 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
       include: { 
         user: { 
           select: { id: true, email: true, role: true } 
-        } 
+        },
+        contracts: { orderBy: { date: 'desc' as const } },
+        teacherSubjects: { include: { subject: true } } // Subject relation uses teacherSubjects
       },
     });
 
@@ -121,11 +131,35 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
           rate: employeeData.rate,
           hireDate: this.parseDate(employeeData.hireDate),
           fireDate: employeeData.fireDate ? this.parseDate(employeeData.fireDate) : undefined,
+          hireOrderNumber: employeeData.hireOrderNumber,
+          hireOrderDate: employeeData.hireOrderDate ? this.parseDate(employeeData.hireOrderDate) : undefined,
+          fireOrderNumber: employeeData.fireOrderNumber,
+          fireOrderDate: employeeData.fireOrderDate ? this.parseDate(employeeData.fireOrderDate) : undefined,
           contractEndDate: employeeData.contractEndDate ? this.parseDate(employeeData.contractEndDate) : undefined,
           medicalCheckupDate: employeeData.medicalCheckupDate ? this.parseDate(employeeData.medicalCheckupDate) : undefined,
           attestationDate: employeeData.attestationDate ? this.parseDate(employeeData.attestationDate) : undefined,
+          status: (employeeData.status as any) || 'ACTIVE',
+          contracts: employeeData.contracts ? {
+            create: employeeData.contracts.map(c => ({
+              type: c.type,
+              number: c.number,
+              date: this.parseDate(c.date),
+              isActive: c.isActive ?? true,
+            }))
+          } : undefined,
         },
       });
+
+      // Create subject associations if provided
+      if (data.subjectIds && data.subjectIds.length > 0) {
+        await tx.teacherSubject.createMany({
+          data: data.subjectIds.map((subjectId: number) => ({
+            employeeId: emp.id,
+            subjectId,
+            isPrimary: false,
+          })),
+        });
+      }
 
       let usr = null;
       if (user) {
@@ -163,14 +197,66 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
     if (data.rate !== undefined) updateData.rate = data.rate;
     if (data.hireDate) updateData.hireDate = this.parseDate(data.hireDate);
     if (data.fireDate !== undefined) updateData.fireDate = data.fireDate ? this.parseDate(data.fireDate) : null;
+    if (data.hireOrderNumber !== undefined) updateData.hireOrderNumber = data.hireOrderNumber || null;
+    if (data.hireOrderDate !== undefined) updateData.hireOrderDate = data.hireOrderDate ? this.parseDate(data.hireOrderDate) : null;
+    if (data.fireOrderNumber !== undefined) updateData.fireOrderNumber = data.fireOrderNumber || null;
+    if (data.fireOrderDate !== undefined) updateData.fireOrderDate = data.fireOrderDate ? this.parseDate(data.fireOrderDate) : null;
     if (data.contractEndDate !== undefined) updateData.contractEndDate = data.contractEndDate ? this.parseDate(data.contractEndDate) : null;
     if (data.medicalCheckupDate !== undefined) updateData.medicalCheckupDate = data.medicalCheckupDate ? this.parseDate(data.medicalCheckupDate) : null;
     if (data.attestationDate !== undefined) updateData.attestationDate = data.attestationDate ? this.parseDate(data.attestationDate) : null;
+    if (data.status !== undefined) updateData.status = data.status as any;
+
+    if (data.contracts !== undefined) {
+      const currentContractIds = data.contracts.filter(c => c.id).map(c => c.id as number);
+      await this.prisma.employeeContract.deleteMany({
+        where: { employeeId: numericId, id: { notIn: currentContractIds } }
+      });
+      
+      for (const contract of data.contracts) {
+        if (contract.id) {
+          await this.prisma.employeeContract.update({
+            where: { id: contract.id },
+            data: {
+              type: contract.type,
+              number: contract.number,
+              date: this.parseDate(contract.date),
+              isActive: contract.isActive,
+            }
+          });
+        } else {
+          await this.prisma.employeeContract.create({
+            data: {
+              employeeId: numericId,
+              type: contract.type,
+              number: contract.number,
+              date: this.parseDate(contract.date),
+              isActive: contract.isActive ?? true,
+            }
+          });
+        }
+      }
+    }
+
+    if (data.subjectIds !== undefined) {
+      await this.prisma.teacherSubject.deleteMany({
+        where: { employeeId: numericId }
+      });
+        if (data.subjectIds.length > 0) {
+          await this.prisma.teacherSubject.createMany({
+            data: data.subjectIds.map((subjectId: number) => ({
+              employeeId: numericId,
+              subjectId,
+              isPrimary: false,
+            })),
+          });
+        }
+    }
 
     return this.safeQuery(() =>
       this.prisma.employee.update({
         where: { id: numericId },
         data: updateData,
+        include: { contracts: true }
       })
     );
   }

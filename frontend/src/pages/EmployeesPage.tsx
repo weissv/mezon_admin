@@ -84,6 +84,16 @@ export default function EmployeesPage() {
     }
   };
 
+  const handleArchive = async (employee: Employee) => {
+    try {
+      await api.put(`/api/employees/${employee.id}/archive`);
+      toast.success('Сотрудник переведен в архив');
+      await fetchData();
+    } catch (error: any) {
+      toast.error('Ошибка архивации', { description: error?.message });
+    }
+  };
+
   const handleEmployeesExport = async () => {
     setIsExporting(true);
     try {
@@ -131,6 +141,11 @@ export default function EmployeesPage() {
           <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
             Редактировать
           </Button>
+          {row.status !== 'ARCHIVED' && (
+            <Button variant="outline" size="sm" onClick={() => handleArchive(row)}>
+              В архив
+            </Button>
+          )}
           <Button
             variant="destructive"
             size="sm"

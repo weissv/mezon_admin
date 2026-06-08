@@ -119,6 +119,17 @@ export default function ChildDetailPage() {
  </dl>
  </Card>
 
+ {/* Приказы */}
+ <Card className="p-4">
+ <h3 className="font-semibold text-sm text-primary mb-3">Приказы</h3>
+ <dl className="space-y-2 text-sm">
+ <Row label="Приказ о прибытии"value={child.admissionOrderNumber ? `№${child.admissionOrderNumber} от ${child.admissionOrderDate ? new Date(child.admissionOrderDate).toLocaleDateString('ru-RU') : ''}` : '—'} />
+ {child.previousSchool && <Row label="Из школы"value={child.previousSchool} />}
+ <Row label="Приказ о выбытии"value={child.dismissalOrderNumber ? `№${child.dismissalOrderNumber} от ${child.dismissalOrderDate ? new Date(child.dismissalOrderDate).toLocaleDateString('ru-RU') : ''}` : '—'} />
+ {child.nextSchool && <Row label="В школу"value={child.nextSchool} />}
+ </dl>
+ </Card>
+
  {/* Родители */}
  <Card className="p-4">
  <h3 className="font-semibold text-sm text-primary mb-3 flex items-center gap-1">
@@ -148,13 +159,26 @@ export default function ChildDetailPage() {
  )}
  </Card>
 
- {/* Договор */}
+ {/* Договоры */}
  <Card className="p-4">
- <h3 className="font-semibold text-sm text-primary mb-3">Договор</h3>
+ <h3 className="font-semibold text-sm text-primary mb-3">Договоры</h3>
+ {child.contracts && child.contracts.length > 0 ? (
+ <div className="space-y-3">
+ {child.contracts.map((c: any) => (
+ <div key={c.id} className="border-b pb-2 last:border-b-0 last:pb-0">
+ <p className="font-medium text-sm">
+ №{c.number} от {new Date(c.date).toLocaleDateString('ru-RU')}
+ {c.isActive && <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">Активен</span>}
+ </p>
+ </div>
+ ))}
+ </div>
+ ) : (
  <dl className="space-y-2 text-sm">
  <Row label="№ договора"value={child.contractNumber || '—'} />
  <Row label="Дата договора"value={child.contractDate ? new Date(child.contractDate).toLocaleDateString('ru-RU') : '—'} />
  </dl>
+ )}
  </Card>
 
  {/* Мед. сведения */}

@@ -9,6 +9,14 @@ import { Button } from '../ui/button';
 import { FormError } from '../ui/FormError';
 import { Input } from '../ui/input';
 
+const contractSchema = z.object({
+  id: z.number().optional(),
+  type: z.enum(['MAIN', 'PART_TIME', 'CONTRACTOR']),
+  number: z.string().min(1, 'Номер обязателен'),
+  date: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
+  isActive: z.boolean().optional(),
+});
+
 const formSchema = z.object({
  firstName: z.string().min(2, 'Имя обязательно'),
  lastName: z.string().min(2, 'Фамилия обязательна'),
@@ -16,14 +24,34 @@ const formSchema = z.object({
  position: z.string().min(2, 'Должность обязательна'),
  rate: z.coerce.number().positive('Ставка должна быть > 0'),
  hireDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
+ 
+ hireOrderNumber: z.string().optional(),
+ hireOrderDate: z.string().optional(),
+ fireOrderNumber: z.string().optional(),
+ fireOrderDate: z.string().optional(),
+ 
+ contracts: z.array(contractSchema).optional(),
 });
 
 type EmployeeFormData = z.infer<typeof formSchema>;
-type Employee = { id: number; firstName: string; lastName: string; birthDate?: string; position: string; rate: number; hireDate: string };
+type Employee = { 
+  id: number; 
+  firstName: string; 
+  lastName: string; 
+  birthDate?: string; 
+  position: string; 
+  rate: number; 
+  hireDate: string;
+  hireOrderNumber?: string;
+  hireOrderDate?: string;
+  fireOrderNumber?: string;
+  fireOrderDate?: string;
+  contracts?: any[];
+};
 type EmployeeFormProps = { initialData?: Employee | null; onSuccess: () => void; onCancel: () => void };
 
 export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormProps) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<EmployeeFormData>({
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<EmployeeFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: initialData?.firstName || '',
@@ -32,7 +60,24 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
       position: initialData?.position || '',
       rate: initialData?.rate || 1,
       hireDate: initialData ? new Date(initialData.hireDate).toISOString().split('T')[0] : '',
+      hireOrderNumber: initialData?.hireOrderNumber || '',
+      hireOrderDate: initialData?.hireOrderDate ? new Date(initialData.hireOrderDate).toISOString().split('T')[0] : '',
+      fireOrderNumber: initialData?.fireOrderNumber || '',
+      fireOrderDate: initialData?.fireOrderDate ? new Date(initialData.fireOrderDate).toISOString().split('T')[0] : '',
+      contracts: initialData?.contracts?.map(c => ({
+        id: c.id,
+        type: c.type,
+        number: c.number,
+        date: new Date(c.date).toISOString().split('T')[0],
+        isActive: c.isActive ?? true,
+      })) || [],
     },
+  });
+
+  const { useFieldArray } = require('react-hook-form');
+  const { fields: contractFields, append: appendContract, remove: removeContract } = useFieldArray({
+    control,
+    name: "contracts"
   });
 
   const onSubmit = async (data: EmployeeFormData) => {
@@ -41,6 +86,17 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
         ...data,
         birthDate: data.birthDate ? new Date(data.birthDate).toISOString() : null,
         hireDate: new Date(data.hireDate).toISOString(),
+        hireOrderNumber: data.hireOrderNumber || undefined,
+        hireOrderDate: data.hireOrderDate ? new Date(data.hireOrderDate).toISOString() : undefined,
+        fireOrderNumber: data.fireOrderNumber || undefined,
+        fireOrderDate: data.fireOrderDate ? new Date(data.fireOrderDate).toISOString() : undefined,
+        contracts: data.contracts?.map(c => ({
+          ...(c.id ? { id: c.id } : {}),
+          type: c.type,
+          number: c.number,
+          date: new Date(c.date).toISOString(),
+          isActive: c.isActive ?? true,
+        })),
       };
       if (initialData) {
         await api.put(`/api/employees/${initialData.id}`, payload);
@@ -107,7 +163,23 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
             <Input type="date" {...register('hireDate')} />
             <FormError message={errors.hireDate?.message} />
           </div>
-          <div className="rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.78)] p-4">
+          <div>
+            <label className="mezon-form-label">№ Приказа о приёме</label>
+            <Input {...register('hireOrderNumber')} />
+          </div>
+          <div>
+            <label className="mezon-form-label">Дата приказа о приёме</label>
+            <Input type="date" {...register('hireOrderDate')} />
+          </div>
+          <div>
+            <label className="mezon-form-label">№ Приказа об увольнении</label>
+            <Input {...register('fireOrderNumber')} />
+          </div>
+          <div>
+            <label className="mezon-form-label">Дата приказа об увольнении</label>
+            <Input type="date" {...register('fireOrderDate')} />
+          </div>
+          <div className="sm:col-span-2 rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.78)] p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-tint-blue text-macos-blue">
                 {initialData ? <BriefcaseBusiness className="h-5 w-5" /> : <UserRound className="h-5 w-5" />}
@@ -124,6 +196,57 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
               </div>
             </div>
           </div>
+        </div>
+      </ModalSection>
+
+      <ModalSection
+        title="Договоры"
+        description="Управление трудовыми и прочими договорами сотрудника."
+      >
+        <div className="space-y-4">
+          {contractFields.map((field: any, index: number) => (
+            <div key={field.id} className="relative rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.82)] p-4">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-2 text-macos-red h-7 w-7 p-0"
+                onClick={() => removeContract(index)}
+              >
+                ✕
+              </Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="mezon-form-label">Тип договора</label>
+                  <select className="mezon-field" {...register(`contracts.${index}.type`)}>
+                    <option value="MAIN">Основной (ТД)</option>
+                    <option value="PART_TIME">По совместительству</option>
+                    <option value="CONTRACTOR">ГПХ</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mezon-form-label">Номер договора *</label>
+                  <Input {...register(`contracts.${index}.number`)} />
+                </div>
+                <div>
+                  <label className="mezon-form-label">Дата договора *</label>
+                  <Input type="date" {...register(`contracts.${index}.date`)} />
+                </div>
+                <div className="flex items-center gap-2 mt-6">
+                  <input type="checkbox" id={`emp-active-${index}`} {...register(`contracts.${index}.isActive`)} />
+                  <label htmlFor={`emp-active-${index}`} className="text-sm">Действующий</label>
+                </div>
+              </div>
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => appendContract({ type: 'MAIN', number: '', date: '', isActive: true })}
+          >
+            Добавить договор
+          </Button>
         </div>
       </ModalSection>
 

@@ -12,6 +12,12 @@ export interface Employee extends BaseEntity {
   rate: number;
   hireDate: string;
   fireDate?: string | null;
+  hireOrderNumber?: string | null;
+  hireOrderDate?: string | null;
+  fireOrderNumber?: string | null;
+  fireOrderDate?: string | null;
+  status?: string;
+  contracts?: { id: number; type: string; number: string; date: string; isActive: boolean }[];
   contractEndDate?: string | null;
   medicalCheckupDate?: string | null;
   attestationDate?: string | null;
@@ -50,6 +56,13 @@ export interface CreateEmployeeInput {
   rate: number;
   hireDate: string;
   fireDate?: string;
+  hireOrderNumber?: string;
+  hireOrderDate?: string;
+  fireOrderNumber?: string;
+  fireOrderDate?: string;
+  status?: string;
+  contracts?: { id?: number; type: string; number: string; date: string; isActive?: boolean }[];
+  subjectIds?: number[];
   contractEndDate?: string;
   medicalCheckupDate?: string;
   attestationDate?: string;
