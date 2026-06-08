@@ -87,7 +87,7 @@ router.get(
         },
         include: {
           requester: { select: { firstName: true, lastName: true } },
-          items: { select: { issuedQuantity: true } }
+          items: { select: { issuedQuantity: true, inventoryItem: { select: { price: true } } } }
         }
       })
     ]);
@@ -101,12 +101,16 @@ router.get(
     let totalExpenses = 0;
     const employeeStats: Record<string, number> = {};
 
-    // Подсчет выданных товаров по заявкам для каждого сотрудника
+    // Подсчет стоимости выданных товаров по заявкам для каждого сотрудника
     transactionsByEmployee.forEach(req => {
       const name = `${req.requester.firstName} ${req.requester.lastName}`;
-      const itemsCount = req.items.reduce((sum, item) => sum + (item.issuedQuantity || 0), 0);
-      if (itemsCount > 0) {
-        employeeStats[name] = (employeeStats[name] || 0) + itemsCount;
+      const itemsCost = req.items.reduce((sum, item) => {
+        const qty = item.issuedQuantity || 0;
+        const price = Number(item.inventoryItem?.price) || 0;
+        return sum + (qty * price);
+      }, 0);
+      if (itemsCost > 0) {
+        employeeStats[name] = (employeeStats[name] || 0) + itemsCost;
       }
     });
 
