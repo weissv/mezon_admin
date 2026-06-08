@@ -87,7 +87,7 @@ export default function FinanceStatisticsView() {
               {data.byEmployee.map((emp: any) => (
                 <div key={emp.name} className="flex justify-between border-b pb-2">
                   <span>{emp.name}</span>
-                  <span className="font-semibold">{emp.amount?.toLocaleString()} ед.</span>
+                  <span className="font-semibold">{emp.amount?.toLocaleString()} UZS</span>
                 </div>
               ))}
             </div>

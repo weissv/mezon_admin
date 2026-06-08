@@ -44,14 +44,18 @@ export interface CreateChildInput {
   birthCertificateNumber?: string;
   contractNumber?: string; // legacy
   contractDate?: string | Date; // legacy
-  contracts?: { id?: number; number: string; date: string | Date; isActive?: boolean }[];
+  contracts?: { id?: number; number: string; date: string | Date; isActive?: boolean; documentUrl?: string; documentName?: string }[];
   
   admissionOrderNumber?: string;
   admissionOrderDate?: string | Date;
   previousSchool?: string;
+  admissionOrderFileUrl?: string;
+  admissionOrderFileName?: string;
   dismissalOrderNumber?: string;
   dismissalOrderDate?: string | Date;
   nextSchool?: string;
+  dismissalOrderFileUrl?: string;
+  dismissalOrderFileName?: string;
   
   parents?: ParentInput[];
   // Legacy fields (backward compat)
@@ -174,8 +178,8 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     const birthDate = this.parseDate(data.birthDate, 'дата рождения');
     this.validateBirthDate(birthDate);
 
-    const child = await this.safeQuery(() =>
-      this.prisma.child.create({
+    const child = await this.safeQuery(async () => {
+      const childRec = await this.prisma.child.create({
         data: {
           firstName: data.firstName,
           lastName: data.lastName,
@@ -196,22 +200,63 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
           dismissalOrderDate: data.dismissalOrderDate ? this.parseDate(data.dismissalOrderDate, 'дата приказа выбытия') : undefined,
           nextSchool: data.nextSchool,
           
-          contracts: data.contracts ? {
-            create: data.contracts.map(c => ({
+          // contracts handled below
+        },
+        include: childDetailInclude,
+      });
+
+      // Handle admission/dismissal order documents
+      let admissionOrderDocId, dismissalOrderDocId;
+      
+      if (data.admissionOrderFileUrl) {
+        const doc = await this.prisma.document.create({
+          data: { name: data.admissionOrderFileName || 'Приказ о прибытии', fileUrl: data.admissionOrderFileUrl, childId: childRec.id }
+        });
+        admissionOrderDocId = doc.id;
+      }
+      
+      if (data.dismissalOrderFileUrl) {
+        const doc = await this.prisma.document.create({
+          data: { name: data.dismissalOrderFileName || 'Приказ о выбытии', fileUrl: data.dismissalOrderFileUrl, childId: childRec.id }
+        });
+        dismissalOrderDocId = doc.id;
+      }
+
+      if (admissionOrderDocId || dismissalOrderDocId) {
+        await this.prisma.child.update({
+          where: { id: childRec.id },
+          data: { admissionOrderDocId, dismissalOrderDocId }
+        });
+      }
+
+      // Handle contracts
+      if (data.contracts) {
+        for (const c of data.contracts) {
+          let documentId = undefined;
+          if (c.documentUrl) {
+            const doc = await this.prisma.document.create({
+              data: { name: c.documentName || \`Договор №\${c.number}\`, fileUrl: c.documentUrl, childId: childRec.id }
+            });
+            documentId = doc.id;
+          }
+          await this.prisma.childContract.create({
+            data: {
+              childId: childRec.id,
               number: c.number,
               date: this.parseDate(c.date, 'дата договора'),
               isActive: c.isActive ?? true,
-            }))
-          } : undefined,
-
+              documentId
+            }
+          });
+        }
+      }
+      
+      return childRec;
+    });
           // Legacy fields
           fatherName: data.fatherName,
           motherName: data.motherName,
           parentPhone: data.parentPhone,
-        },
-        include: childDetailInclude,
-      })
-    );
 
     // Create parents if provided
     if (data.parents?.length) {
@@ -265,6 +310,21 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     if (data.dismissalOrderDate !== undefined) updateData.dismissalOrderDate = data.dismissalOrderDate ? this.parseDate(data.dismissalOrderDate, 'дата приказа') : null;
     if (data.nextSchool !== undefined) updateData.nextSchool = data.nextSchool || null;
 
+    // Handle documents updates
+    if (data.admissionOrderFileUrl) {
+      const doc = await this.prisma.document.create({
+        data: { name: data.admissionOrderFileName || 'Приказ о прибытии', fileUrl: data.admissionOrderFileUrl, childId: numericId }
+      });
+      updateData.admissionOrderDocId = doc.id;
+    }
+    
+    if (data.dismissalOrderFileUrl) {
+      const doc = await this.prisma.document.create({
+        data: { name: data.dismissalOrderFileName || 'Приказ о выбытии', fileUrl: data.dismissalOrderFileUrl, childId: numericId }
+      });
+      updateData.dismissalOrderDocId = doc.id;
+    }
+
     // Handle contracts update
     if (data.contracts !== undefined) {
       // First delete missing contracts
@@ -275,6 +335,14 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
       
       // Update existing or create new
       for (const contract of data.contracts) {
+        let documentId = undefined;
+        if (contract.documentUrl) {
+          const doc = await this.prisma.document.create({
+            data: { name: contract.documentName || \`Договор №\${contract.number}\`, fileUrl: contract.documentUrl, childId: numericId }
+          });
+          documentId = doc.id;
+        }
+
         if (contract.id) {
           await this.prisma.childContract.update({
             where: { id: contract.id },
@@ -282,6 +350,7 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
               number: contract.number,
               date: this.parseDate(contract.date, 'дата договора'),
               isActive: contract.isActive,
+              ...(documentId ? { documentId } : {})
             }
           });
         } else {
@@ -291,6 +360,7 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
               number: contract.number,
               date: this.parseDate(contract.date, 'дата договора'),
               isActive: contract.isActive ?? true,
+              documentId
             }
           });
         }

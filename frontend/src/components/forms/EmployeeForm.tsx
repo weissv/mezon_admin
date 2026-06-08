@@ -8,6 +8,7 @@ import { ModalNotice, ModalSection } from '../Modal';
 import { Button } from '../ui/button';
 import { FormError } from '../ui/FormError';
 import { Input } from '../ui/input';
+import { FileUpload } from '../ui/FileUpload';
 
 const contractSchema = z.object({
   id: z.number().optional(),
@@ -15,6 +16,8 @@ const contractSchema = z.object({
   number: z.string().min(1, 'Номер обязателен'),
   date: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
   isActive: z.boolean().optional(),
+  documentUrl: z.string().optional(),
+  documentName: z.string().optional(),
 });
 
 const formSchema = z.object({
@@ -31,6 +34,11 @@ const formSchema = z.object({
   fireOrderNumber: z.string().optional(),
   fireOrderDate: z.string().optional(),
  
+  fireOrderDate: z.string().optional(),
+  hireOrderFileUrl: z.string().optional(),
+  hireOrderFileName: z.string().optional(),
+  fireOrderFileUrl: z.string().optional(),
+  fireOrderFileName: z.string().optional(),
   contracts: z.array(contractSchema).optional(),
 });
 
@@ -48,12 +56,14 @@ type Employee = {
   hireOrderDate?: string;
   fireOrderNumber?: string;
   fireOrderDate?: string;
+  hireOrderFileUrl?: string;
+  fireOrderFileUrl?: string;
   contracts?: any[];
 };
 type EmployeeFormProps = { initialData?: Employee | null; onSuccess: () => void; onCancel: () => void };
 
 export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormProps) {
-  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<EmployeeFormData>({
+  const { register, handleSubmit, control, setValue, watch, formState: { errors, isSubmitting } } = useForm<EmployeeFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: initialData?.firstName || '',
@@ -73,6 +83,8 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
         number: c.number,
         date: new Date(c.date).toISOString().split('T')[0],
         isActive: c.isActive ?? true,
+        documentUrl: c.documentUrl,
+        documentName: c.documentName,
       })) || [],
     },
   });
@@ -178,6 +190,16 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
             <label className="mezon-form-label">Дата приказа о приёме</label>
             <Input type="date" {...register('hireOrderDate')} />
           </div>
+          <div className="sm:col-span-2">
+            <FileUpload 
+              label="Скан приказа о приёме" 
+              value={watch('hireOrderFileUrl')} 
+              onChange={(url, name) => {
+                setValue('hireOrderFileUrl', url);
+                setValue('hireOrderFileName', name);
+              }} 
+            />
+          </div>
           <div>
             <label className="mezon-form-label">№ Приказа об увольнении</label>
             <Input {...register('fireOrderNumber')} />
@@ -185,6 +207,16 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
           <div>
             <label className="mezon-form-label">Дата приказа об увольнении</label>
             <Input type="date" {...register('fireOrderDate')} />
+          </div>
+          <div className="sm:col-span-2">
+            <FileUpload 
+              label="Скан приказа об увольнении" 
+              value={watch('fireOrderFileUrl')} 
+              onChange={(url, name) => {
+                setValue('fireOrderFileUrl', url);
+                setValue('fireOrderFileName', name);
+              }} 
+            />
           </div>
           <div className="sm:col-span-2 rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.78)] p-4">
             <div className="flex items-start gap-3">
@@ -242,6 +274,16 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
                 <div className="flex items-center gap-2 mt-6">
                   <input type="checkbox" id={`emp-active-${index}`} {...register(`contracts.${index}.isActive`)} />
                   <label htmlFor={`emp-active-${index}`} className="text-sm">Действующий</label>
+                </div>
+                <div className="sm:col-span-2 mt-2">
+                  <FileUpload 
+                    label="Скан договора" 
+                    value={watch(`contracts.${index}.documentUrl` as any)} 
+                    onChange={(url, name) => {
+                      setValue(`contracts.${index}.documentUrl` as any, url);
+                      setValue(`contracts.${index}.documentName` as any, name);
+                    }} 
+                  />
                 </div>
               </div>
             </div>

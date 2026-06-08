@@ -203,8 +203,10 @@ model Employee {
   fireDate           DateTime?
   hireOrderNumber    String?
   hireOrderDate      DateTime?
+  hireOrderDocId     Int?
   fireOrderNumber    String?
   fireOrderDate      DateTime?
+  fireOrderDocId     Int?
   contractEndDate    DateTime?
   medicalCheckupDate DateTime?
   attestationDate    DateTime?
@@ -256,9 +258,11 @@ model Child {
   // Orders
   admissionOrderNumber String?
   admissionOrderDate   DateTime?
+  admissionOrderDocId  Int?
   previousSchool       String?
   dismissalOrderNumber String?
   dismissalOrderDate   DateTime?
+  dismissalOrderDocId  Int?
   nextSchool           String?
 
   // Legacy parent fields (kept for backward compat, prefer Parent relation)
@@ -289,6 +293,7 @@ model ChildContract {
   number    String
   date      DateTime
   isActive  Boolean  @default(true)
+  documentId Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -303,6 +308,7 @@ model EmployeeContract {
   number     String
   date       DateTime
   isActive   Boolean              @default(true)
+  documentId Int?
   createdAt  DateTime             @default(now())
   updatedAt  DateTime             @updatedAt
 
@@ -445,6 +451,7 @@ model InventoryItem {
   quantity     Float
   unit         String // "кг", "шт", "л"
   minQuantity  Float         @default(0) // Минимальный остаток (для уведомлений)
+  price        Decimal       @default(0) @db.Decimal(12, 2)
   expiryDate   DateTime?
   type         InventoryType
   ingredientId Int?

@@ -41,6 +41,8 @@ import permissionsRoutes from "./routes/permissions.routes";
 import examsRoutes from "./routes/exams.routes";
 import publicExamsRoutes from "./routes/public-exams.routes";
 import knowledgeBaseRoutes from "./routes/knowledge-base.routes";
+import uploadRoutes from "./routes/upload.routes";
+import path from "path";
 
 const app = express();
 
@@ -82,9 +84,14 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/public/exams", publicExamsRoutes); // Публичный доступ к контрольным для студентов
 
-// Защита всех последующих роутов
+// Статика для загруженных файлов
+const UPLOADS_DIR = path.join(__dirname, "../../uploads");
+app.use("/uploads", express.static(UPLOADS_DIR));
+
+// Защита всех остальных маршрутов
 app.use(authMiddleware);
 
+app.use("/api/upload", uploadRoutes);
 // 3. Эти роуты теперь защищены:
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/children", childrenRoutes);

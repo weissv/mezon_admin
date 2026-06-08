@@ -12,6 +12,7 @@ import { Input} from '../ui/input';
 import { FormError} from '../ui/FormError';
 import { useGroups} from '../../hooks/useChildren';
 import type { Child, Gender, ParentInput, HealthInfo} from '../../types/child';
+import { FileUpload } from '../ui/FileUpload';
 
 // ===== Zod Schema =====
 
@@ -29,6 +30,8 @@ const contractSchema = z.object({
   number: z.string().min(1, 'Номер обязателен'),
   date: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
   isActive: z.boolean().optional(),
+  documentUrl: z.string().optional(),
+  documentName: z.string().optional(),
 });
 
 const formSchema = z.object({
@@ -54,6 +57,10 @@ const formSchema = z.object({
  dismissalOrderNumber: z.string().optional(),
  dismissalOrderDate: z.string().optional(),
  nextSchool: z.string().optional(),
+ admissionOrderFileUrl: z.string().optional(),
+ admissionOrderFileName: z.string().optional(),
+ dismissalOrderFileUrl: z.string().optional(),
+ dismissalOrderFileName: z.string().optional(),
 
  // Медицина
  healthAllergies: z.string().optional(),
@@ -107,11 +114,13 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
  const healthDefaults = parseHealthInfo(initialData?.healthInfo);
 
  const {
- register,
- handleSubmit,
- control,
- formState: { errors, isSubmitting},
-} = useForm<FormData>({
+  register,
+  handleSubmit,
+  control,
+  watch,
+  setValue,
+  formState: { errors, isSubmitting},
+ } = useForm<FormData>({
  resolver: zodResolver(formSchema),
  defaultValues: {
  lastName: initialData?.lastName ?? '',
@@ -130,6 +139,8 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
     number: c.number,
     date: c.date ? new Date(c.date).toISOString().split('T')[0] : '',
     isActive: c.isActive ?? true,
+    documentUrl: c.documentUrl,
+    documentName: c.documentName,
   })) ?? [],
   admissionOrderNumber: (initialData as any)?.admissionOrderNumber ?? '',
   admissionOrderDate: (initialData as any)?.admissionOrderDate ? new Date((initialData as any).admissionOrderDate).toISOString().split('T')[0] : '',
@@ -137,6 +148,8 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
   dismissalOrderNumber: (initialData as any)?.dismissalOrderNumber ?? '',
   dismissalOrderDate: (initialData as any)?.dismissalOrderDate ? new Date((initialData as any).dismissalOrderDate).toISOString().split('T')[0] : '',
   nextSchool: (initialData as any)?.nextSchool ?? '',
+  admissionOrderFileUrl: (initialData as any)?.admissionOrderFileUrl ?? '',
+  dismissalOrderFileUrl: (initialData as any)?.dismissalOrderFileUrl ?? '',
  ...healthDefaults,
  parents: initialData?.parents?.map((p) => ({
  id: p.id,
@@ -183,6 +196,8 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
     number: c.number,
     date: new Date(c.date).toISOString(),
     isActive: c.isActive ?? true,
+    documentUrl: c.documentUrl,
+    documentName: c.documentName,
   })),
   admissionOrderNumber: data.admissionOrderNumber || undefined,
   admissionOrderDate: data.admissionOrderDate ? new Date(data.admissionOrderDate).toISOString() : undefined,
@@ -190,6 +205,10 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
   dismissalOrderNumber: data.dismissalOrderNumber || undefined,
   dismissalOrderDate: data.dismissalOrderDate ? new Date(data.dismissalOrderDate).toISOString() : undefined,
   nextSchool: data.nextSchool || undefined,
+  admissionOrderFileUrl: data.admissionOrderFileUrl || undefined,
+  admissionOrderFileName: data.admissionOrderFileName || undefined,
+  dismissalOrderFileUrl: data.dismissalOrderFileUrl || undefined,
+  dismissalOrderFileName: data.dismissalOrderFileName || undefined,
  healthInfo,
  parents,
 };
@@ -343,11 +362,21 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
   <label className="mezon-form-label mezon-form-label--regular">Дата приказа прибытия</label>
   <Input type="date"{...register('admissionOrderDate')} />
   </div>
-  <div>
-  <label className="mezon-form-label mezon-form-label--regular">Из какой школы</label>
-  <Input {...register('previousSchool')} />
-  </div>
-  </div>
+   <div>
+   <label className="mezon-form-label mezon-form-label--regular">Из какой школы</label>
+   <Input {...register('previousSchool')} />
+   </div>
+   <div className="sm:col-span-3">
+     <FileUpload 
+       label="Скан приказа о прибытии" 
+       value={watch('admissionOrderFileUrl')} 
+       onChange={(url, name) => {
+         setValue('admissionOrderFileUrl', url);
+         setValue('admissionOrderFileName', name);
+       }} 
+     />
+   </div>
+   </div>
   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
   <div>
   <label className="mezon-form-label mezon-form-label--regular">№ Приказа о выбытии</label>
@@ -357,12 +386,22 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
   <label className="mezon-form-label mezon-form-label--regular">Дата приказа выбытии</label>
   <Input type="date"{...register('dismissalOrderDate')} />
   </div>
-  <div>
-  <label className="mezon-form-label mezon-form-label--regular">В какую школу</label>
-  <Input {...register('nextSchool')} />
-  </div>
-  </div>
-  </fieldset>
+   <div>
+   <label className="mezon-form-label mezon-form-label--regular">В какую школу</label>
+   <Input {...register('nextSchool')} />
+   </div>
+   <div className="sm:col-span-3">
+     <FileUpload 
+       label="Скан приказа о выбытии" 
+       value={watch('dismissalOrderFileUrl')} 
+       onChange={(url, name) => {
+         setValue('dismissalOrderFileUrl', url);
+         setValue('dismissalOrderFileName', name);
+       }} 
+     />
+   </div>
+   </div>
+   </fieldset>
 
   <fieldset className="space-y-4 rounded-[20px] border border-[rgba(15,23,42,0.08)] bg-[rgba(255,255,255,0.72)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] mt-4">
   <legend className="px-1 text-[15px] font-semibold tracking-[-0.015em] text-primary">Договоры</legend>
@@ -390,10 +429,20 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
   </div>
   <div className="sm:col-span-2 flex items-center gap-2">
   <input type="checkbox" id={`active-${index}`} {...register(`contracts.${index}.isActive`)} className="rounded border-gray-300 text-primary focus:ring-primary" />
-  <label htmlFor={`active-${index}`} className="text-sm">Действующий договор</label>
-  </div>
-  </div>
-  </div>
+   <label htmlFor={`active-${index}`} className="text-sm">Действующий договор</label>
+   </div>
+   <div className="sm:col-span-2 mt-2">
+     <FileUpload 
+       label="Скан договора" 
+       value={watch(`contracts.${index}.documentUrl` as any)} 
+       onChange={(url, name) => {
+         setValue(`contracts.${index}.documentUrl` as any, url);
+         setValue(`contracts.${index}.documentName` as any, name);
+       }} 
+     />
+   </div>
+   </div>
+   </div>
   ))}
   <Button
   type="button"

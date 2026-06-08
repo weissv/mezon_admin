@@ -29,7 +29,11 @@ export interface CreateEmployeeInput {
   medicalCheckupDate?: string | Date;
   attestationDate?: string | Date;
   status?: string;
-  contracts?: { id?: number; type: any; number: string; date: string | Date; isActive?: boolean }[];
+  hireOrderFileUrl?: string;
+  hireOrderFileName?: string;
+  fireOrderFileUrl?: string;
+  fireOrderFileName?: string;
+  contracts?: { id?: number; type: any; number: string; date: string | Date; isActive?: boolean; documentUrl?: string; documentName?: string }[];
   subjectIds?: number[];
   user?: {
     email: string;
@@ -139,16 +143,55 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
           medicalCheckupDate: employeeData.medicalCheckupDate ? this.parseDate(employeeData.medicalCheckupDate) : undefined,
           attestationDate: employeeData.attestationDate ? this.parseDate(employeeData.attestationDate) : undefined,
           status: (employeeData.status as any) || 'ACTIVE',
-          contracts: employeeData.contracts ? {
-            create: employeeData.contracts.map(c => ({
+        },
+      });
+
+      // Handle hire/fire order documents
+      let hireOrderDocId, fireOrderDocId;
+      
+      if (employeeData.hireOrderFileUrl) {
+        const doc = await tx.document.create({
+          data: { name: employeeData.hireOrderFileName || 'Приказ о приёме', fileUrl: employeeData.hireOrderFileUrl, employeeId: emp.id }
+        });
+        hireOrderDocId = doc.id;
+      }
+      
+      if (employeeData.fireOrderFileUrl) {
+        const doc = await tx.document.create({
+          data: { name: employeeData.fireOrderFileName || 'Приказ об увольнении', fileUrl: employeeData.fireOrderFileUrl, employeeId: emp.id }
+        });
+        fireOrderDocId = doc.id;
+      }
+
+      if (hireOrderDocId || fireOrderDocId) {
+        await tx.employee.update({
+          where: { id: emp.id },
+          data: { hireOrderDocId, fireOrderDocId }
+        });
+      }
+
+      // Handle contracts
+      if (employeeData.contracts) {
+        for (const c of employeeData.contracts) {
+          let documentId = undefined;
+          if (c.documentUrl) {
+            const doc = await tx.document.create({
+              data: { name: c.documentName || \`Договор №\${c.number}\`, fileUrl: c.documentUrl, employeeId: emp.id }
+            });
+            documentId = doc.id;
+          }
+          await tx.employeeContract.create({
+            data: {
+              employeeId: emp.id,
               type: c.type,
               number: c.number,
               date: this.parseDate(c.date),
               isActive: c.isActive ?? true,
-            }))
-          } : undefined,
-        },
-      });
+              documentId
+            }
+          });
+        }
+      }
 
       // Create subject associations if provided
       if (data.subjectIds && data.subjectIds.length > 0) {
@@ -206,6 +249,21 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
     if (data.attestationDate !== undefined) updateData.attestationDate = data.attestationDate ? this.parseDate(data.attestationDate) : null;
     if (data.status !== undefined) updateData.status = data.status as any;
 
+    // Handle documents updates
+    if (data.hireOrderFileUrl) {
+      const doc = await this.prisma.document.create({
+        data: { name: data.hireOrderFileName || 'Приказ о приёме', fileUrl: data.hireOrderFileUrl, employeeId: numericId }
+      });
+      updateData.hireOrderDocId = doc.id;
+    }
+    
+    if (data.fireOrderFileUrl) {
+      const doc = await this.prisma.document.create({
+        data: { name: data.fireOrderFileName || 'Приказ об увольнении', fileUrl: data.fireOrderFileUrl, employeeId: numericId }
+      });
+      updateData.fireOrderDocId = doc.id;
+    }
+
     if (data.contracts !== undefined) {
       const currentContractIds = data.contracts.filter(c => c.id).map(c => c.id as number);
       await this.prisma.employeeContract.deleteMany({
@@ -213,6 +271,14 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
       });
       
       for (const contract of data.contracts) {
+        let documentId = undefined;
+        if (contract.documentUrl) {
+          const doc = await this.prisma.document.create({
+            data: { name: contract.documentName || \`Договор №\${contract.number}\`, fileUrl: contract.documentUrl, employeeId: numericId }
+          });
+          documentId = doc.id;
+        }
+
         if (contract.id) {
           await this.prisma.employeeContract.update({
             where: { id: contract.id },
@@ -221,6 +287,7 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
               number: contract.number,
               date: this.parseDate(contract.date),
               isActive: contract.isActive,
+              ...(documentId ? { documentId } : {})
             }
           });
         } else {
@@ -231,6 +298,7 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
               number: contract.number,
               date: this.parseDate(contract.date),
               isActive: contract.isActive ?? true,
+              documentId
             }
           });
         }
