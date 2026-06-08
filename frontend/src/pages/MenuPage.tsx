@@ -93,10 +93,13 @@ export default function MenuPage() {
  }
  };
 
- useEffect(() => {
- fetchMenu(weekStart);
- api.get('/api/recipes/dishes').then(res => setApiDishes(res.data)).catch(console.error);
- }, [weekStart]);
+  useEffect(() => {
+  fetchMenu(weekStart);
+  api.get('/api/recipes/dishes').then(res => {
+    const data = res.data;
+    setApiDishes(Array.isArray(data) ? data : data?.items || []);
+  }).catch(console.error);
+  }, [weekStart]);
 
  const handleOpenModal = (date: Date) => {
  const existingMenu = menus.find((menu) => new Date(menu.date).toDateString() === date.toDateString());
@@ -429,9 +432,9 @@ export default function MenuPage() {
  <label className="mezon-form-label">Блюдо</label>
  <select {...register(`meals.${index}.dish`)} className="mezon-field w-full">
  <option value="">Выберите блюдо</option>
- {(apiDishes.filter(d => !mealsWatch?.[index]?.name || d.category === mealsWatch[index].name).length > 0 
-  ? apiDishes.filter(d => !mealsWatch?.[index]?.name || d.category === mealsWatch[index].name) 
-  : apiDishes).map((dish: any) => (
+ {((Array.isArray(apiDishes) ? apiDishes : []).filter(d => !mealsWatch?.[index]?.name || d.category === mealsWatch[index].name).length > 0 
+  ? (Array.isArray(apiDishes) ? apiDishes : []).filter(d => !mealsWatch?.[index]?.name || d.category === mealsWatch[index].name) 
+  : (Array.isArray(apiDishes) ? apiDishes : [])).map((dish: any) => (
  <option key={dish.id} value={dish.name}>{dish.name}</option>
  ))}
  </select>

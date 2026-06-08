@@ -18,19 +18,20 @@ const contractSchema = z.object({
 });
 
 const formSchema = z.object({
- firstName: z.string().min(2, 'Имя обязательно'),
- lastName: z.string().min(2, 'Фамилия обязательна'),
- birthDate: z.string().optional(),
- position: z.string().min(2, 'Должность обязательна'),
- rate: z.coerce.number().positive('Ставка должна быть > 0'),
- hireDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
+  firstName: z.string().min(2, 'Имя обязательно'),
+  lastName: z.string().min(2, 'Фамилия обязательна'),
+  middleName: z.string().optional(),
+  birthDate: z.string().optional(),
+  position: z.string().min(2, 'Должность обязательна'),
+  rate: z.coerce.number().positive('Ставка должна быть > 0'),
+  hireDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
  
- hireOrderNumber: z.string().optional(),
- hireOrderDate: z.string().optional(),
- fireOrderNumber: z.string().optional(),
- fireOrderDate: z.string().optional(),
+  hireOrderNumber: z.string().optional(),
+  hireOrderDate: z.string().optional(),
+  fireOrderNumber: z.string().optional(),
+  fireOrderDate: z.string().optional(),
  
- contracts: z.array(contractSchema).optional(),
+  contracts: z.array(contractSchema).optional(),
 });
 
 type EmployeeFormData = z.infer<typeof formSchema>;
@@ -38,6 +39,7 @@ type Employee = {
   id: number; 
   firstName: string; 
   lastName: string; 
+  middleName?: string;
   birthDate?: string; 
   position: string; 
   rate: number; 
@@ -56,6 +58,7 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
     defaultValues: {
       firstName: initialData?.firstName || '',
       lastName: initialData?.lastName || '',
+      middleName: initialData?.middleName || '',
       birthDate: initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : '',
       position: initialData?.position || '',
       rate: initialData?.rate || 1,
@@ -74,7 +77,6 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
     },
   });
 
-  const { useFieldArray } = require('react-hook-form');
   const { fields: contractFields, append: appendContract, remove: removeContract } = useFieldArray({
     control,
     name: "contracts"
@@ -123,9 +125,14 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
             <FormError message={errors.firstName?.message} />
           </div>
           <div>
-            <label className="mezon-form-label">Фамилия *</label>
+            <label className="mezon-form-label">Фамилия <span className="text-macos-red">*</span></label>
             <Input {...register('lastName')} placeholder="Введите фамилию" />
             <FormError message={errors.lastName?.message} />
+          </div>
+          <div>
+            <label className="mezon-form-label">Отчество</label>
+            <Input {...register('middleName')} placeholder="Введите отчество" />
+            <FormError message={errors.middleName?.message} />
           </div>
           <div className="sm:col-span-2">
             <label className="mezon-form-label">Дата рождения</label>

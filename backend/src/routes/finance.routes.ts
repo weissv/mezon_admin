@@ -74,11 +74,22 @@ router.get(
       }),
       // Активные дети (для расчета на 1 ученика)
       prisma.child.count({ where: { status: "ACTIVE" } }),
-      // Расходы по сотрудникам: считаем, что мы выдаем инвентарь
-      // В InventoryTransaction нет поля totalValue и employeeId, поэтому мы не можем сгруппировать по сумме напрямую
-      // Вместо этого вернем пустой массив или просто количество выдач.
-      // Пока просто возвращаем пустой список, чтобы не ломать сборку.
-      Promise.resolve([])
+      // Расходы по сотрудникам: получаем заявки, которые выполнены
+      prisma.maintenanceRequest.findMany({
+        where: { 
+          status: "DONE",
+          ...(startDate || endDate ? {
+            approvedAt: { // or createdAt
+              ...(startDate ? { gte: new Date(String(startDate)) } : {}),
+              ...(endDate ? { lte: new Date(String(endDate)) } : {})
+            }
+          } : {})
+        },
+        include: {
+          requester: { select: { firstName: true, lastName: true } },
+          items: { select: { issuedQuantity: true } }
+        }
+      })
     ]);
 
     const categoryStats: Record<string, number> = {
@@ -89,6 +100,15 @@ router.get(
     
     let totalExpenses = 0;
     const employeeStats: Record<string, number> = {};
+
+    // Подсчет выданных товаров по заявкам для каждого сотрудника
+    transactionsByEmployee.forEach(req => {
+      const name = `${req.requester.firstName} ${req.requester.lastName}`;
+      const itemsCount = req.items.reduce((sum, item) => sum + (item.issuedQuantity || 0), 0);
+      if (itemsCount > 0) {
+        employeeStats[name] = (employeeStats[name] || 0) + itemsCount;
+      }
+    });
 
     transactions.forEach(tx => {
       const val = Number(tx._sum.amount) || 0;
