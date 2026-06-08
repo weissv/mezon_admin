@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../../lib/api';
-import { Card } from '../../../components/ui/card';
+import { Card } from '../../../components/ui/Card';
 import { LoadingCard } from '../../../components/ui/LoadingState';
 import { ErrorState } from '../../../components/ui/EmptyState';
 import { Input } from '../../../components/ui/input';
