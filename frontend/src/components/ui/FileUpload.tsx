@@ -24,12 +24,8 @@ export function FileUpload({ label, value, onChange, accept = ".pdf,.doc,.docx,.
     formData.append('file', file);
 
     try {
-      const response = await api.post('/api/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      onChange(response.data.fileUrl, file.name);
+      const response = await api.upload('/api/upload', file);
+      onChange(response.fileUrl, file.name);
       toast.success('Файл успешно загружен');
     } catch (error) {
       console.error(error);
