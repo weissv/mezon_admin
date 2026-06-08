@@ -59,8 +59,17 @@ export interface Child extends BaseEntity {
   nationality?: string | null;
   gender?: Gender | null;
   birthCertificateNumber?: string | null;
-  contractNumber?: string | null;
-  contractDate?: string | null;
+  contractNumber?: string | null; // legacy
+  contractDate?: string | null; // legacy
+  contracts?: { id: number; number: string; date: string; isActive: boolean }[];
+  
+  admissionOrderNumber?: string | null;
+  admissionOrderDate?: string | null;
+  previousSchool?: string | null;
+  dismissalOrderNumber?: string | null;
+  dismissalOrderDate?: string | null;
+  nextSchool?: string | null;
+  
   parents: Parent[];
   // Legacy fields (backward compat)
   fatherName?: string | null;
@@ -116,6 +125,13 @@ export interface CreateChildInput {
   birthCertificateNumber?: string;
   contractNumber?: string;
   contractDate?: string;
+  contracts?: { id?: number; number: string; date: string; isActive?: boolean }[];
+  admissionOrderNumber?: string;
+  admissionOrderDate?: string;
+  previousSchool?: string;
+  dismissalOrderNumber?: string;
+  dismissalOrderDate?: string;
+  nextSchool?: string;
   parents?: ParentInput[];
   // Legacy
   fatherName?: string;

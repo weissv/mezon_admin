@@ -142,7 +142,7 @@ export function DishForm({ initialData, onSuccess, onCancel}: DishFormProps) {
  <Input 
  type="number"
  step="0.01"
- placeholder="Кол-во"
+ placeholder="Граммаж (г)"
  {...register(`ingredients.${index}.quantity`)}
  />
  </div>

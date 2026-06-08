@@ -5,54 +5,37 @@ import { checkRole } from "../middleware/checkRole";
 import { buildPagination, buildOrderBy, buildWhere } from "../utils/query";
 import bcrypt from "bcryptjs";
 import { validate } from "../middleware/validate";
+import { EmployeeService } from "../services/EmployeeService";
 import { createEmployeeSchema, updateEmployeeSchema } from "../schemas/employee.schema";
 const router = Router();
 
 router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { skip, take } = buildPagination(req.query);
-  const orderBy = buildOrderBy(req.query, [
-    "id",
-    "firstName",
-    "lastName",
-    "position",
-    "hireDate",
-    "rate",
-    "createdAt",
-  ]);
-  const where = buildWhere<any>(req.query, ["position", "lastName"]);
-  const [items, total] = await Promise.all([
-    prisma.employee.findMany({ where, skip, take, orderBy, include: { user: true } }),
-    prisma.employee.count({ where }),
-  ]);
-  return res.json({ items, total });
+  const { page, pageSize, sortBy, sortOrder, position, lastName } = req.query as any;
+  const result = await EmployeeService.findMany({
+    page: page ? Number(page) : undefined,
+    pageSize: pageSize ? Number(pageSize) : undefined,
+    sortBy,
+    sortOrder,
+    position,
+    lastName,
+  });
+  return res.json(result);
 });
 
 router.post("/", checkRole(["DEPUTY", "ADMIN"]), validate(createEmployeeSchema), async (req, res) => {
-  const { body } = req as any;
-  const { user, ...employee } = body;
-  const created = await prisma.$transaction(async (tx: any) => {
-    const emp = await tx.employee.create({ data: employee });
-    let usr = null;
-    if (user) {
-      usr = await tx.user.create({
-        data: {
-          email: user.email,
-          passwordHash: await (await import("bcryptjs")).hash(user.password, 10),
-          role: user.role,
-          employeeId: emp.id,
-        },
-      });
-    }
-    return { emp, usr };
-  });
+  const created = await EmployeeService.create(req.body);
   return res.status(201).json(created);
 });
 
-// TODO: При увольнении (fireDate): деактивировать User, открепить от Club, записать в ActionLog.
 router.put("/:id", checkRole(["DEPUTY", "ADMIN"]), validate(updateEmployeeSchema), async (req, res) => {
-  const id = Number(req.params.id);
-  const updated = await prisma.employee.update({ where: { id }, data: req.body });
+  const updated = await EmployeeService.update(Number(req.params.id), req.body);
   return res.json(updated);
+});
+
+// PUT /api/employees/:id/archive - архивировать (soft-delete)
+router.put("/:id/archive", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+  await EmployeeService.update(Number(req.params.id), { status: "ARCHIVED" });
+  return res.status(204).send();
 });
 
 // DELETE /api/employees/:id - удаление сотрудника
@@ -63,10 +46,7 @@ router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
   }
 
   try {
-    // Сначала удаляем связанного пользователя, если есть
-    await prisma.user.deleteMany({ where: { employeeId: id } });
-    // Затем удаляем сотрудника
-    await prisma.employee.delete({ where: { id } });
+    await EmployeeService.delete(id);
   } catch (error: any) {
     if (error?.code === "P2025") {
       return res.status(204).send();

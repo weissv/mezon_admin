@@ -23,6 +23,13 @@ const idParam = z.object({
   id: z.string().regex(/^\d+$/, "ID должен быть числом"),
 });
 
+export const contractInputSchema = z.object({
+  id: z.number().int().positive().optional(),
+  number: z.string().min(1, "Номер договора обязателен"),
+  date: z.string().refine((v) => !isNaN(Date.parse(v)), "Неверный формат даты"),
+  isActive: z.boolean().optional().default(true),
+});
+
 // --- Child body ---
 
 const childBody = z.object({
@@ -36,8 +43,20 @@ const childBody = z.object({
   nationality: z.string().optional(),
   gender: z.enum(["MALE", "FEMALE"]).optional(),
   birthCertificateNumber: z.string().optional(),
-  contractNumber: z.string().optional(),
-  contractDate: z.string().refine((v) => !v || !isNaN(Date.parse(v)), "Неверный формат даты договора").optional(),
+  
+  // Contracts
+  contractNumber: z.string().optional(), // @deprecated
+  contractDate: z.string().refine((v) => !v || !isNaN(Date.parse(v)), "Неверный формат даты договора").optional(), // @deprecated
+  contracts: z.array(contractInputSchema).optional(),
+
+  // Orders
+  admissionOrderNumber: z.string().optional(),
+  admissionOrderDate: z.string().refine((v) => !v || !isNaN(Date.parse(v)), "Неверный формат даты").optional(),
+  previousSchool: z.string().optional(),
+  dismissalOrderNumber: z.string().optional(),
+  dismissalOrderDate: z.string().refine((v) => !v || !isNaN(Date.parse(v)), "Неверный формат даты").optional(),
+  nextSchool: z.string().optional(),
+
   // Parents array (new)
   parents: z.array(parentInputSchema).optional(),
   // Legacy fields for backward compat

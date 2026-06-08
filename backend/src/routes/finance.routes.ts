@@ -47,6 +47,71 @@ const appendDateRange = (where: Record<string, any>, start?: unknown, end?: unkn
   if (endDate) where[field].lte = endDate;
 };
 
+// GET /api/finance/statistics/expenses
+router.get(
+  "/statistics/expenses",
+  checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ACCOUNTANT"]),
+  async (req, res) => {
+    const { startDate, endDate } = req.query;
+    
+    const where: any = { type: "OUT", isDeleted: false };
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) where.date.gte = new Date(String(startDate));
+      if (endDate) where.date.lte = new Date(String(endDate));
+    }
+
+    const [
+      transactions,
+      activeChildren,
+      transactionsByEmployee
+    ] = await Promise.all([
+      // Расходы по складам (продукты, хозтовары, канцтовары)
+      prisma.financeTransaction.groupBy({
+        by: ['category'],
+        _sum: { amount: true },
+        where: { type: "EXPENSE" }
+      }),
+      // Активные дети (для расчета на 1 ученика)
+      prisma.child.count({ where: { status: "ACTIVE" } }),
+      // Расходы по сотрудникам: считаем, что мы выдаем инвентарь
+      // В InventoryTransaction нет поля totalValue и employeeId, поэтому мы не можем сгруппировать по сумме напрямую
+      // Вместо этого вернем пустой массив или просто количество выдач.
+      // Пока просто возвращаем пустой список, чтобы не ломать сборку.
+      Promise.resolve([])
+    ]);
+
+    const categoryStats: Record<string, number> = {
+      FOOD: 0,
+      HOUSEHOLD: 0,
+      STATIONERY: 0,
+    };
+    
+    let totalExpenses = 0;
+    const employeeStats: Record<string, number> = {};
+
+    transactions.forEach(tx => {
+      const val = Number(tx._sum.amount) || 0;
+      totalExpenses += val;
+      
+      if (tx.category) {
+        const catStr = tx.category.toString();
+        // NUTRITION -> FOOD, MAINTENANCE -> HOUSEHOLD, OTHER -> STATIONERY
+        if (catStr === 'NUTRITION') categoryStats.FOOD += val;
+        else if (catStr === 'MAINTENANCE') categoryStats.HOUSEHOLD += val;
+        else categoryStats.STATIONERY += val;
+      }
+    });
+
+    return res.json({
+      totalExpenses,
+      perChild: activeChildren > 0 ? totalExpenses / activeChildren : 0,
+      byCategory: categoryStats,
+      byEmployee: Object.entries(employeeStats).map(([name, amount]) => ({ name, amount }))
+    });
+  }
+);
+
 // GET /api/finance/transactions
 router.get(
   "/transactions",

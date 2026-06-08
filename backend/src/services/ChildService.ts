@@ -42,8 +42,17 @@ export interface CreateChildInput {
   nationality?: string;
   gender?: Gender;
   birthCertificateNumber?: string;
-  contractNumber?: string;
-  contractDate?: string | Date;
+  contractNumber?: string; // legacy
+  contractDate?: string | Date; // legacy
+  contracts?: { id?: number; number: string; date: string | Date; isActive?: boolean }[];
+  
+  admissionOrderNumber?: string;
+  admissionOrderDate?: string | Date;
+  previousSchool?: string;
+  dismissalOrderNumber?: string;
+  dismissalOrderDate?: string | Date;
+  nextSchool?: string;
+  
   parents?: ParentInput[];
   // Legacy fields (backward compat)
   fatherName?: string;
@@ -74,6 +83,7 @@ const childListInclude = {
 const childDetailInclude = {
   group: { select: { ...groupSelect, capacity: true, academicYear: true } },
   parents: { select: parentSelect },
+  contracts: { orderBy: { date: 'desc' as const } },
   temporaryAbsences: { orderBy: { startDate: 'desc' as const }, take: 5 },
   enrollments: {
     include: { club: { select: { id: true, name: true } } },
@@ -179,6 +189,21 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
           birthCertificateNumber: data.birthCertificateNumber,
           contractNumber: data.contractNumber,
           contractDate: data.contractDate ? this.parseDate(data.contractDate, 'дата договора') : undefined,
+          admissionOrderNumber: data.admissionOrderNumber,
+          admissionOrderDate: data.admissionOrderDate ? this.parseDate(data.admissionOrderDate, 'дата приказа прибытия') : undefined,
+          previousSchool: data.previousSchool,
+          dismissalOrderNumber: data.dismissalOrderNumber,
+          dismissalOrderDate: data.dismissalOrderDate ? this.parseDate(data.dismissalOrderDate, 'дата приказа выбытия') : undefined,
+          nextSchool: data.nextSchool,
+          
+          contracts: data.contracts ? {
+            create: data.contracts.map(c => ({
+              number: c.number,
+              date: this.parseDate(c.date, 'дата договора'),
+              isActive: c.isActive ?? true,
+            }))
+          } : undefined,
+
           // Legacy fields
           fatherName: data.fatherName,
           motherName: data.motherName,
@@ -232,6 +257,46 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     if (data.contractDate !== undefined) {
       updateData.contractDate = data.contractDate ? this.parseDate(data.contractDate, 'дата договора') : null;
     }
+    
+    if (data.admissionOrderNumber !== undefined) updateData.admissionOrderNumber = data.admissionOrderNumber || null;
+    if (data.admissionOrderDate !== undefined) updateData.admissionOrderDate = data.admissionOrderDate ? this.parseDate(data.admissionOrderDate, 'дата приказа') : null;
+    if (data.previousSchool !== undefined) updateData.previousSchool = data.previousSchool || null;
+    if (data.dismissalOrderNumber !== undefined) updateData.dismissalOrderNumber = data.dismissalOrderNumber || null;
+    if (data.dismissalOrderDate !== undefined) updateData.dismissalOrderDate = data.dismissalOrderDate ? this.parseDate(data.dismissalOrderDate, 'дата приказа') : null;
+    if (data.nextSchool !== undefined) updateData.nextSchool = data.nextSchool || null;
+
+    // Handle contracts update
+    if (data.contracts !== undefined) {
+      // First delete missing contracts
+      const currentContractIds = data.contracts.filter(c => c.id).map(c => c.id as number);
+      await this.prisma.childContract.deleteMany({
+        where: { childId: numericId, id: { notIn: currentContractIds } }
+      });
+      
+      // Update existing or create new
+      for (const contract of data.contracts) {
+        if (contract.id) {
+          await this.prisma.childContract.update({
+            where: { id: contract.id },
+            data: {
+              number: contract.number,
+              date: this.parseDate(contract.date, 'дата договора'),
+              isActive: contract.isActive,
+            }
+          });
+        } else {
+          await this.prisma.childContract.create({
+            data: {
+              childId: numericId,
+              number: contract.number,
+              date: this.parseDate(contract.date, 'дата договора'),
+              isActive: contract.isActive ?? true,
+            }
+          });
+        }
+      }
+    }
+
     // Legacy fields
     if (data.fatherName !== undefined) updateData.fatherName = data.fatherName || null;
     if (data.motherName !== undefined) updateData.motherName = data.motherName || null;

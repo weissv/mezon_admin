@@ -11,9 +11,10 @@ import TransactionsView from"./views/TransactionsView";
 import InvoicesView from"./views/InvoicesView";
 import DebtorsView from"./views/DebtorsView";
 import FinanceRegistersView from"./views/FinanceRegistersView";
+import FinanceStatisticsView from"./views/FinanceStatisticsView";
 import { PageHeader, PageSection, PageStack, PageToolbar } from "../../components/ui/page";
 
-type TabId ="dashboard"|"transactions"|"invoices"|"debtors"|"registers";
+type TabId ="dashboard"|"transactions"|"invoices"|"debtors"|"registers"|"statistics";
 
 const tabs: { id: TabId; label: string; icon: React.ReactNode}[] = [
  { id:"dashboard", label:"Обзор", icon: <LayoutDashboard className="h-4 w-4"/>},
@@ -21,6 +22,7 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode}[] = [
  { id:"invoices", label:"Накладные", icon: <FileText className="h-4 w-4"/>},
  { id:"debtors", label:"Дебиторы", icon: <Users className="h-4 w-4"/>},
   { id:"registers", label:"НДС и активы", icon: <BarChart3 className="h-4 w-4"/>},
+  { id:"statistics", label:"Статистика расходов", icon: <BarChart3 className="h-4 w-4"/>},
 ];
 
 export default function FinancePage() {
@@ -63,6 +65,7 @@ export default function FinancePage() {
   {activeTab ==="invoices"&& <InvoicesView />}
   {activeTab ==="debtors"&& <DebtorsView />}
   {activeTab ==="registers"&& <FinanceRegistersView />}
+  {activeTab ==="statistics"&& <FinanceStatisticsView />}
   </PageSection>
   </PageStack>
   );
