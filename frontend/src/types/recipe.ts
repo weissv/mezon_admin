@@ -21,7 +21,6 @@ export interface Dish {
   id: number;
   name: string;
   category: string;
-  preparationTime: number;
   ingredients?: DishIngredient[];
 }
 

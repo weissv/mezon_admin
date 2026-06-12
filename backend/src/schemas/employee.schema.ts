@@ -20,7 +20,6 @@ export const createEmployeeSchema = z.object({
     hireDate: z.string().datetime("Неверный формат даты"),
     fireDate: z.string().datetime().nullable().optional(),
     hireOrderNumber: z.string().optional(),
-    hireOrderDate: z.string().datetime().nullable().optional(),
     fireOrderNumber: z.string().optional(),
     fireOrderDate: z.string().datetime().nullable().optional(),
     contractEndDate: z.string().datetime().nullable().optional(),

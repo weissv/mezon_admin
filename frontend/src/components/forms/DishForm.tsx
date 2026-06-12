@@ -17,8 +17,7 @@ const ingredientSchema = z.object({
 
 const formSchema = z.object({
  name: z.string().min(2, 'Название обязательно'),
- category: z.string().min(2, 'Категория обязательна'),
- preparationTime: z.coerce.number().positive('Время приготовления должно быть > 0'),
+ category: z.string().min(1, 'Укажите категорию'),
  ingredients: z.array(ingredientSchema).min(1, 'Добавьте хотя бы один ингредиент'),
 });
 
@@ -40,7 +39,6 @@ export function DishForm({ initialData, onSuccess, onCancel}: DishFormProps) {
  defaultValues: {
  name: initialData?.name || '',
  category: initialData?.category || '',
- preparationTime: initialData?.preparationTime || 30,
  ingredients: initialData?.ingredients?.map(ing => ({
  ingredientId: (ing as any).inventoryItemId || (ing as any).ingredientId,
  quantity: ing.quantity,
@@ -88,7 +86,6 @@ export function DishForm({ initialData, onSuccess, onCancel}: DishFormProps) {
  <FormError message={errors.name?.message} />
  </div>
 
- <div className="grid grid-cols-2 gap-4">
  <div>
  <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Категория *</label>
  <select 
@@ -102,13 +99,6 @@ export function DishForm({ initialData, onSuccess, onCancel}: DishFormProps) {
  <option value="Ужин">Ужин</option>
  </select>
  <FormError message={errors.category?.message} />
- </div>
-
- <div>
- <label className="block text-[11px] font-medium uppercase tracking-widest mb-1">Время приготовления (мин)</label>
- <Input type="number"{...register('preparationTime')} placeholder="30"/>
- <FormError message={errors.preparationTime?.message} />
- </div>
  </div>
 
  <div className="border-t pt-4">

@@ -91,10 +91,13 @@ export function useApi<T>({
       }
 
       // Добавляем поиск
-      if (search && searchFields.length > 0) {
-        searchFields.forEach((field) => {
-          params.append(field as string, search);
-        });
+      if (search) {
+        params.append('search', search);
+        if (searchFields.length > 0) {
+          searchFields.forEach((field) => {
+            params.append(field as string, search);
+          });
+        }
       }
 
       // Добавляем фильтры

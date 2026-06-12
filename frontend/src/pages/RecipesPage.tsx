@@ -109,16 +109,6 @@ function DishesView() {
  { key: 'name', header: 'Название'},
  { key: 'category', header: 'Категория'},
  {
- key: 'preparationTime',
- header: 'Время приготовления',
- render: (row) => `${row.preparationTime} мин`
-},
- {
- key: 'ingredients',
- header: 'Ингредиентов',
- render: (row) => row.ingredients?.length || 0
-},
- {
  key: 'actions',
  header: 'Действия',
  render: (row) => (
@@ -159,7 +149,7 @@ function DishesView() {
   onClose={() => setIsModalOpen(false)}
   title={editingDish ? 'Редактировать блюдо' : 'Новое блюдо'}
   eyebrow="Каталог блюд"
-  description="Соберите карточку блюда так, чтобы кухня и администратор быстро проверили категорию, время приготовления и состав."
+  description="Соберите карточку блюда так, чтобы кухня и администратор быстро проверили категорию и состав."
   icon={<ChefHat className="h-5 w-5" />}
   footer={
   <ModalActions>

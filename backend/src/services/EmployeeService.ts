@@ -10,6 +10,8 @@ export interface EmployeeFilters {
   position?: string;
   lastName?: string;
   hasUser?: boolean;
+  search?: string;
+  category?: string;
 }
 
 export interface CreateEmployeeInput {
@@ -22,7 +24,6 @@ export interface CreateEmployeeInput {
   hireDate: string | Date;
   fireDate?: string | Date;
   hireOrderNumber?: string;
-  hireOrderDate?: string | Date;
   fireOrderNumber?: string;
   fireOrderDate?: string | Date;
   contractEndDate?: string | Date;
@@ -68,11 +69,37 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
     
     const where: Prisma.EmployeeWhereInput = {};
     
-    if (params.position) {
-      where.position = { contains: params.position, mode: 'insensitive' };
+    if (params.category === 'ARCHIVED') {
+      where.status = 'ARCHIVED';
+    } else {
+      where.status = 'ACTIVE';
     }
-    if (params.lastName) {
-      where.lastName = { contains: params.lastName, mode: 'insensitive' };
+    
+    if (params.search) {
+      where.OR = [
+        { firstName: { contains: params.search, mode: 'insensitive' } },
+        { lastName: { contains: params.search, mode: 'insensitive' } },
+        { position: { contains: params.search, mode: 'insensitive' } }
+      ];
+    } else {
+      if (params.position) {
+        where.position = { contains: params.position, mode: 'insensitive' };
+      }
+      if (params.lastName) {
+        where.lastName = { contains: params.lastName, mode: 'insensitive' };
+      }
+    }
+    
+    if (params.category) {
+      if (params.category === 'CONTRACT') {
+        where.contracts = { some: { isActive: true } };
+      } else if (params.category === 'ADMIN') {
+        const adminCondition = { OR: [{ user: { role: { in: ['ADMIN', 'DEPUTY', 'DIRECTOR'] } } }, { position: { contains: 'директор', mode: 'insensitive' } }, { position: { contains: 'админ', mode: 'insensitive' } }, { position: { contains: 'завуч', mode: 'insensitive' } }] };
+        where.AND = [adminCondition] as any;
+      } else if (params.category === 'TEACHER') {
+        const teacherCondition = { OR: [{ user: { role: 'TEACHER' } }, { position: { contains: 'учитель', mode: 'insensitive' } }, { position: { contains: 'педагог', mode: 'insensitive' } }, { position: { contains: 'преподаватель', mode: 'insensitive' } }] };
+        where.AND = [teacherCondition] as any;
+      }
     }
 
     const [items, total] = await Promise.all([
@@ -136,7 +163,6 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
           hireDate: this.parseDate(employeeData.hireDate),
           fireDate: employeeData.fireDate ? this.parseDate(employeeData.fireDate) : undefined,
           hireOrderNumber: employeeData.hireOrderNumber,
-          hireOrderDate: employeeData.hireOrderDate ? this.parseDate(employeeData.hireOrderDate) : undefined,
           fireOrderNumber: employeeData.fireOrderNumber,
           fireOrderDate: employeeData.fireOrderDate ? this.parseDate(employeeData.fireOrderDate) : undefined,
           contractEndDate: employeeData.contractEndDate ? this.parseDate(employeeData.contractEndDate) : undefined,
@@ -241,7 +267,6 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
     if (data.hireDate) updateData.hireDate = this.parseDate(data.hireDate);
     if (data.fireDate !== undefined) updateData.fireDate = data.fireDate ? this.parseDate(data.fireDate) : null;
     if (data.hireOrderNumber !== undefined) updateData.hireOrderNumber = data.hireOrderNumber || null;
-    if (data.hireOrderDate !== undefined) updateData.hireOrderDate = data.hireOrderDate ? this.parseDate(data.hireOrderDate) : null;
     if (data.fireOrderNumber !== undefined) updateData.fireOrderNumber = data.fireOrderNumber || null;
     if (data.fireOrderDate !== undefined) updateData.fireOrderDate = data.fireOrderDate ? this.parseDate(data.fireOrderDate) : null;
     if (data.contractEndDate !== undefined) updateData.contractEndDate = data.contractEndDate ? this.parseDate(data.contractEndDate) : null;

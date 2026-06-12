@@ -7,12 +7,13 @@ const router = Router();
 
 // GET /api/documents - List all documents (filter by employeeId or childId)
 router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { employeeId, childId } = req.query;
+  const { employeeId, childId, search } = req.query;
   
   const documents = await prisma.document.findMany({
     where: {
       ...(employeeId ? { employeeId: Number(employeeId) } : {}),
       ...(childId ? { childId: Number(childId) } : {}),
+      ...(search ? { name: { contains: search as string, mode: 'insensitive' } } : {}),
     },
     include: {
       employee: { select: { id: true, firstName: true, lastName: true } },
@@ -78,8 +79,10 @@ router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
 // --- DocumentTemplate CRUD ---
 
 // GET /api/documents/templates - List all templates
-router.get("/templates", checkRole(["DEPUTY", "ADMIN"]), async (_req, res) => {
+router.get("/templates", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
+  const { search } = req.query;
   const templates = await prisma.documentTemplate.findMany({
+    where: search ? { name: { contains: search as string, mode: 'insensitive' } } : {},
     orderBy: { name: "asc" },
   });
   
