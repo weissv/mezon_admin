@@ -52,7 +52,7 @@ router.post("/:id/calculate-kbju", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), asy
             include: {
               ingredients: {
                 include: {
-                  ingredient: true,
+                  inventoryItem: true,
                 },
               },
             },
@@ -74,7 +74,8 @@ router.post("/:id/calculate-kbju", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), asy
 
   for (const menuDish of menu.meals) {
     for (const dishIng of menuDish.dish.ingredients) {
-      const ing = dishIng.ingredient;
+      const ing = dishIng.inventoryItem;
+      if (!ing) continue;
       totalCalories += ing.calories * dishIng.quantity;
       totalProtein += ing.protein * dishIng.quantity;
       totalFat += ing.fat * dishIng.quantity;
@@ -120,7 +121,7 @@ router.get("/:id/shopping-list", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async
             include: {
               ingredients: {
                 include: {
-                  ingredient: true,
+                  inventoryItem: true,
                 },
               },
             },
@@ -137,28 +138,27 @@ router.get("/:id/shopping-list", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async
   const portionsCount = Number(portions) || 1;
 
   // Собираем требуемые ингредиенты
-  const required: Record<string, { qty: number; unit: string; ingredientId: number }> = {};
+  const required: Record<string, { qty: number; unit: string; inventoryItemId: number }> = {};
   
   for (const menuDish of menu.meals) {
     for (const dishIng of menuDish.dish.ingredients) {
-      const ing = dishIng.ingredient;
+      const ing = dishIng.inventoryItem;
+      if (!ing) continue;
       const key = `${ing.name}|${ing.unit}`;
       
       if (!required[key]) {
-        required[key] = { qty: 0, unit: ing.unit, ingredientId: ing.id };
+        required[key] = { qty: 0, unit: ing.unit, inventoryItemId: ing.id };
       }
       required[key].qty += dishIng.quantity * portionsCount;
     }
   }
 
   // Получаем текущие остатки
-  const inventory = await prisma.inventoryItem.findMany({
-    include: { ingredient: true },
-  });
+  const inventory = await prisma.inventoryItem.findMany();
 
   const shoppingList = Object.entries(required).map(([key, val]) => {
     const [name] = key.split("|");
-    const stock = inventory.find((i: any) => i.ingredient?.id === val.ingredientId);
+    const stock = inventory.find((i: any) => i.id === val.inventoryItemId);
     const inStock = stock?.quantity || 0;
     const toBuy = Math.max(val.qty - inStock, 0);
     

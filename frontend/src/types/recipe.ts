@@ -11,9 +11,10 @@ export interface Ingredient {
 
 export interface DishIngredient {
   dishId: number;
-  ingredientId: number;
+  inventoryItemId: number;
+  ingredientId?: number; // for backwards compatibility in forms
   quantity: number;
-  ingredient?: Ingredient;
+  inventoryItem?: Ingredient;
 }
 
 export interface Dish {

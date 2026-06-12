@@ -7,23 +7,26 @@ const router = Router();
 
 // --- Ingredient CRUD ---
 
-// GET /api/recipes/ingredients - List all ingredients
+// GET /api/recipes/ingredients - List all ingredients (from warehouse)
 router.get("/ingredients", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
-  const ingredients = await prisma.ingredient.findMany({
+  const ingredients = await prisma.inventoryItem.findMany({
+    where: { type: "FOOD" },
     orderBy: { name: "asc" },
   });
   
   return res.json(ingredients);
 });
 
-// POST /api/recipes/ingredients - Create new ingredient
+// POST /api/recipes/ingredients - Create new ingredient (warehouse item)
 router.post("/ingredients", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { name, unit, calories, protein, fat, carbs } = req.body;
   
-  const ingredient = await prisma.ingredient.create({
+  const ingredient = await prisma.inventoryItem.create({
     data: {
       name,
       unit,
+      quantity: 0,
+      type: "FOOD",
       calories: calories || 0,
       protein: protein || 0,
       fat: fat || 0,
@@ -39,7 +42,7 @@ router.put("/ingredients/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) 
   const { id } = req.params;
   const { name, unit, calories, protein, fat, carbs } = req.body;
   
-  const ingredient = await prisma.ingredient.update({
+  const ingredient = await prisma.inventoryItem.update({
     where: { id: Number(id) },
     data: {
       name,
@@ -58,7 +61,7 @@ router.put("/ingredients/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) 
 router.delete("/ingredients/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
   
-  await prisma.ingredient.delete({
+  await prisma.inventoryItem.delete({
     where: { id: Number(id) },
   });
   
@@ -73,7 +76,7 @@ router.get("/dishes", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res
     include: {
       ingredients: {
         include: {
-          ingredient: { select: { id: true, name: true, unit: true } },
+          inventoryItem: { select: { id: true, name: true, unit: true } },
         },
       },
     },
@@ -102,7 +105,7 @@ router.post("/dishes", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
     include: {
       ingredients: {
         include: {
-          ingredient: { select: { id: true, name: true, unit: true } },
+          inventoryItem: { select: { id: true, name: true, unit: true } },
         },
       },
     },
@@ -137,7 +140,7 @@ router.put("/dishes/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
     include: {
       ingredients: {
         include: {
-          ingredient: { select: { id: true, name: true, unit: true } },
+          inventoryItem: { select: { id: true, name: true, unit: true } },
         },
       },
     },
@@ -166,7 +169,7 @@ router.get("/dishes/:id/nutrition", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), as
     include: {
       ingredients: {
         include: {
-          ingredient: true,
+          inventoryItem: true,
         },
       },
     },
@@ -182,10 +185,10 @@ router.get("/dishes/:id/nutrition", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), as
     (acc: NutritionAcc, item: any): NutritionAcc => {
       const multiplier = item.quantity; // quantity in dish
       return {
-        calories: acc.calories + item.ingredient.calories * multiplier,
-        protein: acc.protein + item.ingredient.protein * multiplier,
-        fat: acc.fat + item.ingredient.fat * multiplier,
-        carbs: acc.carbs + item.ingredient.carbs * multiplier,
+        calories: acc.calories + item.inventoryItem.calories * multiplier,
+        protein: acc.protein + item.inventoryItem.protein * multiplier,
+        fat: acc.fat + item.inventoryItem.fat * multiplier,
+        carbs: acc.carbs + item.inventoryItem.carbs * multiplier,
       };
     },
     { calories: 0, protein: 0, fat: 0, carbs: 0 }

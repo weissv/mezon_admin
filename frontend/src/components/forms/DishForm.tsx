@@ -42,7 +42,7 @@ export function DishForm({ initialData, onSuccess, onCancel}: DishFormProps) {
  category: initialData?.category || '',
  preparationTime: initialData?.preparationTime || 30,
  ingredients: initialData?.ingredients?.map(ing => ({
- ingredientId: ing.ingredientId,
+ ingredientId: (ing as any).inventoryItemId || (ing as any).ingredientId,
  quantity: ing.quantity,
 })) || [{ ingredientId: 0, quantity: 0}],
 },
