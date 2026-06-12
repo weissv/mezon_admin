@@ -22,6 +22,13 @@ export interface Dish {
   name: string;
   category: string;
   ingredients?: DishIngredient[];
+  totalWeight?: number;
+  macros?: {
+    calories: number;
+    proteins: number;
+    fats: number;
+    carbs: number;
+  };
 }
 
 export interface DishNutrition {

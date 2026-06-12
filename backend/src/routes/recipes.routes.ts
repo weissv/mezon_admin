@@ -3,6 +3,7 @@ import { Router } from "express";
 import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
 import DishService from "../services/DishService";
+import FoodApiService from "../services/FoodApiService";
 
 const router = Router();
 
@@ -20,8 +21,27 @@ router.get("/ingredients", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req
 
 // POST /api/recipes/ingredients - Create new ingredient (warehouse item)
 router.post("/ingredients", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
-  const { name, unit, calories, protein, fat, carbs } = req.body;
+  let { name, unit, calories, protein, fat, carbs } = req.body;
   
+  // АВТОМАТИЧЕСКИЙ ПОДСЧЕТ КБЖУ ДЛЯ ПРОДУКТОВ ПИТАНИЯ (Если не указано вручную)
+  if (!calories && !protein && !fat && !carbs) {
+    try {
+      const searchResults = await FoodApiService.searchIngredients(name);
+      if (searchResults && searchResults.length > 0) {
+        const topResultId = searchResults[0].externalId;
+        const nutrients = await FoodApiService.getIngredientNutrients(topResultId);
+        if (nutrients) {
+          calories = nutrients.calories;
+          protein = nutrients.proteins;
+          fat = nutrients.fats;
+          carbs = nutrients.carbs;
+        }
+      }
+    } catch (e) {
+      console.error("Auto-fetch nutrients failed:", e);
+    }
+  }
+
   const ingredient = await prisma.inventoryItem.create({
     data: {
       name,
@@ -41,17 +61,36 @@ router.post("/ingredients", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => 
 // PUT /api/recipes/ingredients/:id - Update ingredient
 router.put("/ingredients/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
-  const { name, unit, calories, protein, fat, carbs } = req.body;
+  let { name, unit, calories, protein, fat, carbs } = req.body;
   
+  // АВТОМАТИЧЕСКИЙ ПОДСЧЕТ КБЖУ (Если очистили поля или обновляют название)
+  if (!calories && !protein && !fat && !carbs) {
+    try {
+      const searchResults = await FoodApiService.searchIngredients(name);
+      if (searchResults && searchResults.length > 0) {
+        const topResultId = searchResults[0].externalId;
+        const nutrients = await FoodApiService.getIngredientNutrients(topResultId);
+        if (nutrients) {
+          calories = nutrients.calories;
+          protein = nutrients.proteins;
+          fat = nutrients.fats;
+          carbs = nutrients.carbs;
+        }
+      }
+    } catch (e) {
+      console.error("Auto-fetch nutrients failed:", e);
+    }
+  }
+
   const ingredient = await prisma.inventoryItem.update({
     where: { id: Number(id) },
     data: {
       name,
       unit,
-      calories,
-      protein,
-      fat,
-      carbs,
+      calories: calories || 0,
+      protein: protein || 0,
+      fat: fat || 0,
+      carbs: carbs || 0,
     },
   });
   
@@ -77,14 +116,23 @@ router.get("/dishes", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res
     include: {
       ingredients: {
         include: {
-          inventoryItem: { select: { id: true, name: true, unit: true } },
+          inventoryItem: true, // Fetch full inventory item for macros
         },
       },
     },
     orderBy: { name: "asc" },
   });
   
-  return res.json(dishes);
+  const enrichedDishes = dishes.map(dish => {
+    const macroData = DishService.calculateMacrosSync(dish);
+    return {
+      ...dish,
+      macros: macroData.macros,
+      totalWeight: macroData.totalWeight,
+    };
+  });
+
+  return res.json(enrichedDishes);
 });
 
 // POST /api/recipes/dishes - Create new dish with ingredients
@@ -105,13 +153,18 @@ router.post("/dishes", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
     include: {
       ingredients: {
         include: {
-          inventoryItem: { select: { id: true, name: true, unit: true } },
+          inventoryItem: true, // Fetch full for macros
         },
       },
     },
   });
   
-  return res.status(201).json(dish);
+  const macroData = DishService.calculateMacrosSync(dish);
+  return res.status(201).json({
+    ...dish,
+    macros: macroData.macros,
+    totalWeight: macroData.totalWeight
+  });
 });
 
 // PUT /api/recipes/dishes/:id - Update dish
@@ -139,13 +192,18 @@ router.put("/dishes/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
     include: {
       ingredients: {
         include: {
-          inventoryItem: { select: { id: true, name: true, unit: true } },
+          inventoryItem: true, // Fetch full for macros
         },
       },
     },
   });
   
-  return res.json(dish);
+  const macroData = DishService.calculateMacrosSync(dish);
+  return res.json({
+    ...dish,
+    macros: macroData.macros,
+    totalWeight: macroData.totalWeight
+  });
 });
 
 // DELETE /api/recipes/dishes/:id - Delete dish

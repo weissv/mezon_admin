@@ -64,6 +64,46 @@ export class DishService {
       }
     };
   }
+  calculateMacrosSync(dish: any) {
+    let totalCalories = 0;
+    let totalProteins = 0;
+    let totalFats = 0;
+    let totalCarbs = 0;
+    let totalWeight = 0;
+
+    for (const item of dish.ingredients) {
+      if (!item.inventoryItem) continue;
+      
+      let weightInGrams = item.quantity;
+      if (item.inventoryItem.unit.toLowerCase() === 'кг' || item.inventoryItem.unit.toLowerCase() === 'l' || item.inventoryItem.unit.toLowerCase() === 'л') {
+        weightInGrams *= 1000;
+      }
+      
+      totalWeight += weightInGrams;
+
+      const caloriesPer100g = item.inventoryItem.calories || 0;
+      const proteinsPer100g = item.inventoryItem.protein || 0;
+      const fatsPer100g = item.inventoryItem.fat || 0;
+      const carbsPer100g = item.inventoryItem.carbs || 0;
+
+      totalCalories += (caloriesPer100g * weightInGrams) / 100;
+      totalProteins += (proteinsPer100g * weightInGrams) / 100;
+      totalFats += (fatsPer100g * weightInGrams) / 100;
+      totalCarbs += (carbsPer100g * weightInGrams) / 100;
+    }
+
+    return {
+      dishId: dish.id,
+      dishName: dish.name,
+      totalWeight,
+      macros: {
+        calories: Number(totalCalories.toFixed(2)),
+        proteins: Number(totalProteins.toFixed(2)),
+        fats: Number(totalFats.toFixed(2)),
+        carbs: Number(totalCarbs.toFixed(2)),
+      }
+    };
+  }
 }
 
 export default new DishService();

@@ -51,7 +51,6 @@ function DishesView() {
 });
  const [isModalOpen, setIsModalOpen] = useState(false);
  const [editingDish, setEditingDish] = useState<Dish | null>(null);
- const [nutritionData, setNutritionData] = useState<DishNutrition | null>(null);
  
  // Delete confirmation modal
  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -89,15 +88,6 @@ function DishesView() {
 }
 };
 
- const handleViewNutrition = async (dish: Dish) => {
- try {
- const nutrition = await api.get(`/api/recipes/dishes/${dish.id}/nutrition`);
- setNutritionData(nutrition);
-} catch (error) {
- toast.error('Ошибка загрузки КБЖУ');
-}
-};
-
  const handleFormSuccess = () => {
  setIsModalOpen(false);
  fetchData();
@@ -108,6 +98,15 @@ function DishesView() {
  { key: 'id', header: 'ID'},
  { key: 'name', header: 'Название'},
  { key: 'category', header: 'Категория'},
+ { 
+    key: 'macros', 
+    header: 'КБЖУ (Авто)', 
+    render: (row) => row.macros ? 
+      <span className="text-xs text-mezon-text-secondary">
+        {row.macros.calories} ккал (Б:{row.macros.proteins} Ж:{row.macros.fats} У:{row.macros.carbs})
+      </span> 
+      : <span className="text-xs text-mezon-text-tertiary">Нет данных</span>
+  },
  {
  key: 'actions',
  header: 'Действия',
@@ -115,9 +114,6 @@ function DishesView() {
  <div className="flex gap-2">
  <Button variant="outline"size="sm"onClick={() => handleEdit(row)}>
  Редактировать
- </Button>
- <Button variant="ghost"size="sm"onClick={() => handleViewNutrition(row)}>
- КБЖУ
  </Button>
  <Button variant="destructive"size="sm"onClick={() => openDeleteModal(row)}>
  Удалить
@@ -164,26 +160,6 @@ function DishesView() {
  />
  </Modal>
 
- <Modal
-  isOpen={!!nutritionData}
-  onClose={() => setNutritionData(null)}
-  title="Пищевая ценность"
-  eyebrow="КБЖУ"
-  description="Сводка по калорийности и нутриентам для выбранного блюда."
-  icon={<ChefHat className="h-5 w-5" />}
-  >
-  {nutritionData && (
-  <div className="mezon-modal-form">
-  <ModalNotice title="Блюдо" tone="info">{nutritionData.dishName}</ModalNotice>
-  <ModalGrid>
-  <ModalStat label="Калорийность" value={`${nutritionData.calories.toFixed(1)} ккал`} tone="warning" />
-  <ModalStat label="Белки" value={`${nutritionData.protein.toFixed(1)} г`} tone="info" />
-  <ModalStat label="Жиры" value={`${nutritionData.fat.toFixed(1)} г`} tone="warning" />
-  <ModalStat label="Углеводы" value={`${nutritionData.carbs.toFixed(1)} г`} tone="success" />
-  </ModalGrid>
-  </div>
-  )}
-  </Modal>
 
   <Modal
   isOpen={deleteModalOpen}
