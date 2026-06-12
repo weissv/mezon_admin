@@ -43,7 +43,37 @@ export default function EmployeesPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<Employee | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [viewEmployee, setViewEmployee] = useState<Employee | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const navigate = useNavigate();
+
+  const downloadPdf = async () => {
+    if (!viewEmployee) return;
+    const cardElement = document.getElementById('employee-card');
+    if (!cardElement) return;
+
+    try {
+      setIsGeneratingPdf(true);
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const canvas = await html2canvas(cardElement, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`employee-card-${viewEmployee.id}.pdf`);
+      toast.success('Карточка скачана');
+    } catch (err) {
+      console.error(err);
+      toast.error('Ошибка при создании PDF');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   useEffect(() => {
     loadReminders();
@@ -171,6 +201,9 @@ export default function EmployeesPage() {
       header: 'Действия',
       render: (row) => (
         <div className="flex flex-wrap gap-2">
+          <Button variant="ghost" size="sm" onClick={() => setViewEmployee(row)}>
+            Просмотр
+          </Button>
           <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
             Редактировать
           </Button>
@@ -390,6 +423,57 @@ export default function EmployeesPage() {
               </div>
             </ModalSection>
           </>
+        ) : null}
+      </Modal>
+
+      <Modal
+        isOpen={!!viewEmployee}
+        onClose={() => setViewEmployee(null)}
+        title="Просмотр сотрудника"
+        eyebrow="Карточка"
+        description="Подробная информация о сотруднике."
+        icon={<Users className="h-5 w-5" />}
+        footer={
+          <ModalActions>
+            <Button variant="outline" onClick={() => setViewEmployee(null)}>
+              Закрыть
+            </Button>
+            <Button onClick={downloadPdf} disabled={isGeneratingPdf}>
+              {isGeneratingPdf ? 'Сборка PDF...' : 'Скачать PDF'}
+            </Button>
+          </ModalActions>
+        }
+      >
+        {viewEmployee ? (
+          <div id="employee-card" className="p-6 bg-white dark:bg-mezon-base-neutral rounded-xl border border-mezon-border-subtle shadow-sm">
+            <h2 className="text-2xl font-semibold text-mezon-text-primary mb-4">
+              {viewEmployee.lastName} {viewEmployee.firstName} {viewEmployee.middleName || ''}
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-mezon-text-tertiary">Должность</p>
+                <p className="font-medium">{viewEmployee.position}</p>
+              </div>
+              <div>
+                <p className="text-sm text-mezon-text-tertiary">Ставка</p>
+                <p className="font-medium">{viewEmployee.rate}</p>
+              </div>
+              <div>
+                <p className="text-sm text-mezon-text-tertiary">Дата рождения</p>
+                <p className="font-medium">{viewEmployee.birthDate ? new Date(viewEmployee.birthDate).toLocaleDateString('ru-RU') : '—'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-mezon-text-tertiary">Дата приема</p>
+                <p className="font-medium">{viewEmployee.hireDate ? new Date(viewEmployee.hireDate).toLocaleDateString('ru-RU') : '—'}</p>
+              </div>
+              {viewEmployee.user && (
+                <div>
+                  <p className="text-sm text-mezon-text-tertiary">Email (Система)</p>
+                  <p className="font-medium text-macos-green">{viewEmployee.user.email}</p>
+                </div>
+              )}
+            </div>
+          </div>
         ) : null}
       </Modal>
     </PageStack>
