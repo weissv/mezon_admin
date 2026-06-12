@@ -92,7 +92,7 @@ const entityExporters: Record<IntegrationEntity, () => Promise<Record<string, un
   },
   inventory: async () => {
     const items = await prisma.inventoryItem.findMany({
-      include: { ingredient: { select: { id: true, name: true } } },
+
       orderBy: { name: "asc" },
     });
 
@@ -103,8 +103,7 @@ const entityExporters: Record<IntegrationEntity, () => Promise<Record<string, un
       Unit: item.unit,
       Type: item.type,
       "Expiry Date": item.expiryDate?.toISOString().split("T")[0] ?? "",
-      "Ingredient ID": item.ingredientId ?? "",
-      "Ingredient Name": item.ingredient?.name ?? "",
+
     }));
   },
   finance: async () => {
@@ -293,7 +292,7 @@ const entityImporters: Record<IntegrationEntity, (rows: ImportRow[]) => Promise<
         unit,
         type,
         expiryDate: getDate(row, "Expiry Date", "expiryDate") ?? undefined,
-        ingredientId: getInt(row, "Ingredient ID", "ingredientId") ?? undefined,
+
       };
       const id = getInt(row, "ID", "id");
       try {

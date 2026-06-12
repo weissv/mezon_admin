@@ -454,19 +454,23 @@ model InventoryItem {
   price        Decimal       @default(0) @db.Decimal(12, 2)
   expiryDate   DateTime?
   type         InventoryType
-  ingredientId Int?
-  ingredient   Ingredient?   @relation(fields: [ingredientId], references: [id])
+  
+  // КБЖУ (для продуктов питания)
+  calories     Float         @default(0) // per unit
+  protein      Float         @default(0) // per unit
+  fat          Float         @default(0) // per unit
+  carbs        Float         @default(0) // per unit
 
   // Связи
   transactions       InventoryTransaction[]
   maintenanceItems   MaintenanceItem[]
   purchaseOrderItems PurchaseOrderItem[]
+  dishIngredients    DishIngredient[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([type, expiryDate])
-  @@index([ingredientId])
   @@index([name, unit])
 }
 
@@ -625,18 +629,7 @@ model StaffingTable {
 }
 
 // --- 3. ПИТАНИЕ И ЗАКУПКИ ---
-model Ingredient {
-  id                 Int                 @id @default(autoincrement())
-  name               String              @unique
-  unit               String // "кг", "л", "шт"
-  calories           Float               @default(0) // per unit
-  protein            Float               @default(0) // per unit
-  fat                Float               @default(0) // per unit
-  carbs              Float               @default(0) // per unit
-  inventoryItems     InventoryItem[]
-  dishIngredients    DishIngredient[]
-  purchaseOrderItems PurchaseOrderItem[]
-}
+
 
 model Dish {
   id              Int              @id @default(autoincrement())
@@ -648,13 +641,13 @@ model Dish {
 }
 
 model DishIngredient {
-  dish         Dish       @relation(fields: [dishId], references: [id])
-  dishId       Int
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  ingredientId Int
-  quantity     Float // Кол-во на 1 порцию
+  dish            Dish          @relation(fields: [dishId], references: [id])
+  dishId          Int
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryItemId Int
+  quantity        Float // Кол-во на 1 порцию
 
-  @@id([dishId, ingredientId])
+  @@id([dishId, inventoryItemId])
 }
 
 model MenuDish {
@@ -677,7 +670,7 @@ model Supplier {
   address     String?
   inn         String? // ИНН поставщика
   isActive    Boolean         @default(true)
-  pricelist   Json? // { ingredientId: price }
+  pricelist   Json? // { inventoryItemId: price }
   orders      PurchaseOrder[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -737,10 +730,6 @@ model PurchaseOrderItem {
   id      Int           @id @default(autoincrement())
   order   PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId Int
-
-  // Привязка к ингредиенту (опционально)
-  ingredient   Ingredient? @relation(fields: [ingredientId], references: [id])
-  ingredientId Int?
 
   // Привязка к складскому товару (для синхронизации)
   inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id])

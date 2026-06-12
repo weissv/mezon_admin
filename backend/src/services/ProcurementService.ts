@@ -74,7 +74,6 @@ export async function getOrders(filters?: ProcurementFilters) {
       receivedBy: { select: { id: true, firstName: true, lastName: true } },
       items: {
         include: {
-          ingredient: { select: { id: true, name: true, unit: true } },
           inventoryItem: { select: { id: true, name: true, quantity: true, unit: true, type: true } },
         },
       },
@@ -93,7 +92,6 @@ export async function getOrderById(id: number) {
       receivedBy: { select: { id: true, firstName: true, lastName: true } },
       items: {
         include: {
-          ingredient: { select: { id: true, name: true, unit: true } },
           inventoryItem: { select: { id: true, name: true, quantity: true, unit: true, type: true } },
         },
       },
@@ -123,7 +121,6 @@ export interface CreateOrderInput {
     quantity: number;
     unit: string;
     price: number;
-    ingredientId?: number;
     inventoryItemId?: number;
   }[];
 }
@@ -155,7 +152,6 @@ export async function createOrder(input: CreateOrderInput, createdById: number) 
           unit: item.unit,
           price: item.price,
           totalPrice: item.quantity * item.price,
-          ingredientId: item.ingredientId || null,
           inventoryItemId: item.inventoryItemId || null,
         })),
       },
@@ -190,7 +186,6 @@ export interface UpdateOrderInput {
     quantity: number;
     unit: string;
     price: number;
-    ingredientId?: number;
     inventoryItemId?: number;
   }[];
 }
@@ -233,7 +228,6 @@ export async function updateOrder(id: number, input: UpdateOrderInput) {
               unit: item.unit,
               price: item.price,
               totalPrice: item.quantity * item.price,
-              ingredientId: item.ingredientId || null,
               inventoryItemId: item.inventoryItemId || null,
             })),
           }
@@ -428,7 +422,6 @@ export async function receiveOrder(
       items: {
         include: {
           inventoryItem: true,
-          ingredient: true,
         },
       },
     },
@@ -488,7 +481,7 @@ export async function receiveOrder(
             quantity: 0,
             unit: item.unit,
             type: "FOOD", // default type
-            ingredientId: item.ingredientId || null,
+
           },
         });
         result.warnings.push(
