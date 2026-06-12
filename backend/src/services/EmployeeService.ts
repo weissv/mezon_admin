@@ -92,7 +92,9 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
     
     if (params.category) {
       if (params.category === 'CONTRACT') {
-        where.contracts = { some: { isActive: true } };
+        where.contracts = { some: { isActive: true, type: { in: ['MAIN', 'PART_TIME'] } } };
+      } else if (params.category === 'GPH') {
+        where.contracts = { some: { isActive: true, type: 'CONTRACTOR' } };
       } else if (params.category === 'ADMIN') {
         const adminCondition = { OR: [{ user: { role: { in: ['ADMIN', 'DEPUTY', 'DIRECTOR'] } } }, { position: { contains: 'директор', mode: 'insensitive' } }, { position: { contains: 'админ', mode: 'insensitive' } }, { position: { contains: 'завуч', mode: 'insensitive' } }] };
         where.AND = [adminCondition] as any;

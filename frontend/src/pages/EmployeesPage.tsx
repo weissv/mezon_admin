@@ -15,7 +15,7 @@ import { api } from '../lib/api';
 import { Employee, EmployeeReminders } from '../types/employee';
 
 export default function EmployeesPage() {
-  const [category, setCategory] = useState<'ALL' | 'CONTRACT' | 'ADMIN' | 'TEACHER' | 'ARCHIVED'>('ALL');
+  const [category, setCategory] = useState<'ALL' | 'CONTRACT' | 'GPH' | 'ADMIN' | 'TEACHER' | 'ARCHIVED'>('ALL');
   const {
     data,
     total,
@@ -196,6 +196,7 @@ export default function EmployeesPage() {
       <div className="flex gap-2 overflow-x-auto px-6 py-3 border-b border-mezon-border-subtle bg-mezon-base-neutral">
         <Button size="sm" variant={category === 'ALL' ? 'default' : 'outline'} onClick={() => { setCategory('ALL'); setPage(1); }} className="rounded-full whitespace-nowrap">Все Сотрудники</Button>
         <Button size="sm" variant={category === 'CONTRACT' ? 'default' : 'outline'} onClick={() => { setCategory('CONTRACT'); setPage(1); }} className="rounded-full whitespace-nowrap">Трудовой Договор</Button>
+        <Button size="sm" variant={category === 'GPH' ? 'default' : 'outline'} onClick={() => { setCategory('GPH'); setPage(1); }} className="rounded-full whitespace-nowrap">ГПХ</Button>
         <Button size="sm" variant={category === 'ADMIN' ? 'default' : 'outline'} onClick={() => { setCategory('ADMIN'); setPage(1); }} className="rounded-full whitespace-nowrap">Админ. персонал</Button>
         <Button size="sm" variant={category === 'TEACHER' ? 'default' : 'outline'} onClick={() => { setCategory('TEACHER'); setPage(1); }} className="rounded-full whitespace-nowrap">Пед. состав</Button>
         <div className="flex-1"></div>
