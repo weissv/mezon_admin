@@ -77,7 +77,7 @@ export default function GroupsPage() {
     try {
       const [groupsData, employeesData] = await Promise.all([
         api.get('/api/groups'),
-        api.get('/api/employees'),
+        api.get('/api/employees?pageSize=1000'),
       ]);
       setGroups(groupsData || []);
       setEmployees(employeesData?.items || employeesData || []);

@@ -10,7 +10,7 @@ import { createEmployeeSchema, updateEmployeeSchema } from "../schemas/employee.
 const router = Router();
 
 router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
-  const { page, pageSize, sortBy, sortOrder, position, lastName, search } = req.query as any;
+  const { page, pageSize, sortBy, sortOrder, position, lastName, search, category } = req.query as any;
   const result = await EmployeeService.findMany({
     page: page ? Number(page) : undefined,
     pageSize: pageSize ? Number(pageSize) : undefined,
@@ -19,6 +19,7 @@ router.get("/", checkRole(["DEPUTY", "ADMIN"]), async (req, res) => {
     position,
     lastName,
     search,
+    category,
   });
   return res.json(result);
 });
