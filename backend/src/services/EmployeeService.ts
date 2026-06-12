@@ -96,7 +96,7 @@ class EmployeeServiceClass extends BaseService<Employee, CreateEmployeeInput, Up
       } else if (params.category === 'GPH') {
         where.contracts = { some: { isActive: true, type: 'CONTRACTOR' } };
       } else if (params.category === 'ADMIN') {
-        const adminCondition = { OR: [{ user: { role: { in: ['ADMIN', 'DEPUTY', 'DIRECTOR'] } } }, { position: { contains: 'директор', mode: 'insensitive' } }, { position: { contains: 'админ', mode: 'insensitive' } }, { position: { contains: 'завуч', mode: 'insensitive' } }] };
+        const adminCondition = { OR: [{ user: { role: { in: ['ADMIN', 'DEPUTY', 'DIRECTOR', 'ZAVHOZ'] } } }, { position: { contains: 'директор', mode: 'insensitive' } }, { position: { contains: 'админ', mode: 'insensitive' } }, { position: { contains: 'завуч', mode: 'insensitive' } }, { position: { contains: 'завхоз', mode: 'insensitive' } }, { position: { contains: 'ахо', mode: 'insensitive' } }] };
         where.AND = [adminCondition] as any;
       } else if (params.category === 'TEACHER') {
         const teacherCondition = { OR: [{ user: { role: 'TEACHER' } }, { position: { contains: 'учитель', mode: 'insensitive' } }, { position: { contains: 'педагог', mode: 'insensitive' } }, { position: { contains: 'преподаватель', mode: 'insensitive' } }] };
