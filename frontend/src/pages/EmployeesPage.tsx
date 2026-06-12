@@ -132,6 +132,31 @@ export default function EmployeesPage() {
     { key: 'position', header: 'Должность' },
     { key: 'rate', header: 'Ставка' },
     {
+      key: 'experience',
+      header: 'Стаж',
+      render: (row) => {
+        if (!row.hireDate) return '—';
+        const hireDate = new Date(row.hireDate);
+        const now = new Date();
+        let years = now.getFullYear() - hireDate.getFullYear();
+        let months = now.getMonth() - hireDate.getMonth();
+        let days = now.getDate() - hireDate.getDate();
+
+        if (days < 0) months -= 1;
+        if (months < 0) {
+          years -= 1;
+          months += 12;
+        }
+
+        if (years <= 0 && months <= 0) return 'Меньше месяца';
+
+        let res = '';
+        if (years > 0) res += `${years} г. `;
+        if (months > 0) res += `${months} мес.`;
+        return res.trim();
+      }
+    },
+    {
       key: 'user',
       header: 'Аккаунт',
       render: (row) =>
