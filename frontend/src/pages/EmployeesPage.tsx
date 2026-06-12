@@ -26,11 +26,17 @@ export default function EmployeesPage() {
     error,
     search,
     setSearch,
+    setFilters,
   } = useApi<Employee>({
     url: '/api/employees',
     searchFields: ['firstName', 'lastName', 'position'],
-    filters: category !== 'ALL' ? { category } : undefined,
+    filters: category !== 'ALL' ? { category } : {},
   });
+
+  useEffect(() => {
+    setFilters(category !== 'ALL' ? { category } : {});
+    setPage(1);
+  }, [category, setFilters, setPage]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [reminders, setReminders] = useState<EmployeeReminders | null>(null);
