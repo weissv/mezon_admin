@@ -15,6 +15,7 @@ import { api } from '../lib/api';
 import { Employee, EmployeeReminders } from '../types/employee';
 
 export default function EmployeesPage() {
+  const [category, setCategory] = useState<'ALL' | 'CONTRACT' | 'ADMIN' | 'TEACHER' | 'ARCHIVED'>('ALL');
   const {
     data,
     total,
@@ -28,6 +29,7 @@ export default function EmployeesPage() {
   } = useApi<Employee>({
     url: '/api/employees',
     searchFields: ['firstName', 'lastName', 'position'],
+    filters: category !== 'ALL' ? { category } : undefined,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
@@ -184,6 +186,15 @@ export default function EmployeesPage() {
           </>
         }
       />
+
+      <div className="flex gap-2 overflow-x-auto px-6 py-3 border-b border-mezon-border-subtle bg-mezon-base-neutral">
+        <Button size="sm" variant={category === 'ALL' ? 'default' : 'outline'} onClick={() => { setCategory('ALL'); setPage(1); }} className="rounded-full whitespace-nowrap">Все Сотрудники</Button>
+        <Button size="sm" variant={category === 'CONTRACT' ? 'default' : 'outline'} onClick={() => { setCategory('CONTRACT'); setPage(1); }} className="rounded-full whitespace-nowrap">Трудовой Договор</Button>
+        <Button size="sm" variant={category === 'ADMIN' ? 'default' : 'outline'} onClick={() => { setCategory('ADMIN'); setPage(1); }} className="rounded-full whitespace-nowrap">Админ. персонал</Button>
+        <Button size="sm" variant={category === 'TEACHER' ? 'default' : 'outline'} onClick={() => { setCategory('TEACHER'); setPage(1); }} className="rounded-full whitespace-nowrap">Пед. состав</Button>
+        <div className="flex-1"></div>
+        <Button size="sm" variant={category === 'ARCHIVED' ? 'destructive' : 'outline'} onClick={() => { setCategory('ARCHIVED'); setPage(1); }} className="rounded-full whitespace-nowrap">Архив</Button>
+      </div>
 
       <PageToolbar>
         <div className="mezon-toolbar-group">

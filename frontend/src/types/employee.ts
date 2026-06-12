@@ -13,7 +13,6 @@ export interface Employee extends BaseEntity {
   hireDate: string;
   fireDate?: string | null;
   hireOrderNumber?: string | null;
-  hireOrderDate?: string | null;
   fireOrderNumber?: string | null;
   fireOrderDate?: string | null;
   status?: string;
@@ -57,7 +56,6 @@ export interface CreateEmployeeInput {
   hireDate: string;
   fireDate?: string;
   hireOrderNumber?: string;
-  hireOrderDate?: string;
   fireOrderNumber?: string;
   fireOrderDate?: string;
   status?: string;

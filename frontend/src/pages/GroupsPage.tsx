@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, BookOpen, Edit, PlusCircle, Search, Trash2, UserCircle, Users } from 'lucide-react';
+import { AlertTriangle, BookOpen, Edit, Eye, PlusCircle, Search, Trash2, UserCircle, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Modal, ModalActions, ModalNotice, ModalSection } from '../components/Modal';
 import { DataTable, Column } from '../components/DataTable/DataTable';
@@ -29,6 +29,7 @@ interface Group {
   _count?: {
     children: number;
   };
+  children?: { id: number; firstName: string; lastName: string }[];
 }
 
 interface Employee {
@@ -53,6 +54,7 @@ export default function GroupsPage() {
   const [gradeFilter, setGradeFilter] = useState<string>('ALL');
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Group | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -142,6 +144,7 @@ export default function GroupsPage() {
   );
 
   const handleCreate = () => {
+    setIsViewMode(false);
     setEditingGroup(null);
     setFormGrade(1);
     setFormSection('');
@@ -153,6 +156,20 @@ export default function GroupsPage() {
   };
 
   const handleEdit = (group: Group) => {
+    setIsViewMode(false);
+    setEditingGroup(group);
+    const gradeMatch = group.name.match(/^(\d+)([А-Яа-яA-Za-z])?/);
+    setFormGrade(group.grade ?? (gradeMatch ? parseInt(gradeMatch[1], 10) : 1));
+    setFormSection(gradeMatch?.[2] || '');
+    setFormAcademicYear(group.academicYear || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`);
+    setFormTeacherId(group.teacherId || '');
+    setFormCapacity(group.capacity || 30);
+    setFormDescription(group.description || '');
+    setIsModalOpen(true);
+  };
+
+  const handleView = (group: Group) => {
+    setIsViewMode(true);
     setEditingGroup(group);
     const gradeMatch = group.name.match(/^(\d+)([А-Яа-яA-Za-z])?/);
     setFormGrade(group.grade ?? (gradeMatch ? parseInt(gradeMatch[1], 10) : 1));
@@ -252,6 +269,14 @@ export default function GroupsPage() {
       header: 'Действия',
       render: (row) => (
         <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleView(row)}
+            aria-label={`Просмотр класса ${row.name}`}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -360,7 +385,7 @@ export default function GroupsPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingGroup ? 'Редактировать класс' : 'Новый класс'}
+        title={isViewMode ? 'Просмотр класса' : editingGroup ? 'Редактировать класс' : 'Новый класс'}
         eyebrow="Учебная структура"
         description="Соберите карточку класса так, чтобы администратору было легко проверить состав, вместимость и ответственного педагога."
         icon={<Users className="h-5 w-5" />}
@@ -369,11 +394,13 @@ export default function GroupsPage() {
         footer={
           <ModalActions>
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSaving}>
-              Отмена
+              {isViewMode ? 'Закрыть' : 'Отмена'}
             </Button>
-            <Button form={groupFormId} type="submit" disabled={isSaving}>
-              {isSaving ? 'Сохранение...' : 'Сохранить'}
-            </Button>
+            {!isViewMode && (
+              <Button form={groupFormId} type="submit" disabled={isSaving}>
+                {isSaving ? 'Сохранение...' : 'Сохранить'}
+              </Button>
+            )}
           </ModalActions>
         }
       >
@@ -382,7 +409,7 @@ export default function GroupsPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label className="mezon-form-label">Класс (номер)</label>
-                <select value={formGrade} onChange={(event) => setFormGrade(Number(event.target.value))} className={selectClassName}>
+                <select value={formGrade} onChange={(event) => setFormGrade(Number(event.target.value))} className={selectClassName} disabled={isViewMode}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((grade) => (
                     <option key={grade} value={grade}>
                       {grade} класс
@@ -392,7 +419,7 @@ export default function GroupsPage() {
               </div>
               <div>
                 <label className="mezon-form-label mezon-form-label--regular">Буква класса</label>
-                <select value={formSection} onChange={(event) => setFormSection(event.target.value)} className={selectClassName}>
+                <select value={formSection} onChange={(event) => setFormSection(event.target.value)} className={selectClassName} disabled={isViewMode}>
                   <option value="">Без буквы</option>
                   {['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З'].map((section) => (
                     <option key={section} value={section}>
@@ -415,6 +442,7 @@ export default function GroupsPage() {
                 value={formAcademicYear}
                 onChange={(event) => setFormAcademicYear(event.target.value)}
                 placeholder="2024-2025"
+                disabled={isViewMode}
               />
             </div>
 
@@ -424,6 +452,7 @@ export default function GroupsPage() {
                 value={formTeacherId}
                 onChange={(event) => setFormTeacherId(event.target.value ? Number(event.target.value) : '')}
                 className={selectClassName}
+                disabled={isViewMode}
               >
                 <option value="">Не назначен</option>
                 {(teachers.length > 0 ? teachers : employees).map((teacher) => (
@@ -443,6 +472,7 @@ export default function GroupsPage() {
                   onChange={(event) => setFormCapacity(Number(event.target.value))}
                   min={1}
                   max={50}
+                  disabled={isViewMode}
                 />
               </div>
 
@@ -452,10 +482,40 @@ export default function GroupsPage() {
                   value={formDescription}
                   onChange={(event) => setFormDescription(event.target.value)}
                   placeholder="Профиль, особенности класса..."
+                  disabled={isViewMode}
                 />
               </div>
             </div>
           </ModalSection>
+
+          {editingGroup && (
+            <ModalSection title="Список учеников" description="Активные ученики в данном классе.">
+              {editingGroup.children && editingGroup.children.length > 0 ? (
+                <div className="bg-background rounded-md border p-0 max-h-60 overflow-y-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-secondary bg-muted sticky top-0">
+                      <tr>
+                        <th className="px-4 py-2 font-medium">#</th>
+                        <th className="px-4 py-2 font-medium">ФИО ученика</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {editingGroup.children.map((child, index) => (
+                        <tr key={child.id} className="hover:bg-muted/50">
+                          <td className="px-4 py-2 text-secondary">{index + 1}</td>
+                          <td className="px-4 py-2 font-medium">{child.lastName} {child.firstName}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-sm text-secondary p-4 border rounded-md bg-muted/50 text-center">
+                  В этом классе пока нет учеников
+                </div>
+              )}
+            </ModalSection>
+          )}
         </form>
       </Modal>
 

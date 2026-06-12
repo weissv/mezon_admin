@@ -202,7 +202,6 @@ model Employee {
   hireDate           DateTime
   fireDate           DateTime?
   hireOrderNumber    String?
-  hireOrderDate      DateTime?
   hireOrderDocId     Int?
   fireOrderNumber    String?
   fireOrderDate      DateTime?
@@ -456,10 +455,11 @@ model InventoryItem {
   type         InventoryType
   
   // КБЖУ (для продуктов питания)
-  calories     Float         @default(0) // per unit
-  protein      Float         @default(0) // per unit
-  fat          Float         @default(0) // per unit
-  carbs        Float         @default(0) // per unit
+  calories       Float         @default(0) // per unit
+  protein        Float         @default(0) // per unit
+  fat            Float         @default(0) // per unit
+  carbs          Float         @default(0) // per unit
+  nutritionApiId String?       @unique // ID из внешнего API (e.g. Edamam/OpenFoodFacts)
 
   // Связи
   transactions       InventoryTransaction[]
@@ -635,7 +635,6 @@ model Dish {
   id              Int              @id @default(autoincrement())
   name            String           @unique
   category        String?
-  preparationTime Int? // minutes
   ingredients     DishIngredient[]
   menus           MenuDish[]
 }

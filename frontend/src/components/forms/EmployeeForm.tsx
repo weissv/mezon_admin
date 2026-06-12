@@ -30,7 +30,6 @@ const formSchema = z.object({
   hireDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
  
   hireOrderNumber: z.string().optional(),
-  hireOrderDate: z.string().optional(),
   fireOrderNumber: z.string().optional(),
   fireOrderDate: z.string().optional(),
   hireOrderFileUrl: z.string().optional(),
@@ -51,7 +50,6 @@ type Employee = {
   rate: number; 
   hireDate: string;
   hireOrderNumber?: string;
-  hireOrderDate?: string;
   fireOrderNumber?: string;
   fireOrderDate?: string;
   hireOrderFileUrl?: string;
@@ -72,7 +70,6 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
       rate: initialData?.rate || 1,
       hireDate: initialData ? new Date(initialData.hireDate).toISOString().split('T')[0] : '',
       hireOrderNumber: initialData?.hireOrderNumber || '',
-      hireOrderDate: initialData?.hireOrderDate ? new Date(initialData.hireOrderDate).toISOString().split('T')[0] : '',
       fireOrderNumber: initialData?.fireOrderNumber || '',
       fireOrderDate: initialData?.fireOrderDate ? new Date(initialData.fireOrderDate).toISOString().split('T')[0] : '',
       contracts: initialData?.contracts?.map(c => ({
@@ -99,7 +96,6 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
         birthDate: data.birthDate ? new Date(data.birthDate).toISOString() : null,
         hireDate: new Date(data.hireDate).toISOString(),
         hireOrderNumber: data.hireOrderNumber || undefined,
-        hireOrderDate: data.hireOrderDate ? new Date(data.hireOrderDate).toISOString() : undefined,
         fireOrderNumber: data.fireOrderNumber || undefined,
         fireOrderDate: data.fireOrderDate ? new Date(data.fireOrderDate).toISOString() : undefined,
         contracts: data.contracts?.map(c => ({
@@ -183,10 +179,6 @@ export function EmployeeForm({ initialData, onSuccess, onCancel }: EmployeeFormP
           <div>
             <label className="mezon-form-label">№ Приказа о приёме</label>
             <Input {...register('hireOrderNumber')} />
-          </div>
-          <div>
-            <label className="mezon-form-label">Дата приказа о приёме</label>
-            <Input type="date" {...register('hireOrderDate')} />
           </div>
           <div className="sm:col-span-2">
             <FileUpload 

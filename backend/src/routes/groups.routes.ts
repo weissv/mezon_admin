@@ -14,6 +14,11 @@ router.get("/", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (
       },
       teacher: {
         select: { id: true, firstName: true, lastName: true }
+      },
+      children: {
+        where: { status: "ACTIVE" },
+        select: { id: true, firstName: true, lastName: true },
+        orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }]
       }
     },
     orderBy: [{ grade: 'asc' }, { name: 'asc' }]

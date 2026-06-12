@@ -2,6 +2,7 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
+import DishService from "../services/DishService";
 
 const router = Router();
 
@@ -88,13 +89,12 @@ router.get("/dishes", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res
 
 // POST /api/recipes/dishes - Create new dish with ingredients
 router.post("/dishes", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
-  const { name, category, preparationTime, ingredients } = req.body;
+  const { name, category, ingredients } = req.body;
   
   const dish = await prisma.dish.create({
     data: {
       name,
       category: category || null,
-      preparationTime: preparationTime || null,
       ingredients: {
         create: ingredients.map((item: any) => ({
           ingredientId: item.ingredientId,
@@ -117,7 +117,7 @@ router.post("/dishes", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
 // PUT /api/recipes/dishes/:id - Update dish
 router.put("/dishes/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
   const { id } = req.params;
-  const { name, category, preparationTime, ingredients } = req.body;
+  const { name, category, ingredients } = req.body;
   
   // Delete existing ingredients and create new ones
   await prisma.dishIngredient.deleteMany({
@@ -129,7 +129,6 @@ router.put("/dishes/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) => {
     data: {
       name,
       category,
-      preparationTime,
       ingredients: {
         create: ingredients.map((item: any) => ({
           ingredientId: item.ingredientId,
@@ -162,39 +161,13 @@ router.delete("/dishes/:id", checkRole(["ADMIN", "ZAVHOZ"]), async (req, res) =>
 
 // GET /api/recipes/dishes/:id/nutrition - Calculate nutrition info for dish
 router.get("/dishes/:id/nutrition", checkRole(["DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
-  const { id } = req.params;
-  
-  const dish = await prisma.dish.findUnique({
-    where: { id: Number(id) },
-    include: {
-      ingredients: {
-        include: {
-          inventoryItem: true,
-        },
-      },
-    },
-  });
-  
-  if (!dish) {
-    return res.status(404).json({ error: "Dish not found" });
+  try {
+    const { id } = req.params;
+    const macros = await DishService.calculateDishMacros(Number(id));
+    return res.json(macros);
+  } catch (error: any) {
+    return res.status(404).json({ error: error.message });
   }
-  
-  // Calculate total KBJU (calories, protein, fat, carbs)
-  type NutritionAcc = { calories: number; protein: number; fat: number; carbs: number };
-  const nutrition = dish.ingredients.reduce(
-    (acc: NutritionAcc, item: any): NutritionAcc => {
-      const multiplier = item.quantity; // quantity in dish
-      return {
-        calories: acc.calories + item.inventoryItem.calories * multiplier,
-        protein: acc.protein + item.inventoryItem.protein * multiplier,
-        fat: acc.fat + item.inventoryItem.fat * multiplier,
-        carbs: acc.carbs + item.inventoryItem.carbs * multiplier,
-      };
-    },
-    { calories: 0, protein: 0, fat: 0, carbs: 0 }
-  );
-  
-  return res.json({ dishId: dish.id, dishName: dish.name, ...nutrition });
 });
 
 export default router;

@@ -157,7 +157,7 @@ async function probeRequest(
   });
 
   const text = bodyToText(response.data);
-  const contentTypeHeader = response.headers["content-type"];
+  const contentTypeHeader = response.headers["content-type"] as string | string[] | undefined;
   const contentType = Array.isArray(contentTypeHeader)
     ? contentTypeHeader.join(", ")
     : contentTypeHeader || null;
