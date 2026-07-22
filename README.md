@@ -20,10 +20,9 @@
 5. [🎓 Учебная платформа (LMS)](#-учебная-платформа-lms)
 6. [📝 Платформа контрольных работ (Exams)](#-платформа-контрольных-работ-exams)
 7. [🤖 AI-экосистема и настройка API ключей](#-ai-экосистема-и-настройка-api-ключей)
-8. [🎨 Интеграция Figma MCP](#-интеграция-figma-mcp)
-9. [🗄 База данных и ролевая модель (RBAC)](#-база-данных-и-ролевая-модель-rbac)
-10. [📱 Адаптивный дизайн и Mobile-First](#-адаптивный-дизайн-и-mobile-first)
-11. [🔧 Деплой и скрипты](#-деплой-и-скрипты)
+8. [🗄 База данных и ролевая модель (RBAC)](#-база-данных-и-ролевая-модель-rbac)
+9. [📱 Адаптивный дизайн и Mobile-First](#-адаптивный-дизайн-и-mobile-first)
+10. [🔧 Деплой и скрипты](#-деплой-и-скрипты)
 
 ---
 
@@ -32,7 +31,6 @@
 ### Требования к окружению
 - **Node.js**: `v20.x` или новее
 - **npm**: `v10.x` или новее
-- **Docker & Docker Compose** (опционально, для локального запуск бэкенда и БД)
 
 ### 1️⃣ Клонирование и установка зависимостей
 
@@ -53,9 +51,6 @@ npm install
 
 Скопируйте примеры конфигураций:
 ```bash
-# В корне проекта
-cp .env.example .env
-
 # В папке frontend
 cp frontend/.env.example frontend/.env.local
 
@@ -70,8 +65,6 @@ VITE_ENABLE_FIGMA_CAPTURE=true
 ```
 
 ### 3️⃣ Запуск локальных серверов
-
-**Вариант А: Стандартный локальный запуск**
 
 1. **Запуск Бэкенда (API):**
    ```bash
@@ -88,12 +81,6 @@ VITE_ENABLE_FIGMA_CAPTURE=true
    npm run dev
    ```
    *Фронтенд будет доступен по адресу:* `http://localhost:5173/`
-
-**Вариант Б: Быстрый запуск всей инфраструктуры через Docker**
-
-```bash
-docker compose up --build
-```
 
 ### 🔐 Данные для входа в систему (Test Accounts)
 - **Директор:** `director@mezon.uz` / `admin123`
@@ -163,12 +150,8 @@ mezon_admin/
 │   │   ├── services/             # Бизнес-логика (AiService, OneCService...)
 │   │   ├── middleware/           # Auth, RBAC, Error handling middleware
 │   │   └── index.ts              # Точка входа сервера Express
-│   ├── Dockerfile
 │   └── .env.example
 │
-├── docker-compose.yml            # Сборка PostgreSQL, Backend, Frontend
-├── render.yaml                   # Конфигурация деплоя на Render
-├── test-setup.sh                 # Скрипт проверки работоспособности
 └── README.md                     # Единая документация проекта
 ```
 
@@ -264,20 +247,6 @@ GOOGLE_DRIVE_FOLDER_ID=""
 
 ---
 
-## 🎨 Интеграция Figma MCP
-
-В репозитории настроен сервер Figma MCP для прямой связи кода фронтенда с макетами Figma:
-
-- **Конфигурация IDE:** `.vscode/mcp.json` содержит описание сервера `Figma-MCP`.
-- **Capture Script:** В `frontend/index.html` подключен `https://mcp.figma.com/mcp/html-to-design/capture.js`.
-
-### Порядок использования:
-1. Откройте проект в VS Code или WebStorm с поддержкой MCP.
-2. Введите Figma Access Token по запросу IDE.
-3. Запустите фронтенд (`npm run dev`) для валидации верстки и взаимодействия с макетом html-to-design.
-
----
-
 ## 🗄 База данных и ролевая модель (RBAC)
 
 Схема описана в `backend/prisma/schema.prisma` (более 1600+ строк, 30+ таблиц).
@@ -323,13 +292,6 @@ npm run dev        # Сервер разработки (ts-node-dev)
 npm run build      # Компиляция TypeScript в dist/
 npm start          # Запуск закомпилированного сервера
 npm run test       # Тестирование Vitest
-```
-
-### Проверка связи Frontend <-> Backend:
-В корне проекта доступен скрипт:
-```bash
-chmod +x test-setup.sh
-./test-setup.sh
 ```
 
 ---
