@@ -1,89 +1,64 @@
 # Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Build outputs
-dist/
-build/
-*.tsbuildinfo
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-# Keep .env.production as reference (actual values come from Render)
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Logs
-logs/
-*.log
-backups/
-
-# Testing
-coverage/
-.nyc_output/
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Prisma
-prisma/migrations/**/migration.sql.backup
-
-# OS
-Thumbs.db
-
-# Зависимости (Самое тяжелое)
-node_modules/
 .pnp
 .pnp.js
 
-# Сборки
+# Build & Output
 dist/
 build/
 out/
 .next/
+*.tsbuildinfo
 
-# Логи и бэкапы
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-backups/
-*.sql
-*.sqlite
-
-# Тесты (Главный генератор мусора)
-cypress/videos/
-cypress/screenshots/
-cypress/downloads/
-coverage/
-
-# Генерируемые диагностические артефакты
-backend/1c_*.json
-backend/1c_*.xml
-backend/1c_*.txt
-
-# Секреты
+# Environment variables & secrets
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
+!frontend/.env.example
+!backend/.env.example
 
-# Системный мусор
+# IDE & OS junk
+.vscode/*
+!.vscode/mcp.json
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
 Thumbs.db
+
+# Logs & Diagnostics
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+backups/
+*.sql
+*.sqlite
+*.sqlite3
+
+# Cypress & Test artifacts
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+coverage/
+.nyc_output/
+
+# 1C Diagnostic files
+backend/1c_*.json
+backend/1c_*.xml
+backend/1c_*.txt
+1c_*.json
+1c_*.xml
+1c_*.txt
+
+# Temporary reports and user files
+analysis_report.txt
+analyze.js
+Apple Human Interface Guidelines.txt
+migration_diff.sql
 Список блюд.csv

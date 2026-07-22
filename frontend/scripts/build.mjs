@@ -4,7 +4,8 @@ const HEARTBEAT_INTERVAL_MS = 15000;
 
 function runStep(command, args, label) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
+    const execCmd = process.platform === "win32" && command.includes(" ") ? `"${command}"` : command;
+    const child = spawn(execCmd, args, {
       stdio: "inherit",
       shell: process.platform === "win32",
       env: process.env,
@@ -40,8 +41,8 @@ function runStep(command, args, label) {
 }
 
 async function main() {
-  await runStep("npx", ["tsc"], "TypeScript build");
-  await runStep("npx", ["vite", "build"], "Vite build");
+  await runStep(process.execPath, ["./node_modules/typescript/bin/tsc"], "TypeScript build");
+  await runStep(process.execPath, ["./node_modules/vite/bin/vite.js", "build"], "Vite build");
 }
 
 main().catch((error) => {

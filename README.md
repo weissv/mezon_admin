@@ -1,184 +1,337 @@
-# Mezon Admin - Educational ERP & LMS Platform
+# 🏫 Mezon Admin — Educational ERP & LMS Platform
 
-**Mezon Admin** is a large-scale, monorepo platform for comprehensive management of educational institutions (kindergartens, schools, learning centers).
-The system completely covers all administrative, operational, educational, financial, and HR needs.
+[![React](https://img.shields.io/badge/Frontend-React_18_%7C_Vite_%7C_TypeScript-61DAFB?logo=react)](file:///c:/Users/ruzie/Documents/GitHub/mezon_admin/frontend)
+[![Node.js](https://img.shields.io/badge/Backend-Node.js_20_%7C_Express_%7C_Prisma-339933?logo=nodedotjs)](file:///c:/Users/ruzie/Documents/GitHub/mezon_admin/backend)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL_17_%2B_pgvector-4169E1?logo=postgresql)](file:///c:/Users/ruzie/Documents/GitHub/mezon_admin/backend/prisma)
+[![Tailwind CSS](https://img.shields.io/badge/Styling-TailwindCSS_3.4-38B2AC?logo=tailwindcss)](file:///c:/Users/ruzie/Documents/GitHub/mezon_admin/frontend)
 
-> **Project Status (Updated):** The project comprises over 68,000 lines of code and 300+ components. The ERP, LMS, testing platform with AI grading, Google Drive-based knowledge base (RAG), bidirectional 1C synchronization (OData), and full mobile adaptation have been fully implemented.
+**Mezon Admin** — полнофункциональная экосистема для автоматизации всех операционных, финансовых, кадровых и учебных процессов образовательных учреждений (школы, детские сады, учебные центры).
 
----
-
-## 📑 Table of Contents
-
-1. [Architecture & Tech Stack](#-architecture--tech-stack)
-2. [Functional Modules Overview (ERP)](#-functional-modules-overview-erp)
-3. [Educational System (LMS)](#-educational-system-lms)
-4. [Innovations: AI & Automation](#-innovations-ai--automation)
-5. [Integrations (1C, Telegram)](#-integrations-1c-telegram)
-6. [Mobile Adaptation](#-mobile-adaptation)
-7. [Database & Structure (Prisma)](#-database--structure-prisma)
-8. [Setup & Local Development](#-setup--local-development)
-9. [Scripts & Deployment](#-scripts--deployment)
+Проект состоит из более чем 300+ UI компонентов и 68,000+ строк кода TypeScript. Объединяет полноценную **ERP-систему**, **LMS-платформу онлайн-обучения**, **модуль проверочных/контрольных работ с AI-оценкой**, **базу знаний с RAG по Google Drive**, а также двустороннюю интеграцию с **1С:Предприятие** и **Telegram Bot**.
 
 ---
 
-## 🏗 Architecture & Tech Stack
+## 📑 Оглавление
 
-The project is built as a scalable monorepo, strictly separating the Backend (API gateway) and the Frontend (SPA).
-
-### Backend (Node.js API)
-- **Core:** Node.js 20+, Express.js, TypeScript.
-- **Database:** PostgreSQL 17 with the `pgvector` extension for working with embeddings.
-- **ORM:** Prisma ORM (v5). Complex data schema consisting of 30+ interconnected tables.
-- **Validation & Security:** Zod, JWT (authorization with RBAC role model), bcryptjs, CORS policies.
-- **AI Ecosystem:** `@google/generative-ai` (Gemini), `openai` (via Groq API for lightning-fast LLM inference).
-- **Tools:** `node-cron` for background tasks, `mammoth` (parsing `.docx`), `xlsx` for exports.
-
-### Frontend (React SPA)
-- **Framework:** React 18, Vite, TypeScript.
-- **Routing:** React Router DOM v6 (split into main ERP router and `/lms` router).
-- **UI/UX & Styling:** Tailwind CSS, custom UI components based on CSS variables (Glassmorphism), Lucide React.
-- **State & Form Management:** React Hook Form, Zod Resolvers, custom React Contexts (`AuthContext`, `PermissionsContext`).
-- **Mobile Experience:** Support for all iOS/Android browsers (Touch targets, Swipe-menus, Responsive tables).
+1. [🚀 Быстрый старт для Frontend-разработчика](#-быстрый-старт-для-frontend-разработчика)
+2. [🏗 Архитектура и стек технологий](#-архитектура-и-стек-технологий)
+3. [📁 Структура проекта](#-структура-проекта)
+4. [🧩 Функциональные модули (ERP)](#-функциональные-модули-erp)
+5. [🎓 Учебная платформа (LMS)](#-учебная-платформа-lms)
+6. [📝 Платформа контрольных работ (Exams)](#-платформа-контрольных-работ-exams)
+7. [🤖 AI-экосистема и настройка API ключей](#-ai-экосистема-и-настройка-api-ключей)
+8. [🎨 Интеграция Figma MCP](#-интеграция-figma-mcp)
+9. [🗄 База данных и ролевая модель (RBAC)](#-база-данных-и-ролевая-модель-rbac)
+10. [📱 Адаптивный дизайн и Mobile-First](#-адаптивный-дизайн-и-mobile-first)
+11. [🔧 Деплой и скрипты](#-деплой-и-скрипты)
 
 ---
 
-## 🧩 Functional Modules Overview (ERP)
+## 🚀 Быстрый старт для Frontend-разработчика
 
-The administrative and operational department includes 15+ sections.
+### Требования к окружению
+- **Node.js**: `v20.x` или новее
+- **npm**: `v10.x` или новее
+- **Docker & Docker Compose** (опционально, для локального запуск бэкенда и БД)
 
-1. **Dashboard:** Widgetized analytics with customizable layout (`PersonalizationPanel`). Statistics on finances, attendance, security incidents, and HR.
-2. **Contingent (Children/Parents):** Personal files, transfer histories (Child Status: ACTIVE, LEFT, ARCHIVED), tracking absences with medical certificates, health records.
-3. **Groups & Classes:** Distributing the contingent across educational streams (Grades 1-11, Preschool, Infant), homeroom teachers.
-4. **HR & Staffing:** Employee management, staffing tables, tracking expiration dates for medical books and contracts.
-5. **Finances:** Cash flow (Incomes/Expenses), accounting for cash (PKO/RKO) and bank operations, monitoring accounts receivable.
-6. **Warehouse & Inventory:** Multi-warehouse batch tracking (Food, Household, Stationery), tracking critical stock levels and expirations. Supports inventory transactions (Inflow, Outflow, Adjustment, Write-off).
-7. **Kitchen (Recipes & Menus):** Creating technical dish cards with macronutrient (CFC) calculations, generating daily menus by age groups, automatic deduction of ingredients.
-8. **Maintenance (Requests):** Electronic log of requests for inventory issuance or repairs. Built-in workflow: *Creation → Approval (Director) → In Progress (Supply Manager) → Issued/Completed*.
-9. **Procurement:** Creating orders (Planned, Operational), managing suppliers, tracking logistics statuses.
-10. **Document Management & Calendar:** Generating orders and contracts based on templates. Event planning.
-11. **Security:** Incident log, visitor log, fire safety checks.
+### 1️⃣ Клонирование и установка зависимостей
 
----
-
-## 🎓 Educational System (LMS)
-
-A specialized section (accessible via the `/lms` route) for the educational block:
-
-- **LMS Dashboard:** Summary statistics of the educational process.
-- **Gradebook:** Electronic journal with the ability to set various types of grades and comment on student work.
-- **Schedule:** Calendar grid of lessons, linking teachers to classrooms.
-- **Diary & Progress:** Tracking academic performance, displaying homework assignments (with deadlines and attached files).
-- **Clubs & Extracurriculars:** Enrollment in clubs (Waitlist/Active), fee calculation, tracking attendance.
-- **Exams Platform:** 
-  - Test builder (Text, Multiple Choice, Open Response).
-  - Generating secure one-time links (`/api/public/exams`).
-  - **AI Grading:** Automatic evaluation of open-ended answers using Artificial Intelligence based on the teacher's grading rubrics/keys.
-
----
-
-## 🤖 Innovations: AI & Automation
-
-1. **AI Knowledge Base (RAG):**
-   - Full integration with corporate **Google Drive**.
-   - `AiService` runs a background Cron-job (every 30 mins) that scans the specified folder for new regulations (Word, TXT).
-   - Texts are automatically chunked, passed through Gemini Embeddings, and stored in `pgvector`.
-   - The interface features a built-in "AI Assistant" that answers employee questions strictly based on internal school documentation.
-2. **AI Assignment Grading:** Integration with Groq (Llama-3/Gemma) for instant parsing and grading of students' creative assignments in the LMS.
-
----
-
-## 🔄 Integrations (1C, Telegram)
-
-### 1C:Enterprise (OData)
-The platform acts as a convenient frontend for 1C:
-- Synchronization of cash receipts/disbursements and bank statements (`FinanceTransaction`).
-- Import of nomenclature and counterparties.
-- Special interface `/onec-data` for directly viewing 1C information registers and documents (HR, Payroll).
-
-### Telegram Bot
-Every employee can link their Telegram account via their personal profile:
-- Instant Push notifications about new maintenance requests.
-- Purchase approval requests sent to the director.
-- Critical alerts (fire safety checks, security incidents).
-
----
-
-## 📱 Mobile Adaptation
-
-The system follows a **Mobile-First** philosophy:
-- Completely rewritten navigation (`SideNav.tsx`) with a side Slide-Out menu and Backdrop effects.
-- Adaptive grids (Mezon Grid) and responsive data tables (horizontal scroll).
-- Optimized Touch targets (minimum height of inputs and buttons is 44px, disabling interface zooming on iOS).
-- Intelligent collapsing of side panels when switching to mobile resolutions.
-
----
-
-## 🗄 Database & Structure (Prisma)
-
-The role model is built on RBAC (`RolePermission`): `DEVELOPER, DIRECTOR, DEPUTY, ADMIN, TEACHER, ACCOUNTANT, ZAVHOZ`.
-The `ActionLog` model is used to log all operations, allowing you to track who changed what data in the system and when (with JSON payload capturing).
-
-The `backend/prisma/schema.prisma` file contains over 1600 lines and describes:
-- Users, Roles, Employees (`User`, `Employee`).
-- Students, Parents, Clubs (`Child`, `Parent`, `Group`, `Club`).
-- Inventory operations and Nomenclature (`InventoryItem`, `MaintenanceRequest`).
-- Cash registers and Finances (`FinanceTransaction`, `CashFlowArticle`).
-
----
-
-## 🚀 Setup & Local Development
-
-### Prerequisites
-- Node.js v20.x
-- PostgreSQL v17+ (REQUIRED with `pgvector` installed)
-- Docker & Docker Compose (for quick start)
-
-### Quick Start via Docker
 ```bash
-# 1. Clone the repository
 git clone https://github.com/weissv/mezon_admin.git
 cd mezon_admin
 
-# 2. Setup environment
-cp backend/.env.example backend/.env
-
-# 3. Spin up the stack
-docker compose up --build
-
-# 4. Seed the database (in another terminal window)
-docker compose exec backend npx prisma db seed
-```
-**Access:**
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:4000/api`
-- Default login: `director@mezon.uz` / Password is generated in the seed file.
-
-### Local Development (Without Docker)
-
-**Backend:**
-```bash
-cd backend
-npm install
-npx prisma generate
-npx prisma db push
-npm run dev
-```
-
-**Frontend:**
-```bash
+# Установка зависимостей фронтенда
 cd frontend
 npm install
-npm run dev
+
+# Установка зависимостей бэкенда (в отдельном окне)
+cd ../backend
+npm install
+```
+
+### 2️⃣ Настройка файлов окружения (`.env`)
+
+Скопируйте примеры конфигураций:
+```bash
+# В корне проекта
+cp .env.example .env
+
+# В папке frontend
+cp frontend/.env.example frontend/.env.local
+
+# В папке backend
+cp backend/.env.example backend/.env
+```
+
+**`frontend/.env.local`**:
+```env
+VITE_API_URL=http://localhost:4000/api
+VITE_ENABLE_FIGMA_CAPTURE=true
+```
+
+### 3️⃣ Запуск локальных серверов
+
+**Вариант А: Стандартный локальный запуск**
+
+1. **Запуск Бэкенда (API):**
+   ```bash
+   cd backend
+   npx prisma generate
+   npx prisma db push
+   npm run dev
+   ```
+   *Бэкенд будет доступен по адресу:* `http://localhost:4000/api`
+
+2. **Запуск Фронтенда (Vite SPA):**
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+   *Фронтенд будет доступен по адресу:* `http://localhost:5173/`
+
+**Вариант Б: Быстрый запуск всей инфраструктуры через Docker**
+
+```bash
+docker compose up --build
+```
+
+### 🔐 Данные для входа в систему (Test Accounts)
+- **Директор:** `director@mezon.uz` / `admin123`
+- **Завуч:** `deputy@mezon.uz` / `admin123`
+- **Учитель:** `teacher@mezon.uz` / `admin123`
+- **Бухгалтер:** `accountant@mezon.uz` / `admin123`
+- **Завхоз:** `zavhoz@mezon.uz` / `admin123`
+
+---
+
+## 🏗 Архитектура и стек технологий
+
+Проект организован как монорепозиторий со строгим разделением SPA-фронтенда и REST API бэкенда.
+
+### Frontend (SPA & Multi-App Build)
+- **Фреймворк:** React 18, Vite, TypeScript
+- **Маршрутизация:** React Router DOM v6 (раздельный роутинг ERP и `/lms`)
+- **Стилизация:** Tailwind CSS 3.4, Vanilla CSS variables, Glassmorphic UI Tokens
+- **Иконки:** Lucide React
+- **Формы и валидация:** React Hook Form, Zod Resolvers (`zod`), `@hookform/resolvers`
+- **Аналитика и графики:** Recharts
+- **Печать и экспорт:** `jspdf`, `html2canvas`, `papaparse`
+- **Локализация:** `i18next`, `react-i18next`
+
+### Backend (REST API & RAG Gateway)
+- **Core:** Node.js 20+, Express.js, TypeScript
+- **База данных:** PostgreSQL 17 с расширением `pgvector`
+- **ORM:** Prisma ORM (v6) с 30+ связанными таблицами
+- **Безопасность & Авторизация:** JWT (RBAC ролевая модель), `bcryptjs`, CORS, Zod validation
+- **ИИ Службы:** Google Gemini Embeddings (`@google/generative-ai`), Groq LLM Inference (`openai` SDK for Groq)
+- **Интеграции:** Telegraf (Telegram Bot), node-cron, mammoth (DOCX parsing), xlsx
+
+---
+
+## 📁 Структура проекта
+
+```
+mezon_admin/
+├── frontend/                     # Frontend SPA (React + Vite)
+│   ├── public/                   # Статические ресурсы
+│   ├── src/
+│   │   ├── main.tsx              # Точка входа для основного ERP приложения
+│   │   ├── lms-main.tsx          # Точка входа для LMS суб-приложения
+│   │   ├── components/           # Переиспользуемые UI компоненты (Button, Input, Modal...)
+│   │   │   ├── forms/            # Формы создания/редактирования объектов
+│   │   │   └── ui/               # Базовые UI-атомы
+│   │   ├── layouts/              # Макеты страниц (MainLayout, LmsLayout)
+│   │   ├── pages/                # Страницы ERP системы (Dashboard, Contingent, Finances...)
+│   │   │   └── lms/              # Страницы LMS (Courses, Lessons, Assignments...)
+│   │   ├── features/             # Модульные фичи (onec integration, knowledge base...)
+│   │   ├── context/              # React Contexts (AuthContext, PermissionsContext)
+│   │   ├── lib/                  # Клиентские утилиты, API-клиенты (api.ts, lms-api.ts)
+│   │   └── types/                # TypeScript типы и интерфейсы (lms.ts, erp.ts...)
+│   ├── index.html                # HTML шаблон ERP
+│   ├── lms.html                  # HTML шаблон LMS
+│   ├── tailwind.config.js        # Конфигурация Tailwind CSS
+│   └── vite.config.js            # Конфигурация сборки Vite (Multi-page build)
+│
+├── backend/                      # Backend REST API (Node.js + Express)
+│   ├── prisma/
+│   │   ├── schema.prisma         # Главная Prisma схема БД
+│   │   ├── migrations/           # SQL миграции базы данных
+│   │   └── seed.ts               # Базовый сидер (пользователи, роли, структуры)
+│   ├── src/
+│   │   ├── controllers/          # Контроллеры запросов
+│   │   ├── routes/               # API Маршруты (/api/lms, /api/exams, /api/1c...)
+│   │   ├── services/             # Бизнес-логика (AiService, OneCService...)
+│   │   ├── middleware/           # Auth, RBAC, Error handling middleware
+│   │   └── index.ts              # Точка входа сервера Express
+│   ├── Dockerfile
+│   └── .env.example
+│
+├── docker-compose.yml            # Сборка PostgreSQL, Backend, Frontend
+├── render.yaml                   # Конфигурация деплоя на Render
+├── test-setup.sh                 # Скрипт проверки работоспособности
+└── README.md                     # Единая документация проекта
 ```
 
 ---
 
-## 🔧 Scripts & Deployment
+## 🧩 Функциональные модули (ERP)
 
-- The project is configured for deployment on **Render** (`render.yaml`).
-- E2E Testing is configured via `./test-setup.sh`.
-- Built-in scripts for generating test environments (Vite Tests, Prisma Studio).
+1. **Дашборд аналитики (`/`):** Виджеты финансов, посещаемости, инцидентов безопасности, кадрового состава. Настройка расположения виджетов (`PersonalizationPanel`).
+2. **Контингент учеников и воспитанников (`/children`):** Личные дела, история переводов (`ACTIVE`, `LEFT`, `ARCHIVED`), справки, медицинские карты.
+3. **Группы и классы (`/groups`):** Распределение детей по классам (1-11 классы, ясли, дошкольные группы), закрепление классных руководителей.
+4. **Кадры и сотрудники (`/employees`):** Учёт персонала, штатное расписание, отслеживание медицинских книжек и трудовых договоров.
+5. **Финансы (`/finance`):** Движение денежных средств (ПКО/РКО), безналичные расчёты, ведение статей расходов/доходов, отчётность по задолженностям.
+6. **Склад и ТМЦ (`/inventory`):** Партионный учёт складов (Продукты, Хозтовары, Канцелярия), контроль сроков годности, приход/расход/списание.
+7. **Кухня и меню (`/menu`, `/recipes`):** Технологические карты блюд с расчётом КБЖУ, автоматическая генерация меню по возрастным категориям, списание ингредиентов.
+8. **Заявки на ремонт и обслуживание (`/maintenance`):** Электронный журнал заявок на ремонт/выдачу инвентаря. Состояния: *Создана → Утверждена (Директор) → В работе (Завхоз) → Выполнена*.
+9. **Закупки (`/procurement`):** Плановые и оперативные заказы, база поставщиков, отслеживание статусов поставок.
+10. **Документооборот и Календарь (`/documents`, `/calendar`):** Шаблоны приказов, договоров, планирование мероприятий.
+11. **Безопасность (`/security`):** Журнал посещений, инциденты, проверки пожарной безопасности.
 
 ---
-*Documentation generated based on deep static analysis of the codebase.*
-*License: ISC | Author: Izumi Amano*
+
+## 🎓 Учебная платформа (LMS)
+
+LMS встроен в единый репозиторий, но выделен в изоляцию с точкой входа `/lms/` (`lms.html` & `lms-main.tsx`).
+
+### Фронтенд-структура LMS:
+- `frontend/src/lms-main.tsx` — отдельная точка входа LMS.
+- `frontend/src/layouts/LmsLayout.tsx` — сайдбар и макет LMS.
+- `frontend/src/pages/lms/` — страницы: `LmsDashboard`, `LmsCoursesPage`, `LmsCourseDetailPage`, `LmsLessonPage`, `LmsMyLearningPage`, `LmsAssignmentsPage`, `LmsDiscussionsPage`, `LmsProgressPage`, `LmsCourseEditorPage`.
+- `frontend/src/lib/lms-api.ts` — API-клиент LMS.
+
+### Основные эндпоинты LMS API:
+- `GET /api/lms/courses` — каталог курсов (фильтры: категория, уровень)
+- `GET /api/lms/courses/:id` — детали курса с модулями и уроками
+- `POST /api/lms/courses/:id/enroll` — запись на курс
+- `GET /api/lms/my-learning` — мои активные и пройденные курсы
+- `POST /api/lms/lessons/:id/progress` — сохранение прогресса по уроку
+- `POST /api/lms/assignments/:id/submit` — сдача задания
+
+### Конфигурация Nginx для Production:
+```nginx
+location /lms {
+    alias /app/dist;
+    try_files $uri /lms.html;
+}
+
+location /lms/ {
+    alias /app/dist/;
+    try_files $uri /lms.html;
+}
+```
+
+---
+
+## 📝 Платформа контрольных работ (Exams)
+
+Позволяет учителям и администрации создавать контрольные работы с поддержкой автоматической и AI-проверки.
+
+### Типы вопросов:
+- `SINGLE_CHOICE` / `MULTIPLE_CHOICE` — автопроверка
+- `TRUE_FALSE` / `TEXT_SHORT` — автопроверка
+- `TEXT_LONG` — развёрнутый ответ (проверяется AI на основе рубрик)
+- `PROBLEM` — математическая/экономическая задача (проверяется AI)
+
+### Публичные ссылки для учеников (без авторизации):
+1. Преподаватель публикует контрольную (`POST /api/exams/:id/publish`).
+2. Генерируется токен: `https://erp.mezon.uz/exam/:token`.
+3. Ученик открывает ссылку, выполняет работу с таймером и отправляет результат.
+4. AI в фоновом режиме оценивает развёрнутые ответы, выставляет `aiScore` и формирует текстовый отзыв `aiFeedback`.
+
+---
+
+## 🤖 AI-экосистема и настройка API ключей
+
+В систему встроены два ИИ-механизма:
+1. **RAG База знаний (Google Drive + Gemini Embeddings):** Крон-задача сканирует папку Google Drive, векторные представления (768d) сохраняются в PostgreSQL (`pgvector`). ИИ-ассистент отвечает на вопросы сотрудников строго по внутренней документации.
+2. **AI Проверка контрольных (Groq API / Qwen3-32B):** Мгновенная проверка открытых вопросов.
+
+### Переменные окружения в `backend/.env`:
+```env
+# Обязательный ключ для векторного поиска
+GEMINI_API_KEY="AIzaSy..."
+
+# Обязательный ключ для ИИ-ассистента и проверки работ
+GROQ_API_KEY="gsk_..."
+
+# Опционально: Google Drive RAG
+GOOGLE_DRIVE_API_KEY=""
+GOOGLE_DRIVE_FOLDER_ID=""
+```
+
+*Примечание: При отсутствии ключей система корректно переключается на обычный LIKE-поиск по тексту.*
+
+---
+
+## 🎨 Интеграция Figma MCP
+
+В репозитории настроен сервер Figma MCP для прямой связи кода фронтенда с макетами Figma:
+
+- **Конфигурация IDE:** `.vscode/mcp.json` содержит описание сервера `Figma-MCP`.
+- **Capture Script:** В `frontend/index.html` подключен `https://mcp.figma.com/mcp/html-to-design/capture.js`.
+
+### Порядок использования:
+1. Откройте проект в VS Code или WebStorm с поддержкой MCP.
+2. Введите Figma Access Token по запросу IDE.
+3. Запустите фронтенд (`npm run dev`) для валидации верстки и взаимодействия с макетом html-to-design.
+
+---
+
+## 🗄 База данных и ролевая модель (RBAC)
+
+Схема описана в `backend/prisma/schema.prisma` (более 1600+ строк, 30+ таблиц).
+
+### Роли пользователей (`Role`):
+- `DEVELOPER` — полный доступ к отладке и настройкам
+- `DIRECTOR` — административный и финансовый контроль
+- `DEPUTY` — завуч, доступ к упреждению учебного процесса
+- `ADMIN` — системный администратор
+- `TEACHER` — преподаватель (журнал, курсы LMS, контрольные)
+- `ACCOUNTANT` — бухгалтер (финансы, ПКО/РКО, зарплата)
+- `ZAVHOZ` — завхоз (склад, заявки на ремонт)
+
+### Аудит действий (`ActionLog`):
+Все значимые изменения данных логгируются в модели `ActionLog` с сохранением JSON-дампа изменённых полей (`payload`).
+
+---
+
+## 📱 Адаптивный дизайн и Mobile-First
+
+Фронтенд спроектирован с поддержкой всех мобильных устройств и планшетов:
+
+- **Touch targets:** Минимальный размер интерактивных элементов — 44px (предотвращает зум на iOS).
+- **Сайдбар:** Адаптивное Slide-Out меню с эффектами Backdrop Blur (`SideNav.tsx`).
+- **Сетка:** Используется утилита `.mezon-grid` для отзывчивой раскладки карточек (1 колонка на моб., 2-4 на десктопе).
+- **Таблицы:** Компонент `DataTable` с встроенной горизонтальной прокруткой и липкими заголовками.
+
+---
+
+## 🔧 Деплой и скрипты
+
+### Скрипты фронтенда (`frontend/package.json`):
+```bash
+npm run dev        # Локальный сервер Vite (Development)
+npm run build      # Оптимизированная сборка (TypeScript + Vite)
+npm run lint       # Проверка ESLint
+npm run test       # Витест юнит-тесты
+```
+
+### Скрипты бэкенда (`backend/package.json`):
+```bash
+npm run dev        # Сервер разработки (ts-node-dev)
+npm run build      # Компиляция TypeScript в dist/
+npm start          # Запуск закомпилированного сервера
+npm run test       # Тестирование Vitest
+```
+
+### Проверка связи Frontend <-> Backend:
+В корне проекта доступен скрипт:
+```bash
+chmod +x test-setup.sh
+./test-setup.sh
+```
+
+---
+
+*Авторы: Mezon Development Team | Лицензия: ISC*
