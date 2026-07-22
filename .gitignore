@@ -29,7 +29,6 @@ out/
 *~
 .DS_Store
 Thumbs.db
-.env
 
 # Logs & Diagnostics
 logs/
