@@ -80,6 +80,9 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 
 // Health check endpoint (public)
+app.get("/", (_req, res) => {
+  res.json({ status: "ok", service: "Mezon Admin API", timestamp: new Date().toISOString() });
+});
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });

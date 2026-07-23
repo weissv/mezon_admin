@@ -61,5 +61,5 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/*
 
 EXPOSE 4000
-# Run migrations, seed database, then start server
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+# Run database schema push, then start server
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]
