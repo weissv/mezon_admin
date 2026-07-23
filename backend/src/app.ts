@@ -50,30 +50,20 @@ import path from "path";
 
 const app = express();
 
-const allowedOrigins = new Set(config.corsOrigins);
-const allowPattern = [/\.onrender\.com$/, /mezon\.uz$/, /\.trycloudflare\.com$/, /\.loca\.lt$/];
+const corsOriginEnv = process.env.CORS_ORIGIN || '*';
+const allowedOrigins = corsOriginEnv.split(',').map(o => o.trim());
 
-const corsOptions: cors.CorsOptions = {
-  origin(origin, callback) {
-    if (!origin) {
-      return callback(null, true);
+app.use(cors({
+  origin: (origin, callback) => {
+    // Если CORS_ORIGIN='*' или входящий домен есть в списке через запятую — пропускаем
+    if (!origin || corsOriginEnv === '*' || allowedOrigins.includes(origin)) {
+      callback(null, true); // динамически отдает ровно тот Origin, с которого пришел запрос
+    } else {
+      callback(null, false);
     }
-    if (allowedOrigins.has(origin) || allowPattern.some((regex) => regex.test(origin))) {
-      return callback(null, true);
-    }
-    console.log(`CORS blocked origin: ${origin}`);
-    return callback(new Error(`Origin ${origin} is not allowed by CORS`));
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
-  exposedHeaders: ["Set-Cookie"],
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+}));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
