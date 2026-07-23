@@ -307,6 +307,8 @@ VITE_API_URL=https://dev-api.mezon.uz/api
         "gender": "MALE",
         "status": "ACTIVE",
         "groupId": 2,
+        "balance": -3500000,
+        "hasDebt": true,
         "group": { "id": 2, "name": "1-А класс" },
         "parents": [
           { "id": 1, "fullName": "Каримов Ахмат", "relation": "отец", "phone": "+998901234567" }
@@ -319,6 +321,153 @@ VITE_API_URL=https://dev-api.mezon.uz/api
     "totalPages": 3
   }
   ```
+> **Примечание по биллингу:** Поля `balance` (расчетный баланс: сумма оплат за вычетом выставленных счетов) и `hasDebt` (`true`, если баланс отрицательный или есть просроченные счета `OVERDUE`) вычисляются автоматически и используются на фронтенде для индикаторов должников.
+
+---
+
+### 4.2.1. Договоры учеников и Школьный Биллинг (Contracts & Invoices)
+
+#### `GET /api/children/:childId/contracts`
+- **Роли:** `DEPUTY`, `ADMIN`, `TEACHER`, `ACCOUNTANT`
+- **Описание:** Получение всех договоров конкретного ученика.
+- **Response Body (200 OK):**
+  ```json
+  [
+    {
+      "id": 1,
+      "childId": 10,
+      "contractNumber": "DOG-2025-10",
+      "startDate": "2025-09-01T00:00:00.000Z",
+      "endDate": null,
+      "monthlyFee": 3500000,
+      "status": "ACTIVE",
+      "fileUrl": "https://mezon.uz/files/contract_10.pdf",
+      "createdAt": "2025-09-01T10:00:00.000Z",
+      "updatedAt": "2025-09-01T10:00:00.000Z"
+    }
+  ]
+  ```
+
+#### `POST /api/children/:childId/contracts`
+- **Роли:** `DEPUTY`, `ADMIN`, `ACCOUNTANT`
+- **Описание:** Привязка нового договора к ученику.
+- **Request Body:**
+  | Поле | Тип | Обяз. | Описание / Валидация Zod |
+  | :--- | :--- | :---: | :--- |
+  | `contractNumber` | `string` | Да | Уникальный номер договора (`min(1)`) |
+  | `startDate` | `string` | Да | Дата начала (ISO дата) |
+  | `endDate` | `string` | Нет | Дата окончания (ISO дата, опционально) |
+  | `monthlyFee` | `number` | Да | Ежемесячная плата (`positive()`) |
+  | `status` | `enum` | Нет | `ACTIVE` \| `TERMINATED` \| `EXPIRED` (по умолч. `ACTIVE`) |
+  | `fileUrl` | `string` | Нет | Ссылка на документ/скан |
+- **Response Body (201 Created):** Объект нового договора `StudentContract`.
+
+#### `PUT /api/contracts/:id`
+- **Роли:** `DEPUTY`, `ADMIN`, `ACCOUNTANT`
+- **Описание:** Изменение параметров или статуса договора.
+- **Request Body:** Опциональные поля `contractNumber`, `startDate`, `endDate`, `monthlyFee`, `status`, `fileUrl`.
+- **Response Body (200 OK):** Обновленный объект `StudentContract`.
+
+#### `DELETE /api/contracts/:id`
+- **Роли:** `ADMIN`, `ACCOUNTANT`
+- **Описание:** Расторжение/удаление договора.
+- **Response Body (204 No Content)**
+
+---
+
+#### `GET /api/finance/invoices`
+- **Роли:** `DEPUTY`, `ADMIN`, `ACCOUNTANT`, `DIRECTOR`
+- **Описание:** Получение списка всех счетов и инвойсов биллинга с фильтрами и пагинацией.
+- **Query Params:**
+  | Параметр | Тип | Описание |
+  | :--- | :--- | :--- |
+  | `page` | `number` | Номер страницы (по умолчанию 1) |
+  | `pageSize` | `number` | Элементов на страницу (по умолчанию 20) |
+  | `status` | `enum` | `PENDING` \| `PAID` \| `OVERDUE` \| `CANCELLED` |
+  | `groupId` | `number` | Фильтр по классу/группе учеников |
+  | `childId` | `number` | Фильтр по конкретному ученику |
+  | `period` | `string` | Фильтр по периоду (например `"2026-07"`) |
+  | `search` | `string` | Поиск по номеру счета или ФИО ученика |
+- **Response Body (200 OK):**
+  ```json
+  {
+    "items": [
+      {
+        "id": 5,
+        "childId": 10,
+        "contractId": 1,
+        "number": "INV-202607-10",
+        "amount": 3500000,
+        "issueDate": "2026-07-01T00:00:00.000Z",
+        "dueDate": "2026-07-10T00:00:00.000Z",
+        "status": "OVERDUE",
+        "period": "2026-07",
+        "description": "Оплата за обучение (2026-07) по договору №DOG-2025-10",
+        "child": {
+          "id": 10,
+          "firstName": "Тимур",
+          "lastName": "Каримов",
+          "groupId": 2,
+          "group": { "id": 2, "name": "1-А класс" }
+        },
+        "contract": {
+          "id": 1,
+          "contractNumber": "DOG-2025-10",
+          "monthlyFee": 3500000
+        }
+      }
+    ],
+    "total": 120,
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 6
+  }
+  ```
+
+#### `POST /api/finance/invoices/generate`
+- **Роли:** `DEPUTY`, `ADMIN`, `ACCOUNTANT`
+- **Описание:** Массовая автоматическая генерация счетов за указанный/текущий период для всех активных учеников (`status = ACTIVE`), у которых есть действующий договор (`status = ACTIVE`).
+- **Request Body:**
+  | Поле | Тип | Обяз. | Описание |
+  | :--- | :--- | :---: | :--- |
+  | `period` | `string` | Нет | Период в формате `YYYY-MM` (по умолч. текущий месяц, напр. `"2026-07"`) |
+  | `issueDate` | `string` | Нет | Дата выставления |
+  | `dueDate` | `string` | Нет | Срок оплаты (по умолч. 10 число) |
+  | `groupId` | `number` | Нет | Ограничить генерацию конкретной группой |
+- **Response Body (201 Created):**
+  ```json
+  {
+    "count": 42,
+    "invoices": [ /* массив созданных счетов */ ]
+  }
+  ```
+
+#### `POST /api/finance/invoices`
+- **Роли:** `DEPUTY`, `ADMIN`, `ACCOUNTANT`
+- **Описание:** Ручное выставление индивидуального счета ученику.
+- **Request Body:**
+  | Поле | Тип | Обяз. | Описание |
+  | :--- | :--- | :---: | :--- |
+  | `childId` | `number` | Да | ID ученика |
+  | `contractId` | `number` | Нет | ID договора (опционально) |
+  | `amount` | `number` | Да | Сумма счета (`positive()`) |
+  | `issueDate` | `string` | Да | Дата выставления (ISO) |
+  | `dueDate` | `string` | Да | Срок оплаты (ISO) |
+  | `period` | `string` | Да | Период (`YYYY-MM`) |
+  | `description` | `string` | Нет | Комментарий/назначение |
+  | `status` | `enum` | Нет | `PENDING` \| `PAID` \| `OVERDUE` \| `CANCELLED` |
+- **Response Body (201 Created):** Объект созданного счета `Invoice`.
+
+#### `PUT /api/finance/invoices/:id/status`
+- **Роли:** `DEPUTY`, `ADMIN`, `ACCOUNTANT`
+- **Описание:** Изменение статуса счета (например, проведения оплаты или отмены).
+- **Request Body:**
+  ```json
+  {
+    "status": "PAID"
+  }
+  ```
+- **Response Body (200 OK):** Обновленный объект счета `Invoice`.
 
 #### `POST /api/children`
 - **Роли:** `DEPUTY`, `ADMIN`
@@ -853,6 +1002,55 @@ export interface LmsCourse {
   level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
   isPublished: boolean;
   modules?: LmsModule[];
+}
+
+// ============================================================================
+// ШКОЛЬНЫЙ БИЛЛИНГ И ДОГОВОРЫ (BILLING & CONTRACTS)
+// ============================================================================
+
+export type ContractStatus = 'ACTIVE' | 'TERMINATED' | 'EXPIRED';
+
+export interface StudentContract {
+  id: number;
+  childId: number;
+  contractNumber: string;
+  startDate: string;
+  endDate?: string | null;
+  monthlyFee: number;
+  status: ContractStatus;
+  fileUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type InvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+
+export interface Invoice {
+  id: number;
+  childId: number;
+  contractId?: number | null;
+  number: string;
+  amount: number;
+  issueDate: string;
+  dueDate: string;
+  status: InvoiceStatus;
+  period: string; // "2026-07"
+  description?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  child?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    middleName?: string | null;
+    groupId: number;
+    group?: { id: number; name: string };
+  };
+  contract?: {
+    id: number;
+    contractNumber: string;
+    monthlyFee: number;
+  } | null;
 }
 ```
 

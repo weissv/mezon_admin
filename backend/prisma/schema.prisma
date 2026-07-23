@@ -251,9 +251,14 @@ model Child {
   birthCertificateNumber String? // Номер метрики
 
   // Contracts
-  contractNumber String? // @deprecated — use contracts relation
-  contractDate   DateTime? // @deprecated — use contracts relation
+  contractNumber String? // @deprecated — use studentContracts relation
+  contractDate   DateTime? // @deprecated — use studentContracts relation
   contracts      ChildContract[]
+  studentContracts StudentContract[]
+
+  // Invoices & Billing
+  invoices            Invoice[]
+  financeTransactions FinanceTransaction[]
 
   // Orders
   admissionOrderNumber String?
@@ -418,6 +423,8 @@ model FinanceTransaction {
   documentUrl String?
   clubId      Int?
   club        Club?           @relation(fields: [clubId], references: [id])
+  childId     Int?
+  child       Child?          @relation(fields: [childId], references: [id])
 
   // ── 1С Integration ──
   channel            TransactionChannel? // CASH / BANK
@@ -438,6 +445,7 @@ model FinanceTransaction {
 
   @@index([type, category, date])
   @@index([clubId])
+  @@index([childId])
   @@index([channel, date])
   @@index([contractorId])
   @@index([personId])
@@ -1353,6 +1361,63 @@ model DashboardPreference {
   @@index([userId])
 }
 
+enum ContractStatus {
+  ACTIVE
+  TERMINATED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+/// Договоры учеников (Школьный биллинг)
+model StudentContract {
+  id             Int            @id @default(autoincrement())
+  childId        Int
+  child          Child          @relation(fields: [childId], references: [id], onDelete: Cascade)
+  contractNumber String         @unique
+  startDate      DateTime
+  endDate        DateTime?
+  monthlyFee     Decimal        @db.Decimal(12, 2)
+  status         ContractStatus @default(ACTIVE)
+  fileUrl        String?
+
+  invoices  Invoice[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([childId])
+  @@index([status])
+}
+
+/// Счета и инвойсы школьного биллинга
+model Invoice {
+  id          Int              @id @default(autoincrement())
+  childId     Int
+  child       Child            @relation(fields: [childId], references: [id], onDelete: Cascade)
+  contractId  Int?
+  contract    StudentContract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  number      String           @unique
+  amount      Decimal          @db.Decimal(12, 2)
+  issueDate   DateTime
+  dueDate     DateTime
+  status      InvoiceStatus    @default(PENDING)
+  period      String           // "2026-09"
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([childId])
+  @@index([contractId])
+  @@index([status])
+  @@index([period])
+}
+
 // ──────────────────────────────────────
 // 1С Integration Models
 // ──────────────────────────────────────
@@ -1370,7 +1435,7 @@ model Contractor {
   isActive   Boolean @default(true) // !DeletionMark
 
   transactions FinanceTransaction[]
-  invoices     Invoice[]
+  invoices     OneCInvoice[]
 
   balanceSnapshots BalanceSnapshot[]
 
@@ -1411,8 +1476,8 @@ model CashFlowArticle {
   updatedAt DateTime @updatedAt
 }
 
-/// Товарные документы (Поступление / Реализация товаров и услуг)
-model Invoice {
+/// Товарные документы 1С (Поступление / Реализация товаров и услуг)
+model OneCInvoice {
   id             Int              @id @default(autoincrement())
   externalId     String           @unique // Ref_Key
   direction      InvoiceDirection // INCOMING / OUTGOING

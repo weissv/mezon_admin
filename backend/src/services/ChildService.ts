@@ -5,6 +5,7 @@ import { Child, Prisma, Gender, ChildStatus } from '@prisma/client';
 import { BaseService, PaginationParams, SortParams, PaginatedResult } from './BaseService';
 import { NotFoundError, ValidationError } from '../utils/errors';
 import { ParentService } from './ParentService';
+import { InvoiceService } from './InvoiceService';
 
 // --- Interfaces ---
 
@@ -113,7 +114,7 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
 
   async findMany(
     params: PaginationParams & SortParams & ChildFilters
-  ): Promise<PaginatedResult<ChildListItem>> {
+  ): Promise<PaginatedResult<ChildListItem & { balance: number; hasDebt: boolean }>> {
     const pagination = this.buildPagination(params);
     const orderBy = this.buildOrderBy(params);
 
@@ -148,12 +149,24 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
       this.prisma.child.count({ where }),
     ]);
 
-    return this.formatPaginatedResult(items, total, pagination);
+    const childIds = items.map((c) => c.id);
+    const billingMap = await InvoiceService.calculateChildrenBillingStates(childIds);
+
+    const enrichedItems = items.map((item) => {
+      const billing = billingMap.get(item.id) || { balance: 0, hasDebt: false };
+      return {
+        ...item,
+        balance: billing.balance,
+        hasDebt: billing.hasDebt,
+      };
+    });
+
+    return this.formatPaginatedResult(enrichedItems, total, pagination);
   }
 
   // --- Detail ---
 
-  async findById(id: number): Promise<ChildDetail> {
+  async findById(id: number): Promise<ChildDetail & { balance: number; hasDebt: boolean }> {
     const numericId = this.validateNumericId(id);
 
     const child = await this.prisma.child.findUnique({
@@ -165,7 +178,14 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
       throw new NotFoundError(this.modelName);
     }
 
-    return child;
+    const billingMap = await InvoiceService.calculateChildrenBillingStates([numericId]);
+    const billing = billingMap.get(numericId) || { balance: 0, hasDebt: false };
+
+    return {
+      ...child,
+      balance: billing.balance,
+      hasDebt: billing.hasDebt,
+    };
   }
 
   // --- Create ---

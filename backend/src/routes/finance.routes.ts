@@ -346,7 +346,7 @@ router.get(
       _count: { id: true },
       where,
     }),
-    prisma.invoice.aggregate({
+    prisma.oneCInvoice.aggregate({
       _sum: { totalAmount: true },
       _count: { id: true },
       where: invoiceWhere,

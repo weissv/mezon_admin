@@ -488,7 +488,7 @@ router.get(
     }
 
     const [items, total] = await Promise.all([
-      prisma.invoice.findMany({
+      prisma.oneCInvoice.findMany({
         where,
         skip,
         take: pageSize,
@@ -497,7 +497,7 @@ router.get(
           contractor: { select: { id: true, name: true, inn: true } },
         },
       }),
-      prisma.invoice.count({ where }),
+      prisma.oneCInvoice.count({ where }),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(total / pageSize));

@@ -49,7 +49,7 @@ async function syncInvoiceDoc(
         ? options.commentExtractor(r)
         : r.Комментарий ?? null;
 
-      await ctx.db.invoice.upsert({
+      await ctx.db.oneCInvoice.upsert({
         where: { externalId: r.Ref_Key },
         create: {
           externalId: r.Ref_Key,

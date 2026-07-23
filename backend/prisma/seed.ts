@@ -282,7 +282,122 @@ async function main() {
       }
     });
   }
-  console.log("✅ Schedule for 4-Б generated.");
+  // 7. Создаем Договоры учеников и Счета (Billing Seed)
+  const childrenList = await prisma.child.findMany({ where: { groupId: group4B.id }, take: 4 });
+  if (childrenList.length > 0) {
+    const currentPeriod = "2026-07";
+    const pastDueDate = new Date("2026-07-10");
+    const futureDueDate = new Date("2026-08-10");
+    const issueDate = new Date("2026-07-01");
+
+    // Child 1: PAID (Договор + Оплаченный счет + Транзакция оплаты)
+    const child1 = childrenList[0];
+    const contract1 = await prisma.studentContract.upsert({
+      where: { contractNumber: `DOG-2025-${child1.id}` },
+      update: {},
+      create: {
+        childId: child1.id,
+        contractNumber: `DOG-2025-${child1.id}`,
+        startDate: new Date("2025-09-01"),
+        monthlyFee: 3500000,
+        status: "ACTIVE",
+      },
+    });
+
+    const inv1 = await prisma.invoice.upsert({
+      where: { number: `INV-202607-${child1.id}` },
+      update: { status: "PAID" },
+      create: {
+        childId: child1.id,
+        contractId: contract1.id,
+        number: `INV-202607-${child1.id}`,
+        amount: 3500000,
+        issueDate,
+        dueDate: pastDueDate,
+        status: "PAID",
+        period: currentPeriod,
+        description: `Оплата за обучение (${currentPeriod}) по договору №${contract1.contractNumber}`,
+      },
+    });
+
+    // Add Income FinanceTransaction for Child 1 so balance is 0
+    await prisma.financeTransaction.create({
+      data: {
+        amount: 3500000,
+        type: "INCOME",
+        category: "OTHER",
+        description: `Оплата по счету №${inv1.number} (${child1.lastName} ${child1.firstName})`,
+        date: issueDate,
+        childId: child1.id,
+      },
+    });
+
+    // Child 2: OVERDUE (Просроченный счет)
+    if (childrenList.length > 1) {
+      const child2 = childrenList[1];
+      const contract2 = await prisma.studentContract.upsert({
+        where: { contractNumber: `DOG-2025-${child2.id}` },
+        update: {},
+        create: {
+          childId: child2.id,
+          contractNumber: `DOG-2025-${child2.id}`,
+          startDate: new Date("2025-09-01"),
+          monthlyFee: 3500000,
+          status: "ACTIVE",
+        },
+      });
+
+      await prisma.invoice.upsert({
+        where: { number: `INV-202607-${child2.id}` },
+        update: { status: "OVERDUE" },
+        create: {
+          childId: child2.id,
+          contractId: contract2.id,
+          number: `INV-202607-${child2.id}`,
+          amount: 3500000,
+          issueDate,
+          dueDate: pastDueDate,
+          status: "OVERDUE",
+          period: currentPeriod,
+          description: `Оплата за обучение (${currentPeriod}) по договору №${contract2.contractNumber}`,
+        },
+      });
+    }
+
+    // Child 3: PENDING (Счет ожидает оплаты)
+    if (childrenList.length > 2) {
+      const child3 = childrenList[2];
+      const contract3 = await prisma.studentContract.upsert({
+        where: { contractNumber: `DOG-2025-${child3.id}` },
+        update: {},
+        create: {
+          childId: child3.id,
+          contractNumber: `DOG-2025-${child3.id}`,
+          startDate: new Date("2025-09-01"),
+          monthlyFee: 3500000,
+          status: "ACTIVE",
+        },
+      });
+
+      await prisma.invoice.upsert({
+        where: { number: `INV-202607-${child3.id}` },
+        update: { status: "PENDING" },
+        create: {
+          childId: child3.id,
+          contractId: contract3.id,
+          number: `INV-202607-${child3.id}`,
+          amount: 3500000,
+          issueDate,
+          dueDate: futureDueDate,
+          status: "PENDING",
+          period: currentPeriod,
+          description: `Оплата за обучение (${currentPeriod}) по договору №${contract3.contractNumber}`,
+        },
+      });
+    }
+
+    console.log("✅ Billing contracts and invoices seeded.");
+  }
 
   console.log("🎉 Seeding finished successfully.");
 }

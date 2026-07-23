@@ -44,7 +44,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
 RUN npm run build
-RUN npm prune --omit=dev
 
 # Этап 3: Запуск в продакшене
 FROM node:20-slim AS runner

@@ -44,6 +44,8 @@ import knowledgeBaseRoutes from "./routes/knowledge-base.routes";
 import uploadRoutes from "./routes/upload.routes";
 import analyticsRoutes from "./routes/analytics.routes";
 import ingredientsRoutes from "./routes/ingredients.routes";
+import contractsRoutes from "./routes/contracts.routes";
+import invoicesRoutes from "./routes/invoices.routes";
 import path from "path";
 
 const app = express();
@@ -101,7 +103,9 @@ app.use("/api/parents", parentsRoutes);
 app.use("/api/employees", employeesRoutes);
 app.use("/api/clubs", clubsRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/finance/invoices", invoicesRoutes);
 app.use("/api/finance", financeRoutes);
+app.use("/api", contractsRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/maintenance", maintenanceRoutes);

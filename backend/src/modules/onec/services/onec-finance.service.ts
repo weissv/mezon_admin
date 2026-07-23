@@ -59,16 +59,16 @@ export async function listOneCInvoices(query: ListInvoicesQuery) {
   appendDateRange(where, query.startDate, query.endDate);
 
   const [items, total] = await Promise.all([
-    prisma.invoice.findMany({
+    prisma.oneCInvoice.findMany({
       where,
-      skip,
-      take,
-      orderBy,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { date: "desc" },
       include: {
         contractor: { select: { id: true, name: true, inn: true } },
       },
     }),
-    prisma.invoice.count({ where }),
+    prisma.oneCInvoice.count({ where }),
   ]);
 
   return createPaginatedResponse(items, total, page, pageSize);
