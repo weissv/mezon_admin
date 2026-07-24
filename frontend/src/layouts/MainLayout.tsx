@@ -11,7 +11,10 @@ import { ROLE_LABELS } from "../types/auth";
 import { Spinner } from "../components/ui/LoadingState";
 
 export default function MainLayout() {
-  const { user, isLoading } = useAuth();
+  const [demoRole, setDemoRole] = useState("DIRECTOR");
+  // ВРЕМЕННО: фейковый пользователь, привязанный к переключателю
+  const user = { email: 'admin@mezon.com', role: demoRole, employee: { firstName: 'Демо', lastName: 'Пользователь' } }; 
+  const isLoading = false;
   const [showDoom, setShowDoom] = useState(false);
   const userName = user?.employee
     ? [user.employee.firstName, user.employee.lastName].filter(Boolean).join(" ")
@@ -35,7 +38,7 @@ export default function MainLayout() {
     );
   }
 
-  if (!user) {
+  if (false) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-bg-canvas px-6 text-center">
         <div className="max-w-md space-y-4">
@@ -65,10 +68,10 @@ export default function MainLayout() {
     <div className="mezon-app">
       {showDoom && <DoomGame onClose={() => setShowDoom(false)} />}
 
-      {/* ── Top Bar ── */}
-        <header className="mezon-top-bar">
-          <div className="mezon-top-bar__leading">
-            <button
+           {/* ── Top Bar ── */}
+      <header className="mezon-top-bar">
+        <div className="mezon-top-bar__leading">
+          <button
             className="mezon-mobile-menu-btn"
             onClick={() => {
               (window as any).toggleMobileMenu?.();
@@ -77,23 +80,36 @@ export default function MainLayout() {
           >
             <Menu className="h-5 w-5" />
           </button>
-            <div className="mezon-window-controls" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="mezon-top-bar__title">
-              <span>Mezon ERP</span>
-              <strong>Операционный контур школы</strong>
-            </div>
+          <div className="mezon-window-controls" aria-hidden="true">
+            <span />
+            <span />
+            <span />
           </div>
+          <div className="mezon-top-bar__title">
+            <span>Mezon ERP</span>
+            <strong>Операционный контур школы</strong>
+          </div>
+        </div>
 
-        <div className="mezon-top-bar__cluster mezon-top-bar__cluster--compact">
+               <div className="mezon-top-bar__cluster mezon-top-bar__cluster--compact">
           <span className="mezon-chip">
             <LayoutGrid className="h-3.5 w-3.5" />
             Рабочее место
           </span>
-          <span className="mezon-chip">ERP</span>
+          
+          {/* ГЛОБАЛЬНЫЙ ПЕРЕКЛЮЧАТЕЛЬ РОЛЕЙ */}
+          <select 
+            value={demoRole} 
+            onChange={(e) => setDemoRole(e.target.value)}
+            className="text-xs font-bold border-2 border-dashed border-indigo-300 text-indigo-700 bg-indigo-50 rounded-lg px-2 py-1 outline-none cursor-pointer"
+            title="ДЕМО: Переключение интерфейса"
+          >
+            <option value="DIRECTOR">👁️ Директор</option>
+            <option value="ADMIN">👑 Админ</option>
+            <option value="TEACHER">📚 Учитель</option>
+            <option value="STUDENT">📚 Ученик</option>
+            <option value="PARENT">👨‍👩‍👦 Родитель</option>
+          </select>
         </div>
 
         <div className="mezon-top-bar__cluster">
@@ -115,13 +131,12 @@ export default function MainLayout() {
         </div>
       </header>
 
-      {/* ── Body ── */}
       <div className="mezon-shell">
-        <SideNav />
+        <SideNav demoRole={demoRole} />
         <main className="mezon-main">
           <Toaster position="top-right" richColors />
           <div className="mezon-main-inner macos-animate-fade-in">
-            <Outlet />
+            <Outlet context={{ demoRole }} />
           </div>
         </main>
       </div>
