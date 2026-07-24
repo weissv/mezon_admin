@@ -6,12 +6,14 @@ import { ChevronRight, Compass, LifeBuoy, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../hooks/useAuth";
 import { usePermissions } from "../contexts/PermissionsContext";
-import { getLinksWithPermissions, FULL_ACCESS_ROLES, groupModuleLinks } from "../lib/modules";
+import { MODULE_LINKS, groupModuleLinks } from "../lib/modules";
 import { ROLE_LABELS, type UserRole } from "../types/auth";
 
-export default function SideNav() {
-  const { user, logout } = useAuth();
-  const { permissions, isLoading: permissionsLoading } = usePermissions();
+export default function SideNav({ demoRole }: { demoRole: string }) {
+  // ВРЕМЕННО: фейковые данные
+  const user = { email: 'admin@mezon.com', role: 'DIRECTOR', employee: { firstName: 'Продукт', lastName: 'Менеджер' } };
+  const logout = () => { console.log('logout'); };
+  const permissionsLoading = false;
   const loc = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
@@ -22,12 +24,7 @@ export default function SideNav() {
     ? [user.employee.firstName, user.employee.lastName].filter(Boolean).join(" ")
     : user?.email ?? "Пользователь";
 
-  const links = getLinksWithPermissions(
-    role,
-    permissions?.modules || [],
-    permissions?.isFullAccess || FULL_ACCESS_ROLES.includes(role),
-    user?.email
-  );
+    const links = MODULE_LINKS.filter(link => link.roles.includes(demoRole as any)); // ВРЕМЕННО: показываем все кнопки без проверки прав
   const groupedLinks = groupModuleLinks(links);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);

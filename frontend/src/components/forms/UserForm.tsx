@@ -25,16 +25,16 @@ const ROLES = [
 ] as const;
 
 const createUserSchema = z.object({
- email: z.string().min(3, 'Логин обязателен (минимум 3 символа)'),
- password: z.string().min(8, 'Пароль должен быть минимум 8 символов'),
- role: z.enum(['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT', 'ZAVHOZ']),
- employeeId: z.coerce.number().positive('Выберите сотрудника'),
+  email: z.string().min(3, 'Логин обязателен (минимум 3 символа)'),
+  password: z.string().min(8, 'Пароль должен быть минимум 8 символов'),
+  role: z.enum(['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT', 'ZAVHOZ', 'STUDENT', 'PARENT']),
+  employeeId: z.coerce.number().positive('Выберите сотрудника'),
 });
 
 const updateUserSchema = z.object({
- email: z.string().min(3, 'Логин обязателен (минимум 3 символа)').optional(),
- password: z.string().min(8, 'Пароль должен быть минимум 8 символов').optional().or(z.literal('')),
- role: z.enum(['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT', 'ZAVHOZ']).optional(),
+  email: z.string().min(3, 'Логин обязателен (минимум 3 символа)').optional(),
+  password: z.string().min(8, 'Пароль должен быть минимум 8 символов').optional().or(z.literal('')),
+  role: z.enum(['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'TEACHER', 'ACCOUNTANT', 'ZAVHOZ', 'STUDENT', 'PARENT']).optional(),
 });
 
 type CreateUserFormData = z.infer<typeof createUserSchema>;

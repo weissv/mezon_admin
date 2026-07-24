@@ -69,7 +69,7 @@ export interface BaseEntityWithCuid {
 // РОЛИ И РАЗРЕШЕНИЯ
 // ============================================================================
 
-export type Role = 'DEVELOPER' | 'DIRECTOR' | 'DEPUTY' | 'ADMIN' | 'TEACHER' | 'ACCOUNTANT' | 'ZAVHOZ';
+export type Role = 'DEVELOPER' | 'DIRECTOR' | 'DEPUTY' | 'ADMIN' | 'TEACHER' | 'ACCOUNTANT' | 'ZAVHOZ' | 'STUDENT' | 'PARENT';
 
 export const FULL_ACCESS_ROLES: readonly Role[] = ['DEVELOPER', 'DIRECTOR'];
 export const ADMIN_ROLES: readonly Role[] = ['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN'];
