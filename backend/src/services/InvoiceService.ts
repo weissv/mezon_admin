@@ -98,7 +98,7 @@ class InvoiceServiceClass extends BaseService<Invoice, CreateInvoiceInput, any> 
     // Check and update PENDING invoices past due date to OVERDUE dynamically
     const now = new Date();
     const processedItems = items.map((inv) => {
-      if (inv.status === "PENDING" && new Date(inv.dueDate) < now) {
+      if (inv.status === "PENDING" && inv.dueDate && new Date(inv.dueDate) < now) {
         return { ...inv, status: "OVERDUE" as InvoiceStatus };
       }
       return inv;
@@ -271,20 +271,22 @@ class InvoiceServiceClass extends BaseService<Invoice, CreateInvoiceInput, any> 
 
     const invoicesPerChild = new Map<number, Invoice[]>();
     invoices.forEach((inv) => {
-      const list = invoicesPerChild.get(inv.childId) || [];
-      list.push(inv);
-      invoicesPerChild.set(inv.childId, list);
+      if (inv.childId) {
+        const list = invoicesPerChild.get(inv.childId) || [];
+        list.push(inv);
+        invoicesPerChild.set(inv.childId, list);
+      }
     });
 
     for (const childId of childIds) {
       const paidAmount = paymentsMap.get(childId) || 0;
       const childInvoices = invoicesPerChild.get(childId) || [];
 
-      const invoicedTotal = childInvoices.reduce((acc, inv) => acc + Number(inv.amount), 0);
+      const invoicedTotal = childInvoices.reduce((acc, inv) => acc + Number(inv.amount || 0), 0);
       const balance = paidAmount - invoicedTotal;
 
       const hasOverdueInvoice = childInvoices.some(
-        (inv) => inv.status === "OVERDUE" || (inv.status === "PENDING" && new Date(inv.dueDate) < now)
+        (inv) => inv.status === "OVERDUE" || (inv.status === "PENDING" && inv.dueDate && new Date(inv.dueDate) < now)
       );
 
       const hasDebt = balance < 0 || hasOverdueInvoice;
