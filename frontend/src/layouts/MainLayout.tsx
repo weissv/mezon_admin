@@ -11,15 +11,15 @@ import { ROLE_LABELS } from "../types/auth";
 import { Spinner } from "../components/ui/LoadingState";
 
 export default function MainLayout() {
-  const [demoRole, setDemoRole] = useState("DIRECTOR");
-  // ВРЕМЕННО: фейковый пользователь, привязанный к переключателю
-  const user = { email: 'admin@mezon.com', role: demoRole, employee: { firstName: 'Демо', lastName: 'Пользователь' } }; 
-  const isLoading = false;
-  const [showDoom, setShowDoom] = useState(false);
+  const { user, isLoading } = useAuth();
+  const [demoRole, setDemoRole] = useState<string>(user?.role || "DIRECTOR");
+
+  const activeRole = (demoRole || user?.role || "DIRECTOR") as any;
   const userName = user?.employee
     ? [user.employee.firstName, user.employee.lastName].filter(Boolean).join(" ")
-    : user?.email;
-  const userRoleLabel = user ? ROLE_LABELS[user.role] ?? user.role : "";
+    : user?.email || "Демо Пользователь";
+  const userRoleLabel = ROLE_LABELS[activeRole] ?? activeRole;
+  const [showDoom, setShowDoom] = useState(false);
 
   useKonamiCode(() => {
     if (user) setShowDoom(true);

@@ -30,9 +30,9 @@ export default function ColorsTrainer() {
 
   // 1. ГАРАНТИРОВАННО УКРЫВАЕМ МЕНЮ И ШАПКУ
   useEffect(() => {
-    const sidenav = document.querySelector('.mezon-sidenav');
-    const topbar = document.querySelector('.mezon-top-bar');
-    const shell = document.querySelector('.mezon-shell');
+    const sidenav = document.querySelector<HTMLElement>('.mezon-sidenav');
+    const topbar = document.querySelector<HTMLElement>('.mezon-top-bar');
+    const shell = document.querySelector<HTMLElement>('.mezon-shell');
     if (sidenav) sidenav.style.display = 'none';
     if (topbar) topbar.style.display = 'none';
     if (shell) shell.style.marginLeft = '0';

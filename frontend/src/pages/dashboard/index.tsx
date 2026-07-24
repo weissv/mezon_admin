@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { UserCheck, BookOpen, MessageSquare, CreditCard, Clock, AlertTriangle, Play, ClipboardList, Users, Settings, FileText, Target } from "lucide-react";
 
@@ -241,15 +241,16 @@ function AdminDashboard() {
 // ==========================================
 
 export default function DashboardPage() {
-  // Берем роль из глобального переключателя в шапке
-  const { demoRole } = useOutletContext();
+  // Берем роль из глобального переключателя в шапке (или по умолчанию ADMIN)
+  const context = useOutletContext<{ demoRole?: string }>();
+  const role = context?.demoRole || "ADMIN";
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      {demoRole === "PARENT" && <ParentDashboard />}
-      {demoRole === "STUDENT" && <StudentDashboard />}
-      {demoRole === "TEACHER" && <TeacherDashboard />}
-      {demoRole === "ADMIN" && <AdminDashboard />}
+      {role === "PARENT" && <ParentDashboard />}
+      {role === "STUDENT" && <StudentDashboard />}
+      {role === "TEACHER" && <TeacherDashboard />}
+      {(role === "ADMIN" || role === "DIRECTOR" || role === "DEPUTY" || role === "DEVELOPER" || role === "ACCOUNTANT" || role === "ZAVHOZ") && <AdminDashboard />}
     </div>
   );
 }

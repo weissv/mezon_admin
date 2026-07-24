@@ -16,8 +16,7 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "types": ["vite/client"],
-    "rootDir": "./src",
-    "ignoreDeprecations": "6.0"
+    "rootDir": "./src"
   },
   "include": ["src", "vite.config.js"],
   "exclude": [

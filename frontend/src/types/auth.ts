@@ -75,6 +75,8 @@ export const ROLE_LABELS: Record<Role, string> = {
   TEACHER: 'Учитель',
   ACCOUNTANT: 'Бухгалтер',
   ZAVHOZ: 'Завхоз',
+  STUDENT: 'Ученик',
+  PARENT: 'Родитель',
 };
 
 export const hasFullAccess = (role: Role): boolean => {

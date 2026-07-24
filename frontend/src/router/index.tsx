@@ -50,9 +50,18 @@ function LoadingScreen() {
   );
 }
 
-// Проверка авторизации (оставляем)
-// ВРЕМЕННО ОТКЛЮЧАЕМ ЛОГИН ДЛЯ ПРОСМОТРА МЕНЮ
+// Проверка авторизации
 function PrivateRoute() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth/login" replace />;
+  }
+
   return <Outlet />;
 }
 
