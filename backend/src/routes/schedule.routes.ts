@@ -2,6 +2,7 @@
 import { Router } from "express";
 import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
+import { scheduleSolverService } from "../services/ScheduleSolverService";
 
 const router = Router();
 
@@ -611,6 +612,89 @@ router.get("/teacher-load/:teacherId", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]
     byDay,
     lessonsPerWeek: slots.length,
   });
+});
+
+// ====================================================
+// АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ РАСПИСАНИЯ (CP-SAT Solver API)
+// ====================================================
+
+// 1. POST /api/schedule/generate - Запуск асинхронной задачи генерации
+router.post("/generate", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
+  try {
+    const jobId = await scheduleSolverService.startGenerateJob(req.body);
+    return res.status(202).json({
+      jobId,
+      status: "PENDING",
+      message: "Задача автоматической генерации расписания через CP-SAT Solver успешно запущена.",
+    });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message || "Ошибка при запуске генерации расписания" });
+  }
+});
+
+// 2. GET /api/schedule/jobs/:jobId - Получение статуса и результатов задачи
+router.get("/jobs/:jobId", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
+  const { jobId } = req.params;
+  const job = scheduleSolverService.getJob(jobId);
+
+  if (!job) {
+    return res.status(404).json({ error: `Задача с ID '${jobId}' не найдена` });
+  }
+
+  return res.json({
+    jobId: job.id,
+    status: job.status,
+    score: job.score,
+    executionTimeMs: job.executionTimeMs,
+    conflicts: job.conflicts,
+    solution: job.solution,
+    error: job.error || null,
+    createdAt: job.createdAt,
+    updatedAt: job.updatedAt,
+  });
+});
+
+// 3. POST /api/schedule/apply - Применение сгенерированного черновика в рабочую БД
+router.post("/apply", checkRole(["DIRECTOR", "DEPUTY", "ADMIN"]), async (req, res) => {
+  const { jobId, solution } = req.body;
+  try {
+    const result = await scheduleSolverService.applySchedule(jobId, solution);
+    return res.json({
+      success: true,
+      appliedCount: result.appliedCount,
+      message: `Успешно сохранено ${result.appliedCount} слотов расписания в базу данных ERP.`,
+    });
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message || "Ошибка при применении расписания" });
+  }
+});
+
+// 4. POST /api/schedule/validate-move - Мгновенная онлайн-проверка Drag-and-Drop перетаскивания
+router.post("/validate-move", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"]), async (req, res) => {
+  const { slotId, groupId, teacherId, roomId, dayOfWeek, timeSlotId, teacherAvailability, roomAvailability } = req.body;
+
+  if (!groupId || !teacherId || !dayOfWeek || !timeSlotId) {
+    return res.status(400).json({
+      error: "Параметры groupId, teacherId, dayOfWeek и timeSlotId являются обязательными",
+    });
+  }
+
+  try {
+    const validation = await scheduleSolverService.validateMove({
+      slotId,
+      groupId: Number(groupId),
+      teacherId: Number(teacherId),
+      roomId: roomId ? Number(roomId) : null,
+      dayOfWeek: Number(dayOfWeek),
+      timeSlotId: Number(timeSlotId),
+      teacherAvailability,
+      roomAvailability,
+    });
+
+    return res.json(validation);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message || "Ошибка при валидации перемещения" });
+  }
 });
 
 export default router;
