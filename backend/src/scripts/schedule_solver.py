@@ -266,10 +266,17 @@ def solve_schedule(input_data: Dict[str, Any]) -> Dict[str, Any]:
     w2 = int(weights.get("teacher_gaps", 10))
     w3 = int(weights.get("daily_overloads", 20))
 
+    # O4: Virtual Room Penalty — penalize every lesson assigned to virtual room 0 ("Без кабинета").
+    # CP-SAT will always prefer real physical rooms (lower cost) and fall back to virtual room 0
+    # only when all physical rooms are genuinely occupied in a given time slot.
+    virtual_room_vars = [var for key, var in x.items() if key[3] == 0]
+    w4 = int(weights.get("virtual_room", 15))
+
     model.Minimize(
         w1 * sum(class_gap_vars) +
         w2 * sum(teacher_gap_vars) +
-        w3 * sum(overload_vars)
+        w3 * sum(overload_vars) +
+        w4 * sum(virtual_room_vars)
     )
 
     # ----------------------------------------------------

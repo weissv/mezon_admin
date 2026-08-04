@@ -110,6 +110,12 @@ vi.mock('../prisma', () => ({
       findUnique: vi.fn(),
       findMany: vi.fn(),
     },
+    employeeAttendance: {
+      findMany: vi.fn().mockResolvedValue([]), // No blocked days by default
+    },
+    lmsSubject: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
     $queryRaw: vi.fn(),
     $executeRaw: vi.fn(),
     $transaction: vi.fn((fn: Function) => fn()),

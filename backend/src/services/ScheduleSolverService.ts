@@ -129,26 +129,34 @@ class ScheduleSolverService {
     const { slotId, groupId, teacherId, roomId, dayOfWeek, timeSlotId, teacherAvailability, roomAvailability } = params;
     const conflicts: Array<{ type: string; message: string }> = [];
 
-    // 1. Check Teacher Availability Mask
-    if (teacherAvailability) {
-      const teacherMaskKey = `${teacherId}_${dayOfWeek}_${timeSlotId}`;
-      if (teacherAvailability[teacherMaskKey] === 0) {
-        conflicts.push({
-          type: "teacher_availability",
-          message: `Учитель заблокировал этот временной слот по индивидуальному графику доступности.`,
-        });
+    // Fix #4 (Final): Load teacher and room availability from DB — never trust client payload.
+    // Day-of-week mapping: EmployeeAttendance.date is a specific calendar date, so we check
+    // active SICK_LEAVE / VACATION / ABSENT records for the relevant dayOfWeek (1-6 Mon-Sat).
+    // For a lightweight check we look up EmployeeAttendance records with ABSENT/SICK_LEAVE/VACATION
+    // statuses to determine blocked days, then cross-reference with the requested slot.
+    const blockedTeacherDays = new Set<number>(); // Set of dayOfWeek values teacher is unavailable
+    if (prisma.employeeAttendance) {
+      const blockingAttendances = await prisma.employeeAttendance.findMany({
+        where: {
+          employeeId: Number(teacherId),
+          status: { in: ["SICK_LEAVE", "VACATION", "ABSENT"] },
+        },
+        select: { date: true },
+      }).catch(() => []);
+
+      for (const att of blockingAttendances) {
+        // getDay(): 0=Sun, 1=Mon...6=Sat. Our dayOfWeek: 1=Mon..6=Sat.
+        const jsDay = att.date.getDay(); // 0-6
+        const erpDay = jsDay === 0 ? 7 : jsDay; // convert to Mon=1..Sun=7
+        blockedTeacherDays.add(erpDay);
       }
     }
 
-    // 2. Check Room Availability Mask
-    if (roomId && roomAvailability) {
-      const roomMaskKey = `${roomId}_${dayOfWeek}_${timeSlotId}`;
-      if (roomAvailability[roomMaskKey] === 0) {
-        conflicts.push({
-          type: "room_availability",
-          message: `Кабинет недоступен в данный день и временной слот по расписанию использования.`,
-        });
-      }
+    if (blockedTeacherDays.has(Number(dayOfWeek))) {
+      conflicts.push({
+        type: "teacher_availability",
+        message: `Учитель недоступен в данный день (больничный / отпуск / отсутствие).`,
+      });
     }
 
     const baseWhere: any = {
@@ -315,30 +323,45 @@ class ScheduleSolverService {
       })) || [] : [];
       teachers = dbTeachers.map((t) => ({ id: t.id, name: `${t.lastName} ${t.firstName}` }));
 
-      // Fix Issue #3: Avoid Cartesian Product bug. Fetch actual teacher-subject links and limit total weekly class hours
-      const teacherSubjects = prisma.teacherSubject ? (await prisma.teacherSubject.findMany({
+      // Fix Issue #3 (Final): TeacherSubject is a QUALIFICATIONS table, not an assignment table.
+      // Multiple teachers can qualify to teach the same subject.
+      // We must pick exactly ONE teacher per subject: prefer isPrimary=true, else take first.
+      // This prevents the Cartesian Product explosion (Math × 3 teachers = 3 rows per class).
+      const allTeacherSubjects = prisma.teacherSubject ? (await prisma.teacherSubject.findMany({
         include: { subject: true },
+        orderBy: [{ isPrimary: "desc" }, { employeeId: "asc" }],
       })) || [] : [];
 
       const dbLmsSubjects = prisma.lmsSubject ? (await prisma.lmsSubject.findMany()) || [] : [];
 
-      if (teacherSubjects.length === 0) {
+      if (allTeacherSubjects.length === 0) {
         job.status = "FAILED";
         job.error = "В системе не найдена привязка предметов к учителям (TeacherSubject).";
         job.updatedAt = new Date();
         return;
       }
 
+      // Build a deduped map: subjectId -> single TeacherSubject record (isPrimary preferred)
+      const subjectToTeacherMap = new Map<number, typeof allTeacherSubjects[0]>();
+      for (const ts of allTeacherSubjects) {
+        if (!subjectToTeacherMap.has(ts.subjectId)) {
+          subjectToTeacherMap.set(ts.subjectId, ts);
+        } else if (ts.isPrimary && !subjectToTeacherMap.get(ts.subjectId)!.isPrimary) {
+          // Upgrade to primary teacher if found
+          subjectToTeacherMap.set(ts.subjectId, ts);
+        }
+      }
+      const uniqueTeacherSubjects = Array.from(subjectToTeacherMap.values());
+
       curriculum = [];
       let itemCounter = 1;
-      const maxWeeklyHoursPerClass = Math.min(days.length * timeSlots.length, 35);
+      const maxWeeklyHoursPerClass = Math.min(days.length * (timeSlots?.length ?? 7), 35);
 
       for (const group of groups) {
         let classAllocatedHours = 0;
-        // Group subjects safely without Cartesian explosion
-        for (const ts of teacherSubjects) {
+        for (const ts of uniqueTeacherSubjects) {
           const lmsSub = dbLmsSubjects.find((s) => s.erpSubjectId === ts.subjectId);
-          const hours = lmsSub?.hoursPerWeek || 2;
+          const hours = Math.max(1, lmsSub?.hoursPerWeek || 2);
 
           if (classAllocatedHours + hours <= maxWeeklyHoursPerClass) {
             curriculum.push({
@@ -365,7 +388,13 @@ class ScheduleSolverService {
       teacher_availability: options.teacherAvailability || {},
       room_availability: options.roomAvailability || {},
       teacher_room_spec: options.teacherRoomSpec || {},
-      weights: options.weights || { class_gaps: 10, teacher_gaps: 10, daily_overloads: 20 },
+      weights: {
+        class_gaps: 10,
+        teacher_gaps: 10,
+        daily_overloads: 20,
+        virtual_room: 15,  // Always penalise virtual room usage
+        ...(options.weights || {}),
+      },
       time_limit_seconds: options.timeLimitSeconds || 30.0,
     };
 
