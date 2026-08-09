@@ -65,6 +65,289 @@ router.get("/low-stock", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), a
   return res.json(items);
 });
 
+// =====================================================
+// ИНВЕНТАРИЗАЦИЯ СКЛАДА
+// =====================================================
+
+async function generateAuditNumber(): Promise<string> {
+  const now = new Date();
+  const prefix = `AUD-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const lastAudit = await prisma.inventoryAudit.findFirst({
+    where: { auditNumber: { startsWith: prefix } },
+    orderBy: { auditNumber: "desc" },
+    select: { auditNumber: true },
+  });
+
+  let seq = 1;
+  if (lastAudit) {
+    const parts = lastAudit.auditNumber.split("-");
+    const lastSeq = parseInt(parts[parts.length - 1], 10);
+    if (!isNaN(lastSeq)) seq = lastSeq + 1;
+  }
+
+  return `${prefix}-${String(seq).padStart(4, "0")}`;
+}
+
+// GET /api/inventory/audits - список всех актов инвентаризации
+router.get("/audits", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
+  const audits = await prisma.inventoryAudit.findMany({
+    include: {
+      performedBy: { select: { id: true, firstName: true, lastName: true } },
+      _count: { select: { items: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  return res.json(audits);
+});
+
+// GET /api/inventory/audits/:id - детализация акта инвентаризации
+router.get("/audits/:id", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+
+  const audit = await prisma.inventoryAudit.findUnique({
+    where: { id },
+    include: {
+      performedBy: { select: { id: true, firstName: true, lastName: true } },
+      items: {
+        include: {
+          inventoryItem: {
+            select: { id: true, name: true, unit: true, quantity: true, type: true },
+          },
+        },
+        orderBy: { inventoryItem: { name: "asc" } },
+      },
+    },
+  });
+
+  if (!audit) return res.status(404).json({ message: "Акт инвентаризации не найден" });
+  return res.json(audit);
+});
+
+// POST /api/inventory/audits - создание нового акта инвентаризации
+router.post("/audits", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), async (req, res) => {
+  const { notes, type } = req.body;
+  const user = req.user;
+
+  const whereFilter: any = {};
+  if (type && ["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT"].includes(type)) {
+    whereFilter.type = type;
+  }
+
+  const items = await prisma.inventoryItem.findMany({
+    where: whereFilter,
+    orderBy: { name: "asc" },
+  });
+
+  if (items.length === 0) {
+    return res.status(400).json({ message: "Нет товаров на складе для проведения инвентаризации" });
+  }
+
+  const auditNumber = await generateAuditNumber();
+
+  const audit = await prisma.inventoryAudit.create({
+    data: {
+      auditNumber,
+      notes: notes || null,
+      status: "DRAFT",
+      performedById: user?.employeeId || null,
+      items: {
+        create: items.map((item) => ({
+          inventoryItemId: item.id,
+          expectedQuantity: item.quantity,
+          actualQuantity: item.quantity,
+          variance: 0,
+        })),
+      },
+    },
+    include: {
+      performedBy: { select: { id: true, firstName: true, lastName: true } },
+      items: {
+        include: {
+          inventoryItem: { select: { id: true, name: true, unit: true, quantity: true, type: true } },
+        },
+      },
+    },
+  });
+
+  return res.status(201).json(audit);
+});
+
+// PUT /api/inventory/audits/:id - обновление данных черновика инвентаризации
+router.put("/audits/:id", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+
+  const { notes, items } = req.body as {
+    notes?: string;
+    items?: Array<{ inventoryItemId: number; actualQuantity?: number | null; notes?: string }>;
+  };
+
+  const audit = await prisma.inventoryAudit.findUnique({ where: { id } });
+  if (!audit) return res.status(404).json({ message: "Акт не найден" });
+  if (audit.status !== "DRAFT") {
+    return res.status(400).json({ message: "Изменять можно только черновик инвентаризации" });
+  }
+
+  await prisma.$transaction(async (tx) => {
+    if (notes !== undefined) {
+      await tx.inventoryAudit.update({ where: { id }, data: { notes } });
+    }
+
+    if (items && Array.isArray(items)) {
+      for (const itemInput of items) {
+        const auditItem = await tx.inventoryAuditItem.findFirst({
+          where: { auditId: id, inventoryItemId: itemInput.inventoryItemId },
+        });
+
+        if (auditItem) {
+          const actualQty = itemInput.actualQuantity !== undefined && itemInput.actualQuantity !== null
+            ? Number(itemInput.actualQuantity)
+            : auditItem.expectedQuantity;
+          const variance = actualQty - auditItem.expectedQuantity;
+
+          await tx.inventoryAuditItem.update({
+            where: { id: auditItem.id },
+            data: {
+              actualQuantity: actualQty,
+              variance: Math.round(variance * 100) / 100,
+              notes: itemInput.notes !== undefined ? itemInput.notes : auditItem.notes,
+            },
+          });
+        }
+      }
+    }
+  });
+
+  const updated = await prisma.inventoryAudit.findUnique({
+    where: { id },
+    include: {
+      performedBy: { select: { id: true, firstName: true, lastName: true } },
+      items: {
+        include: {
+          inventoryItem: { select: { id: true, name: true, unit: true, quantity: true, type: true } },
+        },
+        orderBy: { inventoryItem: { name: "asc" } },
+      },
+    },
+  });
+
+  return res.json(updated);
+});
+
+// POST /api/inventory/audits/:id/complete - проведение инвентаризации (применение результатов)
+router.post("/audits/:id/complete", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+
+  const audit = await prisma.inventoryAudit.findUnique({
+    where: { id },
+    include: { items: { include: { inventoryItem: true } } },
+  });
+
+  if (!audit) return res.status(404).json({ message: "Акт инвентаризации не найден" });
+  if (audit.status !== "DRAFT") {
+    return res.status(400).json({ message: "Инвентаризация уже проведена или отменена" });
+  }
+
+  const user = req.user;
+
+  const resultSummary = {
+    surplusesCount: 0,
+    deficitsCount: 0,
+    matchedCount: 0,
+  };
+
+  await prisma.$transaction(async (tx) => {
+    for (const item of audit.items) {
+      const actual = item.actualQuantity ?? item.expectedQuantity;
+      const variance = Math.round((actual - item.expectedQuantity) * 100) / 100;
+
+      if (variance === 0) {
+        resultSummary.matchedCount++;
+      } else if (variance > 0) {
+        resultSummary.surplusesCount++;
+        await tx.inventoryItem.update({
+          where: { id: item.inventoryItemId },
+          data: { quantity: actual },
+        });
+
+        await tx.inventoryTransaction.create({
+          data: {
+            inventoryItemId: item.inventoryItemId,
+            type: "IN",
+            quantity: variance,
+            quantityBefore: item.expectedQuantity,
+            quantityAfter: actual,
+            reason: `Инвентаризация #${audit.auditNumber}: излишек (+${variance} ${item.inventoryItem.unit})`,
+            performedById: user?.employeeId || null,
+          },
+        });
+      } else {
+        resultSummary.deficitsCount++;
+        const deficitQty = Math.abs(variance);
+        await tx.inventoryItem.update({
+          where: { id: item.inventoryItemId },
+          data: { quantity: actual },
+        });
+
+        await tx.inventoryTransaction.create({
+          data: {
+            inventoryItemId: item.inventoryItemId,
+            type: "WRITE_OFF",
+            quantity: deficitQty,
+            quantityBefore: item.expectedQuantity,
+            quantityAfter: actual,
+            reason: `Инвентаризация #${audit.auditNumber}: недостача (-${deficitQty} ${item.inventoryItem.unit})`,
+            performedById: user?.employeeId || null,
+          },
+        });
+      }
+    }
+
+    await tx.inventoryAudit.update({
+      where: { id },
+      data: {
+        status: "COMPLETED",
+        completedAt: new Date(),
+      },
+    });
+  });
+
+  const completedAudit = await prisma.inventoryAudit.findUnique({
+    where: { id },
+    include: {
+      performedBy: { select: { id: true, firstName: true, lastName: true } },
+      items: {
+        include: {
+          inventoryItem: { select: { id: true, name: true, unit: true, quantity: true, type: true } },
+        },
+      },
+    },
+  });
+
+  return res.json({ audit: completedAudit, summary: resultSummary });
+});
+
+// POST /api/inventory/audits/:id/cancel - отмена акта инвентаризации
+router.post("/audits/:id/cancel", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+
+  const audit = await prisma.inventoryAudit.findUnique({ where: { id } });
+  if (!audit) return res.status(404).json({ message: "Акт не найден" });
+  if (audit.status !== "DRAFT") {
+    return res.status(400).json({ message: "Отменить можно только черновик инвентаризации" });
+  }
+
+  const cancelled = await prisma.inventoryAudit.update({
+    where: { id },
+    data: { status: "CANCELLED" },
+  });
+
+  return res.json(cancelled);
+});
+
 // GET /api/inventory
 router.get("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
   const items = await prisma.inventoryItem.findMany({ orderBy: { name: "asc" } });

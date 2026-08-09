@@ -1,10 +1,13 @@
 // Типы для модуля Склад
 
 // Типы соответствуют enum InventoryType в schema.prisma
-export type InventoryType = 'FOOD' | 'HOUSEHOLD' | 'STATIONERY';
+export type InventoryType = 'FOOD' | 'HOUSEHOLD' | 'STATIONERY' | 'EQUIPMENT';
 
 // Тип складской операции
 export type InventoryTransactionType = 'IN' | 'OUT' | 'ADJUSTMENT' | 'WRITE_OFF';
+
+// Статус инвентаризации
+export type InventoryAuditStatus = 'DRAFT' | 'COMPLETED' | 'CANCELLED';
 
 export type Item = {
   id: number;
@@ -30,6 +33,45 @@ export type InventoryItem = {
     name: string;
     unit: string;
   } | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Позиция акта инвентаризации
+export type InventoryAuditItem = {
+  id: number;
+  auditId: number;
+  inventoryItemId: number;
+  inventoryItem?: {
+    id: number;
+    name: string;
+    unit: string;
+    quantity: number;
+    type: InventoryType;
+  };
+  expectedQuantity: number;
+  actualQuantity?: number | null;
+  variance?: number | null;
+  notes?: string | null;
+};
+
+// Акт инвентаризации
+export type InventoryAudit = {
+  id: number;
+  auditNumber: string;
+  status: InventoryAuditStatus;
+  notes?: string | null;
+  performedById?: number | null;
+  performedBy?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  } | null;
+  completedAt?: string | null;
+  items?: InventoryAuditItem[];
+  _count?: {
+    items: number;
+  };
   createdAt: string;
   updatedAt: string;
 };
@@ -69,12 +111,27 @@ export const inventoryTypeLabels: Record<InventoryType, string> = {
   FOOD: 'Продукты',
   HOUSEHOLD: 'Хоз. товары',
   STATIONERY: 'Канц. товары',
+  EQUIPMENT: 'Техника',
 };
 
 export const inventoryTypeColors: Record<InventoryType, string> = {
   FOOD: 'bg-green-100 text-green-800',
   HOUSEHOLD: 'bg-amber-100 text-amber-800',
   STATIONERY: 'bg-blue-100 text-blue-800',
+  EQUIPMENT: 'bg-indigo-100 text-indigo-800',
+};
+
+// Маппинг статусов инвентаризации
+export const auditStatusLabels: Record<InventoryAuditStatus, string> = {
+  DRAFT: 'Черновик (в процессе)',
+  COMPLETED: 'Проведена',
+  CANCELLED: 'Отменена',
+};
+
+export const auditStatusColors: Record<InventoryAuditStatus, string> = {
+  DRAFT: 'bg-amber-100 text-amber-800',
+  COMPLETED: 'bg-green-100 text-green-800',
+  CANCELLED: 'bg-gray-100 text-gray-800',
 };
 
 // Маппинг типов транзакций

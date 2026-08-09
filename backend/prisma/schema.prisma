@@ -97,6 +97,13 @@ enum InventoryType {
   FOOD // Продукты питания
   HOUSEHOLD // Хоз. товары
   STATIONERY // Канц. товары
+  EQUIPMENT // Техника
+}
+
+enum InventoryAuditStatus {
+  DRAFT // Черновик (в процессе)
+  COMPLETED // Проведена (акты сформированы, остатки скорректированы)
+  CANCELLED // Отменена
 }
 
 /// Категория товара для заявок на выдачу
@@ -221,6 +228,7 @@ model Employee {
   approvedMaintenanceRequests MaintenanceRequest[]   @relation("Approver")
   receivedMaintenanceRequests MaintenanceRequest[]   @relation("Receiver")
   inventoryTransactions       InventoryTransaction[]
+  inventoryAudits             InventoryAudit[]
   createdPurchaseOrders       PurchaseOrder[]        @relation("PurchaseOrderCreator")
   approvedPurchaseOrders      PurchaseOrder[]        @relation("PurchaseOrderApprover")
   receivedPurchaseOrders      PurchaseOrder[]        @relation("PurchaseOrderReceiver")
@@ -475,6 +483,7 @@ model InventoryItem {
   maintenanceItems   MaintenanceItem[]
   purchaseOrderItems PurchaseOrderItem[]
   dishIngredients    DishIngredient[]
+  auditItems         InventoryAuditItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -575,6 +584,44 @@ model InventoryTransaction {
   @@index([inventoryItemId, createdAt])
   @@index([maintenanceRequestId])
   @@index([type, createdAt])
+}
+
+/// Инвентаризация склада
+model InventoryAudit {
+  id            Int                  @id @default(autoincrement())
+  auditNumber   String               @unique // Номер акта (e.g. AUD-202608-0001)
+  status        InventoryAuditStatus @default(DRAFT)
+  notes         String? // Заметки / основание проведения
+  performedById Int?
+  performedBy   Employee?            @relation(fields: [performedById], references: [id])
+  completedAt   DateTime?
+  items         InventoryAuditItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+/// Позиция инвентаризационной описи
+model InventoryAuditItem {
+  id              Int            @id @default(autoincrement())
+  auditId         Int
+  audit           InventoryAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  inventoryItemId Int
+  inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+
+  expectedQuantity Float // Учётный остаток на момент создания акта
+  actualQuantity   Float? // Фактический остаток (вводится пользователем)
+  variance         Float? // Отклонение (actualQuantity - expectedQuantity)
+  notes            String? // Примечание к расхождению
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([auditId])
+  @@index([inventoryItemId])
 }
 
 model SecurityLog {
