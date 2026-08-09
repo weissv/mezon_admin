@@ -936,23 +936,23 @@ export default function InventoryPage() {
       {activeTab === 'AUDITS' && (
         <PageSection className="p-0 space-y-4">
           {/* Header Action Banner */}
-          <Card className="p-5 bg-gradient-to-r from-indigo-900/10 via-purple-900/5 to-transparent border-indigo-200/80 dark:border-indigo-900/40">
+          <Card variant="glass" className="p-5">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-indigo-600"/>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Проведение Инвентаризации Склада</h3>
+                  <Sparkles className="h-5 w-5 text-macos-purple" />
+                  <h3 className="text-[17px] font-bold text-text-primary tracking-[-0.01em]">Проведение Инвентаризации Склада</h3>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 max-w-2xl">
+                <p className="text-[13px] text-text-secondary mt-1 max-w-2xl leading-relaxed">
                   Сверка фактического наличия с учётными остатками. Система автоматически формирует акты расхождений, корректирует остатки в базе данных и регистрирует транзакции в Журнале движений.
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <select
                   value={auditScopeType}
                   onChange={(e) => setAuditScopeType(e.target.value)}
-                  className="mezon-field text-xs py-2 px-3 rounded-lg"
+                  className="mezon-field text-[13px] py-1.5 px-3 rounded-xl bg-white border border-separator shadow-subtle text-text-primary"
                 >
                   <option value="ALL">Все категории товаров</option>
                   <option value="FOOD">Только Продукты питания</option>
@@ -961,69 +961,68 @@ export default function InventoryPage() {
                   <option value="EQUIPMENT">Только Техника</option>
                 </select>
 
-                <Button onClick={handleStartNewAudit} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md">
-                  <PlusCircle className="mr-2 h-4 w-4"/> Создать новый акт
+                <Button onClick={handleStartNewAudit} size="md">
+                  <PlusCircle className="mr-1.5 h-4 w-4" /> Создать новый акт
                 </Button>
               </div>
             </div>
           </Card>
 
-          {/* Audits Table */}
-          <Card className="p-0 border border-gray-200/80 dark:border-gray-800">
-            <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-              <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <ClipboardCheck className="h-4 w-4 text-indigo-600"/> История и Черновики Инвентаризаций
+          {/* Audits Table Container */}
+          <div className="rounded-2xl border border-black/[0.06] bg-surface-primary shadow-[0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] overflow-hidden">
+            <div className="p-4 border-b border-separator/60 flex justify-between items-center bg-fill-quaternary/30">
+              <h4 className="font-bold text-[14px] text-text-primary flex items-center gap-2">
+                <ClipboardCheck className="h-4 w-4 text-macos-blue" /> История и Черновики Инвентаризаций
               </h4>
-              <span className="text-xs text-gray-500">{audits.length} документов</span>
+              <Badge variant="outline">{audits.length} документов</Badge>
             </div>
 
             {auditsLoading ? (
               <LoadingCard message="Загрузка списка актов..." height={200} />
             ) : audits.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <ClipboardCheck className="mx-auto h-12 w-12 text-gray-300 mb-2"/>
-                <p className="font-semibold text-gray-700 dark:text-gray-300">Нет актов инвентаризации</p>
-                <p className="text-xs text-gray-500 mt-1">Нажмите «Создать новый акт», чтобы начать проверку остатков.</p>
+              <div className="text-center py-12 px-4">
+                <ClipboardCheck className="mx-auto h-10 w-10 text-text-tertiary mb-3 opacity-60" />
+                <p className="font-semibold text-[15px] text-text-primary">Нет актов инвентаризации</p>
+                <p className="text-[13px] text-text-tertiary mt-1">Нажмите «Создать новый акт», чтобы начать проверку остатков.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-50/80 dark:bg-gray-800/50 text-gray-500 font-medium border-b">
-                    <tr>
-                      <th className="p-3.5 pl-4">Номер акта</th>
-                      <th className="p-3.5">Статус</th>
-                      <th className="p-3.5">Позиций</th>
-                      <th className="p-3.5">Основание / Заметки</th>
-                      <th className="p-3.5">Исполнитель</th>
-                      <th className="p-3.5">Дата создания</th>
-                      <th className="p-3.5 pr-4 text-right">Действия</th>
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-separator/60 bg-fill-quaternary/40 backdrop-blur-md">
+                      <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Номер акта</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Статус</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Позиций</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Основание / Заметки</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Исполнитель</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Дата создания</th>
+                      <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary text-right">Действия</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  <tbody className="divide-y divide-separator/40">
                     {audits.map((audit) => (
-                      <tr key={audit.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/40">
-                        <td className="p-3.5 pl-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                      <tr key={audit.id} className="transition-colors duration-150 hover:bg-macos-blue/[0.03]">
+                        <td className="px-5 py-3.5 font-mono font-bold text-[13.5px] text-macos-blue">
                           {audit.auditNumber}
                         </td>
-                        <td className="p-3.5">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${auditStatusColors[audit.status]}`}>
+                        <td className="px-4 py-3.5">
+                          <Badge variant={audit.status === 'COMPLETED' ? 'success' : audit.status === 'DRAFT' ? 'warning' : 'danger'} dot>
                             {auditStatusLabels[audit.status]}
-                          </span>
+                          </Badge>
                         </td>
-                        <td className="p-3.5 font-medium">{audit._count?.items ?? audit.items?.length ?? 0} шт.</td>
-                        <td className="p-3.5 text-xs text-gray-600 dark:text-gray-400 max-w-[200px] truncate">{audit.notes || '—'}</td>
-                        <td className="p-3.5 text-xs">
+                        <td className="px-4 py-3.5 font-semibold text-[13px] text-text-primary">{audit._count?.items ?? audit.items?.length ?? 0} шт.</td>
+                        <td className="px-4 py-3.5 text-[12px] text-text-secondary max-w-[220px] truncate">{audit.notes || '—'}</td>
+                        <td className="px-4 py-3.5 text-[12.5px] font-medium text-text-primary">
                           {audit.performedBy ? `${audit.performedBy.firstName} ${audit.performedBy.lastName}` : 'Администратор'}
                         </td>
-                        <td className="p-3.5 text-xs font-mono text-gray-500 whitespace-nowrap">
-                          {new Date(audit.createdAt).toLocaleString('ru')}
+                        <td className="px-4 py-3.5 text-[12px] font-mono text-text-tertiary whitespace-nowrap">
+                          {new Date(audit.createdAt).toLocaleString('ru-RU')}
                         </td>
-                        <td className="p-3.5 pr-4 text-right">
+                        <td className="px-5 py-3.5 text-right">
                           <Button
                             variant={audit.status === 'DRAFT' ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => handleOpenAuditDetails(audit.id)}
-                            className={audit.status === 'DRAFT' ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : ''}
                           >
                             {audit.status === 'DRAFT' ? 'Заполнить / Провести' : 'Просмотреть акт'}
                           </Button>
@@ -1034,61 +1033,65 @@ export default function InventoryPage() {
                 </table>
               </div>
             )}
-          </Card>
+          </div>
         </PageSection>
       )}
 
       {/* ==================== TAB 3: TRANSACTION LOGS (ЖУРНАЛ ДВИЖЕНИЙ) ==================== */}
       {activeTab === 'LOGS' && (
         <PageSection className="p-0">
-          <Card className="p-0 border border-gray-200/80 dark:border-gray-800">
-            <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-              <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <History className="h-4 w-4 text-indigo-600"/> Сквозной Журнал Движений ТМЦ
+          <div className="rounded-2xl border border-black/[0.06] bg-surface-primary shadow-[0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] overflow-hidden">
+            <div className="p-4 border-b border-separator/60 flex justify-between items-center bg-fill-quaternary/30">
+              <h4 className="font-bold text-[14px] text-text-primary flex items-center gap-2">
+                <History className="h-4 w-4 text-macos-blue" /> Сквозной Журнал Движений ТМЦ
               </h4>
-              <span className="text-xs text-gray-500">Последние {allTransactions.length} операций</span>
+              <Badge variant="outline">Последние {allTransactions.length} операций</Badge>
             </div>
 
             {allTransactionsLoading ? (
               <LoadingCard message="Загрузка журнала движений..." height={240} />
             ) : allTransactions.length === 0 ? (
-              <div className="py-12 text-center text-gray-500">Записи о движениях отсутствуют</div>
+              <div className="py-12 text-center text-[13px] text-text-tertiary">Записи о движениях отсутствуют</div>
             ) : (
               <div className="overflow-x-auto max-h-[70vh]">
-                <table className="w-full text-sm text-left">
-                  <thead className="sticky top-0 bg-gray-100/90 dark:bg-gray-800 text-gray-600 font-medium">
+                <table className="w-full text-left">
+                  <thead className="sticky top-0 bg-surface-primary/95 backdrop-blur-md z-10 border-b border-separator/60 shadow-subtle">
                     <tr>
-                      <th className="p-3 pl-4">Дата и Время</th>
-                      <th className="p-3">Товар</th>
-                      <th className="p-3">Тип Операции</th>
-                      <th className="p-3">Кол-во</th>
-                      <th className="p-3">До → После</th>
-                      <th className="p-3">Причина / Документ</th>
-                      <th className="p-3 pr-4">Исполнитель</th>
+                      <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Дата и Время</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Товар</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Тип Операции</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Кол-во</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">До → После</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Причина / Документ</th>
+                      <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Исполнитель</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  <tbody className="divide-y divide-separator/40">
                     {allTransactions.map((tx: InventoryTransaction) => (
-                      <tr key={tx.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/40">
-                        <td className="p-3 pl-4 font-mono text-xs text-gray-500 whitespace-nowrap">
-                          {new Date(tx.createdAt).toLocaleString('ru')}
+                      <tr key={tx.id} className="transition-colors duration-150 hover:bg-macos-blue/[0.03]">
+                        <td className="px-5 py-3.5 font-mono text-[12px] text-text-tertiary whitespace-nowrap">
+                          {new Date(tx.createdAt).toLocaleString('ru-RU')}
                         </td>
-                        <td className="p-3 font-semibold text-gray-900 dark:text-gray-100">{tx.inventoryItem?.name || '—'}</td>
-                        <td className="p-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${transactionTypeColors[tx.type]}`}>
+                        <td className="px-4 py-3.5 font-bold text-[13.5px] text-text-primary">
+                          {tx.inventoryItem?.name || '—'}
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <Badge variant={tx.type === 'IN' ? 'success' : tx.type === 'OUT' || tx.type === 'WRITE_OFF' ? 'danger' : 'warning'} dot>
                             {transactionTypeLabels[tx.type]}
-                          </span>
+                          </Badge>
                         </td>
-                        <td className="p-3 font-mono font-bold">
-                          <span className={tx.type === 'IN' ? 'text-emerald-600' : 'text-rose-600'}>
+                        <td className="px-4 py-3.5 font-mono font-bold text-[14px]">
+                          <span className={tx.type === 'IN' ? 'text-[#1B7A3D]' : 'text-macos-red'}>
                             {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
                           </span>
                         </td>
-                        <td className="p-3 font-mono text-xs text-gray-500">{tx.quantityBefore} → {tx.quantityAfter}</td>
-                        <td className="p-3 text-xs text-gray-600 dark:text-gray-300 max-w-[240px] truncate" title={tx.reason || ''}>
+                        <td className="px-4 py-3.5 font-mono text-[12px] text-text-secondary">
+                          {tx.quantityBefore} → {tx.quantityAfter}
+                        </td>
+                        <td className="px-4 py-3.5 text-[12.5px] text-text-secondary max-w-[240px] truncate" title={tx.reason || ''}>
                           {tx.reason || '—'}
                         </td>
-                        <td className="p-3 pr-4 text-xs text-gray-500">
+                        <td className="px-5 py-3.5 text-[12.5px] font-medium text-text-primary">
                           {tx.performedBy ? `${tx.performedBy.firstName} ${tx.performedBy.lastName}` : 'Система'}
                         </td>
                       </tr>
@@ -1097,7 +1100,7 @@ export default function InventoryPage() {
                 </table>
               </div>
             )}
-          </Card>
+          </div>
         </PageSection>
       )}
 
