@@ -8,42 +8,44 @@ import type { SchoolStats} from '../../types/lms';
 import { LoadingCard } from '../../components/ui/LoadingState';
 import { PageHeader, PageSection, PageStack } from '../../components/ui/page';
 
+import { Card } from '../../components/ui/Card';
+
 type KPIColor = 'blue' | 'green' | 'purple' | 'orange';
 
 function KPICard({
- title,
- value,
- subtitle,
- icon: Icon,
- color = 'blue',
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  color = 'blue',
 }: {
- title: string;
- value: string | number;
- subtitle?: string;
- icon: typeof Users;
- color?: KPIColor;
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  icon: typeof Users;
+  color?: KPIColor;
 }) {
- const colorClasses = {
- blue: 'bg-[rgba(10,132,255,0.12)] text-macos-blue',
- green: 'bg-[rgba(52,199,89,0.14)] text-[var(--macos-green)]',
- purple: 'bg-[rgba(191,90,242,0.14)] text-[var(--macos-purple)]',
- orange: 'bg-[rgba(255,149,0,0.14)] text-[var(--macos-orange)]',
-}[color];
+  const colorClasses = {
+    blue: 'bg-tint-blue text-macos-blue border-macos-blue/20',
+    green: 'bg-tint-green text-[#1B7A3D] border-macos-green/20',
+    purple: 'bg-tint-purple text-macos-purple border-macos-purple/20',
+    orange: 'bg-tint-orange text-[#B25E00] border-macos-orange/20',
+  }[color];
 
- return (
- <div className="mezon-card">
- <div className="flex items-start justify-between">
- <div>
- <p className="text-[11px] font-medium uppercase tracking-widest text-secondary">{title}</p>
- <h3 className="mt-1 text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{value}</h3>
- {subtitle && <p className="mt-1 text-xs text-[var(--mezon-text-soft)]">{subtitle}</p>}
- </div>
- <div className={`p-3 rounded-xl ${colorClasses}`}>
- <Icon className="h-6 w-6"/>
- </div>
- </div>
- </div>
- );
+  return (
+    <Card variant="glass" className="p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">{title}</p>
+          <h3 className="mt-1 text-[26px] font-bold tracking-[-0.03em] leading-tight text-text-primary tabular-nums">{value}</h3>
+          {subtitle && <p className="mt-1 text-[12px] text-text-tertiary">{subtitle}</p>}
+        </div>
+        <div className={`p-3 rounded-2xl border ${colorClasses} shadow-subtle shrink-0`}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+    </Card>
+  );
 }
 
 export default function LmsSchoolDashboard() {

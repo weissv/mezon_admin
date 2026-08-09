@@ -1,9 +1,11 @@
 // src/pages/InventoryPage.tsx
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
+import clsx from 'clsx';
 import { useApi } from '../hooks/useApi';
 import { Card } from '../components/Card';
 import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/Modal';
 import { Input } from '../components/ui/input';
 import { ShoppingListModal } from '../components/modals/ShoppingListModal';
@@ -57,10 +59,10 @@ type MainTab = 'ITEMS' | 'AUDITS' | 'LOGS';
 const selectClassName = 'mezon-field';
 
 const inventoryBadgeColors: Record<InventoryType, string> = {
-  FOOD: 'bg-emerald-50 text-emerald-700 border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40',
-  HOUSEHOLD: 'bg-amber-50 text-amber-700 border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/40',
-  STATIONERY: 'bg-purple-50 text-purple-700 border-purple-200/60 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-800/40',
-  EQUIPMENT: 'bg-indigo-50 text-indigo-700 border-indigo-200/60 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800/40',
+  FOOD: 'bg-tint-green text-[#1B7A3D] border-macos-green/20',
+  HOUSEHOLD: 'bg-tint-orange text-[#B25E00] border-macos-orange/20',
+  STATIONERY: 'bg-tint-purple text-macos-purple border-macos-purple/20',
+  EQUIPMENT: 'bg-tint-blue text-macos-blue border-macos-blue/20',
 };
 
 export default function InventoryPage() {
@@ -562,63 +564,64 @@ export default function InventoryPage() {
   }, [activeAudit, auditFormItems]);
 
   return (
-    <PageStack>
+    <PageStack className="space-y-6">
       {/* ==================== HERO HEADER ==================== */}
       <PageHeader
         eyebrow="ERP Operations · Складской Учёт"
         title="Склад и Материальные Активы"
         description="Контроль остатков, движение ТМЦ, акты инвентаризации и автоматическая калькуляция закупок."
-        icon={<Archive className="h-5 w-5 text-indigo-600 dark:text-indigo-400"/>}
+        icon={<Archive className="h-5 w-5 text-macos-blue" />}
         meta={
           <div className="flex items-center gap-2">
-            <span className="mezon-badge macos-badge-neutral">{items.length} позиций на складе</span>
+            <Badge variant="outline">{items.length} позиций на складе</Badge>
             {stats.outOfStock > 0 && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400">
-                <AlertCircle className="h-3 w-3"/> {stats.outOfStock} нет в наличии
-              </span>
+              <Badge variant="danger" dot>
+                {stats.outOfStock} нет в наличии
+              </Badge>
             )}
             {stats.lowStock > 0 && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
-                <AlertTriangle className="h-3 w-3"/> {stats.lowStock} заканчивается
-              </span>
+              <Badge variant="warning" dot>
+                {stats.lowStock} заканчивается
+              </Badge>
             )}
           </div>
         }
         actions={
           <div className="flex gap-2 flex-wrap items-center">
-            <Button onClick={handleCreate} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">
-              <PlusCircle className="mr-2 h-4 w-4"/> Добавить товар
+            <Button onClick={handleCreate} size="md">
+              <PlusCircle className="mr-1.5 h-4 w-4" /> Добавить товар
             </Button>
             <Button
               variant="outline"
+              size="md"
               onClick={() => {
                 setActiveTab('AUDITS');
                 handleFetchAudits();
               }}
-              className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950/50"
             >
-              <ClipboardCheck className="mr-2 h-4 w-4 text-indigo-600 dark:text-indigo-400"/> Инвентаризация
+              <ClipboardCheck className="mr-1.5 h-4 w-4 text-macos-blue" /> Инвентаризация
             </Button>
-            <Button variant="outline" onClick={() => setIsModalOpen(true)}>
-              <ShoppingBag className="mr-2 h-4 w-4 text-emerald-600 dark:text-emerald-400"/> Закупки
+            <Button variant="outline" size="md" onClick={() => setIsModalOpen(true)}>
+              <ShoppingBag className="mr-1.5 h-4 w-4 text-[#1B7A3D]" /> Закупки
             </Button>
           </div>
         }
       />
 
       {/* ==================== MAIN TAB NAVIGATION ==================== */}
-      <div className="flex items-center justify-between border-b border-gray-200/80 dark:border-gray-800 pb-2">
-        <div className="flex items-center gap-1 bg-gray-100/80 dark:bg-gray-800/60 p-1 rounded-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-1.5 rounded-2xl bg-surface-primary/80 backdrop-blur-xl border border-black/[0.06] shadow-subtle">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab('ITEMS')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={clsx(
+              "flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all cursor-pointer",
               activeTab === 'ITEMS'
-                ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-            }`}
+                ? 'bg-gradient-to-b from-[#0084FF] to-[#007AFF] text-white shadow-[0_2px_8px_rgba(0,122,255,0.3)]'
+                : 'text-text-secondary hover:text-text-primary hover:bg-fill-quaternary'
+            )}
           >
-            <Layers className="h-4 w-4"/> Остатки на складе ({filteredItems.length})
+            <Layers className="h-4 w-4" /> Остатки на складе ({filteredItems.length})
           </button>
 
           <button
@@ -627,13 +630,14 @@ export default function InventoryPage() {
               setActiveTab('AUDITS');
               handleFetchAudits();
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={clsx(
+              "flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all cursor-pointer",
               activeTab === 'AUDITS'
-                ? 'bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-            }`}
+                ? 'bg-gradient-to-b from-[#0084FF] to-[#007AFF] text-white shadow-[0_2px_8px_rgba(0,122,255,0.3)]'
+                : 'text-text-secondary hover:text-text-primary hover:bg-fill-quaternary'
+            )}
           >
-            <ClipboardCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400"/> Акты инвентаризации
+            <ClipboardCheck className="h-4 w-4" /> Акты инвентаризации
           </button>
 
           <button
@@ -642,34 +646,35 @@ export default function InventoryPage() {
               setActiveTab('LOGS');
               handleLoadAllTransactions();
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={clsx(
+              "flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all cursor-pointer",
               activeTab === 'LOGS'
-                ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-            }`}
+                ? 'bg-gradient-to-b from-[#0084FF] to-[#007AFF] text-white shadow-[0_2px_8px_rgba(0,122,255,0.3)]'
+                : 'text-text-secondary hover:text-text-primary hover:bg-fill-quaternary'
+            )}
           >
-            <History className="h-4 w-4"/> Журнал движений
+            <History className="h-4 w-4" /> Журнал движений
           </button>
         </div>
 
         {/* Global Live Search */}
         {activeTab === 'ITEMS' && (
           <div className="relative min-w-[280px]">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400"/>
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-text-tertiary" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Поиск товара или артикула..."
-              className="w-full pl-9 pr-8 py-1.5 text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full pl-9 pr-8 py-1.5 text-[13px] bg-white border border-separator/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-macos-blue/40 shadow-subtle"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
+                className="absolute right-2.5 top-2.5 text-text-tertiary hover:text-text-primary"
               >
-                <X className="h-3.5 w-3.5"/>
+                <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
@@ -679,51 +684,51 @@ export default function InventoryPage() {
       {/* ==================== TAB 1: ITEMS LIST (ОСТАТКИ) ==================== */}
       {activeTab === 'ITEMS' && (
         <>
-          {/* CATEGORY STAT CARDS */}
-          <PageToolbar className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
-            {filterCards.map(({ type, label, count, icon: Icon, accent, iconBg, activeBorder }) => {
+          {/* CATEGORY BENTO CARDS */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+            {filterCards.map(({ type, label, count, icon: Icon }) => {
               const isActive = filterType === type;
               return (
-                <Card
+                <div
                   key={type}
-                  className={`p-0 transition-all duration-200 cursor-pointer border ${
-                    isActive ? activeBorder : 'border-gray-200/80 dark:border-gray-800 hover:border-gray-300'
-                  }`}
+                  onClick={() => setFilterType(type)}
+                  className={clsx(
+                    "p-4 rounded-2xl border transition-all duration-200 cursor-pointer backdrop-blur-xl select-none",
+                    "bg-surface-primary shadow-[0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]",
+                    isActive
+                      ? 'ring-2 ring-macos-blue border-macos-blue/30 shadow-[0_4px_16px_rgba(0,122,255,0.15)]'
+                      : 'border-black/[0.06] hover:border-black/15 hover:-translate-y-0.5'
+                  )}
                 >
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between p-3.5 text-left"
-                    onClick={() => setFilterType(type)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`rounded-xl p-2.5 ${iconBg}`}>
-                        <Icon className={`h-5 w-5 ${accent}`} />
-                      </div>
-                      <div>
-                        <span className="text-xs text-gray-500 font-medium block">{label}</span>
-                        <p className={`mt-0.5 text-2xl font-bold tracking-tight ${accent}`}>{count}</p>
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-tint-blue text-macos-blue flex items-center justify-center border border-macos-blue/20 shrink-0">
+                      <Icon className="h-4.5 w-4.5" />
                     </div>
-                  </button>
-                </Card>
+                    <div className="min-w-0">
+                      <span className="text-[12px] font-semibold text-text-tertiary block truncate">{label}</span>
+                      <p className="text-[22px] font-bold tracking-[-0.03em] text-text-primary tabular-nums leading-none mt-0.5">{count}</p>
+                    </div>
+                  </div>
+                </div>
               );
             })}
-          </PageToolbar>
+          </div>
 
           {/* STOCK STATUS FILTER CHIPS */}
-          <div className="flex items-center justify-between gap-4 bg-gray-50/70 dark:bg-gray-900/40 p-2.5 rounded-xl border border-gray-200/60 dark:border-gray-800 text-xs">
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4 text-gray-400 ml-1"/>
-              <span className="font-semibold text-gray-700 dark:text-gray-300 mr-2">Фильтр остатка:</span>
-              
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-surface-primary/80 backdrop-blur-xl border border-black/[0.06] shadow-subtle text-[12px]">
+            <div className="flex flex-wrap items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-text-tertiary ml-1" />
+              <span className="font-semibold text-text-secondary mr-1">Фильтр остатка:</span>
+
               <button
                 type="button"
                 onClick={() => setStockStatusFilter('ALL')}
-                className={`px-3 py-1 rounded-lg font-medium transition-all ${
+                className={clsx(
+                  "px-3 py-1 rounded-lg font-medium transition-all cursor-pointer",
                   stockStatusFilter === 'ALL'
-                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm border border-gray-200'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                    ? 'bg-text-primary text-white shadow-subtle font-semibold'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-fill-quaternary'
+                )}
               >
                 Все остатки ({stats.all})
               </button>
@@ -731,39 +736,42 @@ export default function InventoryPage() {
               <button
                 type="button"
                 onClick={() => setStockStatusFilter('NORMAL')}
-                className={`px-3 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                className={clsx(
+                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg font-medium transition-all cursor-pointer",
                   stockStatusFilter === 'NORMAL'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold'
-                    : 'text-gray-600 hover:text-emerald-700'
-                }`}
+                    ? 'bg-tint-green text-[#1B7A3D] border border-macos-green/30 font-semibold'
+                    : 'text-text-secondary hover:text-[#1B7A3D] hover:bg-tint-green/50'
+                )}
               >
-                <span className="h-2 w-2 rounded-full bg-emerald-500"/>
+                <span className="h-2 w-2 rounded-full bg-macos-green shadow-[0_0_0_2px_rgba(52,199,89,0.2)]" />
                 В норме ({stats.normalStock})
               </button>
 
               <button
                 type="button"
                 onClick={() => setStockStatusFilter('LOW')}
-                className={`px-3 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                className={clsx(
+                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg font-medium transition-all cursor-pointer",
                   stockStatusFilter === 'LOW'
-                    ? 'bg-amber-50 text-amber-800 border border-amber-200 font-semibold'
-                    : 'text-gray-600 hover:text-amber-700'
-                }`}
+                    ? 'bg-tint-orange text-[#B25E00] border border-macos-orange/30 font-semibold'
+                    : 'text-text-secondary hover:text-[#B25E00] hover:bg-tint-orange/50'
+                )}
               >
-                <span className="h-2 w-2 rounded-full bg-amber-500"/>
+                <span className="h-2 w-2 rounded-full bg-macos-orange shadow-[0_0_0_2px_rgba(255,149,0,0.2)]" />
                 Низкий остаток ({stats.lowStock})
               </button>
 
               <button
                 type="button"
                 onClick={() => setStockStatusFilter('OUT_OF_STOCK')}
-                className={`px-3 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                className={clsx(
+                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg font-medium transition-all cursor-pointer",
                   stockStatusFilter === 'OUT_OF_STOCK'
-                    ? 'bg-rose-50 text-rose-800 border border-rose-200 font-semibold'
-                    : 'text-gray-600 hover:text-rose-700'
-                }`}
+                    ? 'bg-tint-red text-macos-red border border-macos-red/30 font-semibold'
+                    : 'text-text-secondary hover:text-macos-red hover:bg-tint-red/50'
+                )}
               >
-                <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse"/>
+                <span className="h-2 w-2 rounded-full bg-macos-red shadow-[0_0_0_2px_rgba(255,59,48,0.2)] animate-pulse" />
                 Нет в наличии ({stats.outOfStock})
               </button>
             </div>
@@ -776,7 +784,7 @@ export default function InventoryPage() {
                   setFilterType('ALL');
                   setStockStatusFilter('ALL');
                 }}
-                className="text-xs text-indigo-600 hover:underline font-medium"
+                className="text-[12px] text-macos-blue hover:underline font-semibold cursor-pointer"
               >
                 Сбросить фильтры
               </button>
@@ -784,130 +792,145 @@ export default function InventoryPage() {
           </div>
 
           {/* MAIN INVENTORY TABLE */}
-          <PageSection className="p-0">
-            <Card className="overflow-hidden border border-gray-200/80 dark:border-gray-800">
-              {loading ? (
-                <LoadingCard message="Загружаем остатки со склада..." height={240} />
-              ) : filteredItems.length === 0 ? (
-                <EmptyListState
-                  title={searchQuery ? 'Ничего не найдено' : 'Нет товаров на складе'}
-                  description={searchQuery ? `По запросу «${searchQuery}» товары не найдены.` : 'Добавьте первую позицию на склад.'}
-                  onAction={handleCreate}
-                  actionLabel="Добавить товар"
-                  className="py-12"
-                />
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50/80 dark:bg-gray-800/50 text-gray-500 font-medium border-b border-gray-200/80 dark:border-gray-800">
-                      <tr>
-                        <th className="p-3.5 pl-4">Наименование товара</th>
-                        <th className="p-3.5">Категория</th>
-                        <th className="p-3.5">Статус наличия</th>
-                        <th className="p-3.5">Текущий остаток</th>
-                        <th className="p-3.5">Срок годности</th>
-                        <th className="p-3.5 pr-4 text-right">Действия</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {filteredItems.map((item: any) => {
-                        const progressRatio = item.minQuantity > 0 ? Math.min(100, Math.round((item.quantity / item.minQuantity) * 100)) : 100;
-                        
-                        return (
-                          <tr key={item.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-                            <td className="p-3.5 pl-4 font-semibold text-gray-900 dark:text-gray-100">
-                              {item.name}
-                              {item.minQuantity > 0 && (
-                                <span className="block text-xs text-gray-400 font-normal mt-0.5">
-                                  Низший порог: {item.minQuantity} {item.unit}
-                                </span>
-                              )}
-                            </td>
-
-                            <td className="p-3.5">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${inventoryBadgeColors[item.type as InventoryType] || 'bg-gray-100'}`}>
-                                {inventoryTypeLabels[item.type as InventoryType] || item.type}
+          <div className="rounded-2xl border border-black/[0.06] bg-surface-primary shadow-[0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] overflow-hidden">
+            {loading ? (
+              <LoadingCard message="Загружаем остатки со склада..." height={240} />
+            ) : filteredItems.length === 0 ? (
+              <EmptyListState
+                title={searchQuery ? 'Ничего не найдено' : 'Нет товаров на складе'}
+                description={searchQuery ? `По запросу «${searchQuery}» товары не найдены.` : 'Добавьте первую позицию на склад.'}
+                onAction={handleCreate}
+                actionLabel="Добавить товар"
+                className="py-12"
+              />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-separator/60 bg-fill-quaternary/40 backdrop-blur-md">
+                      <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Наименование товара</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Категория</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Статус наличия</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Текущий остаток</th>
+                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Срок годности</th>
+                      <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary text-right">Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-separator/40">
+                    {filteredItems.map((item: any) => {
+                      const progressRatio = item.minQuantity > 0 ? Math.min(100, Math.round((item.quantity / item.minQuantity) * 100)) : 100;
+                      
+                      return (
+                        <tr key={item.id} className="transition-colors duration-150 hover:bg-macos-blue/[0.03]">
+                          <td className="px-5 py-3.5 font-semibold text-[13.5px] text-text-primary">
+                            {item.name}
+                            {item.minQuantity > 0 && (
+                              <span className="block text-[11px] text-text-tertiary font-normal mt-0.5">
+                                Минимальный порог: {item.minQuantity} {item.unit}
                               </span>
-                            </td>
+                            )}
+                          </td>
 
-                            <td className="p-3.5">
-                              <div className="space-y-1">
-                                {getStockStatusBadge(item.quantity, item.minQuantity)}
-                                {item.minQuantity > 0 && item.quantity > 0 && (
-                                  <div className="w-24 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
-                                    <div
-                                      className={`h-full rounded-full transition-all ${
-                                        progressRatio <= 100 ? 'bg-amber-500' : 'bg-emerald-500'
-                                      }`}
-                                      style={{ width: `${Math.min(100, progressRatio)}%` }}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            </td>
+                          <td className="px-4 py-3.5">
+                            <Badge variant={item.type === 'FOOD' ? 'success' : item.type === 'HOUSEHOLD' ? 'warning' : item.type === 'STATIONERY' ? 'purple' : 'default'} dot>
+                              {inventoryTypeLabels[item.type as InventoryType] || item.type}
+                            </Badge>
+                          </td>
 
-                            <td className="p-3.5 font-mono text-base font-bold text-gray-900 dark:text-white">
-                              {item.quantity} <span className="text-xs font-normal text-gray-500">{item.unit}</span>
-                            </td>
+                          <td className="px-4 py-3.5">
+                            <div className="space-y-1.5">
+                              {getStockStatusBadge(item.quantity, item.minQuantity)}
+                              {item.minQuantity > 0 && item.quantity > 0 && (
+                                <div className="w-28 bg-fill-tertiary h-1.5 rounded-full overflow-hidden">
+                                  <div
+                                    className={clsx(
+                                      "h-full rounded-full transition-all duration-300",
+                                      progressRatio <= 100 ? 'bg-macos-orange' : 'bg-macos-green'
+                                    )}
+                                    style={{ width: `${Math.min(100, progressRatio)}%` }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </td>
 
-                            <td className="p-3.5">
-                              {getExpiryBadge(item.expiryDate) || <span className="text-gray-400 text-xs">—</span>}
-                            </td>
+                          <td className="px-4 py-3.5 font-mono text-[15px] font-bold text-text-primary tabular-nums">
+                            {item.quantity} <span className="text-[12px] font-normal text-text-tertiary">{item.unit}</span>
+                          </td>
 
-                            <td className="p-3.5 pr-4 text-right">
-                              <div className="flex gap-1.5 justify-end">
-                                <Button variant="outline" size="sm" onClick={() => handleEdit(item)} title="Редактировать">
-                                  <Pencil className="h-3.5 w-3.5 text-gray-600"/>
-                                </Button>
+                          <td className="px-4 py-3.5">
+                            {getExpiryBadge(item.expiryDate) || <span className="text-text-tertiary text-[12px]">—</span>}
+                          </td>
 
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setReceiveItem(item);
-                                    setReceiveData({ quantity: '', reason: '' });
-                                    setReceiveModalOpen(true);
-                                  }}
-                                  title="Приёмка товара (+)"
-                                  className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                                >
-                                  <ArrowDownCircle className="h-3.5 w-3.5 text-emerald-600"/>
-                                </Button>
+                          <td className="px-5 py-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(item)}
+                                title="Редактировать"
+                              >
+                                <Pencil className="h-3.5 w-3.5 text-text-secondary" />
+                              </Button>
 
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setWriteOffItem(item);
-                                    setWriteOffData({ quantity: '', reason: '' });
-                                    setWriteOffModalOpen(true);
-                                  }}
-                                  title="Списание (-)"
-                                  className="border-rose-200 text-rose-700 hover:bg-rose-50"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5 text-rose-600"/>
-                                </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setReceiveItem(item);
+                                  setReceiveData({ quantity: '', reason: '' });
+                                  setReceiveModalOpen(true);
+                                }}
+                                title="Приёмка товара (+)"
+                                className="text-[#1B7A3D] border-macos-green/30 hover:bg-tint-green"
+                              >
+                                <ArrowDownCircle className="h-3.5 w-3.5 text-macos-green" />
+                              </Button>
 
-                                <Button variant="outline" size="sm" onClick={() => handleShowHistory(item)} title="История движений">
-                                  <History className="h-3.5 w-3.5 text-indigo-600"/>
-                                </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setWriteOffItem(item);
+                                  setWriteOffData({ quantity: '', reason: '' });
+                                  setWriteOffModalOpen(true);
+                                }}
+                                title="Списание (-)"
+                                className="text-macos-red border-macos-red/30 hover:bg-tint-red"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 text-macos-red" />
+                              </Button>
 
-                                <Button variant="destructive" size="sm" onClick={() => openDeleteModal(item)} title="Удалить">
-                                  &times;
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </Card>
-          </PageSection>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleShowHistory(item)}
+                                title="История движений"
+                              >
+                                <History className="h-3.5 w-3.5 text-macos-blue" />
+                              </Button>
+
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => openDeleteModal(item)}
+                                title="Удалить"
+                              >
+                                &times;
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </>
       )}
+
 
       {/* ==================== TAB 2: AUDITS DASHBOARD & LIST (ИНВЕНТАРИЗАЦИЯ) ==================== */}
       {activeTab === 'AUDITS' && (

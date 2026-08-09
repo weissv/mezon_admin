@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from"react";
 import { toast} from"sonner";
-import { Card} from"../../../components/Card";
+import { Card } from "../../../components/ui/Card";
 import { useOneCBalances} from"../../../features/onec";
 import { api} from"../../../lib/api";
 import { FINANCE_CATEGORIES, TRANSACTION_CHANNELS} from"../../../lib/constants";
@@ -54,107 +54,107 @@ const PIE_THEME_COLORS = [
 ];
 
 // ── Balance Cards ──
-function BalanceCards({ data}: { data: BalancesResponse | null}) {
- if (!data || data.balances.length === 0) return null;
+function BalanceCards({ data }: { data: BalancesResponse | null }) {
+  if (!data || data.balances.length === 0) return null;
 
- const cash = data.balances.find((b) => b.type ==="CASH");
- const bank = data.balances.find((b) => b.type ==="BANK");
- const total = (cash?.amount ?? 0) + (bank?.amount ?? 0);
+  const cash = data.balances.find((b) => b.type === "CASH");
+  const bank = data.balances.find((b) => b.type === "BANK");
+  const total = (cash?.amount ?? 0) + (bank?.amount ?? 0);
 
- const cards = [
- { label:"Касса", amount: cash?.amount ?? 0, icon: Wallet, color:"text-[var(--macos-green)]", bg:"bg-[rgba(52,199,89,0.14)]"},
- { label:"Расчётный счёт", amount: bank?.amount ?? 0, icon: Landmark, color:"text-macos-blue", bg:"bg-[rgba(10,132,255,0.12)]"},
- { label:"Итого", amount: total, icon: DollarSign, color:"text-[var(--macos-purple)]", bg:"bg-[rgba(191,90,242,0.14)]"},
- ];
+  const cards = [
+    { label: "Касса", amount: cash?.amount ?? 0, icon: Wallet, color: "text-[#1B7A3D]", bg: "bg-tint-green border-macos-green/20" },
+    { label: "Расчётный счёт", amount: bank?.amount ?? 0, icon: Landmark, color: "text-macos-blue", bg: "bg-tint-blue border-macos-blue/20" },
+    { label: "Итого баланс", amount: total, icon: DollarSign, color: "text-macos-purple", bg: "bg-tint-purple border-macos-purple/20" },
+  ];
 
- return (
- <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
- {cards.map((c) => (
- <Card key={c.label} className="p-0 overflow-hidden">
- <div className="flex items-center p-5 gap-4">
- <div className={`${c.bg} p-3 rounded-xl`}>
- <c.icon className={`h-6 w-6 ${c.color}`} />
- </div>
- <div className="min-w-0">
- <p className="truncate text-sm text-secondary">{c.label}</p>
- <p className="truncate text-[24px] font-bold tracking-[-0.025em] leading-tight text-primary">{currency.format(c.amount)}</p>
- </div>
- </div>
- </Card>
- ))}
- {data.snapshotDate && (
- <p className="col-span-full text-xs text-[var(--mezon-text-soft)]">
- Данные на {new Date(data.snapshotDate).toLocaleDateString("ru-RU")}
- </p>
- )}
- </div>
- );
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {cards.map((c) => (
+        <Card key={c.label} variant="glass" className="p-5">
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-2xl border ${c.bg} shadow-subtle shrink-0`}>
+              <c.icon className={`h-6 w-6 ${c.color}`} />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[12px] font-semibold uppercase tracking-[0.04em] text-text-tertiary">{c.label}</p>
+              <p className="truncate text-[22px] lg:text-[24px] font-bold tracking-[-0.03em] leading-tight text-text-primary tabular-nums">
+                {currency.format(c.amount)}
+              </p>
+            </div>
+          </div>
+        </Card>
+      ))}
+      {data.snapshotDate && (
+        <p className="col-span-full text-[11px] text-text-tertiary">
+          Данные выписки на {new Date(data.snapshotDate).toLocaleDateString("ru-RU")}
+        </p>
+      )}
+    </div>
+  );
 }
 
 // ── Summary Cards (Income / Expense / Profit) ──
-function SummarySection({ summary}: { summary: any}) {
- if (!summary) return null;
+function SummarySection({ summary }: { summary: any }) {
+  if (!summary) return null;
 
- const income = Number(summary.byType?.find((t: any) => t.type ==="INCOME")?._sum?.amount || 0);
- const expense = Math.abs(Number(summary.byType?.find((t: any) => t.type ==="EXPENSE")?._sum?.amount || 0));
- const profit = income - expense;
- const totalTransactions = Number(summary.totals?.totalTransactions ?? 0);
- const totalInvoices = Number(summary.totals?.totalInvoices ?? 0);
- const totalDocuments = Number(summary.totals?.totalDocuments ?? totalTransactions);
+  const income = Number(summary.byType?.find((t: any) => t.type === "INCOME")?._sum?.amount || 0);
+  const expense = Math.abs(Number(summary.byType?.find((t: any) => t.type === "EXPENSE")?._sum?.amount || 0));
+  const profit = income - expense;
+  const totalTransactions = Number(summary.totals?.totalTransactions ?? 0);
+  const totalInvoices = Number(summary.totals?.totalInvoices ?? 0);
+  const totalDocuments = Number(summary.totals?.totalDocuments ?? totalTransactions);
 
- const kpis = [
- {
- label:"Доходы",
- value: income,
- icon: ArrowUpRight,
- color:"text-[var(--macos-green)]",
- bg:"bg-[rgba(52,199,89,0.14)]",
-},
- {
- label:"Расходы",
- value: expense,
- icon: ArrowDownRight,
- color:"text-[var(--macos-red)]",
- bg:"bg-[rgba(255,59,48,0.12)]",
-},
- {
- label:"Прибыль",
- value: profit,
- icon: profit >= 0 ? TrendingUp : TrendingDown,
- color: profit >= 0 ?"text-[var(--macos-green)]":"text-[var(--macos-red)]",
- bg: profit >= 0 ?"bg-[rgba(52,199,89,0.14)]":"bg-[rgba(255,59,48,0.12)]",
-},
- {
- label:"Всего документов",
- value: totalDocuments,
- icon: BarChart3,
- color:"text-macos-blue",
- bg:"bg-[rgba(10,132,255,0.12)]",
- isCurrency: false,
- hint: `Операции: ${totalTransactions} • Накладные: ${totalInvoices}`,
-},
- ];
+  const kpis = [
+    {
+      label: "Доходы",
+      value: income,
+      icon: ArrowUpRight,
+      color: "text-[#1B7A3D]",
+      bg: "bg-tint-green border-macos-green/20",
+    },
+    {
+      label: "Расходы",
+      value: expense,
+      icon: ArrowDownRight,
+      color: "text-macos-red",
+      bg: "bg-tint-red border-macos-red/20",
+    },
+    {
+      label: "Чистая прибыль",
+      value: profit,
+      icon: profit >= 0 ? TrendingUp : TrendingDown,
+      color: profit >= 0 ? "text-[#1B7A3D]" : "text-macos-red",
+      bg: profit >= 0 ? "bg-tint-green border-macos-green/20" : "bg-tint-red border-macos-red/20",
+    },
+    {
+      label: "Всего документов",
+      value: totalDocuments,
+      icon: BarChart3,
+      color: "text-macos-blue",
+      bg: "bg-tint-blue border-macos-blue/20",
+      isCurrency: false,
+      hint: `Операций: ${totalTransactions} · Накладных: ${totalInvoices}`,
+    },
+  ];
 
- return (
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
- {kpis.map((k) => (
- <Card key={k.label} className="p-0 overflow-hidden">
- <div className="p-5">
- <div className="flex items-center justify-between mb-2">
- <span className="text-sm text-secondary">{k.label}</span>
- <div className={`${k.bg} p-2 rounded-lg`}>
- <k.icon className={`h-4 w-4 ${k.color}`} />
- </div>
- </div>
- <p className={`text-[24px] font-bold tracking-[-0.025em] leading-tight ${k.color}`}>
- {k.isCurrency === false ? k.value : currency.format(k.value)}
- </p>
- {k.hint && <p className="mt-1 text-xs text-[var(--mezon-text-soft)]">{k.hint}</p>}
- </div>
- </Card>
- ))}
- </div>
- );
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {kpis.map((k) => (
+        <Card key={k.label} variant="glass" className="p-5">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <span className="text-[12px] font-semibold uppercase tracking-[0.04em] text-text-tertiary">{k.label}</span>
+            <div className={`p-2 rounded-xl border ${k.bg}`}>
+              <k.icon className={`h-4 w-4 ${k.color}`} />
+            </div>
+          </div>
+          <p className="text-[20px] lg:text-[24px] font-bold tracking-[-0.03em] text-text-primary tabular-nums leading-tight">
+            {k.isCurrency === false ? k.value : currency.format(k.value)}
+          </p>
+          {k.hint && <p className="text-[11px] text-text-tertiary mt-1 truncate">{k.hint}</p>}
+        </Card>
+      ))}
+    </div>
+  );
 }
 
 // ── Category Breakdown (Bar Chart) ──

@@ -191,9 +191,12 @@ export default function EmployeesPage() {
       header: 'Аккаунт',
       render: (row) =>
         row.user ? (
-          <span className="text-macos-green">{row.user.email}</span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-tint-green text-[#1B7A3D] border border-macos-green/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-macos-green shadow-[0_0_0_2px_rgba(52,199,89,0.2)]" />
+            {row.user.email}
+          </span>
         ) : (
-          <span className="text-tertiary">Нет</span>
+          <span className="text-[12px] text-text-tertiary">Нет аккаунта</span>
         ),
     },
     {

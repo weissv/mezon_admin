@@ -1,8 +1,7 @@
 // src/components/dashboard/WidgetChrome.tsx
-// Bento-style card wrapper for dashboard widgets
-
 import { ReactNode } from 'react';
 import { ChevronDown, ChevronUp, RefreshCw, ExternalLink, AlertCircle } from 'lucide-react';
+import clsx from 'clsx';
 
 interface WidgetChromeProps {
   title: string;
@@ -13,7 +12,6 @@ interface WidgetChromeProps {
   onToggleCollapse?: () => void;
   onRefresh?: () => void;
   deepLink?: string;
-  /** When true the card shows the edit-mode outline and grab cursor */
   isEditMode?: boolean;
   children: ReactNode;
 }
@@ -31,22 +29,31 @@ export default function WidgetChrome({
   children,
 }: WidgetChromeProps) {
   return (
-    <div className={`bento-card${isEditMode ? ' bento-card--edit-mode' : ''}`} data-cat={category}>
-      {/* Header — draggable area */}
-      <div className="bento-card__header dashboard-widget__header">
-        <div className="bento-card__title-row">
-          <span className="bento-card__dot" />
-          <h3 className="bento-card__title">{title}</h3>
+    <div
+      className={clsx(
+        "group relative flex flex-col h-full rounded-2xl transition-all duration-200 overflow-hidden",
+        "bg-surface-primary/80 backdrop-blur-xl border border-black/[0.06]",
+        "shadow-[0_2px_10px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.8)]",
+        "hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-black/10",
+        isEditMode && "ring-2 ring-macos-blue/60 ring-offset-2 ring-offset-bg-canvas cursor-grab active:cursor-grabbing border-dashed"
+      )}
+      data-cat={category}
+    >
+      {/* Header — draggable handle */}
+      <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-separator/40 bg-fill-quaternary/20 select-none">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="w-2 h-2 rounded-full bg-macos-blue shadow-[0_0_0_2px_rgba(0,122,255,0.2)] shrink-0" />
+          <h3 className="text-[14px] font-bold text-text-primary tracking-[-0.01em] truncate">{title}</h3>
           {isLoading && (
-            <RefreshCw className="h-3 w-3 animate-spin opacity-50 flex-shrink-0" />
+            <RefreshCw className="h-3 w-3 text-macos-blue animate-spin shrink-0" />
           )}
         </div>
 
-        <div className="bento-card__actions">
+        <div className="flex items-center gap-1 shrink-0">
           {onRefresh && !isLoading && (
             <button
               onClick={onRefresh}
-              className="bento-card__btn"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-fill-tertiary transition-all cursor-pointer"
               title="Обновить"
               aria-label="Обновить"
             >
@@ -56,7 +63,7 @@ export default function WidgetChrome({
           {deepLink && (
             <a
               href={deepLink}
-              className="bento-card__btn"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-text-tertiary hover:text-macos-blue hover:bg-fill-tertiary transition-all cursor-pointer"
               title="Открыть модуль"
               aria-label="Открыть модуль"
             >
@@ -66,7 +73,7 @@ export default function WidgetChrome({
           {onToggleCollapse && (
             <button
               onClick={onToggleCollapse}
-              className="bento-card__btn"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-fill-tertiary transition-all cursor-pointer"
               title={isCollapsed ? 'Развернуть' : 'Свернуть'}
               aria-label={isCollapsed ? 'Развернуть' : 'Свернуть'}
             >
@@ -79,17 +86,17 @@ export default function WidgetChrome({
       </div>
 
       {/* Body */}
-      <div className={`bento-card__body${isCollapsed ? ' bento-card__body--collapsed' : ''}`}>
+      <div className={clsx("flex-1 p-5 transition-all duration-200", isCollapsed && "hidden")}>
         {error ? (
-          <div className="bento-card__error">
-            <AlertCircle className="h-5 w-5 text-red-400" />
-            <p>{error}</p>
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-tint-red/80 border border-macos-red/20 text-macos-red">
+            <AlertCircle className="h-5 w-5 shrink-0" />
+            <p className="text-[13px] font-medium leading-relaxed">{error}</p>
           </div>
         ) : isLoading && !children ? (
-          <div className="bento-card__skeleton">
-            <div className="bento-card__skeleton-line" style={{ width: '80%' }} />
-            <div className="bento-card__skeleton-line" style={{ width: '60%' }} />
-            <div className="bento-card__skeleton-line" style={{ width: '45%' }} />
+          <div className="space-y-3 animate-pulse">
+            <div className="h-4 bg-fill-tertiary rounded-md w-[80%]" />
+            <div className="h-4 bg-fill-tertiary rounded-md w-[60%]" />
+            <div className="h-4 bg-fill-tertiary rounded-md w-[45%]" />
           </div>
         ) : (
           children
@@ -98,3 +105,4 @@ export default function WidgetChrome({
     </div>
   );
 }
+
