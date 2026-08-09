@@ -87,7 +87,7 @@ type ResponseInterceptor = (response: Response) => Response | Promise<Response>;
 type ErrorInterceptor = (error: ApiRequestError) => ApiRequestError | Promise<ApiRequestError>;
 
 class API {
-  private token: string | null = null;
+  private token: string | null = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
   private requestInterceptors: RequestInterceptor[] = [];
   private responseInterceptors: ResponseInterceptor[] = [];
   private errorInterceptors: ErrorInterceptor[] = [];
@@ -166,8 +166,9 @@ class API {
       headers["Content-Type"] = "application/json";
     }
     
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+    const effectiveToken = this.token || (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
+    if (effectiveToken) {
+      headers.Authorization = `Bearer ${effectiveToken}`;
     }
 
     let config: RequestInit = {

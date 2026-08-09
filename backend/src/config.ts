@@ -1,7 +1,12 @@
 // src/config.ts
+import dotenv from "dotenv";
+dotenv.config();
+
 const defaultOrigins = [
   "http://localhost:5173",
+  "http://127.0.0.1:5173",
   "http://localhost:3000",
+  "http://127.0.0.1:3000",
   "https://mezon-admin-frontend.onrender.com",
   "https://erp.mezon.uz",
 ];

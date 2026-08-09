@@ -45,7 +45,7 @@ router.post("/login", async (req, res) => {
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none' as const, // Changed from 'lax' to 'none' for cross-origin
+    sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as const,
     maxAge: JWT.COOKIE_MAX_AGE,
   };
   
