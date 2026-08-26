@@ -10,6 +10,8 @@ import { Button} from '../components/ui/button';
 import { Input} from '../components/ui/input';
 import { FormError} from '../components/ui/FormError';
 import { InventoryAutocomplete} from '../components/ui/InventoryAutocomplete';
+import { WarehouseItemPicker } from '../components/ui/WarehouseItemPicker';
+import { FulfillRequestModal } from '../components/modals/FulfillRequestModal';
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2, X, Check, PlusCircle, MinusCircle} from 'lucide-react';
 import { useAuth} from '../hooks/useAuth';
@@ -26,6 +28,7 @@ import {
  itemCategoryLabels,
  itemCategoryColors,
  ItemCategory,
+ isPartiallyFulfilled,
 } from '../types/maintenance';
 
 // Дополнительные локальные типы для страницы
@@ -78,6 +81,10 @@ export default function MaintenancePage() {
  const [rejectionReason, setRejectionReason] = useState('');
  const [actionLoading, setActionLoading] = useState(false);
  const [confirmReceiptLoading, setConfirmReceiptLoading] = useState<number | null>(null);
+
+ // Модальное окно частичной/полной выдачи для завхоза
+ const [fulfillModalOpen, setFulfillModalOpen] = useState(false);
+ const [fulfillingRequest, setFulfillingRequest] = useState<MaintenanceRequest | null>(null);
 
  // Cleaning state
  const [cleaningSchedules, setCleaningSchedules] = useState<CleaningSchedule[]>([]);
@@ -480,208 +487,254 @@ export default function MaintenancePage() {
 }
 };
 
- const logCheckup = async (id: number) => {
- try {
- await api.post(`/api/maintenance/equipment/${id}/checkup`);
- toast.success('Проверка зафиксирована');
- fetchEquipment();
-} catch (error: any) {
- toast.error('Ошибка', { description: error?.message});
-}
-};
+  const logCheckup = async (id: number) => {
+    try {
+      await api.post(`/api/maintenance/equipment/${id}/checkup`);
+      toast.success('Проверка зафиксирована');
+      fetchEquipment();
+    } catch (error: any) {
+      toast.error('Ошибка', { description: error?.message});
+    }
+  };
 
- // Фильтрация
- const filteredRequests = requests.filter(req => {
- if (filterStatus && req.status !== filterStatus) return false;
- if (filterType && req.type !== filterType) return false;
- return true;
-});
+  // Фильтрация
+  const filteredRequests = requests.filter(req => {
+    if (filterStatus && req.status !== filterStatus) return false;
+    if (filterType && req.type !== filterType) return false;
+    return true;
+  });
 
- // Статистика
- const stats = {
- total: requests.length,
- pending: requests.filter(r => r.status === 'PENDING').length,
- approved: requests.filter(r => r.status === 'APPROVED').length,
- rejected: requests.filter(r => r.status === 'REJECTED').length,
- inProgress: requests.filter(r => r.status === 'IN_PROGRESS').length,
- done: requests.filter(r => r.status === 'DONE').length,
- completed: requests.filter(r => r.status === 'COMPLETED').length,
- repair: requests.filter(r => r.type === 'REPAIR').length,
- issue: requests.filter(r => r.type === 'ISSUE').length,
-};
- 
- // Определяем, может ли пользователь одобрять заявки
- const canApprove = userRole === 'DEVELOPER' || userRole === 'DIRECTOR' || userRole === 'DEPUTY';
- const canEditAll = userRole === 'DEVELOPER' || userRole === 'ADMIN';
- const isZavhoz = userRole === 'ZAVHOZ';
- const isTeacher = userRole === 'TEACHER';
- // Показывать колонки"Кто создал"и"Кто одобрил"для всех кроме учителей
- const showCreatorApprover = !isTeacher;
+  // Статистика
+  const stats = {
+    total: requests.length,
+    pending: requests.filter(r => r.status === 'PENDING').length,
+    approved: requests.filter(r => r.status === 'APPROVED').length,
+    rejected: requests.filter(r => r.status === 'REJECTED').length,
+    inProgress: requests.filter(r => r.status === 'IN_PROGRESS').length,
+    done: requests.filter(r => r.status === 'DONE').length,
+    completed: requests.filter(r => r.status === 'COMPLETED').length,
+    repair: requests.filter(r => r.type === 'REPAIR').length,
+    issue: requests.filter(r => r.type === 'ISSUE').length,
+  };
+  
+  // Определяем, может ли пользователь одобрять заявки
+  const canApprove = userRole === 'DEVELOPER' || userRole === 'DIRECTOR' || userRole === 'DEPUTY';
+  const canEditAll = userRole === 'DEVELOPER' || userRole === 'ADMIN';
+  const isZavhoz = userRole === 'ZAVHOZ';
+  const isTeacher = userRole === 'TEACHER';
+  // Показывать колонки "Кто создал" и "Кто одобрил" для всех кроме учителей
+  const showCreatorApprover = !isTeacher;
 
- const columns: Column<MaintenanceRequest>[] = [
- // Наименование
- { 
- key: 'title', 
- header: 'Наименование',
- render: (row) => (
- <div>
- <div className="font-medium">{row.title}</div>
- {row.type === 'ISSUE' && row.items && row.items.length > 0 && (
- <div className="text-sm text-secondary mt-1">
- {row.items.map((item, idx) => (
- <div key={idx} className="flex items-center gap-2">
- <span className={`inline-block w-2 h-2 rounded-full ${
- item.category === 'STATIONERY' ? 'bg-blue-400' :
- item.category === 'HOUSEHOLD' ? 'bg-amber-400' : 'bg-gray-400'
-}`}></span>
- <span>{item.name} — {item.quantity} {item.unit}</span>
- {/* Показываем фактически выданное количество (если есть) */}
- {item.issuedQuantity != null && item.issuedQuantity !== item.quantity && (
- <span className="text-orange-600 text-xs">(выдано: {item.issuedQuantity})</span>
- )}
- {/* Показываем остаток на складе */}
- {item.inventoryItem && row.status !== 'DONE' && (
- <span className={`text-xs ${item.inventoryItem.quantity < item.quantity ? 'text-macos-red' : 'text-macos-green'}`}>
- [на складе: {item.inventoryItem.quantity} {item.inventoryItem.unit}]
- </span>
- )}
- </div>
- ))}
- </div>
- )}
- </div>
- ),
-},
- // Кол-во позиций (только для ISSUE)
- {
- key: 'itemsCount' as keyof MaintenanceRequest,
- header: 'Позиции',
- render: (row) => row.type === 'ISSUE' && row.items ? (
- <span className="px-2 py-1 rounded text-sm bg-fill-tertiary text-gray-800">
- {row.items.length} шт
- </span>
- ) : '—',
-},
- {
-  key: 'receivedBy' as keyof MaintenanceRequest,
-  header: 'Кто получил',
-  render: (row: MaintenanceRequest) => row.status === 'COMPLETED' && row.receivedBy ? `${row.receivedBy.lastName} ${row.receivedBy.firstName}`: '—',
- },
- // Кто создал (для всех кроме учителей)
- ...(showCreatorApprover ? [{
- key: 'requester' as keyof MaintenanceRequest,
- header: 'Кто создал',
- render: (row: MaintenanceRequest) => row.requester ? `${row.requester.lastName} ${row.requester.firstName}`: '—',
-}] : []),
- {
- key: 'type',
- header: 'Тип',
- render: (row) => (
- <span className={`px-2 py-1 rounded text-sm ${maintenanceTypeColors[row.type]}`}>
- {maintenanceTypeLabels[row.type] || row.type}
- </span>
- ),
-},
- {
- key: 'status',
- header: 'Статус',
- render: (row) => (
- <span className={`px-2 py-1 rounded text-sm ${maintenanceStatusColors[row.status]}`}>
- {maintenanceStatusLabels[row.status] || row.status}
- </span>
- ),
-},
- {
- key: 'createdAt',
- header: 'Дата',
- render: (row) => new Date(row.createdAt).toLocaleDateString('ru-RU'),
-},
- // Кто одобрил (для всех кроме учителей)
- ...(showCreatorApprover ? [{
- key: 'approver' as keyof MaintenanceRequest,
- header: 'Кто одобрил',
- render: (row: MaintenanceRequest) => row.approvedBy ? `${row.approvedBy.lastName} ${row.approvedBy.firstName}`: '—',
-}] : []),
- {
- key: 'actions',
- header: 'Действия',
- render: (row) => (
- <div className="flex gap-2">
- {/* Кнопки одобрения/отклонения для PENDING заявок */}
- {canApprove && row.status === 'PENDING' && (
- <>
- <Button 
- variant="outline"
- size="sm"
- onClick={() => {
- setActionRequest(row);
- setApproveModalOpen(true);
-}}
- title="Одобрить"
- >
- <Check className="h-4 w-4 text-macos-green"/>
- </Button>
- <Button 
- variant="outline"
- size="sm"
- onClick={() => {
- setActionRequest(row);
- setRejectModalOpen(true);
-}}
- title="Отклонить"
- >
- <X className="h-4 w-4 text-macos-red"/>
- </Button>
- </>
- )}
- 
- {/* Быстрые действия для завхоза */}
-  {isZavhoz && row.status === 'APPROVED' && (
-  <Button variant="outline" size="sm" onClick={() => handleQuickStatusChange(row.id, 'IN_PROGRESS')} title="Взять в работу">
-  <Clock className="h-4 w-4 text-macos-blue"/>
-  </Button>
-  )}
-  {isZavhoz && row.status === 'IN_PROGRESS' && (
-  <Button variant="outline" size="sm" onClick={() => handleQuickStatusChange(row.id, 'DONE')} title="Выполнить">
-  <CheckCircle className="h-4 w-4 text-macos-green"/>
-  </Button>
-  )}
+  const columns: Column<MaintenanceRequest>[] = [
+    // Наименование
+    { 
+      key: 'title', 
+      header: 'Наименование',
+      render: (row) => (
+        <div>
+          <div className="font-medium text-text-primary">{row.title}</div>
+          {row.type === 'ISSUE' && row.items && row.items.length > 0 && (
+            <div className="text-sm text-secondary mt-1.5 space-y-1">
+              {row.items.map((item, idx) => {
+                const isDone = row.status === 'DONE' || row.status === 'COMPLETED';
+                const isPartial = item.issuedQuantity != null && item.issuedQuantity < item.quantity;
+                const isZeroIssued = item.issuedQuantity === 0;
 
-  {/* Кнопка подтверждения получения для создателя, если статус DONE */}
-  {(row.status === 'DONE' && (row.requesterId === user?.employee?.id || canEditAll)) && (
-  <Button 
-  variant="outline"
-  size="sm"
-  onClick={() => handleConfirmReceipt(row.id)} 
-  disabled={confirmReceiptLoading === row.id}
-  title="Подтвердить получение"
-  className="border-macos-green text-macos-green hover:bg-macos-green hover:text-white"
-  >
-  {confirmReceiptLoading === row.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4 mr-1"/>} Получил
-  </Button>
-  )}
+                return (
+                  <div key={idx} className="flex flex-wrap items-center gap-1.5 text-[12.5px]">
+                    <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                      item.category === 'STATIONERY' ? 'bg-blue-400' :
+                      item.category === 'HOUSEHOLD' ? 'bg-amber-400' : 'bg-gray-400'
+                    }`}></span>
+                    <span className="font-medium text-text-primary">{item.name}</span>
+                    <span className="text-text-tertiary">({item.quantity} {item.unit})</span>
+                    
+                    {/* Отображение статуса выдачи для завершенных/выполненных заявок */}
+                    {isDone && item.issuedQuantity != null && (
+                      isZeroIssued ? (
+                        <span className="inline-flex items-center text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded">
+                          ✕ Не выдано (0 {item.unit})
+                        </span>
+                      ) : isPartial ? (
+                        <span className="inline-flex items-center text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-300 px-1.5 py-0.2 rounded">
+                          ⚠️ Выдано {item.issuedQuantity} из {item.quantity} {item.unit}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded">
+                          ✓ Выдано {item.issuedQuantity} {item.unit}
+                        </span>
+                      )
+                    )}
 
- {/* Редактирование: DEVELOPER и ADMIN всегда, ZAVHOZ для одобренных, учитель для своих не-одобренных, директор и завуч могут редактировать свои заявки */}
- {(canEditAll || 
- (isZavhoz && (row.status === 'APPROVED' || row.status === 'IN_PROGRESS' || row.status === 'DONE')) ||
- (userRole === 'TEACHER' && row.status !== 'APPROVED' && row.status !== 'IN_PROGRESS' && row.status !== 'DONE' && row.status !== 'COMPLETED') ||
- ((userRole === 'DIRECTOR' || userRole === 'DEPUTY') && row.requesterId === user?.employee?.id)
- ) && (
- <Button variant="outline"size="sm"onClick={() => handleEdit(row)}>
- <Edit className="h-4 w-4"/>
- </Button>
- )}
- 
- {/* Удаление: только DEVELOPER и ADMIN */}
- {canEditAll && (
- <Button variant="destructive"size="sm"onClick={() => setDeleteConfirm(row)}>
- <Trash2 className="h-4 w-4"/>
- </Button>
- )}
- </div>
- ),
-},
- ];
+                    {/* Показываем остаток на складе для невыполненных заявок */}
+                    {!isDone && item.inventoryItem && (
+                      <span className={`text-xs ${item.inventoryItem.quantity < item.quantity ? 'text-macos-red font-medium' : 'text-macos-green'}`}>
+                        [на складе: {item.inventoryItem.quantity} {item.inventoryItem.unit}]
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    // Кол-во позиций (только для ISSUE)
+    {
+      key: 'itemsCount' as keyof MaintenanceRequest,
+      header: 'Позиции',
+      render: (row) => row.type === 'ISSUE' && row.items ? (
+        <span className="px-2 py-1 rounded text-sm bg-fill-tertiary text-gray-800">
+          {row.items.length} шт
+        </span>
+      ) : '—',
+    },
+    {
+      key: 'receivedBy' as keyof MaintenanceRequest,
+      header: 'Кто получил',
+      render: (row: MaintenanceRequest) => row.status === 'COMPLETED' && row.receivedBy ? `${row.receivedBy.lastName} ${row.receivedBy.firstName}`: '—',
+    },
+    // Кто создал (для всех кроме учителей)
+    ...(showCreatorApprover ? [{
+      key: 'requester' as keyof MaintenanceRequest,
+      header: 'Кто создал',
+      render: (row: MaintenanceRequest) => row.requester ? `${row.requester.lastName} ${row.requester.firstName}`: '—',
+    }] : []),
+    {
+      key: 'type',
+      header: 'Тип',
+      render: (row) => (
+        <span className={`px-2 py-1 rounded text-sm ${maintenanceTypeColors[row.type]}`}>
+          {maintenanceTypeLabels[row.type] || row.type}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Статус',
+      render: (row) => {
+        if (isPartiallyFulfilled(row)) {
+          return (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300 shadow-sm">
+              Частично выдано
+            </span>
+          );
+        }
+        return (
+          <span className={`px-2 py-1 rounded text-sm ${maintenanceStatusColors[row.status]}`}>
+            {maintenanceStatusLabels[row.status] || row.status}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'createdAt',
+      header: 'Дата',
+      render: (row) => new Date(row.createdAt).toLocaleDateString('ru-RU'),
+    },
+    // Кто одобрил (для всех кроме учителей)
+    ...(showCreatorApprover ? [{
+      key: 'approver' as keyof MaintenanceRequest,
+      header: 'Кто одобрил',
+      render: (row: MaintenanceRequest) => row.approvedBy ? `${row.approvedBy.lastName} ${row.approvedBy.firstName}`: '—',
+    }] : []),
+    {
+      key: 'actions',
+      header: 'Действия',
+      render: (row) => (
+        <div className="flex gap-2">
+          {/* Кнопки одобрения/отклонения для PENDING заявок */}
+          {canApprove && row.status === 'PENDING' && (
+            <>
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setActionRequest(row);
+                  setApproveModalOpen(true);
+                }}
+                title="Одобрить"
+              >
+                <Check className="h-4 w-4 text-macos-green"/>
+              </Button>
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setActionRequest(row);
+                  setRejectModalOpen(true);
+                }}
+                title="Отклонить"
+              >
+                <X className="h-4 w-4 text-macos-red"/>
+              </Button>
+            </>
+          )}
+          
+          {/* Выдача завхозом для заявок ISSUE */}
+          {isZavhoz && (row.status === 'APPROVED' || row.status === 'IN_PROGRESS') && row.type === 'ISSUE' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setFulfillingRequest(row);
+                setFulfillModalOpen(true);
+              }}
+              title="Оформить выдачу (в т.ч. частичную)"
+              className="border-macos-green text-macos-green hover:bg-macos-green hover:text-white"
+            >
+              <Package className="h-4 w-4 mr-1"/> Выдать
+            </Button>
+          )}
+
+          {/* Быстрые действия для завхоза для заявок REPAIR */}
+          {isZavhoz && row.status === 'APPROVED' && row.type === 'REPAIR' && (
+            <Button variant="outline" size="sm" onClick={() => handleQuickStatusChange(row.id, 'IN_PROGRESS')} title="Взять в работу">
+              <Clock className="h-4 w-4 text-macos-blue"/>
+            </Button>
+          )}
+          {isZavhoz && row.status === 'IN_PROGRESS' && row.type === 'REPAIR' && (
+            <Button variant="outline" size="sm" onClick={() => handleQuickStatusChange(row.id, 'DONE')} title="Выполнить">
+              <CheckCircle className="h-4 w-4 text-macos-green"/>
+            </Button>
+          )}
+
+          {/* Кнопка подтверждения получения для создателя, если статус DONE */}
+          {(row.status === 'DONE' && (row.requesterId === user?.employee?.id || canEditAll)) && (
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => handleConfirmReceipt(row.id)} 
+              disabled={confirmReceiptLoading === row.id}
+              title="Подтвердить получение"
+              className="border-macos-green text-macos-green hover:bg-macos-green hover:text-white"
+            >
+              {confirmReceiptLoading === row.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4 mr-1"/>} Получил
+            </Button>
+          )}
+
+          {/* Редактирование */}
+          {(canEditAll || 
+            (isZavhoz && (row.status === 'APPROVED' || row.status === 'IN_PROGRESS' || row.status === 'DONE')) ||
+            (userRole === 'TEACHER' && row.status !== 'APPROVED' && row.status !== 'IN_PROGRESS' && row.status !== 'DONE' && row.status !== 'COMPLETED') ||
+            ((userRole === 'DIRECTOR' || userRole === 'DEPUTY') && row.requesterId === user?.employee?.id)
+          ) && (
+            <Button variant="outline" size="sm" onClick={() => handleEdit(row)}>
+              <Edit className="h-4 w-4"/>
+            </Button>
+          )}
+          
+          {/* Удаление: только DEVELOPER и ADMIN */}
+          {canEditAll && (
+            <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(row)}>
+              <Trash2 className="h-4 w-4"/>
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
 
  const frequencyMapping: Record<string, string> = {
  DAILY: 'Ежедневно',
@@ -1031,63 +1084,81 @@ export default function MaintenancePage() {
  )}
  </div>
  
- <div className="grid grid-cols-1 gap-2">
- <div>
- <InventoryAutocomplete
- name={`items.${index}.name`}
- control={control}
- placeholder="Наименование товара"
- onSelect={(selectedItem) => {
- setValue(`items.${index}.name`, selectedItem.name);
- setValue(`items.${index}.unit`, selectedItem.unit);
- setValue(`items.${index}.inventoryItemId`, selectedItem.id);
-}}
- disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
- />
- {errors.items?.[index]?.name && (
- <FormError message={errors.items[index]?.name?.message} />
- )}
- </div>
- 
- <div className="grid grid-cols-3 gap-2">
- <div>
- <Input 
- {...register(`items.${index}.quantity`, { valueAsNumber: true})} 
- type="number"
- min="0.01"
- step="0.01"
- placeholder="Кол-во"
- className="text-sm"
- disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
- />
- {errors.items?.[index]?.quantity && (
- <FormError message={errors.items[index]?.quantity?.message} />
- )}
- </div>
- <div>
- <Input 
- {...register(`items.${index}.unit`)} 
- placeholder="Ед.изм"
- className="text-sm"
- disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
- />
- {errors.items?.[index]?.unit && (
- <FormError message={errors.items[index]?.unit?.message} />
- )}
- </div>
- <div>
- <select 
- {...register(`items.${index}.category`)} 
- className="w-full p-2 border rounded text-sm"
- disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
- >
- <option value="STATIONERY">Канц.</option>
- <option value="HOUSEHOLD">Хоз.</option>
- <option value="OTHER">Прочее</option>
- </select>
- </div>
- </div>
- </div>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-text-tertiary mb-1">
+                      Товар со склада <span className="text-macos-red">*</span>
+                    </label>
+                    <WarehouseItemPicker
+                      value={watch(`items.${index}.inventoryItemId`)}
+                      selectedName={watch(`items.${index}.name`)}
+                      selectedUnit={watch(`items.${index}.unit`)}
+                      selectedCategory={watch(`items.${index}.category`)}
+                      onSelect={(selectedItem) => {
+                        setValue(`items.${index}.name`, selectedItem.name);
+                        setValue(`items.${index}.unit`, selectedItem.unit);
+                        setValue(`items.${index}.inventoryItemId`, selectedItem.id);
+                        const cat = selectedItem.type === 'STATIONERY'
+                          ? 'STATIONERY'
+                          : selectedItem.type === 'HOUSEHOLD'
+                          ? 'HOUSEHOLD'
+                          : 'OTHER';
+                        setValue(`items.${index}.category`, cat);
+                      }}
+                      onClear={() => {
+                        setValue(`items.${index}.name`, '');
+                        setValue(`items.${index}.unit`, '');
+                        setValue(`items.${index}.inventoryItemId`, null);
+                      }}
+                      disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
+                      error={errors.items?.[index]?.name?.message}
+                      excludeItemIds={fields
+                        .map((_, i) => (i !== index ? watch(`items.${i}.inventoryItemId`) : null))
+                        .filter((id): id is number => typeof id === 'number')}
+                    />
+                    {errors.items?.[index]?.name && (
+                      <FormError message={errors.items[index]?.name?.message} />
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <label className="block text-[10px] uppercase font-bold text-text-tertiary mb-0.5">
+                        Количество <span className="text-macos-red">*</span>
+                      </label>
+                      <Input
+                        {...register(`items.${index}.quantity`, { valueAsNumber: true })}
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="Кол-во"
+                        className="text-sm"
+                        disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
+                      />
+                      {errors.items?.[index]?.quantity && (
+                        <FormError message={errors.items[index]?.quantity?.message} />
+                      )}
+                    </div>
+
+                    <div className="w-24">
+                      <label className="block text-[10px] uppercase font-bold text-text-tertiary mb-0.5">
+                        Ед. изм
+                      </label>
+                      <div className="h-9 px-3 rounded-lg border border-separator/60 bg-fill-quaternary/40 flex items-center text-sm font-medium text-text-secondary">
+                        {watch(`items.${index}.unit`) || '—'}
+                      </div>
+                    </div>
+
+                    <div className="w-28">
+                      <label className="block text-[10px] uppercase font-bold text-text-tertiary mb-0.5">
+                        Категория
+                      </label>
+                      <div className="h-9 px-2.5 rounded-lg border border-separator/60 bg-fill-quaternary/40 flex items-center text-xs font-semibold text-text-secondary truncate">
+                        {itemCategoryLabels[watch(`items.${index}.category`)] || '—'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
  </div>
  ))}
  </div>
@@ -1353,6 +1424,19 @@ export default function MaintenancePage() {
  </div>
  </form>
  </Modal>
+
+ {/* Fulfill Request Modal (Завхоз - выдача товаров) */}
+ <FulfillRequestModal
+    isOpen={fulfillModalOpen}
+    onClose={() => {
+      setFulfillModalOpen(false);
+      setFulfillingRequest(null);
+    }}
+    request={fulfillingRequest}
+    onSuccess={() => {
+      fetchRequests();
+    }}
+  />
  </PageStack>
  );
 }

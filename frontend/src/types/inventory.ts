@@ -96,12 +96,21 @@ export type InventoryTransaction = {
     id: number;
     title: string;
     type: string;
+    requester?: {
+      id: number;
+      firstName: string;
+      lastName: string;
+      middleName?: string | null;
+      position?: string | null;
+    } | null;
   } | null;
   performedById?: number | null;
   performedBy?: {
     id: number;
     firstName: string;
     lastName: string;
+    middleName?: string | null;
+    position?: string | null;
   } | null;
   createdAt: string;
 };

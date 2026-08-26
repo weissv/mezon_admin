@@ -1053,49 +1053,117 @@ export default function InventoryPage() {
             ) : allTransactions.length === 0 ? (
               <div className="py-12 text-center text-[13px] text-text-tertiary">Записи о движениях отсутствуют</div>
             ) : (
-              <div className="overflow-x-auto max-h-[70vh]">
-                <table className="w-full text-left">
+              <div className="max-h-[70vh] overflow-y-auto">
+                <table className="w-full text-left table-fixed">
                   <thead className="sticky top-0 bg-surface-primary/95 backdrop-blur-md z-10 border-b border-separator/60 shadow-subtle">
                     <tr>
-                      <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Дата и Время</th>
-                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Товар</th>
-                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Тип Операции</th>
-                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Кол-во</th>
-                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">До → После</th>
-                      <th className="px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Причина / Документ</th>
-                      <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Исполнитель</th>
+                      <th className="w-[14%] px-4 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Дата и время</th>
+                      <th className="w-[20%] px-4 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Товар</th>
+                      <th className="w-[18%] px-4 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Операция / Движение</th>
+                      <th className="w-[18%] px-4 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Основание / Документ</th>
+                      <th className="w-[16%] px-4 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Получатель</th>
+                      <th className="w-[14%] px-4 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Исполнитель</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-separator/40">
-                    {allTransactions.map((tx: InventoryTransaction) => (
-                      <tr key={tx.id} className="transition-colors duration-150 hover:bg-macos-blue/[0.03]">
-                        <td className="px-5 py-3.5 font-mono text-[12px] text-text-tertiary whitespace-nowrap">
-                          {new Date(tx.createdAt).toLocaleString('ru-RU')}
-                        </td>
-                        <td className="px-4 py-3.5 font-bold text-[13.5px] text-text-primary">
-                          {tx.inventoryItem?.name || '—'}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <Badge variant={tx.type === 'IN' ? 'success' : tx.type === 'OUT' || tx.type === 'WRITE_OFF' ? 'danger' : 'warning'} dot>
-                            {transactionTypeLabels[tx.type]}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3.5 font-mono font-bold text-[14px]">
-                          <span className={tx.type === 'IN' ? 'text-[#1B7A3D]' : 'text-macos-red'}>
-                            {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3.5 font-mono text-[12px] text-text-secondary">
-                          {tx.quantityBefore} → {tx.quantityAfter}
-                        </td>
-                        <td className="px-4 py-3.5 text-[12.5px] text-text-secondary max-w-[240px] truncate" title={tx.reason || ''}>
-                          {tx.reason || '—'}
-                        </td>
-                        <td className="px-5 py-3.5 text-[12.5px] font-medium text-text-primary">
-                          {tx.performedBy ? `${tx.performedBy.firstName} ${tx.performedBy.lastName}` : 'Система'}
-                        </td>
-                      </tr>
-                    ))}
+                    {allTransactions.map((tx: InventoryTransaction) => {
+                      const isOut = tx.type === 'OUT' || tx.type === 'WRITE_OFF';
+                      const requester = tx.maintenanceRequest?.requester;
+
+                      return (
+                        <tr key={tx.id} className="transition-colors duration-150 hover:bg-macos-blue/[0.03]">
+                          {/* 1. Дата и время */}
+                          <td className="px-4 py-3 text-[12px] font-mono text-text-secondary whitespace-nowrap">
+                            <div className="font-semibold text-text-primary">
+                              {new Date(tx.createdAt).toLocaleDateString('ru-RU')}
+                            </div>
+                            <div className="text-[11px] text-text-tertiary">
+                              {new Date(tx.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            </div>
+                          </td>
+
+                          {/* 2. Товар */}
+                          <td className="px-4 py-3 min-w-0">
+                            <div className="font-bold text-[13.5px] text-text-primary truncate" title={tx.inventoryItem?.name || ''}>
+                              {tx.inventoryItem?.name || '—'}
+                            </div>
+                            {tx.inventoryItem?.type && (
+                              <span className="inline-block text-[10.5px] text-text-tertiary">
+                                {inventoryTypeLabels[tx.inventoryItem.type] || tx.inventoryItem.type}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* 3. Операция и дельта */}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={tx.type === 'IN' ? 'success' : isOut ? 'danger' : 'warning'} dot>
+                                {transactionTypeLabels[tx.type]}
+                              </Badge>
+                              <span className={`font-mono font-bold text-[13.5px] ${tx.type === 'IN' ? 'text-[#1B7A3D]' : 'text-macos-red'}`}>
+                                {tx.type === 'IN' ? '+' : '-'}{tx.quantity} {tx.inventoryItem?.unit || ''}
+                              </span>
+                            </div>
+                            <div className="text-[11px] font-mono text-text-tertiary mt-0.5">
+                              остаток: {tx.quantityBefore} → {tx.quantityAfter}
+                            </div>
+                          </td>
+
+                          {/* 4. Основание / Документ */}
+                          <td className="px-4 py-3 min-w-0">
+                            {tx.maintenanceRequest ? (
+                              <div>
+                                <span className="font-semibold text-[12.5px] text-macos-blue block truncate">
+                                  Заявка #{tx.maintenanceRequest.id}
+                                </span>
+                                <span className="text-[11.5px] text-text-secondary block truncate" title={tx.reason || tx.maintenanceRequest.title}>
+                                  {tx.reason || tx.maintenanceRequest.title}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-[12.5px] text-text-secondary block truncate" title={tx.reason || ''}>
+                                {tx.reason || '—'}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* 5. Получатель (Создатель заявки) */}
+                          <td className="px-4 py-3 min-w-0">
+                            {requester ? (
+                              <div>
+                                <div className="flex items-center gap-1 font-semibold text-[12.5px] text-text-primary truncate">
+                                  <span className="text-secondary shrink-0">👤</span>
+                                  <span className="truncate">{requester.lastName} {requester.firstName}</span>
+                                </div>
+                                <span className="text-[11px] text-text-tertiary block truncate">
+                                  {requester.position || 'Заявитель'}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-text-tertiary text-[12px]">—</span>
+                            )}
+                          </td>
+
+                          {/* 6. Исполнитель */}
+                          <td className="px-4 py-3 min-w-0">
+                            {tx.performedBy ? (
+                              <div>
+                                <span className="font-medium text-[12.5px] text-text-primary block truncate">
+                                  {tx.performedBy.lastName} {tx.performedBy.firstName}
+                                </span>
+                                {tx.performedBy.position && (
+                                  <span className="text-[11px] text-text-tertiary block truncate">
+                                    {tx.performedBy.position}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-text-tertiary text-[12px]">Система</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1267,33 +1335,52 @@ export default function InventoryPage() {
             <div className="py-6 text-center text-gray-500">Нет записей о движениях</div>
           ) : (
             <div className="max-h-[60vh] overflow-y-auto">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-gray-100 text-gray-600 font-medium">
+              <table className="w-full text-sm table-fixed">
+                <thead className="sticky top-0 bg-gray-100 text-gray-600 font-medium text-xs">
                   <tr>
-                    <th className="text-left p-2">Дата</th>
-                    <th className="text-left p-2">Тип</th>
-                    <th className="text-left p-2">Кол-во</th>
-                    <th className="text-left p-2">До → После</th>
-                    <th className="text-left p-2">Причина</th>
+                    <th className="w-[18%] text-left p-2.5">Дата и время</th>
+                    <th className="w-[20%] text-left p-2.5">Тип и дельта</th>
+                    <th className="w-[18%] text-left p-2.5">До → После</th>
+                    <th className="w-[24%] text-left p-2.5">Причина / Заявка</th>
+                    <th className="w-[20%] text-left p-2.5">Получатель</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-100 text-xs">
                   {transactions.map((tx: InventoryTransaction) => (
-                    <tr key={tx.id} className="border-t">
-                      <td className="p-2 whitespace-nowrap text-xs text-gray-500">{new Date(tx.createdAt).toLocaleString('ru')}</td>
-                      <td className="p-2">
-                        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${transactionTypeColors[tx.type]}`}>
-                          {transactionTypeLabels[tx.type]}
-                        </span>
+                    <tr key={tx.id} className="hover:bg-gray-50">
+                      <td className="p-2.5 text-gray-500 whitespace-nowrap">
+                        <div className="font-medium text-gray-800">{new Date(tx.createdAt).toLocaleDateString('ru-RU')}</div>
+                        <div className="text-[10.5px] text-gray-400">{new Date(tx.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
                       </td>
-                      <td className="p-2 font-mono font-bold">
-                        <span className={tx.type === 'IN' ? 'text-emerald-600' : 'text-rose-600'}>
-                          {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
-                        </span>
+                      <td className="p-2.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`px-1.5 py-0.5 rounded font-semibold text-[10.5px] ${transactionTypeColors[tx.type]}`}>
+                            {transactionTypeLabels[tx.type]}
+                          </span>
+                          <span className={`font-mono font-bold ${tx.type === 'IN' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
+                          </span>
+                        </div>
                       </td>
-                      <td className="p-2 font-mono text-xs">{tx.quantityBefore} → {tx.quantityAfter}</td>
-                      <td className="p-2 text-xs text-gray-600 max-w-[200px] truncate" title={tx.reason || ''}>
-                        {tx.reason || '—'}
+                      <td className="p-2.5 font-mono text-gray-600">{tx.quantityBefore} → {tx.quantityAfter}</td>
+                      <td className="p-2.5 text-gray-700 truncate" title={tx.reason || ''}>
+                        {tx.reason || (tx.maintenanceRequest ? `Заявка #${tx.maintenanceRequest.id}` : '—')}
+                      </td>
+                      <td className="p-2.5 truncate">
+                        {tx.maintenanceRequest?.requester ? (
+                          <div className="truncate">
+                            <span className="font-medium text-gray-800 block truncate">
+                              👤 {tx.maintenanceRequest.requester.lastName} {tx.maintenanceRequest.requester.firstName}
+                            </span>
+                            {tx.maintenanceRequest.requester.position && (
+                              <span className="text-[10px] text-gray-400 block truncate">
+                                {tx.maintenanceRequest.requester.position}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}

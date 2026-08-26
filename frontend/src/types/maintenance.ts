@@ -66,6 +66,15 @@ export const itemCategoryColors: Record<ItemCategory, string> = {
   OTHER: 'bg-gray-100 text-gray-800',
 };
 
+// Функция проверки частичной выдачи
+export function isPartiallyFulfilled(request: MaintenanceRequest): boolean {
+  if (request.type !== 'ISSUE' || !request.items || request.items.length === 0) return false;
+  if (request.status !== 'DONE' && request.status !== 'COMPLETED') return false;
+  return request.items.some(
+    (item) => item.issuedQuantity != null && item.issuedQuantity < item.quantity
+  );
+}
+
 // Тип данных позиции (товара) в заявке
 export type MaintenanceItem = {
   id: number;

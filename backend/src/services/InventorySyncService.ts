@@ -92,7 +92,8 @@ export async function checkStockAvailability(requestId: number): Promise<StockCh
  */
 export async function deductStockForRequest(
   requestId: number,
-  performedById: number
+  performedById: number,
+  customIssuedItems?: Array<{ itemId: number; issuedQuantity: number }>
 ): Promise<DeductionResult> {
   const request = await prisma.maintenanceRequest.findUnique({
     where: { id: requestId },
@@ -132,8 +133,18 @@ export async function deductStockForRequest(
       }
 
       const quantityBefore = inventoryItem.quantity;
+      
+      // Определяем желаемое количество к выдаче
+      let targetQuantity = item.quantity;
+      if (customIssuedItems && Array.isArray(customIssuedItems)) {
+        const customEntry = customIssuedItems.find((c) => c.itemId === item.id);
+        if (customEntry !== undefined) {
+          targetQuantity = Math.max(0, Number(customEntry.issuedQuantity));
+        }
+      }
+
       // Списываем не больше, чем есть на складе
-      const actualDeduction = Math.min(item.quantity, quantityBefore);
+      const actualDeduction = Math.min(targetQuantity, quantityBefore);
       const quantityAfter = quantityBefore - actualDeduction;
 
       if (actualDeduction < item.quantity) {
@@ -143,25 +154,32 @@ export async function deductStockForRequest(
         );
       }
 
-      // Обновляем остаток на складе
-      await tx.inventoryItem.update({
-        where: { id: inventoryItem.id },
-        data: { quantity: quantityAfter },
-      });
+      // Обновляем остаток на складе только если что-то списали
+      if (actualDeduction > 0) {
+        await tx.inventoryItem.update({
+          where: { id: inventoryItem.id },
+          data: { quantity: quantityAfter },
+        });
 
-      // Создаём запись в журнале операций
-      await tx.inventoryTransaction.create({
-        data: {
-          inventoryItemId: inventoryItem.id,
-          type: "OUT",
-          quantity: actualDeduction,
-          quantityBefore,
-          quantityAfter,
-          reason: `Выдача по заявке #${requestId}: ${request.title}`,
-          maintenanceRequestId: requestId,
-          performedById,
-        },
-      });
+        // Создаём запись в журнале операций
+        const isPartial = actualDeduction < item.quantity;
+        const reasonText = isPartial
+          ? `Выдача по заявке #${requestId}: ${request.title} (Частично: ${actualDeduction} из ${item.quantity} ${item.unit})`
+          : `Выдача по заявке #${requestId}: ${request.title}`;
+
+        await tx.inventoryTransaction.create({
+          data: {
+            inventoryItemId: inventoryItem.id,
+            type: "OUT",
+            quantity: actualDeduction,
+            quantityBefore,
+            quantityAfter,
+            reason: reasonText,
+            maintenanceRequestId: requestId,
+            performedById,
+          },
+        });
+      }
 
       // Обновляем позицию заявки: привязка к складскому товару + фактически выданное количество
       await tx.maintenanceItem.update({
@@ -320,10 +338,17 @@ export async function getItemTransactions(inventoryItemId: number, limit = 50) {
     where: { inventoryItemId },
     include: {
       maintenanceRequest: {
-        select: { id: true, title: true, type: true },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          requester: {
+            select: { id: true, firstName: true, lastName: true, middleName: true, position: true },
+          },
+        },
       },
       performedBy: {
-        select: { id: true, firstName: true, lastName: true },
+        select: { id: true, firstName: true, lastName: true, middleName: true, position: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -360,10 +385,17 @@ export async function getTransactions(filters?: {
         select: { id: true, name: true, unit: true, type: true },
       },
       maintenanceRequest: {
-        select: { id: true, title: true, type: true },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          requester: {
+            select: { id: true, firstName: true, lastName: true, middleName: true, position: true },
+          },
+        },
       },
       performedBy: {
-        select: { id: true, firstName: true, lastName: true },
+        select: { id: true, firstName: true, lastName: true, middleName: true, position: true },
       },
     },
     orderBy: { createdAt: "desc" },

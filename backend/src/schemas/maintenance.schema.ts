@@ -34,9 +34,23 @@ export const updateMaintenanceSchema = z.object({
   body: z.object({
     title: z.string().min(3).optional(),
     description: z.string().optional(),
-    status: z.enum(["PENDING", "APPROVED", "REJECTED", "IN_PROGRESS", "DONE"]).optional(),
+    status: z.enum(["PENDING", "APPROVED", "REJECTED", "IN_PROGRESS", "DONE", "COMPLETED"]).optional(),
     type: z.enum(["REPAIR", "ISSUE"]).optional(),
     // Массив позиций для обновления (полная замена)
     items: z.array(maintenanceItemSchema).optional(),
   }),
 });
+
+// Схема для частичной или полной выдачи завхозом
+export const fulfillMaintenanceSchema = z.object({
+  params: z.object({ id: z.string().regex(/^\d+$/) }),
+  body: z.object({
+    issuedItems: z.array(
+      z.object({
+        itemId: z.number().int().positive("ID позиции обязателен"),
+        issuedQuantity: z.number().min(0, "Выданное количество не может быть отрицательным"),
+      })
+    ).min(1, "Необходимо указать хотя бы одну позицию для выдачи"),
+  }),
+});
+

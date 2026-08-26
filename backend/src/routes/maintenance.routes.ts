@@ -4,13 +4,20 @@ import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
 const router = Router();
 import { validate } from "../middleware/validate";
-import { createMaintenanceSchema, updateMaintenanceSchema } from "../schemas/maintenance.schema";
+import { createMaintenanceSchema, updateMaintenanceSchema, fulfillMaintenanceSchema } from "../schemas/maintenance.schema";
 import { notifyRole, sendTelegramMessage } from "../services/TelegramService";
 import {
   checkStockAvailability,
   deductStockForRequest,
   reverseStockForRequest,
 } from "../services/InventorySyncService";
+
+// Helper for mapping inventory type to maintenance item category
+function mapInventoryTypeToCategory(type?: string): "STATIONERY" | "HOUSEHOLD" | "OTHER" {
+  if (type === "STATIONERY") return "STATIONERY";
+  if (type === "HOUSEHOLD") return "HOUSEHOLD";
+  return "OTHER";
+}
 
 // GET /api/maintenance - получить заявки с учетом роли
 router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ", "ACCOUNTANT"]), async (req, res) => {
@@ -108,6 +115,34 @@ router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER"
 router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER", "ZAVHOZ", "ACCOUNTANT"]), validate(createMaintenanceSchema), async (req, res) => {
   const { items, ...data } = req.body;
   const user = req.user!;
+
+  // Обрабатываем позиции: если передан inventoryItemId, берем канонические данные со склада
+  let processedItems: Array<{ name: string; quantity: number; unit: string; category: "STATIONERY" | "HOUSEHOLD" | "OTHER"; inventoryItemId?: number | null }> = [];
+  if (items && items.length > 0) {
+    processedItems = await Promise.all(
+      items.map(async (item: { name: string; quantity: number; unit: string; category: string; inventoryItemId?: number }) => {
+        if (item.inventoryItemId) {
+          const invItem = await prisma.inventoryItem.findUnique({ where: { id: item.inventoryItemId } });
+          if (invItem) {
+            return {
+              name: invItem.name,
+              quantity: item.quantity,
+              unit: invItem.unit,
+              category: mapInventoryTypeToCategory(invItem.type),
+              inventoryItemId: invItem.id,
+            };
+          }
+        }
+        return {
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: (item.category as any) || "OTHER",
+          inventoryItemId: item.inventoryItemId || null,
+        };
+      })
+    );
+  }
   
   const created = await prisma.maintenanceRequest.create({
     data: { 
@@ -115,14 +150,8 @@ router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER
       requesterId: user.employeeId,
       status: "PENDING", // Все новые заявки начинаются с PENDING
       // Nested write для создания позиций с привязкой к складу
-      items: items && items.length > 0 ? {
-        create: items.map((item: { name: string; quantity: number; unit: string; category: string; inventoryItemId?: number }) => ({
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          category: item.category,
-          inventoryItemId: item.inventoryItemId || null,
-        }))
+      items: processedItems.length > 0 ? {
+        create: processedItems
       } : undefined
     },
     include: {
@@ -225,6 +254,34 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
   if (previousStatus === "DONE" && newStatus && newStatus !== "DONE" && request.type === "ISSUE") {
     await reverseStockForRequest(id, user.employeeId);
   }
+
+  // Обрабатываем позиции при обновлении
+  let processedItems: Array<{ name: string; quantity: number; unit: string; category: "STATIONERY" | "HOUSEHOLD" | "OTHER"; inventoryItemId?: number | null }> | undefined = undefined;
+  if (items && Array.isArray(items)) {
+    processedItems = await Promise.all(
+      items.map(async (item: { name: string; quantity: number; unit: string; category: string; inventoryItemId?: number }) => {
+        if (item.inventoryItemId) {
+          const invItem = await prisma.inventoryItem.findUnique({ where: { id: item.inventoryItemId } });
+          if (invItem) {
+            return {
+              name: invItem.name,
+              quantity: item.quantity,
+              unit: invItem.unit,
+              category: mapInventoryTypeToCategory(invItem.type),
+              inventoryItemId: invItem.id,
+            };
+          }
+        }
+        return {
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: (item.category as any) || "OTHER",
+          inventoryItemId: item.inventoryItemId || null,
+        };
+      })
+    );
+  }
   
   // Если items передан, делаем полную замену позиций
   const updated = await prisma.maintenanceRequest.update({ 
@@ -232,15 +289,9 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
     data: {
       ...updateData,
       // Если items передан, удаляем старые и создаем новые
-      items: items ? {
+      items: processedItems ? {
         deleteMany: {}, // Удаляем все старые позиции
-        create: items.map((item: { name: string; quantity: number; unit: string; category: string; inventoryItemId?: number }) => ({
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          category: item.category,
-          inventoryItemId: item.inventoryItemId || null,
-        }))
+        create: processedItems
       } : undefined
     },
     include: {
@@ -308,6 +359,107 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
   }
 
   res.json(response);
+});
+
+// POST /api/maintenance/:id/fulfill - частичная или полная выдача завхозом
+router.post("/:id/fulfill", checkRole(["DEVELOPER", "DIRECTOR", "ADMIN", "ZAVHOZ"]), validate(fulfillMaintenanceSchema), async (req, res) => {
+  const id = Number(req.params.id);
+  const user = req.user!;
+  const { issuedItems } = req.body;
+
+  const request = await prisma.maintenanceRequest.findUnique({
+    where: { id },
+    include: {
+      items: true,
+      requester: {
+        include: {
+          user: { select: { id: true } }
+        }
+      }
+    }
+  });
+
+  if (!request) {
+    return res.status(404).json({ message: "Заявка не найдена" });
+  }
+
+  if (request.type !== "ISSUE") {
+    return res.status(400).json({ message: "Выдача доступна только для заявок на выдачу (ISSUE)" });
+  }
+
+  if (request.status !== "APPROVED" && request.status !== "IN_PROGRESS") {
+    return res.status(400).json({ message: "Выдавать можно только одобренные заявки или заявки в работе" });
+  }
+
+  // Списываем товары со склада с учетом переданных количеств
+  const stockResult = await deductStockForRequest(id, user.employeeId, issuedItems);
+
+  // Переводим заявку в статус DONE
+  const updated = await prisma.maintenanceRequest.update({
+    where: { id },
+    data: {
+      status: "DONE",
+    },
+    include: {
+      requester: {
+        include: {
+          user: { select: { id: true, role: true } }
+        }
+      },
+      approvedBy: true,
+      receivedBy: true,
+      items: {
+        include: {
+          inventoryItem: {
+            select: { id: true, name: true, quantity: true, unit: true, type: true }
+          }
+        }
+      }
+    }
+  });
+
+  // Проверяем, частичная ли выдача
+  const isPartial = updated.items.some(
+    (item) => (item.issuedQuantity ?? 0) < item.quantity
+  );
+
+  // 📱 Telegram уведомление заявителю о выдаче
+  try {
+    const requesterId = updated.requester.user?.id;
+    if (requesterId) {
+      const requestTitle = updated.title || `Заявка #${updated.id}`;
+      let message = isPartial
+        ? `⚠️ <b>Заявка выполнена ЧАСТИЧНО</b>\n\n`
+        : `✅ <b>Заявка выполнена полностью!</b>\n\n`;
+      
+      message += `🔢 ID заявки: #${updated.id}\n` +
+        `📝 Тема: ${requestTitle}\n\n` +
+        `📦 <b>Выдано со склада:</b>\n`;
+      
+      for (const item of updated.items) {
+        const issued = item.issuedQuantity ?? 0;
+        if (issued < item.quantity) {
+          message += `  • ${item.name}: <b>${issued}</b> из ${item.quantity} ${item.unit} (недостача: ${item.quantity - issued} ${item.unit})\n`;
+        } else {
+          message += `  • ${item.name}: <b>${issued}</b> ${item.unit} (выдано полностью)\n`;
+        }
+      }
+
+      message += isPartial
+        ? `\n<i>Пожалуйста, подтвердите получение выданной части товаров.</i>`
+        : `\n<i>Пожалуйста, подтвердите получение товаров.</i>`;
+
+      await sendTelegramMessage(requesterId, message);
+    }
+  } catch (error) {
+    console.error('Ошибка отправки Telegram уведомления:', error);
+  }
+
+  const response: any = updated;
+  response.stockDeduction = stockResult;
+  response.isPartial = isPartial;
+
+  return res.json(response);
 });
 
 // GET /api/maintenance/:id/stock-check - проверка наличия товаров на складе для заявки ISSUE
