@@ -11,6 +11,7 @@ import { Input} from '../components/ui/input';
 import { FormError} from '../components/ui/FormError';
 import { InventoryAutocomplete} from '../components/ui/InventoryAutocomplete';
 import { WarehouseItemPicker } from '../components/ui/WarehouseItemPicker';
+import { RequestItemsBuilder } from '../components/maintenance/RequestItemsBuilder';
 import { FulfillRequestModal } from '../components/modals/FulfillRequestModal';
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Trash2, AlertCircle, Edit, Plus, Wrench, Package, ClipboardList, Filter, Sparkles, Settings, CheckCircle, Clock, Loader2, X, Check, PlusCircle, MinusCircle} from 'lucide-react';
@@ -125,21 +126,17 @@ export default function MaintenancePage() {
  name: 'items',
 });
  
- // Отслеживаем тип заявки для условного отображения полей
- const watchType = watch('type');
+  // Отслеживаем тип заявки для условного отображения полей
+  const watchType = watch('type');
 
- // Очищаем items при переключении на REPAIR, восстанавливаем при ISSUE
- useEffect(() => {
- if (watchType === 'REPAIR') {
- // Для типа REPAIR убираем все items
- while (fields.length > 0) {
- remove(0);
-}
-} else if (watchType === 'ISSUE' && fields.length === 0) {
- // Для типа ISSUE добавляем хотя бы одну позицию, если их нет
- append({ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY', inventoryItemId: null});
-}
-}, [watchType, fields.length, remove, append]);
+  // Очищаем items при переключении на REPAIR
+  useEffect(() => {
+    if (watchType === 'REPAIR') {
+      while (fields.length > 0) {
+        remove(0);
+      }
+    }
+  }, [watchType, remove]);
 
  const fetchRequests = async () => {
  setLoading(true);
@@ -205,38 +202,36 @@ export default function MaintenancePage() {
 }
 }, [activeTab]);
 
- const handleCreate = () => {
- setEditingRequest(null);
- reset({ 
- title: '', 
- description: '', 
- type: 'REPAIR', // По умолчанию ремонт
- items: [], // Пустой массив для REPAIR
-});
- setIsModalOpen(true);
-};
+  const handleCreate = () => {
+    setEditingRequest(null);
+    reset({ 
+      title: '', 
+      description: '', 
+      type: 'ISSUE', // По умолчанию выдача
+      items: [],
+    });
+    setIsModalOpen(true);
+  };
 
- const handleEdit = (request: MaintenanceRequest) => {
- setEditingRequest(request);
- reset({
- title: request.title,
- description: request.description || '',
- type: request.type,
- status: request.status, // Добавляем текущий статус
- items: request.items && request.items.length > 0 
- ? request.items.map(item => ({
- name: item.name,
- quantity: item.quantity,
- unit: item.unit,
- category: item.category,
- inventoryItemId: item.inventoryItemId || null,
-}))
- : request.type === 'ISSUE' 
- ? [{ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY' as const, inventoryItemId: null}]
- : [], // Для REPAIR items должен быть пустым массивом
-});
- setIsModalOpen(true);
-};
+  const handleEdit = (request: MaintenanceRequest) => {
+    setEditingRequest(request);
+    reset({
+      title: request.title,
+      description: request.description || '',
+      type: request.type,
+      status: request.status,
+      items: request.items && request.items.length > 0 
+        ? request.items.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            category: item.category,
+            inventoryItemId: item.inventoryItemId || null,
+          }))
+        : [],
+    });
+    setIsModalOpen(true);
+  };
 
  const onSubmit = async (data: MaintenanceFormData) => {
  try {
@@ -1020,186 +1015,156 @@ export default function MaintenancePage() {
  )}
  </Card></PageSection>
   )}
+  {/* Create/Edit Modal */}
+  <Modal 
+    isOpen={isModalOpen} 
+    onClose={() => setIsModalOpen(false)} 
+    title={editingRequest ? 'Редактировать заявку' : watchType === 'ISSUE' ? 'Новая заявка на выдачу ТМЦ' : 'Новая заявка на ремонт'}
+    size="lg"
+  >
+    <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-5 space-y-4">
+      {/* Переключатель типа заявки (Segmented Control) */}
+      <div>
+        <label className="block text-[11px] uppercase font-bold text-text-tertiary mb-1.5 tracking-wider">
+          Тип заявки
+        </label>
+        <div className="grid grid-cols-2 gap-1.5 p-1 bg-fill-quaternary/80 rounded-2xl border border-separator/60">
+          <button
+            type="button"
+            disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
+            onClick={() => setValue('type', 'ISSUE')}
+            className={`py-2 px-3 rounded-xl font-semibold text-[13px] flex items-center justify-center gap-2 transition-all ${
+              watchType === 'ISSUE'
+                ? 'bg-white text-macos-blue shadow-sm border border-black/5'
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            <Package className="h-4 w-4" />
+            <span>Выдача со склада</span>
+          </button>
+          <button
+            type="button"
+            disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
+            onClick={() => setValue('type', 'REPAIR')}
+            className={`py-2 px-3 rounded-xl font-semibold text-[13px] flex items-center justify-center gap-2 transition-all ${
+              watchType === 'REPAIR'
+                ? 'bg-white text-macos-blue shadow-sm border border-black/5'
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            <Wrench className="h-4 w-4" />
+            <span>Ремонт и хозработы</span>
+          </button>
+        </div>
+        {errors.type && <FormError message={errors.type.message} />}
+      </div>
 
- {/* Create/Edit Modal */}
- <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingRequest ? 'Редактировать заявку' : 'Новая заявка на выдачу'}>
- <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
- <div>
- <label htmlFor="type"className="block mb-1 font-medium">Тип заявки</label>
- <select 
- {...register('type')} 
- id="type"
- className="w-full p-2 border rounded"
- disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
- >
- <option value="ISSUE">Выдача</option>
- <option value="REPAIR">Ремонт</option>
- </select>
- {errors.type && <FormError message={errors.type.message} />}
- </div>
+      {/* Поля для заявки на ВЫДАЧУ */}
+      {watchType === 'ISSUE' && (
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="title" className="block mb-1 text-[13px] font-bold text-text-primary">
+              Название заявки <span className="text-macos-red">*</span>
+            </label>
+            <Input 
+              {...register('title')} 
+              id="title" 
+              placeholder="Например: Канцтовары для 3А класса (на 1-ю четверть)" 
+              disabled={editingRequest !== null && userRole === 'ZAVHOZ'} 
+              className="h-10 text-[13.5px]"
+            />
+            {errors.title && <FormError message={errors.title.message} />}
+          </div>
 
- {/* Поля для заявки на ВЫДАЧУ - динамический список позиций */}
- {watchType === 'ISSUE' && (
- <>
- <div>
- <label htmlFor="title"className="block mb-1 font-medium">Название заявки <span className="text-macos-red">*</span></label>
- <Input {...register('title')} id="title"placeholder="Например: Канцтовары для 3А класса"disabled={editingRequest !== null && userRole === 'ZAVHOZ'} />
- {errors.title && <FormError message={errors.title.message} />}
- </div>
+          {/* Интерактивный билдер позиций с быстрым поиском и каталогом */}
+          <RequestItemsBuilder
+            items={(watch('items') as any) || []}
+            onAdd={(item) => append(item)}
+            onRemove={(index) => remove(index)}
+            onUpdateQuantity={(index, quantity) => {
+              setValue(`items.${index}.quantity`, quantity, { shouldValidate: true });
+            }}
+            disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
+            error={errors.items && typeof errors.items === 'object' && 'message' in errors.items ? (errors.items.message as string) : undefined}
+          />
+        </div>
+      )}
 
- <div>
- <div className="flex justify-between items-center mb-2">
- <label className="font-medium">Позиции заявки <span className="text-macos-red">*</span></label>
- {!(editingRequest !== null && userRole === 'ZAVHOZ') && (
- <Button
- type="button"
- variant="outline"
- size="sm"
- onClick={() => append({ name: '', quantity: 1, unit: 'шт', category: 'STATIONERY', inventoryItemId: null})}
- >
- <PlusCircle className="h-4 w-4 mr-1"/> Добавить позицию
- </Button>
- )}
- </div>
- 
- {errors.items && typeof errors.items === 'object' && 'message' in errors.items && (
- <FormError message={errors.items.message as string} />
- )}
+      {/* Поля для заявки на РЕМОНТ */}
+      {watchType === 'REPAIR' && (
+        <div className="space-y-3">
+          <div>
+            <label htmlFor="title" className="block mb-1 text-[13px] font-bold text-text-primary">
+              Тема / Описание неисправности <span className="text-macos-red">*</span>
+            </label>
+            <Input 
+              {...register('title')} 
+              id="title" 
+              placeholder="Например: Замена лампы в каб. 204 или ремонт дверного замка" 
+              disabled={editingRequest !== null && userRole === 'ZAVHOZ'} 
+              className="h-10 text-[13.5px]"
+            />
+            {errors.title && <FormError message={errors.title.message} />}
+          </div>
+        </div>
+      )}
 
- <div className="space-y-3 max-h-64 overflow-y-auto">
- {fields.map((field, index) => (
- <div key={field.id} className="p-3 bg-fill-quaternary rounded-lg border">
- <div className="flex justify-between items-start mb-2">
- <span className="text-[11px] font-medium uppercase tracking-widest text-secondary">Позиция {index + 1}</span>
- {fields.length > 1 && !(editingRequest !== null && userRole === 'ZAVHOZ') && (
- <Button
- type="button"
- variant="ghost"
- size="sm"
- onClick={() => remove(index)}
- className="text-macos-red hover:text-macos-red h-6 w-6 p-0"
- >
- <MinusCircle className="h-4 w-4"/>
- </Button>
- )}
- </div>
- 
-                <div className="space-y-2">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-text-tertiary mb-1">
-                      Товар со склада <span className="text-macos-red">*</span>
-                    </label>
-                    <WarehouseItemPicker
-                      value={watch(`items.${index}.inventoryItemId`)}
-                      selectedName={watch(`items.${index}.name`)}
-                      selectedUnit={watch(`items.${index}.unit`)}
-                      selectedCategory={watch(`items.${index}.category`)}
-                      onSelect={(selectedItem) => {
-                        setValue(`items.${index}.name`, selectedItem.name);
-                        setValue(`items.${index}.unit`, selectedItem.unit);
-                        setValue(`items.${index}.inventoryItemId`, selectedItem.id);
-                        const cat = selectedItem.type === 'STATIONERY'
-                          ? 'STATIONERY'
-                          : selectedItem.type === 'HOUSEHOLD'
-                          ? 'HOUSEHOLD'
-                          : 'OTHER';
-                        setValue(`items.${index}.category`, cat);
-                      }}
-                      onClear={() => {
-                        setValue(`items.${index}.name`, '');
-                        setValue(`items.${index}.unit`, '');
-                        setValue(`items.${index}.inventoryItemId`, null);
-                      }}
-                      disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
-                      error={errors.items?.[index]?.name?.message}
-                      excludeItemIds={fields
-                        .map((_, i) => (i !== index ? watch(`items.${i}.inventoryItemId`) : null))
-                        .filter((id): id is number => typeof id === 'number')}
-                    />
-                    {errors.items?.[index]?.name && (
-                      <FormError message={errors.items[index]?.name?.message} />
-                    )}
-                  </div>
+      {/* Описание / Примечание */}
+      <div>
+        <label htmlFor="description" className="block mb-1 text-[12.5px] font-semibold text-text-secondary">
+          Примечание / комментарий {watchType === 'ISSUE' && '(необязательно)'}
+        </label>
+        <textarea 
+          {...register('description')} 
+          id="description" 
+          className="w-full p-2.5 border border-separator/80 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-macos-blue/40 bg-white" 
+          rows={2} 
+          placeholder="Дополнительные пожелания или комментарий для завхоза..." 
+          disabled={editingRequest !== null && userRole === 'ZAVHOZ'} 
+        />
+      </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <label className="block text-[10px] uppercase font-bold text-text-tertiary mb-0.5">
-                        Количество <span className="text-macos-red">*</span>
-                      </label>
-                      <Input
-                        {...register(`items.${index}.quantity`, { valueAsNumber: true })}
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        placeholder="Кол-во"
-                        className="text-sm"
-                        disabled={editingRequest !== null && userRole === 'ZAVHOZ'}
-                      />
-                      {errors.items?.[index]?.quantity && (
-                        <FormError message={errors.items[index]?.quantity?.message} />
-                      )}
-                    </div>
+      {/* Завхоз может менять статус APPROVED -> IN_PROGRESS -> DONE */}
+      {userRole === 'ZAVHOZ' && editingRequest && (editingRequest.status === 'APPROVED' || editingRequest.status === 'IN_PROGRESS' || editingRequest.status === 'DONE') && (
+        <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1.5">
+          <label htmlFor="status" className="block text-[12px] font-bold uppercase text-amber-900">
+            Статус выполнения заявки:
+          </label>
+          <select 
+            {...register('status')} 
+            id="status" 
+            className="w-full p-2 border border-amber-300 rounded-lg text-sm bg-white font-medium"
+          >
+            <option value="APPROVED">Одобрено</option>
+            <option value="IN_PROGRESS">В работе</option>
+            <option value="DONE">Выполнено</option>
+          </select>
+          {errors.status && <FormError message={errors.status.message} />}
+        </div>
+      )}
 
-                    <div className="w-24">
-                      <label className="block text-[10px] uppercase font-bold text-text-tertiary mb-0.5">
-                        Ед. изм
-                      </label>
-                      <div className="h-9 px-3 rounded-lg border border-separator/60 bg-fill-quaternary/40 flex items-center text-sm font-medium text-text-secondary">
-                        {watch(`items.${index}.unit`) || '—'}
-                      </div>
-                    </div>
-
-                    <div className="w-28">
-                      <label className="block text-[10px] uppercase font-bold text-text-tertiary mb-0.5">
-                        Категория
-                      </label>
-                      <div className="h-9 px-2.5 rounded-lg border border-separator/60 bg-fill-quaternary/40 flex items-center text-xs font-semibold text-text-secondary truncate">
-                        {itemCategoryLabels[watch(`items.${index}.category`)] || '—'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
- </div>
- ))}
- </div>
- </div>
- </>
- )}
-
- {/* Поля для заявки на РЕМОНТ */}
- {watchType === 'REPAIR' && (
- <div>
- <label htmlFor="title"className="block mb-1 font-medium">Тема <span className="text-macos-red">*</span></label>
- <Input {...register('title')} id="title"placeholder="Кратко опишите проблему"disabled={editingRequest !== null && userRole === 'ZAVHOZ'} />
- {errors.title && <FormError message={errors.title.message} />}
- </div>
- )}
-
- <div>
- <label htmlFor="description"className="block mb-1 font-medium">Описание {watchType === 'ISSUE' && '(необязательно)'}</label>
- <textarea {...register('description')} id="description"className="w-full p-2 border rounded"rows={3} placeholder="Подробности..."disabled={editingRequest !== null && userRole === 'ZAVHOZ'} />
- </div>
-
- {/* Завхоз может менять статус APPROVED -> IN_PROGRESS -> DONE */}
- {userRole === 'ZAVHOZ' && editingRequest && (editingRequest.status === 'APPROVED' || editingRequest.status === 'IN_PROGRESS' || editingRequest.status === 'DONE') && (
- <div>
- <label htmlFor="status"className="block mb-1 font-medium">Статус заявки <span className="text-macos-red">*</span></label>
- <select {...register('status')} id="status"className="w-full p-2 border rounded">
- <option value="APPROVED">Одобрено</option>
- <option value="IN_PROGRESS">В работе</option>
- <option value="DONE">Выполнено</option>
- </select>
- {errors.status && <FormError message={errors.status.message} />}
- <p className="text-sm text-secondary mt-1">Вы можете изменять только статус выполнения заявки</p>
- </div>
- )}
-
- <div className="flex justify-end gap-2 pt-4">
- <Button type="button"variant="ghost"onClick={() => setIsModalOpen(false)}>Отмена</Button>
- <Button type="submit"disabled={isSubmitting}>{isSubmitting ? 'Сохранение...' : 'Сохранить'}</Button>
- </div>
- </form>
- </Modal>
+      <div className="flex justify-end gap-2.5 pt-3 border-t border-separator/60">
+        <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+          Отмена
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="bg-macos-blue hover:bg-macos-blue/90 text-white font-semibold px-5"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Сохранение...
+            </>
+          ) : editingRequest ? (
+            'Сохранить изменения'
+          ) : (
+            'Создать заявку'
+          )}
+        </Button>
+      </div>
+    </form>
+  </Modal>
 
  {/* Approve Modal */}
  <Modal isOpen={approveModalOpen} onClose={() => setApproveModalOpen(false)} title="Одобрение заявки">
