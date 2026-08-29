@@ -34,6 +34,12 @@ import NotFoundPage from "../pages/NotFoundPage";
 import { FULL_ACCESS_ROLES } from "../types/common";
 import { Spinner } from "../components/ui/LoadingState";
 
+import ClassProfilePage from "../pages/education/ClassProfilePage";
+import SubjectPage from "../pages/education/SubjectPage";
+import ScheduleConstructor from "../pages/education/ScheduleConstructor";
+import CommunicationHub from "../pages/chat/CommunicationHub";
+import JournalPage from '../pages/journal/JournalPage';
+
 // LMS Pages
 import LmsSchoolDashboard from "../pages/lms/LmsSchoolDashboard";
 import LmsClassesPage from "../pages/lms/LmsClassesPage";
@@ -52,6 +58,14 @@ import ExamTakePage from "../pages/ExamTakePage";
 // Knowledge Base Pages
 import ArticleList from "../pages/KnowledgeBase/ArticleList";
 import ArticleView from "../pages/KnowledgeBase/ArticleView";
+
+// ==========================================
+// ТВОИ НОВЫЕ СТРАНИЦЫ (из новых папок)
+// ==========================================
+import ColorsTrainer from "../pages/education/subjects/languages/vocabulary/ColorsTrainer";
+import ColorsTest from "../pages/education/subjects/languages/vocabulary/ColorsTest";
+import GrammarFillBlank from "../pages/education/subjects/languages/grammar/GrammarFillBlank";
+import ListeningExercise from "../pages/education/subjects/languages/listening/ListeningExercise";
 
 function LoadingScreen() {
   return (
@@ -144,7 +158,12 @@ export default function Router() {
       </Route>
 
       <Route element={<PrivateRoute />}>
-        {/* ERP Routes - доступны всем ролям включая учителей */}
+        
+        {/* НОВЫЙ ERP КОНТУР */}
+        <Route path="education/schedule-constructor" element={<ScheduleConstructor />} />
+        <Route path="chat" element={<CommunicationHub />} />
+        <Route path="/journal" element={<JournalPage />} />
+        
         <Route path="/" element={<MainLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
@@ -170,6 +189,13 @@ export default function Router() {
             <Route element={<RoleBasedRoute roles={["DEPUTY", "ADMIN"]} />}>
               <Route path="action-log" element={<ActionLogPage />} />
             </Route>
+
+            <Route path="education/class/:classId/subject/:subjectId/trainer/:topicId" element={<ColorsTrainer />} />
+            <Route path="education/class/:classId/subject/:subjectId/test/:topicId" element={<ColorsTest />} />
+            <Route path="education/class/:classId/subject/:subjectId/grammar-trainer/:topicId" element={<GrammarFillBlank mode="trainer" />} />
+            <Route path="education/class/:classId/subject/:subjectId/grammar-test/:topicId" element={<GrammarFillBlank mode="test" />} />
+            <Route path="education/class/:classId/subject/:subjectId/listening-trainer/:topicId" element={<ListeningExercise mode="trainer" />} />
+            <Route path="education/class/:classId/subject/:subjectId/listening-test/:topicId" element={<ListeningExercise mode="test" />} />
 
             <Route element={<RoleBasedRoute roles={["ADMIN"]} />}>
               <Route path="users" element={<UsersPage />} />
