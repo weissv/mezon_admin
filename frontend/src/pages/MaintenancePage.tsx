@@ -1222,19 +1222,45 @@ export default function MaintenancePage() {
             {errors.type && <FormError message={errors.type.message} />}
           </div>
 
+          {/* Поясняющий баннер для типа заявки */}
+          {watchType === 'PURCHASE' && (
+            <div className="flex items-start gap-2.5 px-3.5 py-2.5 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl text-[12px] text-emerald-950">
+              <ShoppingCart className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-emerald-900">Заявка на покупку (закупку) ТМЦ</p>
+                <p className="text-[11.5px] text-emerald-800/90 mt-0.5">
+                  Предназначена для заказа новых товаров, которых нет в школе, либо пополнения закончившихся складских позиций (остаток 0). Товары, имеющиеся в наличии, выдаются через режим «Выдача».
+                </p>
+              </div>
+            </div>
+          )}
+
+          {watchType === 'ISSUE' && (
+            <div className="flex items-start gap-2.5 px-3.5 py-2.5 bg-purple-50/80 border border-purple-200/90 rounded-2xl text-[12px] text-purple-950">
+              <Package className="h-4 w-4 text-purple-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-purple-900">Заявка на выдачу материалов со склада</p>
+                <p className="text-[11.5px] text-purple-800/90 mt-0.5">
+                  Получение канцелярии и хозтоваров из фактического наличия на складе. Если товар закончился (остаток 0), переключитесь на «Покупку».
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Поля для заявки на ВЫДАЧУ или ПОКУПКУ */}
           {(watchType === 'ISSUE' || watchType === 'PURCHASE') && (
             <div className="space-y-4">
               <div>
                 <label htmlFor="title" className="block mb-1 text-[13px] font-bold text-text-primary">
-                  Название заявки <span className="text-macos-red">*</span>
+                  {watchType === 'PURCHASE' ? 'Тема / Название закупки' : 'Название заявки'}{' '}
+                  <span className="text-macos-red">*</span>
                 </label>
                 <Input 
                   {...register('title')} 
                   id="title" 
                   placeholder={
                     watchType === 'PURCHASE'
-                      ? 'Например: Закупка бумаги А4 и картриджей для учительской'
+                      ? 'Например: Учебные наборы по робототехнике или закупка бумаги А4 для учительской'
                       : 'Например: Канцтовары для 3А класса (на 1-ю четверть)'
                   } 
                   className="h-10 text-[13.5px]"
@@ -1250,6 +1276,19 @@ export default function MaintenancePage() {
                 onRemove={(index) => remove(index)}
                 onUpdateQuantity={(index, quantity) => {
                   setValue(`items.${index}.quantity`, quantity, { shouldValidate: true });
+                }}
+                onSwitchMode={(targetMode, preselectedItem) => {
+                  setValue('type', targetMode);
+                  if (preselectedItem) {
+                    append({
+                      name: preselectedItem.name,
+                      quantity: 1,
+                      unit: preselectedItem.unit,
+                      category: (preselectedItem.type === 'STATIONERY' ? 'STATIONERY' : preselectedItem.type === 'HOUSEHOLD' ? 'HOUSEHOLD' : 'OTHER'),
+                      inventoryItemId: preselectedItem.id,
+                    });
+                    toast.info(`Режим переключен на «Выдача со склада». Товар "${preselectedItem.name}" добавлен в заявку.`);
+                  }
                 }}
                 error={errors.items && typeof errors.items === 'object' && 'message' in errors.items ? (errors.items.message as string) : undefined}
               />
@@ -1274,17 +1313,23 @@ export default function MaintenancePage() {
             </div>
           )}
 
-          {/* Описание / Примечание */}
+          {/* Описание / Обоснование */}
           <div>
             <label htmlFor="description" className="block mb-1 text-[12.5px] font-semibold text-text-secondary">
-              Примечание / комментарий {watchType !== 'REPAIR' && '(необязательно)'}
+              {watchType === 'PURCHASE'
+                ? 'Обоснование закупки (для кого / для чего требуется закупка)'
+                : `Примечание / комментарий ${watchType !== 'REPAIR' ? '(необязательно)' : ''}`}
             </label>
             <textarea 
               {...register('description')} 
               id="description" 
               className="w-full p-2.5 border border-separator/80 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-macos-blue/40 bg-white" 
               rows={2} 
-              placeholder="Дополнительные пожелания или комментарий для завхоза..." 
+              placeholder={
+                watchType === 'PURCHASE'
+                  ? 'Укажите цель закупки, для какого класса, кабинета или открытого урока требуются материалы (необходимо для согласования завучем/директором)...'
+                  : 'Дополнительные пожелания или комментарий для завхоза...'
+              } 
             />
           </div>
 

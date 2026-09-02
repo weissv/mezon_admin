@@ -130,6 +130,20 @@ router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER
     }
   }
 
+  // Для заявок на покупку (PURCHASE) проверяем, что выбранный товар не имеет остатка в наличии на складе
+  if (data.type === "PURCHASE" && items && items.length > 0) {
+    for (const item of items) {
+      if (item.inventoryItemId) {
+        const invItem = await prisma.inventoryItem.findUnique({ where: { id: item.inventoryItemId } });
+        if (invItem && invItem.quantity > 0) {
+          return res.status(400).json({
+            message: `Товар "${invItem.name}" уже есть на складе в наличии (${invItem.quantity} ${invItem.unit}). Закупка не требуется — пожалуйста, оформите заявку на выдачу со склада.`,
+          });
+        }
+      }
+    }
+  }
+
   // Обрабатываем позиции: если передан inventoryItemId, берем канонические данные со склада
   let processedItems: Array<{ name: string; quantity: number; unit: string; category: "STATIONERY" | "HOUSEHOLD" | "OTHER"; inventoryItemId?: number | null }> = [];
   if (items && items.length > 0) {
@@ -242,6 +256,34 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
   const { items, ...updateData } = req.body;
   const previousStatus = request.status;
   const newStatus = updateData.status;
+  const effectiveType = updateData.type || request.type;
+
+  // Проверка позиций при обновлении:
+  if (effectiveType === "PURCHASE" && items && items.length > 0) {
+    for (const item of items) {
+      if (item.inventoryItemId) {
+        const invItem = await prisma.inventoryItem.findUnique({ where: { id: item.inventoryItemId } });
+        if (invItem && invItem.quantity > 0) {
+          return res.status(400).json({
+            message: `Товар "${invItem.name}" уже есть на складе в наличии (${invItem.quantity} ${invItem.unit}). Закупка не требуется — пожалуйста, оформите заявку на выдачу со склада.`,
+          });
+        }
+      }
+    }
+  }
+
+  if (effectiveType === "ISSUE" && items && items.length > 0) {
+    for (const item of items) {
+      if (item.inventoryItemId) {
+        const invItem = await prisma.inventoryItem.findUnique({ where: { id: item.inventoryItemId } });
+        if (!invItem || invItem.quantity <= 0) {
+          return res.status(400).json({
+            message: `Товар "${invItem?.name || item.name}" отсутствует на складе (остаток 0). Пожалуйста, оформите заявку на покупку.`,
+          });
+        }
+      }
+    }
+  }
   
   // Проверка: если переход в DONE для ISSUE — проверяем остатки на складе
   if (newStatus === "DONE" && previousStatus !== "DONE" && request.type === "ISSUE") {
