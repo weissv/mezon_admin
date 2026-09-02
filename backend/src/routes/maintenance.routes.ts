@@ -116,6 +116,20 @@ router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER
   const { items, ...data } = req.body;
   const user = req.user!;
 
+  // Для заявок на выдачу (ISSUE) проверяем, что ни один выбранный товар не имеет нулевой остаток
+  if (data.type === "ISSUE" && items && items.length > 0) {
+    for (const item of items) {
+      if (item.inventoryItemId) {
+        const invItem = await prisma.inventoryItem.findUnique({ where: { id: item.inventoryItemId } });
+        if (!invItem || invItem.quantity <= 0) {
+          return res.status(400).json({
+            message: `Товар "${invItem?.name || item.name}" отсутствует на складе (остаток 0). Пожалуйста, оформите заявку на покупку.`,
+          });
+        }
+      }
+    }
+  }
+
   // Обрабатываем позиции: если передан inventoryItemId, берем канонические данные со склада
   let processedItems: Array<{ name: string; quantity: number; unit: string; category: "STATIONERY" | "HOUSEHOLD" | "OTHER"; inventoryItemId?: number | null }> = [];
   if (items && items.length > 0) {
@@ -170,11 +184,13 @@ router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER
   try {
     const requesterName = `${created.requester.firstName} ${created.requester.lastName}`;
     const requestTitle = created.title || `Заявка #${created.id}`;
+    const typeLabel = created.type === "PURCHASE" ? "на покупку" : created.type === "ISSUE" ? "на выдачу ТМЦ" : "на ремонт";
+    const typeIcon = created.type === "PURCHASE" ? "🛒" : created.type === "ISSUE" ? "📦" : "🔧";
     
     if (user.role === 'TEACHER') {
       // Учитель -> уведомляем Завуча (DEPUTY)
       await notifyRole('DEPUTY', 
-        `📋 <b>Новая заявка от учителя</b>\n\n` +
+        `${typeIcon} <b>Новая заявка ${typeLabel} от учителя</b>\n\n` +
         `👤 От: ${requesterName}\n` +
         `📝 Тема: ${requestTitle}\n` +
         `🔢 ID заявки: #${created.id}`
@@ -182,7 +198,7 @@ router.post("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACHER
     } else {
       // Не учитель -> уведомляем Директора
       await notifyRole('DIRECTOR', 
-        `📋 <b>Новая заявка</b>\n\n` +
+        `${typeIcon} <b>Новая заявка ${typeLabel}</b>\n\n` +
         `👤 От: ${requesterName} (${user.role})\n` +
         `📝 Тема: ${requestTitle}\n` +
         `🔢 ID заявки: #${created.id}`
@@ -215,23 +231,13 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
     return res.status(404).json({ message: "Заявка не найдена" });
   }
   
-  // Учитель не может редактировать одобренную заявку
-  if (user.role === "TEACHER" && request.status === "APPROVED") {
-    return res.status(403).json({ message: "Нельзя редактировать одобренную заявку" });
+  // Учитель не может редактировать одобренную, выполненную или завершенную заявку
+  if (user.role === "TEACHER" && (request.status === "APPROVED" || request.status === "DONE" || request.status === "COMPLETED")) {
+    return res.status(403).json({ message: "Нельзя редактировать согласованную или выполненную заявку" });
   }
   
-  // Завхоз может редактировать только одобренные заявки (APPROVED, IN_PROGRESS, DONE)
-  // и только менять статус, но не содержимое
-  if (user.role === "ZAVHOZ") {
-    if (request.status !== "APPROVED" && request.status !== "IN_PROGRESS" && request.status !== "DONE") {
-      return res.status(403).json({ message: "Вы можете редактировать только одобренные заявки" });
-    }
-    // Завхоз может менять только статус
-    const { status } = req.body;
-    if (!status || (status !== "APPROVED" && status !== "IN_PROGRESS" && status !== "DONE")) {
-      return res.status(403).json({ message: "Вы можете изменять только статус заявки" });
-    }
-  }
+  // Завхоз, Директор, Завуч, Админ и Разработчик имеют право редактировать заявки
+  // (исправлять позиции, удалять, добавлять новые со склада или вручную, менять количество и статус)
   
   const { items, ...updateData } = req.body;
   const previousStatus = request.status;
@@ -536,12 +542,16 @@ router.post("/:id/approve", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY"]), asyn
   // 📱 Telegram уведомление Завхозу об одобренной заявке
   try {
     const requestTitle = updated.title || `Заявка #${updated.id}`;
+    const typeLabel = updated.type === "PURCHASE" ? "на покупку" : updated.type === "ISSUE" ? "на выдачу ТМЦ" : "на ремонт";
+    const typeAction = updated.type === "PURCHASE" ? "Готова к закупке" : updated.type === "ISSUE" ? "Готова к выдаче со склада" : "Готова к выполнению";
+    const typeIcon = updated.type === "PURCHASE" ? "🛒" : updated.type === "ISSUE" ? "📦" : "🔧";
+    
     await notifyRole('ZAVHOZ', 
-      `✅ <b>Заявка одобрена</b>\n\n` +
+      `${typeIcon} <b>Заявка ${typeLabel} одобрена</b>\n\n` +
       `🔢 ID заявки: #${updated.id}\n` +
       `📝 Тема: ${requestTitle}\n` +
       `👤 От: ${updated.requester.firstName} ${updated.requester.lastName}\n\n` +
-      `⚡ Готова к выполнению`
+      `⚡ ${typeAction}`
     );
   } catch (error) {
     console.error('Ошибка отправки Telegram уведомления:', error);

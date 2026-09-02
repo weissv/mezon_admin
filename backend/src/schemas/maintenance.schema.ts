@@ -14,17 +14,17 @@ export const createMaintenanceSchema = z.object({
   body: z.object({
     title: z.string().min(3, "Наименование обязательно (минимум 3 символа)"),
     description: z.string().optional(),
-    type: z.enum(["REPAIR", "ISSUE"]),
-    // Массив позиций для заявок типа ISSUE (выдача)
+    type: z.enum(["REPAIR", "ISSUE", "PURCHASE"]),
+    // Массив позиций для заявок типа ISSUE (выдача) и PURCHASE (покупка)
     items: z.array(maintenanceItemSchema).optional(),
   }).refine((data) => {
-    // Если тип ISSUE, то items должен содержать хотя бы одну позицию
-    if (data.type === "ISSUE") {
+    // Если тип ISSUE или PURCHASE, то items должен содержать хотя бы одну позицию
+    if (data.type === "ISSUE" || data.type === "PURCHASE") {
       return data.items && data.items.length > 0;
     }
     return true;
   }, {
-    message: "Для заявки на выдачу необходимо добавить хотя бы одну позицию",
+    message: "Для заявки на выдачу или покупку необходимо добавить хотя бы одну позицию",
     path: ["items"],
   }),
 });
@@ -35,7 +35,7 @@ export const updateMaintenanceSchema = z.object({
     title: z.string().min(3).optional(),
     description: z.string().optional(),
     status: z.enum(["PENDING", "APPROVED", "REJECTED", "IN_PROGRESS", "DONE", "COMPLETED"]).optional(),
-    type: z.enum(["REPAIR", "ISSUE"]).optional(),
+    type: z.enum(["REPAIR", "ISSUE", "PURCHASE"]).optional(),
     // Массив позиций для обновления (полная замена)
     items: z.array(maintenanceItemSchema).optional(),
   }),

@@ -138,6 +138,7 @@ export type InventoryType = keyof typeof INVENTORY_TYPE;
 export const MAINTENANCE_TYPE = {
   REPAIR: 'REPAIR',
   ISSUE: 'ISSUE',
+  PURCHASE: 'PURCHASE',
 } as const;
 
 export type MaintenanceType = keyof typeof MAINTENANCE_TYPE;

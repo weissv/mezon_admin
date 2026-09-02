@@ -14,6 +14,9 @@ import {
   PlusCircle,
   MinusCircle,
   ShoppingBag,
+  ShoppingCart,
+  Edit3,
+  Info,
 } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -43,6 +46,7 @@ interface RequestItemsBuilderProps {
   onAdd: (item: RequestItemRow) => void;
   onRemove: (index: number) => void;
   onUpdateQuantity: (index: number, quantity: number) => void;
+  mode?: 'ISSUE' | 'PURCHASE';
   disabled?: boolean;
   error?: string;
 }
@@ -52,6 +56,7 @@ export function RequestItemsBuilder({
   onAdd,
   onRemove,
   onUpdateQuantity,
+  mode = 'ISSUE',
   disabled = false,
   error,
 }: RequestItemsBuilderProps) {
@@ -65,6 +70,13 @@ export function RequestItemsBuilder({
   const [addQuantity, setAddQuantity] = useState<number>(1);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+
+  // Custom Item state (primarily for PURCHASE mode or custom requests)
+  const [isCustomMode, setIsCustomMode] = useState(false);
+  const [customName, setCustomName] = useState('');
+  const [customQuantity, setCustomQuantity] = useState<number>(1);
+  const [customUnit, setCustomUnit] = useState('шт');
+  const [customCategory, setCustomCategory] = useState<ItemCategory>('STATIONERY');
 
   // Catalog browse modal toggle
   const [showCatalogModal, setShowCatalogModal] = useState(false);
@@ -122,6 +134,10 @@ export function RequestItemsBuilder({
 
   // Handle select from dropdown
   const handleSelectStockItem = (item: WarehouseStockItem) => {
+    if (mode === 'ISSUE' && item.quantity <= 0) {
+      // In ISSUE mode, cannot select 0-stock items
+      return;
+    }
     setSelectedStockItem(item);
     setSearchQuery(item.name);
     setIsDropdownOpen(false);
@@ -132,6 +148,10 @@ export function RequestItemsBuilder({
   const handleQuickAdd = () => {
     if (!selectedStockItem) return;
     if (addQuantity <= 0) return;
+
+    if (mode === 'ISSUE' && selectedStockItem.quantity <= 0) {
+      return;
+    }
 
     // Check if already in list
     const existingIndex = items.findIndex(
@@ -161,8 +181,28 @@ export function RequestItemsBuilder({
     searchInputRef.current?.focus();
   };
 
+  // Handle adding custom item (for PURCHASE mode or items not in warehouse catalogue)
+  const handleAddCustomItem = () => {
+    if (!customName.trim()) return;
+    if (customQuantity <= 0) return;
+
+    onAdd({
+      name: customName.trim(),
+      quantity: customQuantity,
+      unit: customUnit.trim() || 'шт',
+      category: customCategory,
+      inventoryItemId: null,
+    });
+
+    setCustomName('');
+    setCustomQuantity(1);
+  };
+
   // Quick 1-click add directly from catalog browser
   const handleCatalogDirectAdd = (item: WarehouseStockItem) => {
+    if (mode === 'ISSUE' && item.quantity <= 0) {
+      return;
+    }
     const existingIndex = items.findIndex((it) => it.inventoryItemId === item.id);
     if (existingIndex !== -1) {
       onUpdateQuantity(existingIndex, items[existingIndex].quantity + 1);
@@ -195,15 +235,37 @@ export function RequestItemsBuilder({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-separator/60 pb-2.5">
         <div>
           <label className="text-[13px] font-bold text-text-primary flex items-center gap-2">
-            <ShoppingBag className="h-4 w-4 text-macos-blue" />
-            Позиции заявки <span className="text-macos-red">*</span>
+            {mode === 'PURCHASE' ? (
+              <ShoppingCart className="h-4 w-4 text-emerald-600" />
+            ) : (
+              <ShoppingBag className="h-4 w-4 text-macos-blue" />
+            )}
+            <span>
+              {mode === 'PURCHASE' ? 'Позиции для закупки / покупки' : 'Позиции для выдачи со склада'}
+            </span>
+            <span className="text-macos-red">*</span>
           </label>
           <p className="text-[11.5px] text-text-secondary mt-0.5">
-            Выберите товары из наличия на складе с указанием нужного количества
+            {mode === 'PURCHASE'
+              ? 'Укажите товары для закупки: выберите из каталога или введите произвольные наименования'
+              : 'Выберите товары из наличия на складе (позиции с остатком 0 недоступны для выдачи)'}
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {mode === 'PURCHASE' && (
+            <Button
+              type="button"
+              variant={isCustomMode ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setIsCustomMode(!isCustomMode)}
+              className={`text-[12px] h-8 ${isCustomMode ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-fill-quaternary/40 hover:bg-fill-tertiary border-separator/80'}`}
+            >
+              <Edit3 className="h-3.5 w-3.5 mr-1.5" />
+              {isCustomMode ? 'Складской каталог' : '+ Произвольный товар'}
+            </Button>
+          )}
+
           <Button
             type="button"
             variant="outline"
@@ -217,13 +279,114 @@ export function RequestItemsBuilder({
         </div>
       </div>
 
-      {/* ----------------- QUICK ADD BAR ----------------- */}
-      {!disabled && (
+      {/* ----------------- INFORMATIONAL NOTICE ----------------- */}
+      {mode === 'ISSUE' ? (
+        <div className="flex items-center gap-2 px-3 py-2 bg-blue-50/70 border border-blue-200/80 rounded-xl text-[12px] text-blue-900">
+          <Info className="h-4 w-4 text-blue-600 shrink-0" />
+          <span>
+            <strong>Только товары в наличии:</strong> позиции с нулевым остатком недоступны для выдачи. Если нужного товара нет на складе, переключите тип заявки на <strong>«Заявка на покупку»</strong>.
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-[12px] text-emerald-900">
+          <ShoppingCart className="h-4 w-4 text-emerald-600 shrink-0" />
+          <span>
+            <strong>Заявка на закупку:</strong> вы можете запросить пополнение закончившихся товаров склада или заказ новых позиций, которых ещё нет в номенклатуре.
+          </span>
+        </div>
+      )}
+
+      {/* ----------------- CUSTOM ITEM ADD FORM (PURCHASE MODE) ----------------- */}
+      {!disabled && isCustomMode && mode === 'PURCHASE' && (
+        <div className="p-3.5 bg-gradient-to-r from-emerald-50/60 via-emerald-50/30 to-emerald-50/60 rounded-2xl border border-emerald-200/90 shadow-subtle space-y-3 animate-in fade-in-50 duration-150">
+          <div className="flex items-center justify-between">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+              <Edit3 className="h-3.5 w-3.5 text-emerald-600" />
+              Добавление произвольного товара (нет на складе):
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+            <div className="sm:col-span-5">
+              <input
+                type="text"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="Наименование товара (например: Проектор, Маркеры белые 10 шт)..."
+                className="w-full px-3 py-2 text-[13px] bg-white border border-emerald-300/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/40 shadow-subtle"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddCustomItem();
+                  }
+                }}
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={customQuantity}
+                onChange={(e) => setCustomQuantity(parseFloat(e.target.value) || 1)}
+                placeholder="Кол-во"
+                className="w-full px-3 py-2 text-center font-mono font-bold text-[13px] bg-white border border-emerald-300/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/40 shadow-subtle"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <select
+                value={customUnit}
+                onChange={(e) => setCustomUnit(e.target.value)}
+                className="w-full px-2 py-2 text-[12.5px] bg-white border border-emerald-300/80 rounded-xl focus:outline-none font-medium"
+              >
+                <option value="шт">шт</option>
+                <option value="упак">упак</option>
+                <option value="пачка">пачка</option>
+                <option value="коробка">коробка</option>
+                <option value="комплект">комплект</option>
+                <option value="набор">набор</option>
+                <option value="кг">кг</option>
+                <option value="л">л</option>
+                <option value="рулон">рулон</option>
+                <option value="м">м</option>
+              </select>
+            </div>
+
+            <div className="sm:col-span-3 flex items-center gap-1.5">
+              <select
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value as ItemCategory)}
+                className="flex-1 px-2 py-2 text-[12px] bg-white border border-emerald-300/80 rounded-xl focus:outline-none font-medium"
+              >
+                <option value="STATIONERY">Канцтовары</option>
+                <option value="HOUSEHOLD">Хозтовары</option>
+                <option value="OTHER">Прочее</option>
+              </select>
+
+              <Button
+                type="button"
+                onClick={handleAddCustomItem}
+                disabled={!customName.trim() || customQuantity <= 0}
+                className="h-9 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[12.5px] shadow-sm shrink-0"
+              >
+                <Plus className="h-4 w-4 mr-0.5" /> Добавить
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ----------------- QUICK ADD BAR (FROM WAREHOUSE CATALOG) ----------------- */}
+      {!disabled && (!isCustomMode || mode === 'ISSUE') && (
         <div className="p-3 bg-gradient-to-r from-fill-quaternary/70 via-fill-quaternary/40 to-fill-quaternary/70 rounded-2xl border border-separator/80 shadow-subtle space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-text-tertiary flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              Быстрое добавление со склада:
+              {mode === 'PURCHASE'
+                ? 'Быстрый выбор из каталога (в т.ч. закончившихся позиций):'
+                : 'Быстрый выбор со склада (только товары в наличии):'}
             </span>
 
             {/* Category filter pills */}
@@ -273,7 +436,12 @@ export function RequestItemsBuilder({
                       if (selectedStockItem) {
                         handleQuickAdd();
                       } else if (filteredQuickItems.length > 0) {
-                        handleSelectStockItem(filteredQuickItems[0]);
+                        const firstValid = mode === 'ISSUE'
+                          ? filteredQuickItems.find((i) => i.quantity > 0)
+                          : filteredQuickItems[0];
+                        if (firstValid) {
+                          handleSelectStockItem(firstValid);
+                        }
                       }
                     }
                   }}
@@ -295,7 +463,7 @@ export function RequestItemsBuilder({
                 )}
               </div>
 
-              {/* Floating Dropdown List (never clipped) */}
+              {/* Floating Dropdown List */}
               {isDropdownOpen && (
                 <div className="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-separator/80 rounded-2xl shadow-elevated max-h-56 overflow-y-auto divide-y divide-separator/30 p-1.5 animate-in fade-in-50 zoom-in-95 duration-150">
                   {loadingWarehouse ? (
@@ -309,21 +477,30 @@ export function RequestItemsBuilder({
                   ) : (
                     filteredQuickItems.map((item) => {
                       const isOutOfStock = item.quantity <= 0;
+                      const isSelectDisabled = mode === 'ISSUE' && isOutOfStock;
                       const isAdded = items.some((it) => it.inventoryItemId === item.id);
 
                       return (
                         <div
                           key={item.id}
-                          onClick={() => handleSelectStockItem(item)}
-                          className={`px-3 py-2 rounded-xl flex items-center justify-between gap-2 cursor-pointer transition-colors text-[13px] ${
-                            selectedStockItem?.id === item.id
-                              ? 'bg-macos-blue/10 text-macos-blue font-semibold'
-                              : 'hover:bg-fill-quaternary text-text-primary'
+                          onClick={() => {
+                            if (!isSelectDisabled) {
+                              handleSelectStockItem(item);
+                            }
+                          }}
+                          className={`px-3 py-2 rounded-xl flex items-center justify-between gap-2 transition-colors text-[13px] ${
+                            isSelectDisabled
+                              ? 'opacity-50 cursor-not-allowed bg-rose-50/30'
+                              : selectedStockItem?.id === item.id
+                              ? 'bg-macos-blue/10 text-macos-blue font-semibold cursor-pointer'
+                              : 'hover:bg-fill-quaternary text-text-primary cursor-pointer'
                           }`}
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold truncate">{item.name}</span>
+                              <span className={`font-semibold truncate ${isSelectDisabled ? 'text-text-tertiary line-through' : ''}`}>
+                                {item.name}
+                              </span>
                               {item.type && (
                                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-fill-tertiary text-text-secondary shrink-0">
                                   {item.type === 'STATIONERY'
@@ -353,7 +530,9 @@ export function RequestItemsBuilder({
                               }`}
                             >
                               {isOutOfStock
-                                ? '0 (нет в наличии)'
+                                ? mode === 'ISSUE'
+                                  ? '0 (нет в наличии)'
+                                  : '0 (требуется закупка)'
                                 : `На складе: ${item.quantity} ${item.unit}`}
                             </span>
                             {selectedStockItem?.id === item.id && (
@@ -395,8 +574,10 @@ export function RequestItemsBuilder({
               <Button
                 type="button"
                 onClick={handleQuickAdd}
-                disabled={!selectedStockItem || addQuantity <= 0}
-                className="h-10 px-4 bg-macos-blue hover:bg-macos-blue/90 text-white font-semibold text-[13px] shadow-sm shrink-0"
+                disabled={!selectedStockItem || addQuantity <= 0 || (mode === 'ISSUE' && (selectedStockItem?.quantity ?? 0) <= 0)}
+                className={`h-10 px-4 text-white font-semibold text-[13px] shadow-sm shrink-0 ${
+                  mode === 'PURCHASE' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-macos-blue hover:bg-macos-blue/90'
+                }`}
               >
                 <Plus className="h-4 w-4 mr-1" /> Добавить
               </Button>
@@ -441,18 +622,21 @@ export function RequestItemsBuilder({
             {catalogFilteredItems.map((cItem) => {
               const isAdded = items.some((it) => it.inventoryItemId === cItem.id);
               const isZero = cItem.quantity <= 0;
+              const isZeroDisabled = mode === 'ISSUE' && isZero;
 
               return (
                 <div
                   key={cItem.id}
                   className={`p-2.5 rounded-xl border flex flex-col justify-between gap-1.5 transition-all ${
-                    isAdded
+                    isZeroDisabled
+                      ? 'bg-fill-quaternary/30 border-separator/50 opacity-60'
+                      : isAdded
                       ? 'bg-emerald-50/50 border-emerald-200'
                       : 'bg-white border-separator/80 hover:border-macos-blue/60 shadow-subtle'
                   }`}
                 >
                   <div className="min-w-0">
-                    <div className="font-semibold text-[12.5px] text-text-primary truncate" title={cItem.name}>
+                    <div className={`font-semibold text-[12.5px] text-text-primary truncate ${isZeroDisabled ? 'line-through text-text-tertiary' : ''}`} title={cItem.name}>
                       {cItem.name}
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-text-tertiary mt-0.5">
@@ -469,15 +653,24 @@ export function RequestItemsBuilder({
 
                   <button
                     type="button"
+                    disabled={isZeroDisabled}
                     onClick={() => handleCatalogDirectAdd(cItem)}
                     className={`w-full py-1 text-[11.5px] font-bold rounded-lg flex items-center justify-center gap-1 transition-colors ${
-                      isAdded
+                      isZeroDisabled
+                        ? 'bg-fill-quaternary text-text-tertiary cursor-not-allowed'
+                        : isAdded
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         : 'bg-fill-tertiary hover:bg-macos-blue hover:text-white text-text-primary'
                     }`}
                   >
-                    <Plus className="h-3 w-3" />
-                    {isAdded ? '+1 ещё' : 'Добавить'}
+                    {isZeroDisabled ? (
+                      '✕ Нет на складе'
+                    ) : (
+                      <>
+                        <Plus className="h-3 w-3" />
+                        {isAdded ? '+1 ещё' : 'Добавить'}
+                      </>
+                    )}
                   </button>
                 </div>
               );
@@ -491,7 +684,7 @@ export function RequestItemsBuilder({
         <div className="px-3.5 py-2.5 bg-fill-quaternary/40 border-b border-separator/60 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-[12px] font-bold uppercase tracking-wider text-text-tertiary">
-              Выбранные товары:
+              Выбранные позиции:
             </span>
             <Badge variant="outline" className="text-[11px] font-bold">
               {items.length} {items.length === 1 ? 'позиция' : items.length < 5 ? 'позиции' : 'позиций'}
@@ -512,7 +705,9 @@ export function RequestItemsBuilder({
               В заявке пока нет позиций
             </p>
             <p className="text-[11.5px] text-text-tertiary max-w-sm mx-auto">
-              Воспользуйтесь строкой быстрого поиска выше или откройте «Каталог склада» для добавления нужных товаров.
+              {mode === 'PURCHASE'
+                ? 'Воспользуйтесь строкой быстрого поиска или нажмите «+ Произвольный товар» для добавления позиций.'
+                : 'Воспользуйтесь строкой быстрого поиска или откройте «Каталог склада» для добавления имеющихся товаров.'}
             </p>
           </div>
         ) : (
@@ -521,7 +716,8 @@ export function RequestItemsBuilder({
               // Find matching stock item for warning
               const stock = warehouseItems.find((w) => w.id === row.inventoryItemId);
               const inStockQty = stock?.quantity ?? 0;
-              const isOverStock = stock && row.quantity > inStockQty;
+              const isOverStock = mode === 'ISSUE' && stock && row.quantity > inStockQty;
+              const isCustom = !row.inventoryItemId;
 
               return (
                 <div
@@ -546,10 +742,15 @@ export function RequestItemsBuilder({
                         >
                           {itemCategoryLabels[row.category] || row.category}
                         </span>
+                        {isCustom && (
+                          <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.2 rounded">
+                            Заказная позиция
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-3 mt-1 text-[11.5px] text-text-tertiary">
-                        {stock && (
+                        {stock ? (
                           <span
                             className={`inline-flex items-center gap-1 font-semibold ${
                               isOverStock
@@ -562,7 +763,11 @@ export function RequestItemsBuilder({
                             На складе: {inStockQty} {row.unit}
                             {isOverStock && ' (меньше запрошенного)'}
                           </span>
-                        )}
+                        ) : isCustom ? (
+                          <span className="text-text-secondary italic">
+                            Вне складского каталога
+                          </span>
+                        ) : null}
                         <span>Ед. изм: {row.unit}</span>
                       </div>
                     </div>

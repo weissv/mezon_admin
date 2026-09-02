@@ -14,10 +14,11 @@ export type MaintenanceStatus =
 
 // MaintenanceType enum
 export type MaintenanceType = 
-  | 'REPAIR'  // Ремонт
-  | 'ISSUE';  // Выдача
+  | 'REPAIR'    // Ремонт
+  | 'ISSUE'     // Выдача
+  | 'PURCHASE'; // Покупка
 
-// ItemCategory enum (для заявок на выдачу)
+// ItemCategory enum (для заявок на выдачу и покупку)
 export type ItemCategory = 
   | 'STATIONERY'  // Канц.товары
   | 'HOUSEHOLD'   // Хоз.товары
@@ -46,11 +47,13 @@ export const maintenanceStatusColors: Record<MaintenanceStatus, string> = {
 export const maintenanceTypeLabels: Record<MaintenanceType, string> = {
   REPAIR: 'Ремонт',
   ISSUE: 'Выдача',
+  PURCHASE: 'Покупка',
 };
 
 export const maintenanceTypeColors: Record<MaintenanceType, string> = {
-  REPAIR: 'bg-orange-100 text-orange-800',
-  ISSUE: 'bg-purple-100 text-purple-800',
+  REPAIR: 'bg-orange-100 text-orange-800 border border-orange-200',
+  ISSUE: 'bg-purple-100 text-purple-800 border border-purple-200',
+  PURCHASE: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
 };
 
 // Маппинг для категорий товаров
@@ -145,17 +148,19 @@ const maintenanceItemFormSchema = z.object({
 export const createMaintenanceSchema = z.object({
   title: z.string().min(3, 'Наименование обязательно (минимум 3 символа)'),
   description: z.string().optional(),
-  type: z.enum(['REPAIR', 'ISSUE']),
+  type: z.enum(['REPAIR', 'ISSUE', 'PURCHASE']),
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE', 'COMPLETED']).optional(), // Добавляем статус для завхоза
-  // Массив позиций для заявок типа ISSUE
+  // Массив позиций для заявок типа ISSUE и PURCHASE
   items: z.array(maintenanceItemFormSchema).optional(),
 }).superRefine((data, ctx) => {
-  // Если тип ISSUE, то items обязательно должен содержать хотя бы одну позицию
-  if (data.type === 'ISSUE') {
+  // Если тип ISSUE или PURCHASE, то items обязательно должен содержать хотя бы одну позицию
+  if (data.type === 'ISSUE' || data.type === 'PURCHASE') {
     if (!data.items || data.items.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Для заявки на выдачу необходимо добавить хотя бы одну позицию',
+        message: data.type === 'PURCHASE'
+          ? 'Для заявки на покупку необходимо добавить хотя бы одну позицию'
+          : 'Для заявки на выдачу необходимо добавить хотя бы одну позицию',
         path: ['items'],
       });
     }
@@ -176,7 +181,7 @@ export const createMaintenanceSchema = z.object({
 export const updateMaintenanceSchema = z.object({
   title: z.string().min(3, 'Наименование обязательно (минимум 3 символа)').optional(),
   description: z.string().optional(),
-  type: z.enum(['REPAIR', 'ISSUE']).optional(),
+  type: z.enum(['REPAIR', 'ISSUE', 'PURCHASE']).optional(),
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'IN_PROGRESS', 'DONE', 'COMPLETED']).optional(),
   items: z.array(maintenanceItemFormSchema).optional(),
   rejectionReason: z.string().optional(),

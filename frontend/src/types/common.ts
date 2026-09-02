@@ -98,7 +98,7 @@ export type FinanceType = 'INCOME' | 'EXPENSE';
 export type FinanceCategory = 'NUTRITION' | 'CLUBS' | 'MAINTENANCE' | 'SALARY';
 export type FinanceSource = 'BUDGET' | 'EXTRA_BUDGET';
 export type InventoryType = 'FOOD' | 'SUPPLIES';
-export type MaintenanceType = 'REPAIR' | 'PURCHASE';
+export type MaintenanceType = 'REPAIR' | 'ISSUE' | 'PURCHASE';
 export type SecurityEventType = 'INCIDENT' | 'FIRE_CHECK' | 'VISITOR_LOG' | 'DOCUMENT';
 export type AgeGroup = 'INFANT' | 'PRESCHOOL' | 'ELEMENTARY';
 

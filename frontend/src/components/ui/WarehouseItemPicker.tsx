@@ -22,6 +22,7 @@ interface WarehouseItemPickerProps {
   disabled?: boolean;
   error?: string;
   excludeItemIds?: number[];
+  allowZeroStock?: boolean;
 }
 
 export function WarehouseItemPicker({
@@ -34,6 +35,7 @@ export function WarehouseItemPicker({
   disabled = false,
   error,
   excludeItemIds = [],
+  allowZeroStock = false,
 }: WarehouseItemPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -215,20 +217,21 @@ export function WarehouseItemPicker({
                 const isSelected = item.id === value;
                 const isExcluded = excludeItemIds.includes(item.id) && !isSelected;
                 const isOutOfStock = item.quantity <= 0;
+                const isSelectDisabled = isExcluded || (!allowZeroStock && isOutOfStock);
 
                 return (
                   <div
                     key={item.id}
                     onClick={() => {
-                      if (isExcluded) return;
+                      if (isSelectDisabled) return;
                       handleSelectItem(item);
                     }}
-                    className={`px-3 py-2.5 rounded-xl flex items-center justify-between gap-3 transition-colors cursor-pointer text-[13px] ${
+                    className={`px-3 py-2.5 rounded-xl flex items-center justify-between gap-3 transition-colors text-[13px] ${
                       isSelected
-                        ? 'bg-macos-blue/10 text-macos-blue font-semibold'
-                        : isExcluded
+                        ? 'bg-macos-blue/10 text-macos-blue font-semibold cursor-pointer'
+                        : isSelectDisabled
                         ? 'opacity-40 cursor-not-allowed bg-fill-quaternary/40'
-                        : 'hover:bg-fill-quaternary text-text-primary'
+                        : 'hover:bg-fill-quaternary text-text-primary cursor-pointer'
                     }`}
                   >
                     <div className="flex-1 min-w-0">

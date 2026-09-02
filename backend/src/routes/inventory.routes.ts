@@ -349,7 +349,7 @@ router.post("/audits/:id/cancel", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), as
 });
 
 // GET /api/inventory
-router.get("/", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
+router.get("/", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ", "TEACHER", "ACCOUNTANT"]), async (_req, res) => {
   const items = await prisma.inventoryItem.findMany({ orderBy: { name: "asc" } });
   return res.json(items);
 });
