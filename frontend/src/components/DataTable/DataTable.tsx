@@ -9,6 +9,9 @@ export type Column<T> = {
   key: string;
   header: string;
   render?: (row: T) => React.ReactNode;
+  width?: string;
+  className?: string;
+  align?: "left" | "center" | "right";
 };
 
 export function DataTable<T extends Record<string, any>>({
@@ -45,11 +48,11 @@ export function DataTable<T extends Record<string, any>>({
 
   const headerCellCls = wrapCells
     ? clsx(
-        "text-left whitespace-normal break-words align-middle text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary select-none",
+        "whitespace-normal break-words align-middle text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary select-none",
         isCompact ? "px-3.5 py-2.5" : "px-4 py-3.5",
       )
     : clsx(
-        "text-left whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary select-none",
+        "whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary select-none",
         isCompact ? "px-3.5 py-2.5" : "px-4 py-3.5",
       );
 
@@ -114,11 +117,19 @@ export function DataTable<T extends Record<string, any>>({
         <table className={tableCls}>
           <thead>
             <tr className="border-b border-separator/60 bg-fill-quaternary/50 backdrop-blur-md">
-              {columns.map((c) => (
-                <th key={c.key} className={headerCellCls}>
-                  {c.header}
-                </th>
-              ))}
+              {columns.map((c) => {
+                const alignCls =
+                  c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left";
+                return (
+                  <th
+                    key={c.key}
+                    className={clsx(headerCellCls, alignCls, c.className)}
+                    style={c.width ? { width: c.width } : undefined}
+                  >
+                    {c.header}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className="divide-y divide-separator/40">
@@ -148,15 +159,23 @@ export function DataTable<T extends Record<string, any>>({
                     i % 2 === 1 ? 'bg-fill-quaternary/20' : 'bg-transparent'
                   )}
                 >
-                  {columns.map((c) => (
-                    <td key={c.key} className={bodyCellCls}>
-                      {c.render
-                        ? c.render(row)
-                        : c.key in row
-                        ? String(row[c.key as keyof T] ?? "")
-                        : ""}
-                    </td>
-                  ))}
+                  {columns.map((c) => {
+                    const alignCls =
+                      c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left";
+                    return (
+                      <td
+                        key={c.key}
+                        className={clsx(bodyCellCls, alignCls, c.className)}
+                        style={c.width ? { width: c.width } : undefined}
+                      >
+                        {c.render
+                          ? c.render(row)
+                          : c.key in row
+                          ? String(row[c.key as keyof T] ?? "")
+                          : ""}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             )}

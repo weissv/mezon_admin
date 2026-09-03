@@ -536,10 +536,11 @@ export default function MaintenancePage() {
     { 
       key: 'title', 
       header: 'Заявка и ТМЦ',
+      width: '45%',
       render: (row) => (
-        <div className="space-y-1.5 py-1">
+        <div className="space-y-1.5 py-1 min-w-0">
           {/* Header row with Type badge, ID and Title */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
             {row.type === 'PURCHASE' ? (
               <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
                 <ShoppingCart className="h-3 w-3 text-emerald-600" />
@@ -557,18 +558,18 @@ export default function MaintenancePage() {
               </span>
             )}
 
-            <span className="font-mono text-[11px] font-bold text-text-tertiary">
+            <span className="font-mono text-[11px] font-bold text-text-tertiary shrink-0">
               #{row.id}
             </span>
 
-            <span className="font-bold text-[13.5px] text-text-primary">
+            <span className="font-bold text-[13.5px] text-text-primary break-words leading-snug">
               {row.title}
             </span>
           </div>
 
           {/* Items Preview for ISSUE and PURCHASE */}
           {(row.type === 'ISSUE' || row.type === 'PURCHASE') && row.items && row.items.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0">
               {row.items.slice(0, 3).map((item, idx) => {
                 const isDone = row.status === 'DONE' || row.status === 'COMPLETED';
                 const isPartial = item.issuedQuantity != null && item.issuedQuantity < item.quantity;
@@ -577,7 +578,7 @@ export default function MaintenancePage() {
                 return (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 text-[11.5px] font-medium px-2 py-0.5 rounded-md bg-fill-quaternary border border-separator/60"
+                    className="inline-flex items-center gap-1 text-[11.5px] font-medium px-2 py-0.5 rounded-md bg-fill-quaternary border border-separator/60 shrink-0 max-w-full truncate"
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full shrink-0 ${
@@ -589,11 +590,11 @@ export default function MaintenancePage() {
                       }`}
                     />
                     <span className="text-text-primary font-semibold truncate max-w-[130px]">{item.name}</span>
-                    <span className="text-text-secondary">({item.quantity} {item.unit})</span>
+                    <span className="text-text-secondary shrink-0">({item.quantity} {item.unit})</span>
 
                     {/* Отметка выдачи */}
                     {row.type === 'ISSUE' && isDone && item.issuedQuantity != null && (
-                      <span className="ml-0.5 text-[10.5px] font-bold">
+                      <span className="ml-0.5 text-[10.5px] font-bold shrink-0">
                         {isZeroIssued ? (
                           <span className="text-rose-600">✕ 0</span>
                         ) : isPartial ? (
@@ -608,7 +609,7 @@ export default function MaintenancePage() {
               })}
 
               {row.items.length > 3 && (
-                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-fill-tertiary text-text-secondary">
+                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-fill-tertiary text-text-secondary shrink-0">
                   +{row.items.length - 3} ещё
                 </span>
               )}
@@ -617,7 +618,7 @@ export default function MaintenancePage() {
 
           {/* Description snippet */}
           {row.description && (
-            <p className="text-[11.5px] text-text-tertiary line-clamp-1 italic">
+            <p className="text-[11.5px] text-text-tertiary truncate italic max-w-full" title={row.description}>
               {row.description}
             </p>
           )}
@@ -629,21 +630,22 @@ export default function MaintenancePage() {
     {
       key: 'requester' as keyof MaintenanceRequest,
       header: 'Заявитель и дата',
+      width: '18%',
       render: (row: MaintenanceRequest) => (
-        <div className="space-y-0.5 text-[12.5px]">
-          <div className="font-semibold text-text-primary">
+        <div className="space-y-0.5 text-[12.5px] min-w-0">
+          <div className="font-semibold text-text-primary truncate" title={row.requester ? `${row.requester.lastName} ${row.requester.firstName}` : ''}>
             {row.requester ? `${row.requester.lastName} ${row.requester.firstName}` : '—'}
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-text-tertiary">
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-text-tertiary">
             {row.requester?.user?.role && (
-              <span className="px-1.5 py-0.2 rounded bg-fill-tertiary text-text-secondary font-medium">
+              <span className="px-1.5 py-0.2 rounded bg-fill-tertiary text-text-secondary font-medium shrink-0">
                 {row.requester.user.role === 'TEACHER' ? 'Учитель' :
                  row.requester.user.role === 'DEPUTY' ? 'Завуч' :
                  row.requester.user.role === 'DIRECTOR' ? 'Директор' :
                  row.requester.user.role === 'ZAVHOZ' ? 'Завхоз' : row.requester.user.role}
               </span>
             )}
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 shrink-0">
               <Clock className="h-3 w-3" />
               {new Date(row.createdAt).toLocaleDateString('ru-RU')}
             </span>
@@ -656,8 +658,9 @@ export default function MaintenancePage() {
     {
       key: 'status',
       header: 'Статус',
+      width: '17%',
       render: (row) => (
-        <div className="space-y-1">
+        <div className="space-y-1 min-w-0">
           <div>
             {isPartiallyFulfilled(row) ? (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11.5px] font-semibold bg-amber-50 text-amber-800 border border-amber-300 shadow-xs">
@@ -672,12 +675,12 @@ export default function MaintenancePage() {
 
           {/* Subtext with approver/receiver info */}
           {row.approvedBy && row.status !== 'REJECTED' && (
-            <div className="text-[11px] text-text-tertiary truncate">
+            <div className="text-[11px] text-text-tertiary truncate" title={`Одобрил: ${row.approvedBy.lastName} ${row.approvedBy.firstName}`}>
               Одобрил: <span className="text-text-secondary font-medium">{row.approvedBy.lastName} {row.approvedBy.firstName?.[0]}.</span>
             </div>
           )}
           {row.status === 'COMPLETED' && row.receivedBy && (
-            <div className="text-[11px] text-text-tertiary truncate">
+            <div className="text-[11px] text-text-tertiary truncate" title={`Получил: ${row.receivedBy.lastName} ${row.receivedBy.firstName}`}>
               Получил: <span className="text-text-secondary font-medium">{row.receivedBy.lastName} {row.receivedBy.firstName?.[0]}.</span>
             </div>
           )}
@@ -694,6 +697,8 @@ export default function MaintenancePage() {
     {
       key: 'actions',
       header: 'Действия',
+      width: '20%',
+      align: 'right',
       render: (row) => {
         const canEditThisRequest =
           canEditAll ||
@@ -1006,33 +1011,32 @@ export default function MaintenancePage() {
           )}
 
           {/* Таблица заявок без горизонтального скролла */}
-          <Card className="p-0 overflow-hidden border-separator/80">
-            {loading ? (
-              <div className="p-12 text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto text-macos-blue" />
-                <p className="mt-2 text-sm text-text-secondary">Загрузка заявок...</p>
-              </div>
-            ) : filteredRequests.length === 0 ? (
-              <div className="p-12 text-center text-text-secondary">
-                <ClipboardList className="h-10 w-10 mx-auto text-text-tertiary mb-2" />
-                <p className="font-semibold text-text-primary">
-                  {filterStatus || filterType ? 'Нет заявок по выбранному фильтру' : 'Список заявок пуст'}
-                </p>
-                <p className="text-xs text-text-tertiary mt-1">
-                  Нажмите кнопку «Создать заявку» для оформления запроса на выдачу, покупку или ремонт.
-                </p>
-              </div>
-            ) : (
-              <DataTable
-                columns={columns}
-                data={filteredRequests}
-                page={1}
-                pageSize={filteredRequests.length}
-                total={filteredRequests.length}
-                onPageChange={() => {}}
-              />
-            )}
-          </Card>
+          {loading ? (
+            <Card className="p-12 text-center border-separator/80">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-macos-blue" />
+              <p className="mt-2 text-sm text-text-secondary">Загрузка заявок...</p>
+            </Card>
+          ) : filteredRequests.length === 0 ? (
+            <Card className="p-12 text-center text-text-secondary border-separator/80">
+              <ClipboardList className="h-10 w-10 mx-auto text-text-tertiary mb-2" />
+              <p className="font-semibold text-text-primary">
+                {filterStatus || filterType ? 'Нет заявок по выбранному фильтру' : 'Список заявок пуст'}
+              </p>
+              <p className="text-xs text-text-tertiary mt-1">
+                Нажмите кнопку «Создать заявку» для оформления запроса на выдачу, покупку или ремонт.
+              </p>
+            </Card>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={filteredRequests}
+              page={1}
+              pageSize={Math.max(1, filteredRequests.length)}
+              total={filteredRequests.length}
+              onPageChange={() => {}}
+              wrapCells={true}
+            />
+          )}
         </PageSection>
       )}
 
