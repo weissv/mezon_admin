@@ -1315,11 +1315,19 @@ export default function MaintenancePage() {
 
           {/* Описание / Обоснование */}
           <div>
-            <label htmlFor="description" className="block mb-1 text-[12.5px] font-semibold text-text-secondary">
-              {watchType === 'PURCHASE'
-                ? 'Обоснование закупки (для кого / для чего требуется закупка)'
-                : `Примечание / комментарий ${watchType !== 'REPAIR' ? '(необязательно)' : ''}`}
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="description" className="text-[12.5px] font-semibold text-text-secondary">
+                {watchType === 'PURCHASE' ? 'Обоснование закупки' : 'Примечание / комментарий'}
+              </label>
+              <span className="text-[11.5px] text-text-tertiary font-normal">
+                необязательно
+              </span>
+            </div>
+            {watchType === 'PURCHASE' && (
+              <p className="text-[11.5px] text-text-tertiary mb-1.5 leading-normal">
+                Для кого или для чего требуются материалы (класс, кабинет, открытый урок)
+              </p>
+            )}
             <textarea 
               {...register('description')} 
               id="description" 
