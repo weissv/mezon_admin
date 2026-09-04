@@ -49,15 +49,34 @@ async function main() {
     },
     {
       role: Role.ZAVHOZ,
-      modules: ["dashboard", "inventory", "maintenance", "procurement"],
-      canCreate: true, canEdit: true, canDelete: false, canExport: false
+      modules: ["dashboard", "inventory", "maintenance", "procurement", "calendar", "notifications"],
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      customPermissions: {
+        inventory_export: true,
+        inventory_import: true,
+        inventory_audit: true,
+        inventory_adjust: true,
+        inventory_table_edit: true,
+        maintenance_return_to_progress: true,
+        maintenance_fulfill: true,
+      },
     },
   ];
 
   for (const rp of rolePermissionsData) {
     await prisma.rolePermission.upsert({
       where: { role: rp.role },
-      update: { modules: rp.modules, canCreate: rp.canCreate, canEdit: rp.canEdit, canDelete: rp.canDelete, canExport: rp.canExport },
+      update: {
+        modules: rp.modules,
+        canCreate: rp.canCreate,
+        canEdit: rp.canEdit,
+        canDelete: rp.canDelete,
+        canExport: rp.canExport,
+        customPermissions: (rp as any).customPermissions || {},
+      },
       create: rp,
     });
   }
