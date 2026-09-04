@@ -53,3 +53,17 @@ export const updateAuditItemsSchema = z.object({
     ),
   }),
 });
+
+export const importInventoryPreviewSchema = z.object({
+  body: z.object({
+    fileBase64: z.string().min(1, "Файл обязателен"),
+  }),
+});
+
+export const applyInventoryImportSchema = z.object({
+  body: z.object({
+    fileBase64: z.string().min(1, "Файл обязателен"),
+    skipErrors: z.boolean().optional().default(true),
+  }),
+});
+

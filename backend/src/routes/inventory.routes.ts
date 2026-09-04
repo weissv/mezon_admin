@@ -3,7 +3,14 @@ import { Router } from "express";
 import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
 import { validate } from "../middleware/validate";
-import { listInventorySchema, generateShoppingListSchema, createInventorySchema, updateInventorySchema } from "../schemas/inventory.schema";
+import { 
+  listInventorySchema, 
+  generateShoppingListSchema, 
+  createInventorySchema, 
+  updateInventorySchema,
+  importInventoryPreviewSchema,
+  applyInventoryImportSchema
+} from "../schemas/inventory.schema";
 import {
   createIncomingTransaction,
   createAdjustmentTransaction,
@@ -12,6 +19,12 @@ import {
   getTransactions,
   getLowStockItems,
 } from "../services/InventorySyncService";
+import {
+  generateInventoryExcelBuffer,
+  parseAndAnalyzeInventoryImport,
+  applyInventoryImport,
+  sanitizeBase64,
+} from "../services/InventoryTableService";
 import { InventoryTransactionType } from "@prisma/client";
 const router = Router();
 
@@ -64,6 +77,63 @@ router.get("/low-stock", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), a
   const items = await getLowStockItems();
   return res.json(items);
 });
+
+// =====================================================
+// ЭКСПОРТ И ИМПОРТ ТАБЛИЦ СКЛАДА (EXCEL / XLSX)
+// =====================================================
+
+// GET /api/inventory/export/excel - выгрузка всех товаров в файл Excel
+router.get("/export/excel", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
+  try {
+    const buffer = await generateInventoryExcelBuffer();
+    const dateStr = new Date().toISOString().split("T")[0];
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename=inventory-export-${dateStr}.xlsx`);
+    return res.send(buffer);
+  } catch (error: any) {
+    console.error("Ошибка при экспорте склада в Excel:", error);
+    return res.status(500).json({ message: "Ошибка при формировании Excel-файла", error: error?.message });
+  }
+});
+
+// POST /api/inventory/import/preview - предварительный разбор файла и расчет diff перед сохранением
+router.post(
+  "/import/preview",
+  checkRole(["DEVELOPER", "DIRECTOR", "ADMIN", "ZAVHOZ"]),
+  validate(importInventoryPreviewSchema),
+  async (req, res) => {
+    try {
+      const fileBase64 = sanitizeBase64(req.body.fileBase64);
+      const buffer = Buffer.from(fileBase64, "base64");
+      const preview = await parseAndAnalyzeInventoryImport(buffer);
+      return res.json(preview);
+    } catch (error: any) {
+      console.error("Ошибка предварительного анализа таблицы склада:", error);
+      return res.status(400).json({ message: error?.message || "Не удалось обработать Excel-файл" });
+    }
+  }
+);
+
+// POST /api/inventory/import/apply - подтвержденное применение импорта со складскими транзакциями
+router.post(
+  "/import/apply",
+  checkRole(["DEVELOPER", "DIRECTOR", "ADMIN", "ZAVHOZ"]),
+  validate(applyInventoryImportSchema),
+  async (req, res) => {
+    try {
+      const user = req.user!;
+      const fileBase64 = sanitizeBase64(req.body.fileBase64);
+      const skipErrors = req.body.skipErrors !== false;
+      const buffer = Buffer.from(fileBase64, "base64");
+
+      const result = await applyInventoryImport(buffer, user.employeeId, skipErrors);
+      return res.json(result);
+    } catch (error: any) {
+      console.error("Ошибка применения импорта таблицы склада:", error);
+      return res.status(400).json({ message: error?.message || "Ошибка при сохранении данных таблицы" });
+    }
+  }
+);
 
 // =====================================================
 // ИНВЕНТАРИЗАЦИЯ СКЛАДА

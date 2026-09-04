@@ -1,5 +1,5 @@
 // src/pages/InventoryPage.tsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import clsx from 'clsx';
 import { useApi } from '../hooks/useApi';
@@ -20,6 +20,8 @@ import {
   transactionTypeColors,
   auditStatusLabels,
   auditStatusColors,
+  InventoryImportPreviewResult,
+  InventoryImportRowResult,
 } from '../types/inventory';
 import { api } from '../lib/api';
 import { 
@@ -50,7 +52,13 @@ import {
   TrendingDown,
   TrendingUp,
   Clock,
-  Sparkles
+  Sparkles,
+  Download,
+  Upload,
+  FileSpreadsheet,
+  Loader2,
+  Check,
+  ShieldCheck,
 } from 'lucide-react';
 import { EmptyListState } from '../components/ui/EmptyState';
 import { LoadingCard } from '../components/ui/LoadingState';
@@ -150,6 +158,35 @@ export default function InventoryPage() {
   const [auditFormItems, setAuditFormItems] = useState<Record<number, { actualQuantity: string; notes: string }>>({});
   const [savingAudit, setSavingAudit] = useState(false);
   const [completingAudit, setCompletingAudit] = useState(false);
+
+  // ==================== EXPORT & IMPORT ТАБЛИЦ СКЛАДА ====================
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importAnalyzing, setImportAnalyzing] = useState(false);
+  const [importApplying, setImportApplying] = useState(false);
+  const [importPreviewData, setImportPreviewData] = useState<InventoryImportPreviewResult | null>(null);
+  const [importFileBase64, setImportFileBase64] = useState<string | null>(null);
+  const [importFileName, setImportFileName] = useState<string | null>(null);
+  const [importFilter, setImportFilter] = useState<'ALL' | 'UPDATES' | 'CREATES' | 'UNCHANGED' | 'ERRORS'>('ALL');
+  const [importSkipErrors, setImportSkipErrors] = useState(true);
+
+  const filteredImportRows = useMemo(() => {
+    if (!importPreviewData) return [];
+    if (importFilter === 'UPDATES') {
+      return importPreviewData.rows.filter((r) => r.status === 'UPDATE');
+    }
+    if (importFilter === 'CREATES') {
+      return importPreviewData.rows.filter((r) => r.status === 'CREATE');
+    }
+    if (importFilter === 'UNCHANGED') {
+      return importPreviewData.rows.filter((r) => r.status === 'UNCHANGED');
+    }
+    if (importFilter === 'ERRORS') {
+      return importPreviewData.rows.filter((r) => r.status === 'ERROR');
+    }
+    return importPreviewData.rows;
+  }, [importPreviewData, importFilter]);
 
   // ==================== COMPUTED FILTERED ITEMS ====================
   const filteredItems = useMemo(() => {
@@ -580,6 +617,100 @@ export default function InventoryPage() {
     return { total: activeAudit.items.length, matched, surpluses, deficits };
   }, [activeAudit, auditFormItems]);
 
+  // ==================== EXPORT & IMPORT HANDLERS ====================
+  const handleExportExcel = async () => {
+    try {
+      setExportingExcel(true);
+      const blob = await api.download('/api/inventory/export/excel');
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Таблица склада успешно выгружена');
+    } catch (err: any) {
+      toast.error('Ошибка при экспорте таблицы', { description: err?.message });
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        resolve(result);
+      };
+      reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSelectImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    setImportFileName(file.name);
+    setImportFilter('ALL');
+    setImportSkipErrors(true);
+    setImportModalOpen(true);
+    setImportAnalyzing(true);
+    setImportPreviewData(null);
+
+    try {
+      const base64 = await convertFileToBase64(file);
+      setImportFileBase64(base64);
+
+      const preview = await api.post<InventoryImportPreviewResult>('/api/inventory/import/preview', {
+        fileBase64: base64,
+      });
+      setImportPreviewData(preview);
+    } catch (err: any) {
+      toast.error('Не удалось разобрать файл', { description: err?.message });
+      setImportModalOpen(false);
+    } finally {
+      setImportAnalyzing(false);
+    }
+  };
+
+  const handleApplyImport = async () => {
+    if (!importFileBase64) return;
+    try {
+      setImportApplying(true);
+      const res = await api.post<{ success: boolean; updatedCount: number; createdCount: number; skippedCount: number }>(
+        '/api/inventory/import/apply',
+        {
+          fileBase64: importFileBase64,
+          skipErrors: importSkipErrors,
+        }
+      );
+
+      toast.success('Изменения успешно применены!', {
+        description: `Обновлено: ${res.updatedCount}, создано новых: ${res.createdCount}`,
+      });
+
+      setImportModalOpen(false);
+      setImportPreviewData(null);
+      setImportFileBase64(null);
+      setImportFileName(null);
+
+      // Обновляем данные на странице
+      fetchData();
+      if (activeTab === 'LOGS') {
+        handleLoadAllTransactions();
+      }
+    } catch (err: any) {
+      toast.error('Ошибка применения импорта', { description: err?.message });
+    } finally {
+      setImportApplying(false);
+    }
+  };
+
   return (
     <PageStack className="space-y-6">
       {/* ==================== HERO HEADER ==================== */}
@@ -605,6 +736,15 @@ export default function InventoryPage() {
         }
         actions={
           <div className="flex gap-2 flex-wrap items-center">
+            {/* Скрытый input для выбора файла таблицы */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              className="hidden"
+              onChange={handleSelectImportFile}
+            />
+
             <Button onClick={handleCreate} size="md">
               <PlusCircle className="mr-1.5 h-4 w-4" /> Добавить товар
             </Button>
@@ -620,6 +760,27 @@ export default function InventoryPage() {
             </Button>
             <Button variant="outline" size="md" onClick={() => setIsModalOpen(true)}>
               <ShoppingBag className="mr-1.5 h-4 w-4 text-[#1B7A3D]" /> Закупки
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleExportExcel}
+              disabled={exportingExcel}
+            >
+              {exportingExcel ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin text-macos-blue" />
+              ) : (
+                <Download className="mr-1.5 h-4 w-4 text-macos-blue" />
+              )}
+              Экспорт
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <FileSpreadsheet className="mr-1.5 h-4 w-4 text-emerald-600" />
+              Импорт таблицы
             </Button>
           </div>
         }
@@ -1806,6 +1967,370 @@ export default function InventoryPage() {
           )}
         </div>
       </Modal>
+
+      {/* ==================== MODAL: CONFIRM TABLE IMPORT DIFF ==================== */}
+      <Modal
+        isOpen={importModalOpen}
+        onClose={() => {
+          if (!importApplying) setImportModalOpen(false);
+        }}
+        title="Сверка изменений таблицы склада"
+        eyebrow="Импорт Excel / CSV"
+        icon={<FileSpreadsheet className="h-5 w-5 text-emerald-600" />}
+        size="xl"
+      >
+        <div className="p-4 space-y-4">
+          {importAnalyzing ? (
+            <div className="py-12">
+              <LoadingCard message={`Анализируем файл «${importFileName || ''}» и рассчитываем различия...`} height={200} />
+            </div>
+          ) : !importPreviewData ? (
+            <div className="text-center py-8 text-text-secondary text-sm">
+              Данные таблицы не загружены.
+            </div>
+          ) : (
+            <>
+              {/* Header summary strip / Bento cards */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 rounded-2xl border border-black/[0.06] bg-surface-primary p-4 shadow-subtle">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-base text-text-primary flex items-center gap-1.5">
+                      <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                      {importFileName || 'Таблица склада'}
+                    </span>
+                    <Badge variant="outline">{importPreviewData.summary.totalRows} строк в файле</Badge>
+                  </div>
+                  <p className="text-xs text-text-secondary mt-1">
+                    Проверьте изменения перед записью в базу. При совпадении названия товар обновится без создания дубликата.
+                  </p>
+                </div>
+
+                {/* Metric Strip */}
+                <div className="flex items-center gap-2 bg-fill-quaternary/40 p-2 rounded-xl border border-separator/60 text-xs">
+                  <div className="text-center px-2.5 border-r border-separator/60">
+                    <span className="text-text-tertiary block font-medium">К обновлению</span>
+                    <strong className="text-sm font-bold text-macos-blue">
+                      {importPreviewData.summary.toUpdate}
+                    </strong>
+                  </div>
+                  <div className="text-center px-2.5 border-r border-separator/60">
+                    <span className="text-text-tertiary block font-medium">Новых</span>
+                    <strong className="text-sm font-bold text-emerald-600">
+                      +{importPreviewData.summary.toCreate}
+                    </strong>
+                  </div>
+                  <div className="text-center px-2.5 border-r border-separator/60">
+                    <span className="text-text-tertiary block font-medium">Без изм.</span>
+                    <strong className="text-sm font-bold text-text-secondary">
+                      {importPreviewData.summary.unchanged}
+                    </strong>
+                  </div>
+                  {importPreviewData.summary.errors > 0 && (
+                    <div className="text-center px-2.5 border-r border-separator/60">
+                      <span className="text-rose-500 block font-medium">Ошибок</span>
+                      <strong className="text-sm font-bold text-rose-600">
+                        {importPreviewData.summary.errors}
+                      </strong>
+                    </div>
+                  )}
+                  <div className="text-center px-2.5">
+                    <span className="text-text-tertiary block font-medium">Дельта остатка</span>
+                    <strong className={clsx(
+                      "text-sm font-bold font-mono",
+                      importPreviewData.summary.totalQuantityDelta > 0 ? "text-emerald-600" : importPreviewData.summary.totalQuantityDelta < 0 ? "text-rose-600" : "text-text-secondary"
+                    )}>
+                      {importPreviewData.summary.totalQuantityDelta > 0 ? `+${importPreviewData.summary.totalQuantityDelta}` : importPreviewData.summary.totalQuantityDelta}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Segmented Filter Controls */}
+              <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
+                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-fill-quaternary/50 border border-separator/40 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setImportFilter('ALL')}
+                    className={clsx(
+                      "px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer",
+                      importFilter === 'ALL' ? "bg-white shadow-sm font-bold text-text-primary" : "text-text-secondary hover:text-text-primary"
+                    )}
+                  >
+                    Все ({importPreviewData.summary.totalRows})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImportFilter('UPDATES')}
+                    className={clsx(
+                      "px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer",
+                      importFilter === 'UPDATES' ? "bg-white shadow-sm font-bold text-macos-blue" : "text-text-secondary hover:text-text-primary"
+                    )}
+                  >
+                    К обновлению ({importPreviewData.summary.toUpdate})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImportFilter('CREATES')}
+                    className={clsx(
+                      "px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer",
+                      importFilter === 'CREATES' ? "bg-white shadow-sm font-bold text-emerald-600" : "text-text-secondary hover:text-text-primary"
+                    )}
+                  >
+                    Новые ({importPreviewData.summary.toCreate})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImportFilter('UNCHANGED')}
+                    className={clsx(
+                      "px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer",
+                      importFilter === 'UNCHANGED' ? "bg-white shadow-sm font-bold text-text-primary" : "text-text-secondary hover:text-text-primary"
+                    )}
+                  >
+                    Без изменений ({importPreviewData.summary.unchanged})
+                  </button>
+                  {importPreviewData.summary.errors > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setImportFilter('ERRORS')}
+                      className={clsx(
+                        "px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer",
+                        importFilter === 'ERRORS' ? "bg-rose-50 text-rose-700 shadow-sm font-bold border border-rose-200" : "text-rose-600 hover:bg-rose-50/50"
+                      )}
+                    >
+                      Ошибки ({importPreviewData.summary.errors})
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Interactive Diff Table */}
+              <div className="max-h-[46vh] overflow-y-auto rounded-xl border border-separator/60 bg-surface-primary shadow-inner">
+                <table className="w-full text-left table-fixed">
+                  <thead className="sticky top-0 bg-surface-primary/95 backdrop-blur-md z-10 border-b border-separator/60 shadow-subtle">
+                    <tr>
+                      <th className="w-[15%] px-3.5 py-2.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Статус</th>
+                      <th className="w-[30%] px-3.5 py-2.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Товар / Категория</th>
+                      <th className="w-[25%] px-3.5 py-2.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Остаток До → После</th>
+                      <th className="w-[30%] px-3.5 py-2.5 text-[11px] font-bold uppercase tracking-[0.05em] text-text-tertiary">Изменения / Примечание</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-separator/40 text-[12.5px]">
+                    {filteredImportRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="py-8 text-center text-text-tertiary">
+                          Нет строк для выбранного фильтра
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredImportRows.map((row) => {
+                        const isUpdate = row.status === 'UPDATE';
+                        const isCreate = row.status === 'CREATE';
+                        const isUnchanged = row.status === 'UNCHANGED';
+                        const isError = row.status === 'ERROR';
+
+                        return (
+                          <tr
+                            key={`${row.rowIndex}-${row.name}`}
+                            className={clsx(
+                              "transition-colors duration-150",
+                              isError ? "bg-rose-50/40 hover:bg-rose-50/60" : "hover:bg-fill-quaternary/40"
+                            )}
+                          >
+                            {/* 1. Статус */}
+                            <td className="px-3.5 py-3 align-top whitespace-nowrap">
+                              <div className="space-y-1">
+                                {isUpdate && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold text-[11px] bg-blue-50 text-blue-800 border border-blue-200">
+                                    <Pencil className="h-3 w-3 text-blue-600" /> Изменится
+                                  </span>
+                                )}
+                                {isCreate && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    <PlusCircle className="h-3 w-3 text-emerald-600" /> Новый
+                                  </span>
+                                )}
+                                {isUnchanged && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium text-[11px] bg-gray-100 text-gray-600 border border-gray-200">
+                                    Без изменений
+                                  </span>
+                                )}
+                                {isError && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold text-[11px] bg-rose-50 text-rose-800 border border-rose-200">
+                                    <AlertCircle className="h-3 w-3 text-rose-600" /> Ошибка
+                                  </span>
+                                )}
+                                <div className="text-[10px] text-text-tertiary font-mono">
+                                  Стр. #{row.rowIndex}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* 2. Товар */}
+                            <td className="px-3.5 py-3 align-top min-w-0">
+                              <div className="font-bold text-text-primary text-[13px] leading-snug break-words">
+                                {row.name}
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                {row.id ? (
+                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-fill-quaternary text-text-tertiary border border-separator/40">
+                                    ID #{row.id}
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-emerald-100/70 text-emerald-800 border border-emerald-200">
+                                    Новая позиция
+                                  </span>
+                                )}
+                                <span className={`text-[10.5px] px-1.5 py-0.2 rounded border font-medium ${inventoryBadgeColors[row.type] || 'bg-gray-100 text-gray-700'}`}>
+                                  {row.typeLabel || row.type}
+                                </span>
+                                {row.matchedByName && (
+                                  <span className="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.2">
+                                    Сопоставлен по имени
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* 3. Остаток До → После */}
+                            <td className="px-3.5 py-3 align-top whitespace-nowrap">
+                              {isError ? (
+                                <span className="font-mono text-rose-600 font-bold">
+                                  {row.quantity} {row.unit}
+                                </span>
+                              ) : isCreate ? (
+                                <div className="space-y-0.5">
+                                  <span className="font-mono font-bold text-emerald-700 text-[13px]">
+                                    +{row.quantity} {row.unit}
+                                  </span>
+                                  <div className="text-[10.5px] text-text-tertiary">будет оприходовано</div>
+                                </div>
+                              ) : isUpdate && row.quantityDiff !== undefined && Math.abs(row.quantityDiff) > 0.0001 ? (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1.5 font-mono text-[12px]">
+                                    <span className="text-text-secondary bg-fill-quaternary px-1.5 py-0.5 rounded border border-separator/40">
+                                      {row.quantityBefore}
+                                    </span>
+                                    <span className="text-text-tertiary">→</span>
+                                    <span className="font-bold text-text-primary bg-fill-tertiary px-1.5 py-0.5 rounded border border-separator/60">
+                                      {row.quantity} {row.unit}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className={clsx(
+                                      "inline-block font-mono font-bold text-[11px] px-1.5 py-0.2 rounded",
+                                      row.quantityDiff > 0 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"
+                                    )}>
+                                      {row.quantityDiff > 0 ? `+${row.quantityDiff}` : row.quantityDiff} {row.unit}
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="font-mono text-text-secondary text-[12px]">
+                                  {row.quantity} {row.unit} <span className="text-text-tertiary">(без изм.)</span>
+                                </span>
+                              )}
+                            </td>
+
+                            {/* 4. Другие изменения / Примечание */}
+                            <td className="px-3.5 py-3 align-top min-w-0">
+                              {isError ? (
+                                <div className="rounded-lg bg-rose-100/70 border border-rose-200 p-2 text-rose-800 text-[11.5px] flex items-start gap-1.5">
+                                  <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+                                  <span>{row.errorReason}</span>
+                                </div>
+                              ) : (
+                                <div className="space-y-1">
+                                  {row.diffs.filter((d) => d.field !== 'quantity').length === 0 ? (
+                                    <span className="text-text-tertiary text-xs">—</span>
+                                  ) : (
+                                    row.diffs.filter((d) => d.field !== 'quantity').map((d, dIdx) => (
+                                      <div key={dIdx} className="text-[11.5px] flex items-center gap-1 text-text-secondary">
+                                        <span className="text-text-tertiary font-medium">{d.label}:</span>
+                                        <span className="line-through text-text-tertiary">{String(d.before)}</span>
+                                        <span>→</span>
+                                        <span className="font-semibold text-text-primary">{String(d.after)}</span>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Journal Safety Notice */}
+              <div className="rounded-xl border border-blue-200/70 bg-blue-50/50 p-3 flex items-start gap-2.5">
+                <ShieldCheck className="h-4 w-4 text-macos-blue shrink-0 mt-0.5" />
+                <p className="text-[11.5px] text-blue-900 leading-relaxed">
+                  <strong>Гарантия точности журнала движения:</strong> изменения остатков фиксируются как операции корректировки (ADJUSTMENT/IN) с сохранением значений «до» и «после», ФИО автора и основанием. История предыдущих выдач по заявкам не искажается.
+                </p>
+              </div>
+
+              {/* Options for errors */}
+              {importPreviewData.summary.errors > 0 && (
+                <label className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={importSkipErrors}
+                    onChange={(e) => setImportSkipErrors(e.target.checked)}
+                    className="h-4 w-4 rounded text-macos-blue border-separator focus:ring-macos-blue"
+                  />
+                  <span>
+                    Пропустить ошибочные строки (<strong>{importPreviewData.summary.errors}</strong>) и применить остальные валидные позиции (<strong>{importPreviewData.summary.toUpdate + importPreviewData.summary.toCreate}</strong>)
+                  </span>
+                </label>
+              )}
+
+              {/* Footer Actions */}
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-2 pt-3 border-t border-separator/50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={importApplying}
+                >
+                  <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5 text-emerald-600" /> Выбрать другой файл
+                </Button>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setImportModalOpen(false)}
+                    disabled={importApplying}
+                  >
+                    Отмена
+                  </Button>
+                  <Button
+                    onClick={handleApplyImport}
+                    disabled={
+                      importApplying ||
+                      (importPreviewData.summary.toUpdate + importPreviewData.summary.toCreate === 0) ||
+                      (importPreviewData.summary.errors > 0 && !importSkipErrors)
+                    }
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm"
+                  >
+                    {importApplying ? (
+                      <>
+                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Применение...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="mr-1.5 h-4 w-4" /> Применить изменения ({importPreviewData.summary.toUpdate + importPreviewData.summary.toCreate})
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </Modal>
     </PageStack>
   );
 }
+

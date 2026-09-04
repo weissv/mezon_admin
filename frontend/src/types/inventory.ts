@@ -180,3 +180,49 @@ export type StockCheckResult = {
   available: boolean;
   items: StockCheckItem[];
 };
+
+// ============================================================================
+// ИМПОРТ И ЭКСПОРТ ТАБЛИЦ СКЛАДА
+// ============================================================================
+
+export type RowDiffStatus = 'UPDATE' | 'CREATE' | 'UNCHANGED' | 'ERROR';
+
+export interface FieldDiff {
+  field: string;
+  label: string;
+  before: any;
+  after: any;
+  delta?: number;
+}
+
+export interface InventoryImportRowResult {
+  rowIndex: number;
+  status: RowDiffStatus;
+  id?: number;
+  name: string;
+  type: InventoryType;
+  typeLabel: string;
+  quantity: number;
+  quantityBefore?: number;
+  quantityDiff?: number;
+  unit: string;
+  minQuantity: number;
+  price: number;
+  expiryDate?: string | null;
+  matchedByName?: boolean;
+  diffs: FieldDiff[];
+  errorReason?: string;
+}
+
+export interface InventoryImportPreviewResult {
+  summary: {
+    totalRows: number;
+    toUpdate: number;
+    toCreate: number;
+    unchanged: number;
+    errors: number;
+    totalQuantityDelta: number;
+  };
+  rows: InventoryImportRowResult[];
+}
+
