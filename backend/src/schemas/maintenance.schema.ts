@@ -36,9 +36,19 @@ export const updateMaintenanceSchema = z.object({
     description: z.string().optional(),
     status: z.enum(["PENDING", "APPROVED", "REJECTED", "IN_PROGRESS", "DONE", "COMPLETED"]).optional(),
     type: z.enum(["REPAIR", "ISSUE", "PURCHASE"]).optional(),
+    returnStock: z.boolean().optional(),
     // Массив позиций для обновления (полная замена)
     items: z.array(maintenanceItemSchema).optional(),
   }),
+});
+
+// Схема для возврата заявки в статус «В работе»
+export const returnToProgressMaintenanceSchema = z.object({
+  params: z.object({ id: z.string().regex(/^\d+$/) }),
+  body: z.object({
+    returnStock: z.boolean().optional(),
+    reason: z.string().optional(),
+  }).optional(),
 });
 
 // Схема для частичной или полной выдачи завхозом

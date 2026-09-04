@@ -43,6 +43,10 @@ import {
   SlidersHorizontal,
   Layers,
   ArrowUpRight,
+  ArrowDownLeft,
+  Calendar,
+  User,
+  FileText,
   TrendingDown,
   TrendingUp,
   Clock,
@@ -102,6 +106,19 @@ export default function InventoryPage() {
   const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [selectedItemForHistory, setSelectedItemForHistory] = useState<Item | null>(null);
+
+  const itemTxSummary = useMemo(() => {
+    let inQty = 0;
+    let outQty = 0;
+    transactions.forEach((tx) => {
+      if (tx.type === 'IN') {
+        inQty += tx.quantity;
+      } else if (tx.type === 'OUT' || tx.type === 'WRITE_OFF') {
+        outQty += tx.quantity;
+      }
+    });
+    return { inQty, outQty, total: transactions.length };
+  }, [transactions]);
 
   // Write-off modal
   const [writeOffModalOpen, setWriteOffModalOpen] = useState(false);
@@ -1327,65 +1344,228 @@ export default function InventoryPage() {
       </Modal>
 
       {/* ITEM TRANSACTION HISTORY MODAL */}
-      <Modal isOpen={transactionsModalOpen} onClose={() => setTransactionsModalOpen(false)} title={`История движений: ${selectedItemForHistory?.name || ''}`}>
-        <div className="p-4">
+      <Modal 
+        isOpen={transactionsModalOpen} 
+        onClose={() => setTransactionsModalOpen(false)} 
+        title={`История движений: ${selectedItemForHistory?.name || ''}`}
+        size="xl"
+        eyebrow="Складской учёт / Движение номенклатуры"
+        icon={<History className="h-5 w-5 text-macos-blue" />}
+        meta={selectedItemForHistory ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mezon-badge macos-badge-neutral text-xs">
+              {inventoryTypeLabels[selectedItemForHistory.type] || selectedItemForHistory.type}
+            </span>
+            <span className="mezon-badge macos-badge-neutral text-xs">
+              Текущий остаток: <strong className="text-text-primary ml-1">{selectedItemForHistory.quantity} {selectedItemForHistory.unit}</strong>
+            </span>
+          </div>
+        ) : undefined}
+        footer={
+          <div className="flex items-center justify-between w-full">
+            <span className="text-xs text-text-tertiary">
+              Записей в истории: <strong className="text-text-primary tabular-nums">{transactions.length}</strong>
+            </span>
+            <Button variant="outline" onClick={() => setTransactionsModalOpen(false)}>
+              Закрыть
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {/* KPI Summary strip */}
+          {selectedItemForHistory && !transactionsLoading && transactions.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="p-3 rounded-xl bg-fill-quaternary/40 border border-separator/50">
+                <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider block">Текущий остаток</span>
+                <span className="text-base font-bold text-text-primary tabular-nums mt-0.5 block">
+                  {selectedItemForHistory.quantity} <span className="text-xs font-normal text-text-secondary">{selectedItemForHistory.unit}</span>
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-fill-quaternary/40 border border-separator/50">
+                <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider block">Всего операций</span>
+                <span className="text-base font-bold text-text-primary tabular-nums mt-0.5 block">
+                  {itemTxSummary.total}
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200/50">
+                <span className="text-[11px] font-medium text-emerald-800 uppercase tracking-wider block">Всего поступило</span>
+                <span className="text-base font-bold text-emerald-700 tabular-nums mt-0.5 block">
+                  +{itemTxSummary.inQty} <span className="text-xs font-normal text-emerald-800/80">{selectedItemForHistory.unit}</span>
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-rose-50/60 border border-rose-200/50">
+                <span className="text-[11px] font-medium text-rose-800 uppercase tracking-wider block">Выдано / Списано</span>
+                <span className="text-base font-bold text-rose-700 tabular-nums mt-0.5 block">
+                  -{itemTxSummary.outQty} <span className="text-xs font-normal text-rose-800/80">{selectedItemForHistory.unit}</span>
+                </span>
+              </div>
+            </div>
+          )}
+
           {transactionsLoading ? (
-            <div className="text-center py-6">Загрузка истории...</div>
+            <div className="py-12 text-center text-text-secondary flex flex-col items-center justify-center gap-2">
+              <div className="h-7 w-7 border-2 border-macos-blue border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm font-medium">Загрузка истории движений...</span>
+            </div>
           ) : transactions.length === 0 ? (
-            <div className="py-6 text-center text-gray-500">Нет записей о движениях</div>
+            <div className="py-12 text-center text-text-tertiary flex flex-col items-center justify-center gap-2 bg-fill-quaternary/20 border border-separator/40 rounded-2xl">
+              <History className="h-8 w-8 text-text-tertiary/60" />
+              <p className="font-semibold text-text-primary text-sm">История движений пуста</p>
+              <p className="text-xs text-text-secondary">По данному товару ещё не было зарегистрировано приходов, выдач или списаний.</p>
+            </div>
           ) : (
-            <div className="max-h-[60vh] overflow-y-auto">
-              <table className="w-full text-sm table-fixed">
-                <thead className="sticky top-0 bg-gray-100 text-gray-600 font-medium text-xs">
-                  <tr>
-                    <th className="w-[18%] text-left p-2.5">Дата и время</th>
-                    <th className="w-[20%] text-left p-2.5">Тип и дельта</th>
-                    <th className="w-[18%] text-left p-2.5">До → После</th>
-                    <th className="w-[24%] text-left p-2.5">Причина / Заявка</th>
-                    <th className="w-[20%] text-left p-2.5">Получатель</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 text-xs">
-                  {transactions.map((tx: InventoryTransaction) => (
-                    <tr key={tx.id} className="hover:bg-gray-50">
-                      <td className="p-2.5 text-gray-500 whitespace-nowrap">
-                        <div className="font-medium text-gray-800">{new Date(tx.createdAt).toLocaleDateString('ru-RU')}</div>
-                        <div className="text-[10.5px] text-gray-400">{new Date(tx.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
-                      </td>
-                      <td className="p-2.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`px-1.5 py-0.5 rounded font-semibold text-[10.5px] ${transactionTypeColors[tx.type]}`}>
-                            {transactionTypeLabels[tx.type]}
-                          </span>
-                          <span className={`font-mono font-bold ${tx.type === 'IN' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                            {tx.type === 'IN' ? '+' : '-'}{tx.quantity}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-2.5 font-mono text-gray-600">{tx.quantityBefore} → {tx.quantityAfter}</td>
-                      <td className="p-2.5 text-gray-700 truncate" title={tx.reason || ''}>
-                        {tx.reason || (tx.maintenanceRequest ? `Заявка #${tx.maintenanceRequest.id}` : '—')}
-                      </td>
-                      <td className="p-2.5 truncate">
-                        {tx.maintenanceRequest?.requester ? (
-                          <div className="truncate">
-                            <span className="font-medium text-gray-800 block truncate">
-                              👤 {tx.maintenanceRequest.requester.lastName} {tx.maintenanceRequest.requester.firstName}
-                            </span>
-                            {tx.maintenanceRequest.requester.position && (
-                              <span className="text-[10px] text-gray-400 block truncate">
-                                {tx.maintenanceRequest.requester.position}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )}
-                      </td>
+            <div className="border border-separator/60 rounded-xl overflow-hidden shadow-xs bg-surface-primary">
+              <div className="max-h-[58vh] overflow-y-auto overflow-x-auto">
+                <table className="w-full text-sm min-w-[760px]">
+                  <thead className="sticky top-0 z-10 bg-fill-quaternary/90 backdrop-blur-md text-text-tertiary font-bold text-[11px] uppercase tracking-wider border-b border-separator/60">
+                    <tr>
+                      <th className="text-left px-4 py-3 w-[16%]">Дата и время</th>
+                      <th className="text-left px-4 py-3 w-[18%]">Операция</th>
+                      <th className="text-left px-3 py-3 w-[14%]">Изменение</th>
+                      <th className="text-left px-3 py-3 w-[14%]">Остаток</th>
+                      <th className="text-left px-4 py-3 w-[20%]">Основание / Заявка</th>
+                      <th className="text-left px-4 py-3 w-[18%]">Получатель / Ответственный</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-separator/40 text-[12.5px]">
+                    {transactions.map((tx: InventoryTransaction) => {
+                      const isIncoming = tx.type === 'IN';
+                      const isOutgoing = tx.type === 'OUT';
+                      const isWriteOff = tx.type === 'WRITE_OFF';
+                      const isAdjustment = tx.type === 'ADJUSTMENT';
+
+                      const deltaVal = isAdjustment 
+                        ? tx.quantityAfter - tx.quantityBefore 
+                        : isIncoming 
+                        ? tx.quantity 
+                        : -tx.quantity;
+
+                      return (
+                        <tr key={tx.id} className="hover:bg-macos-blue/[0.03] transition-colors">
+                          {/* 1. Дата и время */}
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <div className="font-semibold text-text-primary flex items-center gap-1.5">
+                              <Calendar className="h-3 w-3 text-text-tertiary shrink-0" />
+                              {new Date(tx.createdAt).toLocaleDateString('ru-RU')}
+                            </div>
+                            <div className="text-[11px] text-text-tertiary pl-4.5 font-mono">
+                              {new Date(tx.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </td>
+
+                          {/* 2. Операция */}
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold text-[11px] border ${
+                                isIncoming
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                  : isOutgoing
+                                  ? 'bg-purple-50 text-purple-800 border-purple-200'
+                                  : isWriteOff
+                                  ? 'bg-rose-50 text-rose-800 border-rose-200'
+                                  : 'bg-amber-50 text-amber-800 border-amber-200'
+                              }`}
+                            >
+                              {isIncoming && <ArrowDownLeft className="h-3 w-3 text-emerald-600" />}
+                              {isOutgoing && <ArrowUpRight className="h-3 w-3 text-purple-600" />}
+                              {isWriteOff && <Trash2 className="h-3 w-3 text-rose-600" />}
+                              {isAdjustment && <SlidersHorizontal className="h-3 w-3 text-amber-600" />}
+                              {transactionTypeLabels[tx.type]}
+                            </span>
+                          </td>
+
+                          {/* 3. Изменение (дельта) */}
+                          <td className="px-3 py-3 whitespace-nowrap font-mono">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-md font-bold text-[12px] ${
+                                deltaVal > 0
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : deltaVal < 0
+                                  ? 'bg-rose-50 text-rose-700'
+                                  : 'bg-gray-100 text-gray-600'
+                              }`}
+                            >
+                              {deltaVal > 0 ? `+${deltaVal}` : deltaVal} {selectedItemForHistory?.unit}
+                            </span>
+                          </td>
+
+                          {/* 4. Остаток До → После */}
+                          <td className="px-3 py-3 whitespace-nowrap font-mono text-[12px]">
+                            <span className="text-text-secondary bg-fill-quaternary/70 px-1.5 py-0.5 rounded border border-separator/40">
+                              {tx.quantityBefore}
+                            </span>
+                            <span className="text-text-tertiary mx-1.5 font-sans">→</span>
+                            <span className="font-bold text-text-primary bg-fill-tertiary px-1.5 py-0.5 rounded border border-separator/50">
+                              {tx.quantityAfter}
+                            </span>
+                          </td>
+
+                          {/* 5. Основание / Заявка */}
+                          <td className="px-4 py-3">
+                            {tx.maintenanceRequest ? (
+                              <div className="space-y-0.5 min-w-0">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
+                                  <FileText className="h-3 w-3 text-blue-600 shrink-0" />
+                                  Заявка #{tx.maintenanceRequest.id}
+                                </span>
+                                <p className="text-[11.5px] text-text-secondary leading-snug line-clamp-2" title={tx.maintenanceRequest.title}>
+                                  {tx.maintenanceRequest.title}
+                                </p>
+                              </div>
+                            ) : tx.reason ? (
+                              <p className="text-[12px] text-text-secondary leading-snug break-words">
+                                {tx.reason}
+                              </p>
+                            ) : (
+                              <span className="text-text-tertiary text-xs">—</span>
+                            )}
+                          </td>
+
+                          {/* 6. Получатель / Ответственный */}
+                          <td className="px-4 py-3">
+                            {tx.maintenanceRequest?.requester ? (
+                              <div className="flex items-start gap-2 min-w-0">
+                                <div className="w-6 h-6 rounded-full bg-macos-blue/10 text-macos-blue font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                                  {tx.maintenanceRequest.requester.lastName?.[0] || 'U'}
+                                  {tx.maintenanceRequest.requester.firstName?.[0] || ''}
+                                </div>
+                                <div className="min-w-0">
+                                  <span className="font-semibold text-text-primary block text-[12px] leading-tight">
+                                    {tx.maintenanceRequest.requester.lastName} {tx.maintenanceRequest.requester.firstName}
+                                  </span>
+                                  {tx.maintenanceRequest.requester.position && (
+                                    <span className="text-[10.5px] text-text-tertiary block leading-tight mt-0.5">
+                                      {tx.maintenanceRequest.requester.position}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ) : tx.performedBy ? (
+                              <div className="flex items-start gap-2 min-w-0">
+                                <div className="w-6 h-6 rounded-full bg-fill-tertiary text-text-secondary font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                                  {tx.performedBy.lastName?.[0] || 'A'}
+                                  {tx.performedBy.firstName?.[0] || ''}
+                                </div>
+                                <div className="min-w-0">
+                                  <span className="font-medium text-text-secondary block text-[12px] leading-tight">
+                                    {tx.performedBy.lastName} {tx.performedBy.firstName}
+                                  </span>
+                                  <span className="text-[10.5px] text-text-tertiary block leading-tight mt-0.5">
+                                    {tx.performedBy.position || 'Оператор склада'}
+                                  </span>
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-text-tertiary text-xs">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

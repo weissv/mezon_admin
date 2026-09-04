@@ -4,7 +4,12 @@ import { prisma } from "../prisma";
 import { checkRole } from "../middleware/checkRole";
 const router = Router();
 import { validate } from "../middleware/validate";
-import { createMaintenanceSchema, updateMaintenanceSchema, fulfillMaintenanceSchema } from "../schemas/maintenance.schema";
+import { 
+  createMaintenanceSchema, 
+  updateMaintenanceSchema, 
+  fulfillMaintenanceSchema,
+  returnToProgressMaintenanceSchema 
+} from "../schemas/maintenance.schema";
 import { notifyRole, sendTelegramMessage } from "../services/TelegramService";
 import {
   checkStockAvailability,
@@ -233,6 +238,7 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
   const request = await prisma.maintenanceRequest.findUnique({
     where: { id },
     include: {
+      items: true,
       requester: {
         include: {
           user: { select: { role: true } }
@@ -257,6 +263,8 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
   const previousStatus = request.status;
   const newStatus = updateData.status;
   const effectiveType = updateData.type || request.type;
+  const returnStock = Boolean(updateData.returnStock);
+  delete updateData.returnStock;
 
   // Проверка позиций при обновлении:
   if (effectiveType === "PURCHASE" && items && items.length > 0) {
@@ -273,8 +281,16 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
   }
 
   if (effectiveType === "ISSUE" && items && items.length > 0) {
+    // Собираем ID товаров, которые уже были привязаны к этой заявке
+    const existingItemInventoryIds = new Set(
+      request.items.map((i) => i.inventoryItemId).filter(Boolean)
+    );
+
     for (const item of items) {
-      if (item.inventoryItemId) {
+      // Проверяем наличие на складе ТОЛЬКО для вновь добавляемых товаров со склада.
+      // Позиции, которые уже присутствовали в этой заявке (и тем более уже выданы),
+      // не блокируют сохранение при остатке 0!
+      if (item.inventoryItemId && !existingItemInventoryIds.has(item.inventoryItemId)) {
         const invItem = await prisma.inventoryItem.findUnique({ where: { id: item.inventoryItemId } });
         if (!invItem || invItem.quantity <= 0) {
           return res.status(400).json({
@@ -298,16 +314,41 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
     }
   }
   
-  // Если заявка была DONE и переводится обратно — возвращаем товары на склад
-  if (previousStatus === "DONE" && newStatus && newStatus !== "DONE" && request.type === "ISSUE") {
-    await reverseStockForRequest(id, user.employeeId);
+  // Если заявка была выполнена (DONE или COMPLETED) и переводится обратно:
+  const wasCompleted = previousStatus === "DONE" || previousStatus === "COMPLETED";
+  const isLeavingCompleted = wasCompleted && newStatus && newStatus !== "DONE" && newStatus !== "COMPLETED";
+
+  if (isLeavingCompleted) {
+    // Сбрасываем факт подтверждения получения
+    updateData.receivedById = null;
+    updateData.receivedAt = null;
+
+    // Возвращаем товары на баланс склада ТОЛЬКО если явно запрошен физический возврат
+    if (returnStock && request.type === "ISSUE") {
+      await reverseStockForRequest(id, user.employeeId);
+    }
   }
 
-  // Обрабатываем позиции при обновлении
-  let processedItems: Array<{ name: string; quantity: number; unit: string; category: "STATIONERY" | "HOUSEHOLD" | "OTHER"; inventoryItemId?: number | null }> | undefined = undefined;
+  // Обрабатываем позиции при обновлении с сохранением выданного количества
+  const existingItemMap = new Map(
+    request.items.map((i) => [i.inventoryItemId ? `inv_${i.inventoryItemId}` : `name_${i.name}`, i])
+  );
+
+  let processedItems: Array<{ 
+    name: string; 
+    quantity: number; 
+    unit: string; 
+    category: "STATIONERY" | "HOUSEHOLD" | "OTHER"; 
+    inventoryItemId?: number | null;
+    issuedQuantity?: number | null;
+  }> | undefined = undefined;
+
   if (items && Array.isArray(items)) {
     processedItems = await Promise.all(
       items.map(async (item: { name: string; quantity: number; unit: string; category: string; inventoryItemId?: number }) => {
+        const prev = existingItemMap.get(item.inventoryItemId ? `inv_${item.inventoryItemId}` : `name_${item.name}`);
+        const existingIssued = returnStock ? null : (prev ? prev.issuedQuantity : null);
+
         if (item.inventoryItemId) {
           const invItem = await prisma.inventoryItem.findUnique({ where: { id: item.inventoryItemId } });
           if (invItem) {
@@ -317,6 +358,7 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
               unit: invItem.unit,
               category: mapInventoryTypeToCategory(invItem.type),
               inventoryItemId: invItem.id,
+              issuedQuantity: existingIssued,
             };
           }
         }
@@ -326,6 +368,7 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
           unit: item.unit,
           category: (item.category as any) || "OTHER",
           inventoryItemId: item.inventoryItemId || null,
+          issuedQuantity: existingIssued,
         };
       })
     );
@@ -407,6 +450,66 @@ router.put("/:id", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "TEACH
   }
 
   res.json(response);
+});
+
+// POST /api/maintenance/:id/return-to-progress - возврат выполненной заявки в статус «В работе»
+router.post("/:id/return-to-progress", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), validate(returnToProgressMaintenanceSchema), async (req, res) => {
+  const id = Number(req.params.id);
+  const user = req.user!;
+  const returnStock = Boolean(req.body?.returnStock);
+
+  const request = await prisma.maintenanceRequest.findUnique({
+    where: { id },
+    include: {
+      items: true,
+      requester: {
+        include: {
+          user: { select: { id: true, role: true } }
+        }
+      }
+    }
+  });
+
+  if (!request) {
+    return res.status(404).json({ message: "Заявка не найдена" });
+  }
+
+  if (request.status !== "DONE" && request.status !== "COMPLETED") {
+    return res.status(400).json({ message: "Вернуть в работу можно только выполненные заявки" });
+  }
+
+  // Если явно запрошен физический возврат товаров на баланс склада
+  if (returnStock && request.type === "ISSUE") {
+    await reverseStockForRequest(id, user.employeeId);
+  }
+
+  // Обновляем заявку: переводим в IN_PROGRESS и сбрасываем факт подтверждения получения
+  const updated = await prisma.maintenanceRequest.update({
+    where: { id },
+    data: {
+      status: "IN_PROGRESS",
+      receivedById: null,
+      receivedAt: null,
+    },
+    include: {
+      requester: {
+        include: {
+          user: { select: { id: true, role: true } }
+        }
+      },
+      approvedBy: true,
+      receivedBy: true,
+      items: {
+        include: {
+          inventoryItem: {
+            select: { id: true, name: true, quantity: true, unit: true, type: true }
+          }
+        }
+      }
+    }
+  });
+
+  res.json(updated);
 });
 
 // POST /api/maintenance/:id/fulfill - частичная или полная выдача завхозом

@@ -133,8 +133,9 @@ export async function deductStockForRequest(
       }
 
       const quantityBefore = inventoryItem.quantity;
+      const alreadyIssued = item.issuedQuantity ?? 0;
       
-      // Определяем желаемое количество к выдаче
+      // Определяем желаемое итоговое количество к выдаче
       let targetQuantity = item.quantity;
       if (customIssuedItems && Array.isArray(customIssuedItems)) {
         const customEntry = customIssuedItems.find((c) => c.itemId === item.id);
@@ -143,59 +144,118 @@ export async function deductStockForRequest(
         }
       }
 
-      // Списываем не больше, чем есть на складе
-      const actualDeduction = Math.min(targetQuantity, quantityBefore);
-      const quantityAfter = quantityBefore - actualDeduction;
-
-      if (actualDeduction < item.quantity) {
-        result.warnings.push(
-          `Товар "${item.name}": запрошено ${item.quantity} ${item.unit}, ` +
-          `на складе ${quantityBefore} ${item.unit}, выдано ${actualDeduction} ${item.unit}`
-        );
+      // Сценарий 1: Уже выдано ровно столько, сколько требуется
+      if (targetQuantity === alreadyIssued) {
+        // Товар уже выдан в требуемом объеме ранее.
+        // Не списываем повторно и не создаем дублирующих записей в журнале движений!
+        result.transactions.push({
+          inventoryItemId: inventoryItem.id,
+          itemName: item.name,
+          deducted: 0,
+          remainingStock: quantityBefore,
+        });
+        continue;
       }
 
-      // Обновляем остаток на складе только если что-то списали
-      if (actualDeduction > 0) {
+      // Сценарий 2: Нужно довыдать со склада (targetQuantity > alreadyIssued)
+      if (targetQuantity > alreadyIssued) {
+        const deltaNeeded = targetQuantity - alreadyIssued;
+        const actualDeduction = Math.min(deltaNeeded, quantityBefore);
+        const quantityAfter = quantityBefore - actualDeduction;
+        const newIssuedTotal = alreadyIssued + actualDeduction;
+
+        if (actualDeduction < deltaNeeded) {
+          result.warnings.push(
+            `Товар "${item.name}": требуется довыдать ${deltaNeeded} ${item.unit}, ` +
+            `на складе ${quantityBefore} ${item.unit}, фактически выдано ${actualDeduction} ${item.unit}`
+          );
+        }
+
+        // Обновляем остаток на складе только если что-то списали
+        if (actualDeduction > 0) {
+          await tx.inventoryItem.update({
+            where: { id: inventoryItem.id },
+            data: { quantity: quantityAfter },
+          });
+
+          // Создаём запись в журнале операций с понятным основанием
+          const reasonText = alreadyIssued > 0
+            ? `Довыдача по заявке #${requestId}: ${request.title} (+${actualDeduction} к ранее выданным ${alreadyIssued} ${item.unit})`
+            : (newIssuedTotal < item.quantity
+              ? `Выдача по заявке #${requestId}: ${request.title} (Частично: ${newIssuedTotal} из ${item.quantity} ${item.unit})`
+              : `Выдача по заявке #${requestId}: ${request.title}`);
+
+          await tx.inventoryTransaction.create({
+            data: {
+              inventoryItemId: inventoryItem.id,
+              type: "OUT",
+              quantity: actualDeduction,
+              quantityBefore,
+              quantityAfter,
+              reason: reasonText,
+              maintenanceRequestId: requestId,
+              performedById,
+            },
+          });
+        }
+
+        // Обновляем позицию заявки: фактически выданное количество
+        await tx.maintenanceItem.update({
+          where: { id: item.id },
+          data: {
+            inventoryItemId: inventoryItem.id,
+            issuedQuantity: newIssuedTotal,
+          },
+        });
+
+        result.transactions.push({
+          inventoryItemId: inventoryItem.id,
+          itemName: item.name,
+          deducted: actualDeduction,
+          remainingStock: actualDeduction > 0 ? quantityAfter : quantityBefore,
+        });
+        continue;
+      }
+
+      // Сценарий 3: Уменьшение выданного количества (targetQuantity < alreadyIssued)
+      if (targetQuantity < alreadyIssued) {
+        const returnDelta = alreadyIssued - targetQuantity;
+        const quantityAfter = quantityBefore + returnDelta;
+
         await tx.inventoryItem.update({
           where: { id: inventoryItem.id },
           data: { quantity: quantityAfter },
         });
 
-        // Создаём запись в журнале операций
-        const isPartial = actualDeduction < item.quantity;
-        const reasonText = isPartial
-          ? `Выдача по заявке #${requestId}: ${request.title} (Частично: ${actualDeduction} из ${item.quantity} ${item.unit})`
-          : `Выдача по заявке #${requestId}: ${request.title}`;
-
         await tx.inventoryTransaction.create({
           data: {
             inventoryItemId: inventoryItem.id,
-            type: "OUT",
-            quantity: actualDeduction,
+            type: "IN",
+            quantity: returnDelta,
             quantityBefore,
             quantityAfter,
-            reason: reasonText,
+            reason: `Корректировка выдачи по заявке #${requestId}: возврат ${returnDelta} ${item.unit} на склад`,
             maintenanceRequestId: requestId,
             performedById,
           },
         });
-      }
 
-      // Обновляем позицию заявки: привязка к складскому товару + фактически выданное количество
-      await tx.maintenanceItem.update({
-        where: { id: item.id },
-        data: {
+        await tx.maintenanceItem.update({
+          where: { id: item.id },
+          data: {
+            inventoryItemId: inventoryItem.id,
+            issuedQuantity: targetQuantity,
+          },
+        });
+
+        result.transactions.push({
           inventoryItemId: inventoryItem.id,
-          issuedQuantity: actualDeduction,
-        },
-      });
-
-      result.transactions.push({
-        inventoryItemId: inventoryItem.id,
-        itemName: item.name,
-        deducted: actualDeduction,
-        remainingStock: quantityAfter,
-      });
+          itemName: item.name,
+          deducted: -returnDelta,
+          remainingStock: quantityAfter,
+        });
+        continue;
+      }
     }
   });
 

@@ -30,6 +30,10 @@ import {
   Check,
   ShoppingCart,
   ShieldAlert,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  RotateCcw,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { PageHeader, PageSection, PageStack, PageToolbar } from '../components/ui/page';
@@ -83,6 +87,20 @@ export default function MaintenancePage() {
   // Requests state
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedRequests, setExpandedRequests] = useState<Set<number>>(new Set());
+
+  const toggleExpandRequest = (id: number) => {
+    setExpandedRequests((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<MaintenanceRequest | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<MaintenanceRequest | null>(null);
@@ -101,6 +119,12 @@ export default function MaintenancePage() {
   // Модальное окно частичной/полной выдачи для завхоза
   const [fulfillModalOpen, setFulfillModalOpen] = useState(false);
   const [fulfillingRequest, setFulfillingRequest] = useState<MaintenanceRequest | null>(null);
+
+  // Модальное окно возврата в статус «В работе»
+  const [returnToWorkModalOpen, setReturnToWorkModalOpen] = useState(false);
+  const [returnToWorkRequest, setReturnToWorkRequest] = useState<MaintenanceRequest | null>(null);
+  const [returnStock, setReturnStock] = useState(false);
+  const [returnLoading, setReturnLoading] = useState(false);
 
   // Cleaning state
   const [cleaningSchedules, setCleaningSchedules] = useState<CleaningSchedule[]>([]);
@@ -379,6 +403,24 @@ export default function MaintenancePage() {
     }
   };
 
+  const handleReturnToWork = async () => {
+    if (!returnToWorkRequest) return;
+    setReturnLoading(true);
+    try {
+      await api.post(`/api/maintenance/${returnToWorkRequest.id}/return-to-progress`, {
+        returnStock,
+      });
+      toast.success('Заявка возвращена в статус «В работе»');
+      setReturnToWorkModalOpen(false);
+      setReturnToWorkRequest(null);
+      fetchRequests();
+    } catch (error: any) {
+      toast.error('Ошибка возврата заявки в работу', { description: error?.message });
+    } finally {
+      setReturnLoading(false);
+    }
+  };
+
   // Cleaning handlers
   const openCleaningModal = (schedule?: CleaningSchedule) => {
     if (schedule) {
@@ -537,93 +579,208 @@ export default function MaintenancePage() {
       key: 'title', 
       header: 'Заявка и ТМЦ',
       width: '45%',
-      render: (row) => (
-        <div className="space-y-1.5 py-1 min-w-0">
-          {/* Header row with Type badge, ID and Title */}
-          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-            {row.type === 'PURCHASE' ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
-                <ShoppingCart className="h-3 w-3 text-emerald-600" />
-                Покупка
-              </span>
-            ) : row.type === 'ISSUE' ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200 shrink-0">
-                <Package className="h-3 w-3 text-purple-600" />
-                Выдача
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-orange-50 text-orange-800 border border-orange-200 shrink-0">
-                <Wrench className="h-3 w-3 text-orange-600" />
-                Ремонт
-              </span>
-            )}
+      className: 'align-top',
+      render: (row) => {
+        const isExpanded = expandedRequests.has(row.id);
+        const hasItems = (row.type === 'ISSUE' || row.type === 'PURCHASE') && row.items && row.items.length > 0;
+        const totalItems = row.items?.length || 0;
+        const showExpandButton = totalItems > 2;
+        const previewItems = showExpandButton ? row.items.slice(0, 2) : (row.items || []);
 
-            <span className="font-mono text-[11px] font-bold text-text-tertiary shrink-0">
-              #{row.id}
-            </span>
-
-            <span className="font-bold text-[13.5px] text-text-primary break-words leading-snug">
-              {row.title}
-            </span>
-          </div>
-
-          {/* Items Preview for ISSUE and PURCHASE */}
-          {(row.type === 'ISSUE' || row.type === 'PURCHASE') && row.items && row.items.length > 0 && (
+        return (
+          <div className="space-y-1.5 py-1 min-w-0">
+            {/* Header row with Type badge, ID and Title */}
             <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-              {row.items.slice(0, 3).map((item, idx) => {
-                const isDone = row.status === 'DONE' || row.status === 'COMPLETED';
-                const isPartial = item.issuedQuantity != null && item.issuedQuantity < item.quantity;
-                const isZeroIssued = item.issuedQuantity === 0;
-
-                return (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1 text-[11.5px] font-medium px-2 py-0.5 rounded-md bg-fill-quaternary border border-separator/60 shrink-0 max-w-full truncate"
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                        item.category === 'STATIONERY'
-                          ? 'bg-blue-500'
-                          : item.category === 'HOUSEHOLD'
-                          ? 'bg-amber-500'
-                          : 'bg-gray-500'
-                      }`}
-                    />
-                    <span className="text-text-primary font-semibold truncate max-w-[130px]">{item.name}</span>
-                    <span className="text-text-secondary shrink-0">({item.quantity} {item.unit})</span>
-
-                    {/* Отметка выдачи */}
-                    {row.type === 'ISSUE' && isDone && item.issuedQuantity != null && (
-                      <span className="ml-0.5 text-[10.5px] font-bold shrink-0">
-                        {isZeroIssued ? (
-                          <span className="text-rose-600">✕ 0</span>
-                        ) : isPartial ? (
-                          <span className="text-amber-700">⚠️ {item.issuedQuantity}</span>
-                        ) : (
-                          <span className="text-emerald-700">✓</span>
-                        )}
-                      </span>
-                    )}
-                  </span>
-                );
-              })}
-
-              {row.items.length > 3 && (
-                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-fill-tertiary text-text-secondary shrink-0">
-                  +{row.items.length - 3} ещё
+              {row.type === 'PURCHASE' ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                  <ShoppingCart className="h-3 w-3 text-emerald-600" />
+                  Покупка
+                </span>
+              ) : row.type === 'ISSUE' ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200 shrink-0">
+                  <Package className="h-3 w-3 text-purple-600" />
+                  Выдача
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-orange-50 text-orange-800 border border-orange-200 shrink-0">
+                  <Wrench className="h-3 w-3 text-orange-600" />
+                  Ремонт
                 </span>
               )}
-            </div>
-          )}
 
-          {/* Description snippet */}
-          {row.description && (
-            <p className="text-[11.5px] text-text-tertiary truncate italic max-w-full" title={row.description}>
-              {row.description}
-            </p>
-          )}
-        </div>
-      ),
+              <span className="font-mono text-[11px] font-bold text-text-tertiary shrink-0">
+                #{row.id}
+              </span>
+
+              <span className="font-bold text-[13.5px] text-text-primary break-words leading-snug">
+                {row.title}
+              </span>
+            </div>
+
+            {/* Items Preview and Smooth Accordion */}
+            {hasItems && (
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                  {previewItems.map((item, idx) => {
+                    const isDone = row.status === 'DONE' || row.status === 'COMPLETED';
+                    const isPartial = item.issuedQuantity != null && item.issuedQuantity < item.quantity;
+                    const isZeroIssued = item.issuedQuantity === 0;
+
+                    return (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 text-[11.5px] font-medium px-2 py-0.5 rounded-md bg-fill-quaternary border border-separator/60 shrink-0 max-w-full truncate"
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            item.category === 'STATIONERY'
+                              ? 'bg-blue-500'
+                              : item.category === 'HOUSEHOLD'
+                              ? 'bg-amber-500'
+                              : 'bg-emerald-500'
+                          }`}
+                        />
+                        <span className="text-text-primary font-semibold truncate max-w-[130px]">{item.name}</span>
+                        <span className="text-text-secondary shrink-0">({item.quantity} {item.unit})</span>
+
+                        {/* Отметка выдачи */}
+                        {row.type === 'ISSUE' && isDone && item.issuedQuantity != null && (
+                          <span className="ml-0.5 text-[10.5px] font-bold shrink-0">
+                            {isZeroIssued ? (
+                              <span className="text-rose-600">✕ 0</span>
+                            ) : isPartial ? (
+                              <span className="text-amber-700">⚠️ {item.issuedQuantity}</span>
+                            ) : (
+                              <span className="text-emerald-700">✓</span>
+                            )}
+                          </span>
+                        )}
+                      </span>
+                    );
+                  })}
+
+                  {showExpandButton && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleExpandRequest(row.id);
+                      }}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer group shadow-2xs ${
+                        isExpanded
+                          ? 'bg-fill-tertiary hover:bg-fill-secondary text-text-secondary border border-separator/80'
+                          : 'bg-macos-blue/10 hover:bg-macos-blue/20 text-macos-blue border border-macos-blue/25'
+                      }`}
+                      title={isExpanded ? 'Свернуть список позиций' : `Показать все ${totalItems} позиций`}
+                    >
+                      {isExpanded ? (
+                        <>
+                          <span>Свернуть</span>
+                          <ChevronUp className="h-3 w-3 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                        </>
+                      ) : (
+                        <>
+                          <span>+{totalItems - 2} ещё</span>
+                          <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:translate-y-0.5" />
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Animated In-Table Positions Expansion */}
+                {showExpandButton && (
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      isExpanded
+                        ? 'grid-rows-[1fr] opacity-100 mt-1.5 pointer-events-auto'
+                        : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="rounded-xl border border-separator/70 bg-fill-quaternary/40 p-2.5 space-y-2 backdrop-blur-xs">
+                        <div className="flex items-center justify-between text-[11px] text-text-tertiary font-semibold uppercase tracking-wider px-0.5">
+                          <span className="flex items-center gap-1.5">
+                            <Layers className="h-3 w-3 text-macos-blue" />
+                            Все позиции заявки ({totalItems})
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleExpandRequest(row.id);
+                            }}
+                            className="text-macos-blue hover:underline text-[11px] font-medium lowercase first-letter:uppercase cursor-pointer"
+                          >
+                            свернуть список
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
+                          {row.items.map((item, idx) => {
+                            const isDone = row.status === 'DONE' || row.status === 'COMPLETED';
+                            const isPartial = item.issuedQuantity != null && item.issuedQuantity < item.quantity;
+                            const isZeroIssued = item.issuedQuantity === 0;
+
+                            return (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between gap-2 p-1.5 px-2 rounded-lg bg-surface-primary border border-separator/50 shadow-2xs hover:border-separator transition-all text-[11.5px]"
+                              >
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span
+                                    className={`w-2 h-2 rounded-full shrink-0 ${
+                                      item.category === 'STATIONERY'
+                                        ? 'bg-blue-500'
+                                        : item.category === 'HOUSEHOLD'
+                                        ? 'bg-amber-500'
+                                        : 'bg-emerald-500'
+                                    }`}
+                                  />
+                                  <span className="font-semibold text-text-primary truncate" title={item.name}>
+                                    {item.name}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span className="font-mono text-text-secondary font-medium">
+                                    {item.quantity} {item.unit}
+                                  </span>
+
+                                  {row.type === 'ISSUE' && isDone && item.issuedQuantity != null && (
+                                    <span
+                                      className={`px-1.5 py-0.2 rounded text-[10.5px] font-bold border ${
+                                        isZeroIssued
+                                          ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                          : isPartial
+                                          ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                      }`}
+                                    >
+                                      {isZeroIssued ? '✕ 0' : isPartial ? `⚠️ ${item.issuedQuantity}` : '✓'}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Description snippet */}
+            {row.description && (
+              <p className="text-[11.5px] text-text-tertiary truncate italic max-w-full" title={row.description}>
+                {row.description}
+              </p>
+            )}
+          </div>
+        );
+      },
     },
 
     // Колонка 2: Заявитель и дата
@@ -631,6 +788,7 @@ export default function MaintenancePage() {
       key: 'requester' as keyof MaintenanceRequest,
       header: 'Заявитель и дата',
       width: '18%',
+      className: 'align-top',
       render: (row: MaintenanceRequest) => (
         <div className="space-y-0.5 text-[12.5px] min-w-0">
           <div className="font-semibold text-text-primary truncate" title={row.requester ? `${row.requester.lastName} ${row.requester.firstName}` : ''}>
@@ -659,6 +817,7 @@ export default function MaintenancePage() {
       key: 'status',
       header: 'Статус',
       width: '17%',
+      className: 'align-top',
       render: (row) => (
         <div className="space-y-1 min-w-0">
           <div>
@@ -699,6 +858,7 @@ export default function MaintenancePage() {
       header: 'Действия',
       width: '20%',
       align: 'right',
+      className: 'align-top',
       render: (row) => {
         const canEditThisRequest =
           canEditAll ||
@@ -790,6 +950,23 @@ export default function MaintenancePage() {
               >
                 {confirmReceiptLoading === row.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Check className="h-3.5 w-3.5 mr-1" />}
                 Получил
+              </Button>
+            )}
+
+            {/* Кнопка возврата в работу для выполненных заявок (Завхоз, Админ, Директор) */}
+            {(row.status === 'DONE' || row.status === 'COMPLETED') && (canEditAll || isZavhoz) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setReturnToWorkRequest(row);
+                  setReturnStock(false);
+                  setReturnToWorkModalOpen(true);
+                }}
+                title="Вернуть заявку в статус «В работе» для исправления ошибок"
+                className="h-8 px-2.5 border-macos-blue/60 text-macos-blue hover:bg-macos-blue hover:text-white font-semibold shadow-2xs"
+              >
+                <RotateCcw className="h-3.5 w-3.5 mr-1" /> В работу
               </Button>
             )}
 
@@ -1612,6 +1789,73 @@ export default function MaintenancePage() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Return to Work Modal */}
+      <Modal
+        isOpen={returnToWorkModalOpen}
+        onClose={() => setReturnToWorkModalOpen(false)}
+        title={returnToWorkRequest ? `Вернуть заявку #${returnToWorkRequest.id} в работу` : 'Вернуть заявку в работу'}
+        eyebrow="Корректировка статуса"
+        icon={<RotateCcw className="h-5 w-5 text-macos-blue" />}
+        size="md"
+      >
+        <div className="p-4 space-y-4">
+          {returnToWorkRequest && (
+            <div className="rounded-xl border border-separator/60 bg-fill-quaternary/40 p-3 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-xs text-text-tertiary">#{returnToWorkRequest.id}</span>
+                <span className="font-semibold text-text-primary text-sm">{returnToWorkRequest.title}</span>
+              </div>
+              {returnToWorkRequest.items && returnToWorkRequest.items.length > 0 && (
+                <p className="text-xs text-text-secondary">
+                  Позиций в заявке: <strong>{returnToWorkRequest.items.length}</strong>
+                </p>
+              )}
+            </div>
+          )}
+
+          <p className="text-xs text-text-secondary leading-relaxed">
+            Заявка будет переведена из статуса «Выполнено» обратно в «В работе». Вы сможете отредактировать состав позиций, тему, описание или довыдать материалы.
+          </p>
+
+          {returnToWorkRequest?.type === 'ISSUE' && (
+            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-separator/70 bg-fill-quaternary/30 cursor-pointer hover:bg-fill-quaternary/50 transition-all select-none">
+              <input
+                type="checkbox"
+                checked={returnStock}
+                onChange={(e) => setReturnStock(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded text-macos-blue border-separator focus:ring-macos-blue cursor-pointer"
+              />
+              <div className="min-w-0">
+                <span className="font-semibold text-text-primary text-[12.5px] block">
+                  Физический возврат: вернуть товары на склад
+                </span>
+                <span className="text-[11px] text-text-tertiary block mt-0.5 leading-normal">
+                  Включите только если заявитель <strong>реально сдал</strong> выданные товары обратно завхозу на полку склада. По умолчанию товары остаются списанными за заявителем.
+                </span>
+              </div>
+            </label>
+          )}
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-separator/50">
+            <Button
+              variant="outline"
+              onClick={() => setReturnToWorkModalOpen(false)}
+              disabled={returnLoading}
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleReturnToWork}
+              disabled={returnLoading}
+              className="bg-macos-blue text-white hover:bg-macos-blue/90"
+            >
+              {returnLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <RotateCcw className="h-4 w-4 mr-1.5" />}
+              Вернуть в работу
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* Fulfill Request Modal (Завхоз - выдача товаров) */}
