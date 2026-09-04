@@ -47,6 +47,7 @@ export interface InventoryImportPreviewResult {
     unchanged: number;
     errors: number;
     totalQuantityDelta: number;
+    detectedCategories: string[];
   };
   rows: InventoryImportRowResult[];
 }
@@ -89,6 +90,27 @@ export function mapCategoryToType(val: unknown, fallback: InventoryType = "HOUSE
   }
 
   return fallback;
+}
+
+/**
+ * Определение категории товара по названию листа Excel (если лист назван по категории)
+ */
+export function detectCategoryFromSheetName(sheetName: string): InventoryType | null {
+  if (!sheetName) return null;
+  const str = sheetName.trim().toLowerCase();
+  if (str.includes("канц") || str.includes("stationery") || str.includes("ручк") || str.includes("бумаг")) {
+    return "STATIONERY";
+  }
+  if (str.includes("хоз") || str.includes("household") || str.includes("мыл") || str.includes("быт")) {
+    return "HOUSEHOLD";
+  }
+  if (str.includes("продукт") || str.includes("food") || str.includes("питан") || str.includes("ед")) {
+    return "FOOD";
+  }
+  if (str.includes("техник") || str.includes("оборуд") || str.includes("equipment") || str.includes("электр")) {
+    return "EQUIPMENT";
+  }
+  return null;
 }
 
 /**
@@ -144,10 +166,16 @@ function parseFlexibleDate(val: any): Date | null {
 }
 
 /**
- * 1. Генерация Excel файла со всеми товарами склада
+ * 1. Генерация Excel файла со всеми товарами склада или по конкретной категории
  */
-export async function generateInventoryExcelBuffer(): Promise<Buffer> {
+export async function generateInventoryExcelBuffer(category?: InventoryType): Promise<Buffer> {
+  const where: Prisma.InventoryItemWhereInput = {};
+  if (category && category in INVENTORY_TYPE_RU_LABELS) {
+    where.type = category;
+  }
+
   const items = await prisma.inventoryItem.findMany({
+    where,
     orderBy: [{ type: "asc" }, { name: "asc" }],
   });
 
@@ -177,7 +205,11 @@ export async function generateInventoryExcelBuffer(): Promise<Buffer> {
     { wch: 14 }, // Цена
   ];
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Склад ТМЦ");
+  const sheetName = category && INVENTORY_TYPE_RU_LABELS[category]
+    ? INVENTORY_TYPE_RU_LABELS[category]
+    : "Склад ТМЦ";
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
 }
 
@@ -186,16 +218,9 @@ export async function generateInventoryExcelBuffer(): Promise<Buffer> {
  */
 export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promise<InventoryImportPreviewResult> {
   const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-  const [firstSheetName] = workbook.SheetNames;
-  if (!firstSheetName) {
+  const sheetNames = workbook.SheetNames || [];
+  if (sheetNames.length === 0) {
     throw new Error("В файле нет листов с данными");
-  }
-
-  const sheet = workbook.Sheets[firstSheetName];
-  const rawRows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: "" });
-
-  if (rawRows.length === 0) {
-    throw new Error("Таблица пуста. Заполните данные и повторите загрузку.");
   }
 
   // Предзагрузка всех товаров из БД для сверки
@@ -205,20 +230,76 @@ export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promis
     allDbItems.map((i) => [i.name.trim().toLowerCase(), i])
   );
 
+  interface RawRowEntry {
+    sheetName: string;
+    sheetCategory: InventoryType | null;
+    rowIndex: number;
+    row: Record<string, any>;
+  }
+
+  const allRawEntries: RawRowEntry[] = [];
+  const categoryFreq: Record<InventoryType, number> = {
+    FOOD: 0,
+    HOUSEHOLD: 0,
+    STATIONERY: 0,
+    EQUIPMENT: 0,
+  };
+
+  for (const sheetName of sheetNames) {
+    const sheet = workbook.Sheets[sheetName];
+    if (!sheet) continue;
+    const sheetCategory = detectCategoryFromSheetName(sheetName);
+    const sheetRows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: "" });
+
+    for (let i = 0; i < sheetRows.length; i++) {
+      const row = sheetRows[i];
+      const hasAnyVal = Object.values(row).some((v) => v !== "" && v !== undefined && v !== null);
+      if (!hasAnyVal) continue;
+
+      allRawEntries.push({
+        sheetName,
+        sheetCategory,
+        rowIndex: i + 2,
+        row,
+      });
+
+      // Учет категории для вычисления доминирующей категории файла
+      const rawCategory = getRowValue(row, "Категория", "Тип", "Category", "type", "Type");
+      if (rawCategory) {
+        const cat = mapCategoryToType(rawCategory, undefined as any);
+        if (cat) categoryFreq[cat] = (categoryFreq[cat] || 0) + 1;
+      } else if (sheetCategory) {
+        categoryFreq[sheetCategory] = (categoryFreq[sheetCategory] || 0) + 1;
+      }
+    }
+  }
+
+  if (allRawEntries.length === 0) {
+    throw new Error("Таблица пуста. Заполните данные и повторите загрузку.");
+  }
+
+  // Определение преобладающей категории в файле
+  let fileDominantCategory: InventoryType = "HOUSEHOLD";
+  let maxFreq = 0;
+  for (const [cat, count] of Object.entries(categoryFreq)) {
+    if (count > maxFreq) {
+      maxFreq = count;
+      fileDominantCategory = cat as InventoryType;
+    }
+  }
+
   const results: InventoryImportRowResult[] = [];
+  const detectedCategoriesSet = new Set<string>();
   let toUpdate = 0;
   let toCreate = 0;
   let unchanged = 0;
   let errors = 0;
   let totalQuantityDelta = 0;
 
-  for (let i = 0; i < rawRows.length; i++) {
-    const row = rawRows[i];
-    const rowIndex = i + 2; // строка в Excel (1-indexed + header)
-
-    // Пропуск полностью пустых строк
-    const hasAnyVal = Object.values(row).some((v) => v !== "" && v !== undefined && v !== null);
-    if (!hasAnyVal) continue;
+  for (let i = 0; i < allRawEntries.length; i++) {
+    const entry = allRawEntries[i];
+    const { row, rowIndex, sheetCategory } = entry;
+    const effectiveFallback = sheetCategory || fileDominantCategory || "HOUSEHOLD";
 
     // Извлечение полей с алиасами
     const rawId = getRowValue(row, "ID", "id", "№", "Код");
@@ -238,8 +319,8 @@ export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promis
         rowIndex,
         status: "ERROR",
         name: "— (не указано)",
-        type: "HOUSEHOLD",
-        typeLabel: INVENTORY_TYPE_RU_LABELS.HOUSEHOLD,
+        type: effectiveFallback,
+        typeLabel: INVENTORY_TYPE_RU_LABELS[effectiveFallback],
         quantity: 0,
         unit: "шт",
         minQuantity: 0,
@@ -258,8 +339,8 @@ export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promis
         rowIndex,
         status: "ERROR",
         name,
-        type: "HOUSEHOLD",
-        typeLabel: INVENTORY_TYPE_RU_LABELS.HOUSEHOLD,
+        type: effectiveFallback,
+        typeLabel: INVENTORY_TYPE_RU_LABELS[effectiveFallback],
         quantity: 0,
         unit: String(rawUnit || "шт"),
         minQuantity: 0,
@@ -276,8 +357,8 @@ export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promis
         rowIndex,
         status: "ERROR",
         name,
-        type: "HOUSEHOLD",
-        typeLabel: INVENTORY_TYPE_RU_LABELS.HOUSEHOLD,
+        type: effectiveFallback,
+        typeLabel: INVENTORY_TYPE_RU_LABELS[effectiveFallback],
         quantity: parsedQty,
         unit: String(rawUnit || "шт"),
         minQuantity: 0,
@@ -308,8 +389,8 @@ export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promis
         status: "ERROR",
         id: parsedId,
         name,
-        type: "HOUSEHOLD",
-        typeLabel: INVENTORY_TYPE_RU_LABELS.HOUSEHOLD,
+        type: effectiveFallback,
+        typeLabel: INVENTORY_TYPE_RU_LABELS[effectiveFallback],
         quantity: parsedQty,
         unit: String(rawUnit || "шт"),
         minQuantity: 0,
@@ -330,7 +411,15 @@ export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promis
       }
     }
 
-    const type = mapCategoryToType(rawCategory, existingItem?.type || "HOUSEHOLD");
+    // Определение категории:
+    // 1) Если указана в строке — парсим с fallback на effectiveFallback
+    // 2) Если строка существующего товара и категория не указана — сохраняем категорию из БД
+    // 3) Если новый товар и категория не указана — присваиваем effectiveFallback
+    const type = rawCategory 
+      ? mapCategoryToType(rawCategory, effectiveFallback)
+      : (existingItem ? existingItem.type : effectiveFallback);
+
+    detectedCategoriesSet.add(INVENTORY_TYPE_RU_LABELS[type] || type);
     const unit = String(rawUnit || existingItem?.unit || "шт").trim();
 
     // Мин. остаток: если не указан в строке — сохраняем текущий из БД
@@ -509,6 +598,7 @@ export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promis
       unchanged,
       errors,
       totalQuantityDelta,
+      detectedCategories: Array.from(detectedCategoriesSet),
     },
     rows: results,
   };

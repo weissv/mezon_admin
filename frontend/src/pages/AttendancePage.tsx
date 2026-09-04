@@ -46,7 +46,7 @@ export default function AttendancePage() {
 }
  setLoading(true);
  setError(null);
- api.get(`/api/children?groupId=${selectedGroupId}&pageSize=200`)
+ api.get(`/api/children?groupId=${selectedGroupId}&status=ACTIVE&pageSize=200`)
  .then((data) => {
  setChildren(data.items || []);
  setAttendance(new Map());

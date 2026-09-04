@@ -1,5 +1,5 @@
 // src/pages/InventoryPage.tsx
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import clsx from 'clsx';
 import { useApi } from '../hooks/useApi';
@@ -59,6 +59,7 @@ import {
   Loader2,
   Check,
   ShieldCheck,
+  ChevronDown,
 } from 'lucide-react';
 import { EmptyListState } from '../components/ui/EmptyState';
 import { LoadingCard } from '../components/ui/LoadingState';
@@ -161,7 +162,19 @@ export default function InventoryPage() {
 
   // ==================== EXPORT & IMPORT ТАБЛИЦ СКЛАДА ====================
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [exportingExcel, setExportingExcel] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setExportMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importAnalyzing, setImportAnalyzing] = useState(false);
   const [importApplying, setImportApplying] = useState(false);
@@ -618,19 +631,23 @@ export default function InventoryPage() {
   }, [activeAudit, auditFormItems]);
 
   // ==================== EXPORT & IMPORT HANDLERS ====================
-  const handleExportExcel = async () => {
+  const handleExportExcel = async (category?: InventoryType | 'ALL') => {
     try {
       setExportingExcel(true);
-      const blob = await api.download('/api/inventory/export/excel');
+      setExportMenuOpen(false);
+      const queryParam = category && category !== 'ALL' ? `?type=${category}` : '';
+      const blob = await api.download(`/api/inventory/export/excel${queryParam}`);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+      const tag = category && category !== 'ALL' ? category : 'ALL';
+      a.download = `inventory-export-${tag}-${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success('Таблица склада успешно выгружена');
+      const categoryLabel = category && category !== 'ALL' ? (inventoryTypeLabels[category] || category) : 'весь склад';
+      toast.success(`Таблица (${categoryLabel}) успешно выгружена`);
     } catch (err: any) {
       toast.error('Ошибка при экспорте таблицы', { description: err?.message });
     } finally {
@@ -761,19 +778,111 @@ export default function InventoryPage() {
             <Button variant="outline" size="md" onClick={() => setIsModalOpen(true)}>
               <ShoppingBag className="mr-1.5 h-4 w-4 text-[#1B7A3D]" /> Закупки
             </Button>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={handleExportExcel}
-              disabled={exportingExcel}
-            >
-              {exportingExcel ? (
-                <Loader2 className="mr-1.5 h-4 w-4 animate-spin text-macos-blue" />
-              ) : (
-                <Download className="mr-1.5 h-4 w-4 text-macos-blue" />
+            <div className="relative inline-block" ref={exportMenuRef}>
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => setExportMenuOpen((prev) => !prev)}
+                disabled={exportingExcel}
+                className="gap-1.5"
+              >
+                {exportingExcel ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-macos-blue" />
+                ) : (
+                  <Download className="h-4 w-4 text-macos-blue" />
+                )}
+                <span>
+                  {filterType !== 'ALL'
+                    ? `Экспорт: ${filterType === 'FOOD' ? 'Продукты' : filterType === 'HOUSEHOLD' ? 'Хоз. товары' : filterType === 'STATIONERY' ? 'Канцтовары' : 'Техника'}`
+                    : 'Экспорт'}
+                </span>
+                <ChevronDown className={clsx("h-3.5 w-3.5 text-text-tertiary transition-transform duration-200", exportMenuOpen && "rotate-180")} />
+              </Button>
+
+              {exportMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl bg-surface-primary/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-[0_12px_36px_rgba(0,0,0,0.18)] p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-3 py-1.5 text-[11px] font-semibold text-text-tertiary uppercase tracking-wider">
+                    Экспорт склада в Excel
+                  </div>
+                  
+                  {filterType !== 'ALL' && (
+                    <button
+                      type="button"
+                      onClick={() => handleExportExcel(filterType)}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-macos-blue hover:bg-macos-blue/10 transition-colors text-left cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Download className="h-4 w-4 text-macos-blue" />
+                        <span>Текущая категория ({filterType === 'FOOD' ? 'Продукты' : filterType === 'HOUSEHOLD' ? 'Хоз. товары' : filterType === 'STATIONERY' ? 'Канцтовары' : 'Техника'})</span>
+                      </div>
+                      <span className="text-[10.5px] px-1.5 py-0.5 rounded-full bg-macos-blue/15 text-macos-blue font-semibold">Фильтр</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => handleExportExcel('ALL')}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-text-primary hover:bg-fill-quaternary transition-colors text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Archive className="h-4 w-4 text-text-secondary" />
+                      <span>Весь склад (Все категории)</span>
+                    </div>
+                    <span className="text-[12px] text-text-tertiary font-medium">{stats.all}</span>
+                  </button>
+
+                  <div className="my-1 border-t border-black/5 dark:border-white/5" />
+
+                  <button
+                    type="button"
+                    onClick={() => handleExportExcel('FOOD')}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-text-primary hover:bg-fill-quaternary transition-colors text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Apple className="h-4 w-4 text-emerald-600" />
+                      <span>Продукты питания</span>
+                    </div>
+                    <span className="text-[12px] text-text-tertiary font-medium">{stats.food}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleExportExcel('HOUSEHOLD')}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-text-primary hover:bg-fill-quaternary transition-colors text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Package className="h-4 w-4 text-amber-600" />
+                      <span>Хоз. товары</span>
+                    </div>
+                    <span className="text-[12px] text-text-tertiary font-medium">{stats.household}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleExportExcel('STATIONERY')}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-text-primary hover:bg-fill-quaternary transition-colors text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileSpreadsheet className="h-4 w-4 text-purple-600" />
+                      <span>Канцелярия</span>
+                    </div>
+                    <span className="text-[12px] text-text-tertiary font-medium">{stats.stationery}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleExportExcel('EQUIPMENT')}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-text-primary hover:bg-fill-quaternary transition-colors text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Layers className="h-4 w-4 text-blue-600" />
+                      <span>Оборудование / Техника</span>
+                    </div>
+                    <span className="text-[12px] text-text-tertiary font-medium">{stats.equipment}</span>
+                  </button>
+                </div>
               )}
-              Экспорт
-            </Button>
+            </div>
             <Button
               variant="outline"
               size="md"
@@ -2003,6 +2112,20 @@ export default function InventoryPage() {
                   <p className="text-xs text-text-secondary mt-1">
                     Проверьте изменения перед записью в базу. При совпадении названия товар обновится без создания дубликата.
                   </p>
+                  {importPreviewData.summary.detectedCategories && importPreviewData.summary.detectedCategories.length > 0 && (
+                    <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[11px] text-text-tertiary font-medium">Категории в файле:</span>
+                      {importPreviewData.summary.detectedCategories.map((catName) => (
+                        <span key={catName} className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-macos-blue/10 text-macos-blue border border-macos-blue/20">
+                          {catName}
+                        </span>
+                      ))}
+                      <span className="text-[11px] text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-md font-medium flex items-center gap-1">
+                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                        Остальные товары склада не затрагиваются
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Metric Strip */}

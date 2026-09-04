@@ -10,7 +10,11 @@ router.get("/", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (
   const groups = await prisma.group.findMany({
     include: {
       _count: {
-        select: { children: true }
+        select: {
+          children: {
+            where: { status: "ACTIVE" },
+          },
+        },
       },
       teacher: {
         select: { id: true, firstName: true, lastName: true }

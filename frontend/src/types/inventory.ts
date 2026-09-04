@@ -222,6 +222,7 @@ export interface InventoryImportPreviewResult {
     unchanged: number;
     errors: number;
     totalQuantityDelta: number;
+    detectedCategories?: string[];
   };
   rows: InventoryImportRowResult[];
 }

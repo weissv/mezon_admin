@@ -25,7 +25,7 @@ import {
   applyInventoryImport,
   sanitizeBase64,
 } from "../services/InventoryTableService";
-import { InventoryTransactionType } from "@prisma/client";
+import { InventoryTransactionType, InventoryType } from "@prisma/client";
 const router = Router();
 
 // GET /api/inventory/search - поиск товаров для автозаполнения
@@ -82,13 +82,19 @@ router.get("/low-stock", checkRole(["DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), a
 // ЭКСПОРТ И ИМПОРТ ТАБЛИЦ СКЛАДА (EXCEL / XLSX)
 // =====================================================
 
-// GET /api/inventory/export/excel - выгрузка всех товаров в файл Excel
-router.get("/export/excel", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (_req, res) => {
+// GET /api/inventory/export/excel - выгрузка товаров в файл Excel (всех или по категории)
+router.get("/export/excel", checkRole(["DEVELOPER", "DIRECTOR", "DEPUTY", "ADMIN", "ZAVHOZ"]), async (req, res) => {
   try {
-    const buffer = await generateInventoryExcelBuffer();
+    const rawCategory = (req.query.type as string) || (req.query.category as string) || undefined;
+    const category = rawCategory && rawCategory !== "ALL" && rawCategory !== "all"
+      ? (rawCategory.toUpperCase() as InventoryType)
+      : undefined;
+
+    const buffer = await generateInventoryExcelBuffer(category);
     const dateStr = new Date().toISOString().split("T")[0];
+    const categoryTag = category ? `-${category}` : "-ALL";
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", `attachment; filename=inventory-export-${dateStr}.xlsx`);
+    res.setHeader("Content-Disposition", `attachment; filename=inventory-export${categoryTag}-${dateStr}.xlsx`);
     return res.send(buffer);
   } catch (error: any) {
     console.error("Ошибка при экспорте склада в Excel:", error);

@@ -121,8 +121,8 @@ router.get("/classes", async (req: Request, res: Response) => {
       include: {
         _count: {
           select: { 
-            children: true,
-            lmsStudents: true,
+            children: { where: { status: "ACTIVE" } },
+            lmsStudents: { where: { status: "active", student: { status: "ACTIVE" } } },
           },
         },
       },
@@ -173,10 +173,11 @@ router.get("/classes/:id", async (req: Request, res: Response) => {
       where: { id: classId },
       include: {
         children: {
+          where: { status: "ACTIVE" },
           select: { id: true, firstName: true, lastName: true, birthDate: true, status: true },
         },
         lmsStudents: {
-          where: { status: "active" },
+          where: { status: "active", student: { status: "ACTIVE" } },
           include: {
             student: {
               select: { id: true, firstName: true, lastName: true, birthDate: true },
@@ -1431,7 +1432,7 @@ router.get("/school-stats", async (req: Request, res: Response) => {
       upcomingHomework,
     ] = await Promise.all([
       prisma.group.count(),
-      prisma.lmsSchoolStudent.count({ where: { status: "active" } }),
+      prisma.child.count({ where: { status: "ACTIVE" } }),
       prisma.lmsSubject.count(),
       prisma.lmsStudentAttendance.groupBy({
         by: ['status'],

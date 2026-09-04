@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as XLSX from "xlsx";
 import {
   mapCategoryToType,
+  detectCategoryFromSheetName,
   sanitizeBase64,
   parseAndAnalyzeInventoryImport,
   generateInventoryExcelBuffer,
@@ -284,6 +285,105 @@ describe("InventoryTableService", () => {
           }),
         })
       );
+    });
+  });
+
+  describe("detectCategoryFromSheetName", () => {
+    it("распознает категории по названиям листов", () => {
+      expect(detectCategoryFromSheetName("Продукты питания")).toBe("FOOD");
+      expect(detectCategoryFromSheetName("Продукты")).toBe("FOOD");
+      expect(detectCategoryFromSheetName("Канцтовары")).toBe("STATIONERY");
+      expect(detectCategoryFromSheetName("Канц. товары")).toBe("STATIONERY");
+      expect(detectCategoryFromSheetName("Хоз. товары")).toBe("HOUSEHOLD");
+      expect(detectCategoryFromSheetName("Хозтовары")).toBe("HOUSEHOLD");
+      expect(detectCategoryFromSheetName("Техника")).toBe("EQUIPMENT");
+      expect(detectCategoryFromSheetName("Оборудование")).toBe("EQUIPMENT");
+      expect(detectCategoryFromSheetName("Лист 1")).toBeNull();
+    });
+  });
+
+  describe("Экспорт по категориям и контекстный импорт", () => {
+    it("generateInventoryExcelBuffer фильтрует по категории и задает название листа", async () => {
+      const mockItems = [
+        {
+          id: 10,
+          name: "Сахар песок",
+          type: "FOOD",
+          quantity: 25,
+          unit: "кг",
+          minQuantity: 5,
+          price: 9000,
+          expiryDate: new Date("2027-01-01"),
+        },
+      ];
+      (prisma.inventoryItem.findMany as any).mockResolvedValue(mockItems);
+
+      const buffer = await generateInventoryExcelBuffer("FOOD");
+      expect(prisma.inventoryItem.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { type: "FOOD" },
+        })
+      );
+
+      const wb = XLSX.read(buffer, { type: "buffer" });
+      expect(wb.SheetNames).toContain("Продукты");
+    });
+
+    it("автоматически подставляет категорию из названия листа, если ячейка категории пустая", async () => {
+      (prisma.inventoryItem.findMany as any).mockResolvedValue([]);
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet([
+        {
+          "Наименование": "Сыр Российский",
+          "Категория": "", // пустая ячейка
+          "Остаток": 10,
+          "Ед. изм.": "кг",
+          "Мин. остаток": 2,
+          "Цена (сум)": 65000,
+        },
+      ]);
+      XLSX.utils.book_append_sheet(wb, ws, "Продукты питания");
+      const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+
+      const result = await parseAndAnalyzeInventoryImport(buffer);
+      expect(result.summary.toCreate).toBe(1);
+      expect(result.rows[0].type).toBe("FOOD");
+      expect(result.summary.detectedCategories).toContain("Продукты");
+    });
+
+    it("сканирует все листы многостраничной книги Excel", async () => {
+      (prisma.inventoryItem.findMany as any).mockResolvedValue([]);
+
+      const wb = XLSX.utils.book_new();
+      const wsFood = XLSX.utils.json_to_sheet([
+        {
+          "Наименование": "Молоко 3.2%",
+          "Категория": "Продукты",
+          "Остаток": 20,
+          "Ед. изм.": "л",
+          "Цена (сум)": 12000,
+        },
+      ]);
+      const wsStationery = XLSX.utils.json_to_sheet([
+        {
+          "Наименование": "Бумага А4",
+          "Категория": "Канцелярия",
+          "Остаток": 50,
+          "Ед. изм.": "пач",
+          "Цена (сум)": 45000,
+        },
+      ]);
+
+      XLSX.utils.book_append_sheet(wb, wsFood, "Продукты");
+      XLSX.utils.book_append_sheet(wb, wsStationery, "Канцтовары");
+      const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+
+      const result = await parseAndAnalyzeInventoryImport(buffer);
+      expect(result.summary.totalRows).toBe(2);
+      expect(result.summary.toCreate).toBe(2);
+      expect(result.summary.detectedCategories).toContain("Продукты");
+      expect(result.summary.detectedCategories).toContain("Канц. товары");
     });
   });
 });
