@@ -131,6 +131,8 @@ export const INVENTORY_TYPE = {
   FOOD: 'FOOD',
   HOUSEHOLD: 'HOUSEHOLD',
   STATIONERY: 'STATIONERY',
+  EQUIPMENT: 'EQUIPMENT',
+  OTHER: 'OTHER',
 } as const;
 
 export type InventoryType = keyof typeof INVENTORY_TYPE;

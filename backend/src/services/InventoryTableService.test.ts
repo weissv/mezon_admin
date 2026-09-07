@@ -47,6 +47,10 @@ describe("InventoryTableService", () => {
       expect(mapCategoryToType("Продукты питания")).toBe("FOOD");
       expect(mapCategoryToType("Техника")).toBe("EQUIPMENT");
       expect(mapCategoryToType("Оборудование")).toBe("EQUIPMENT");
+      expect(mapCategoryToType("Прочее")).toBe("OTHER");
+      expect(mapCategoryToType("Прочие")).toBe("OTHER");
+      expect(mapCategoryToType("Разное")).toBe("OTHER");
+      expect(mapCategoryToType("Другое")).toBe("OTHER");
     });
 
     it("возвращает fallback при неизвестном значении", () => {
@@ -298,6 +302,8 @@ describe("InventoryTableService", () => {
       expect(detectCategoryFromSheetName("Хозтовары")).toBe("HOUSEHOLD");
       expect(detectCategoryFromSheetName("Техника")).toBe("EQUIPMENT");
       expect(detectCategoryFromSheetName("Оборудование")).toBe("EQUIPMENT");
+      expect(detectCategoryFromSheetName("Прочее")).toBe("OTHER");
+      expect(detectCategoryFromSheetName("Разное")).toBe("OTHER");
       expect(detectCategoryFromSheetName("Лист 1")).toBeNull();
     });
   });

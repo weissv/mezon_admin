@@ -36,6 +36,7 @@ import {
   ArrowDownCircle, 
   Trash2, 
   Laptop, 
+  MoreHorizontal,
   ClipboardCheck, 
   CheckCircle2, 
   XCircle, 
@@ -76,6 +77,7 @@ const inventoryBadgeColors: Record<InventoryType, string> = {
   HOUSEHOLD: 'bg-tint-orange text-[#B25E00] border-macos-orange/20',
   STATIONERY: 'bg-tint-purple text-macos-purple border-macos-purple/20',
   EQUIPMENT: 'bg-tint-blue text-macos-blue border-macos-blue/20',
+  OTHER: 'bg-tint-gray text-text-secondary border-black/10 dark:border-white/10',
 };
 
 export default function InventoryPage() {
@@ -232,12 +234,13 @@ export default function InventoryPage() {
     const household = items.filter((i: any) => i.type === 'HOUSEHOLD').length;
     const stationery = items.filter((i: any) => i.type === 'STATIONERY').length;
     const equipment = items.filter((i: any) => i.type === 'EQUIPMENT').length;
+    const other = items.filter((i: any) => i.type === 'OTHER').length;
 
     const outOfStock = items.filter((i: any) => i.quantity === 0).length;
     const lowStock = items.filter((i: any) => i.quantity > 0 && i.minQuantity > 0 && i.quantity <= i.minQuantity).length;
     const normalStock = items.filter((i: any) => i.quantity > 0 && (i.minQuantity === 0 || i.quantity > i.minQuantity)).length;
 
-    return { all, food, household, stationery, equipment, outOfStock, lowStock, normalStock };
+    return { all, food, household, stationery, equipment, other, outOfStock, lowStock, normalStock };
   }, [items]);
 
   const filterCards = [
@@ -285,6 +288,15 @@ export default function InventoryPage() {
       accent: 'text-indigo-600 dark:text-indigo-400',
       iconBg: 'bg-indigo-50 dark:bg-indigo-950/50',
       activeBorder: 'border-indigo-500 shadow-indigo-100/50 dark:shadow-none',
+    },
+    {
+      type: 'OTHER' as const,
+      label: 'Прочее',
+      count: stats.other,
+      icon: MoreHorizontal,
+      accent: 'text-slate-600 dark:text-slate-400',
+      iconBg: 'bg-slate-50 dark:bg-slate-900/50',
+      activeBorder: 'border-slate-500 shadow-slate-100/50 dark:shadow-none',
     },
   ];
 
@@ -793,7 +805,7 @@ export default function InventoryPage() {
                 )}
                 <span>
                   {filterType !== 'ALL'
-                    ? `Экспорт: ${filterType === 'FOOD' ? 'Продукты' : filterType === 'HOUSEHOLD' ? 'Хоз. товары' : filterType === 'STATIONERY' ? 'Канцтовары' : 'Техника'}`
+                    ? `Экспорт: ${inventoryTypeLabels[filterType] || filterType}`
                     : 'Экспорт'}
                 </span>
                 <ChevronDown className={clsx("h-3.5 w-3.5 text-text-tertiary transition-transform duration-200", exportMenuOpen && "rotate-180")} />
@@ -813,7 +825,7 @@ export default function InventoryPage() {
                     >
                       <div className="flex items-center gap-2">
                         <Download className="h-4 w-4 text-macos-blue" />
-                        <span>Текущая категория ({filterType === 'FOOD' ? 'Продукты' : filterType === 'HOUSEHOLD' ? 'Хоз. товары' : filterType === 'STATIONERY' ? 'Канцтовары' : 'Техника'})</span>
+                        <span>Текущая категория ({inventoryTypeLabels[filterType] || filterType})</span>
                       </div>
                       <span className="text-[10.5px] px-1.5 py-0.5 rounded-full bg-macos-blue/15 text-macos-blue font-semibold">Фильтр</span>
                     </button>
@@ -879,6 +891,18 @@ export default function InventoryPage() {
                       <span>Оборудование / Техника</span>
                     </div>
                     <span className="text-[12px] text-text-tertiary font-medium">{stats.equipment}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleExportExcel('OTHER')}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-text-primary hover:bg-fill-quaternary transition-colors text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <MoreHorizontal className="h-4 w-4 text-slate-600" />
+                      <span>Прочее</span>
+                    </div>
+                    <span className="text-[12px] text-text-tertiary font-medium">{stats.other}</span>
                   </button>
                 </div>
               )}
@@ -972,7 +996,7 @@ export default function InventoryPage() {
       {activeTab === 'ITEMS' && (
         <>
           {/* CATEGORY BENTO CARDS */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
             {filterCards.map(({ type, label, count, icon: Icon }) => {
               const isActive = filterType === type;
               return (
@@ -1246,6 +1270,7 @@ export default function InventoryPage() {
                   <option value="HOUSEHOLD">Только Хоз. товары</option>
                   <option value="STATIONERY">Только Канц. товары</option>
                   <option value="EQUIPMENT">Только Техника</option>
+                  <option value="OTHER">Только Прочее</option>
                 </select>
 
                 <Button onClick={handleStartNewAudit} size="md">
@@ -1519,6 +1544,7 @@ export default function InventoryPage() {
               <option value="HOUSEHOLD">Хоз. товары</option>
               <option value="STATIONERY">Канц. товары</option>
               <option value="EQUIPMENT">Техника</option>
+              <option value="OTHER">Прочее</option>
             </select>
           </div>
 

@@ -1,7 +1,6 @@
 // Типы для модуля Склад
 
-// Типы соответствуют enum InventoryType в schema.prisma
-export type InventoryType = 'FOOD' | 'HOUSEHOLD' | 'STATIONERY' | 'EQUIPMENT';
+export type InventoryType = 'FOOD' | 'HOUSEHOLD' | 'STATIONERY' | 'EQUIPMENT' | 'OTHER';
 
 // Тип складской операции
 export type InventoryTransactionType = 'IN' | 'OUT' | 'ADJUSTMENT' | 'WRITE_OFF';
@@ -121,6 +120,7 @@ export const inventoryTypeLabels: Record<InventoryType, string> = {
   HOUSEHOLD: 'Хоз. товары',
   STATIONERY: 'Канц. товары',
   EQUIPMENT: 'Техника',
+  OTHER: 'Прочее',
 };
 
 export const inventoryTypeColors: Record<InventoryType, string> = {
@@ -128,6 +128,7 @@ export const inventoryTypeColors: Record<InventoryType, string> = {
   HOUSEHOLD: 'bg-amber-100 text-amber-800',
   STATIONERY: 'bg-blue-100 text-blue-800',
   EQUIPMENT: 'bg-indigo-100 text-indigo-800',
+  OTHER: 'bg-slate-100 text-slate-800',
 };
 
 // Маппинг статусов инвентаризации

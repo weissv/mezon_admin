@@ -11,7 +11,7 @@ export const createInventorySchema = z.object({
     quantity: z.number().min(0, "Количество должно быть >= 0"),
     unit: z.string().min(1, "Единица измерения обязательна"),
     expiryDate: z.string().nullable().optional(),
-    type: z.enum(["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT"]).optional().default("FOOD"),
+    type: z.enum(["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT", "OTHER"]).optional().default("FOOD"),
     minQuantity: z.number().min(0).optional().default(0),
   }),
 });
@@ -22,7 +22,7 @@ export const updateInventorySchema = z.object({
     quantity: z.number().min(0).optional(),
     unit: z.string().min(1).optional(),
     expiryDate: z.string().nullable().optional(),
-    type: z.enum(["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT"]).optional(),
+    type: z.enum(["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT", "OTHER"]).optional(),
     minQuantity: z.number().min(0).optional(),
   }),
 });
@@ -37,7 +37,7 @@ export const generateShoppingListSchema = z.object({
 export const createAuditSchema = z.object({
   body: z.object({
     notes: z.string().optional(),
-    type: z.enum(["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT"]).optional(),
+    type: z.enum(["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT", "OTHER"]).optional(),
   }),
 });
 

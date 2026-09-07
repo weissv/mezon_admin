@@ -98,6 +98,7 @@ enum InventoryType {
   HOUSEHOLD // Хоз. товары
   STATIONERY // Канц. товары
   EQUIPMENT // Техника
+  OTHER // Прочее
 }
 
 enum InventoryAuditStatus {

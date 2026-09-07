@@ -667,7 +667,7 @@ git push origin feature/fe-login-page
 
 #### `GET /api/inventory`
 - **Роли:** `DIRECTOR`, `DEPUTY`, `ADMIN`, `ZAVHOZ`, `ACCOUNTANT`
-- **Query Params:** `type` (`FOOD`\|`HOUSEHOLD`\|`STATIONERY`), `search`, `lowStock` (`true`\|`false`)
+- **Query Params:** `type` (`FOOD`\|`HOUSEHOLD`\|`STATIONERY`\|`EQUIPMENT`\|`OTHER`), `search`, `lowStock` (`true`\|`false`)
 - **Response Body (200 OK):**
   ```json
   {
@@ -989,7 +989,7 @@ export interface FinanceTransaction {
   createdAt: string;
 }
 
-export type InventoryType = 'FOOD' | 'HOUSEHOLD' | 'STATIONERY';
+export type InventoryType = 'FOOD' | 'HOUSEHOLD' | 'STATIONERY' | 'EQUIPMENT' | 'OTHER';
 
 export interface InventoryItem {
   id: number;

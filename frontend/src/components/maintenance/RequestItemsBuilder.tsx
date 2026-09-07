@@ -559,7 +559,7 @@ export function RequestItemsBuilder({
                             {item.name}
                           </div>
                           <div className="flex items-center justify-between text-[11px] text-text-tertiary mt-0.5">
-                            <span>{item.type === 'STATIONERY' ? 'Канцтовары' : item.type === 'HOUSEHOLD' ? 'Хозтовары' : 'Прочее'}</span>
+                            <span>{item.type === 'STATIONERY' ? 'Канцтовары' : item.type === 'HOUSEHOLD' ? 'Хозтовары' : item.type === 'FOOD' ? 'Продукты' : item.type === 'EQUIPMENT' ? 'Техника' : 'Прочее'}</span>
                             <span className="font-bold text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
                               0 {item.unit} на складе
                             </span>

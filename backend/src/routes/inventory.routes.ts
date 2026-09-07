@@ -206,7 +206,7 @@ router.post("/audits", checkRole(["DIRECTOR", "ADMIN", "ZAVHOZ"]), async (req, r
   const user = req.user;
 
   const whereFilter: any = {};
-  if (type && ["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT"].includes(type)) {
+  if (type && ["FOOD", "HOUSEHOLD", "STATIONERY", "EQUIPMENT", "OTHER"].includes(type)) {
     whereFilter.type = type;
   }
 

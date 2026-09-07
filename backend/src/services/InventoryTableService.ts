@@ -8,6 +8,7 @@ export const INVENTORY_TYPE_RU_LABELS: Record<InventoryType, string> = {
   HOUSEHOLD: "Хоз. товары",
   FOOD: "Продукты",
   EQUIPMENT: "Техника",
+  OTHER: "Прочее",
 };
 
 export type RowDiffStatus = "UPDATE" | "CREATE" | "UNCHANGED" | "ERROR";
@@ -82,6 +83,9 @@ export function mapCategoryToType(val: unknown, fallback: InventoryType = "HOUSE
   if (str.includes("техник") || str.includes("оборуд") || str.includes("equipment") || str.includes("электр")) {
     return "EQUIPMENT";
   }
+  if (str.includes("проч") || str.includes("other") || str.includes("разн") || str.includes("другое")) {
+    return "OTHER";
+  }
 
   // Прямое совпадение по enum
   const upper = String(val).trim().toUpperCase();
@@ -109,6 +113,9 @@ export function detectCategoryFromSheetName(sheetName: string): InventoryType | 
   }
   if (str.includes("техник") || str.includes("оборуд") || str.includes("equipment") || str.includes("электр")) {
     return "EQUIPMENT";
+  }
+  if (str.includes("проч") || str.includes("other") || str.includes("разн") || str.includes("другое")) {
+    return "OTHER";
   }
   return null;
 }
@@ -243,6 +250,7 @@ export async function parseAndAnalyzeInventoryImport(fileBuffer: Buffer): Promis
     HOUSEHOLD: 0,
     STATIONERY: 0,
     EQUIPMENT: 0,
+    OTHER: 0,
   };
 
   for (const sheetName of sheetNames) {

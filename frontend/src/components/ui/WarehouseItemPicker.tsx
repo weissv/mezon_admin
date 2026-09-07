@@ -245,7 +245,9 @@ export function WarehouseItemPicker({
                               ? 'Хозтовары'
                               : item.type === 'FOOD'
                               ? 'Продукты'
-                              : 'Техника'}
+                              : item.type === 'EQUIPMENT'
+                              ? 'Техника'
+                              : 'Прочее'}
                           </span>
                         )}
                       </div>
