@@ -181,7 +181,7 @@ router.put(
 // DELETE /api/children/:id/documents/:docId — удалить документ
 router.delete(
   "/:id/documents/:docId",
-  checkRole(["DEPUTY", "ADMIN"]),
+  checkRole(["DEPUTY", "ADMIN", "TEACHER"]),
   logAction("DELETE_CHILD_DOCUMENT", (req) => ({ id: req.params.id, docId: req.params.docId })),
   async (req, res) => {
     await ChildService.deleteDocument(Number(req.params.id), Number(req.params.docId));

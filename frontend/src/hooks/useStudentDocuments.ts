@@ -11,11 +11,21 @@ import { toast } from 'sonner';
 
 export type CategoryFilter = StudentDocumentCategory | 'ALL';
 
-export function useStudentDocuments(childId: number | null) {
-  const [documents, setDocuments] = useState<Document[]>([]);
+export function useStudentDocuments(
+  childId: number | null,
+  initialDocuments?: Document[]
+) {
+  const [documents, setDocuments] = useState<Document[]>(initialDocuments || []);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync if initialDocuments is provided or updated
+  useEffect(() => {
+    if (initialDocuments && initialDocuments.length > 0) {
+      setDocuments(initialDocuments);
+    }
+  }, [initialDocuments]);
 
   const fetchDocuments = useCallback(async () => {
     if (!childId) {
@@ -24,8 +34,16 @@ export function useStudentDocuments(childId: number | null) {
     }
     setLoading(true);
     try {
-      const data = await api.get<Document[]>(`/api/children/${childId}/documents`);
-      setDocuments(Array.isArray(data) ? data : []);
+      const res = await api.get<any>(`/api/children/${childId}/documents`);
+      let list: Document[] = [];
+      if (Array.isArray(res)) {
+        list = res;
+      } else if (res && Array.isArray(res.documents)) {
+        list = res.documents;
+      } else if (res && Array.isArray(res.items)) {
+        list = res.items;
+      }
+      setDocuments(list);
     } catch (err: any) {
       console.error('Failed to fetch student documents:', err);
       toast.error('Ошибка загрузки документов ученика', {
@@ -46,6 +64,9 @@ export function useStudentDocuments(childId: number | null) {
       try {
         const created = await api.post<Document>(`/api/children/${childId}/documents`, input);
         toast.success('Документ успешно прикреплен');
+        if (created) {
+          setDocuments((prev) => [created, ...prev.filter((d) => d.id !== created.id)]);
+        }
         await fetchDocuments();
         return created;
       } catch (err: any) {
@@ -65,6 +86,9 @@ export function useStudentDocuments(childId: number | null) {
       try {
         const updated = await api.put<Document>(`/api/children/${childId}/documents/${documentId}`, input);
         toast.success('Документ обновлен');
+        if (updated) {
+          setDocuments((prev) => prev.map((d) => (d.id === documentId ? updated : d)));
+        }
         await fetchDocuments();
         return updated;
       } catch (err: any) {
@@ -84,6 +108,7 @@ export function useStudentDocuments(childId: number | null) {
       try {
         await api.delete(`/api/children/${childId}/documents/${documentId}`);
         toast.success('Документ удален');
+        setDocuments((prev) => prev.filter((d) => d.id !== documentId));
         await fetchDocuments();
         return true;
       } catch (err: any) {

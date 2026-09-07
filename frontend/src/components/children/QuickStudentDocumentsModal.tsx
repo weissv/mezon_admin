@@ -55,6 +55,8 @@ export function QuickStudentDocumentsModal({
         <StudentDocumentsSection
           childId={child.id}
           childName={fullName}
+          initialDocuments={child.documents}
+          onUpdated={onUpdated}
         />
       </div>
     </Modal>

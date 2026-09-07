@@ -37,6 +37,8 @@ import { DocumentPreviewModal } from './DocumentPreviewModal';
 interface StudentDocumentsSectionProps {
   childId: number;
   childName?: string;
+  initialDocuments?: Document[];
+  onUpdated?: () => void;
 }
 
 const CATEGORY_TABS: { key: CategoryFilter; label: string }[] = [
@@ -54,6 +56,8 @@ const CATEGORY_TABS: { key: CategoryFilter; label: string }[] = [
 export function StudentDocumentsSection({
   childId,
   childName,
+  initialDocuments,
+  onUpdated,
 }: StudentDocumentsSectionProps) {
   const {
     documents,
@@ -66,7 +70,7 @@ export function StudentDocumentsSection({
     categoryCounts,
     deleteDocument,
     refresh,
-  } = useStudentDocuments(childId);
+  } = useStudentDocuments(childId, initialDocuments);
 
   const [isAttachOpen, setIsAttachOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<Document | null>(null);
@@ -95,6 +99,7 @@ export function StudentDocumentsSection({
     const ok = await deleteDocument(doc.id);
     if (ok) {
       setDeleteConfirmDoc(null);
+      onUpdated?.();
     }
   };
 
@@ -375,7 +380,10 @@ export function StudentDocumentsSection({
             ? (selectedCategory as StudentDocumentCategory)
             : 'OTHER'
         }
-        onSuccess={refresh}
+        onSuccess={() => {
+          refresh();
+          onUpdated?.();
+        }}
       />
 
       {/* Preview Modal */}

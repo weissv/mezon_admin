@@ -252,7 +252,12 @@ export default function ChildDetailPage() {
 
       {/* Документы ученика */}
       <PageSection>
-        <StudentDocumentsSection childId={child.id} childName={fullName} />
+        <StudentDocumentsSection
+          childId={child.id}
+          childName={fullName}
+          initialDocuments={child.documents}
+          onUpdated={refresh}
+        />
       </PageSection>
 
       {/* Edit Modal */}
