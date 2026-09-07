@@ -2,7 +2,7 @@
 // Детальная карточка ребёнка
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, Archive, CalendarX, Users, BookOpen, HeartPulse, FileText } from 'lucide-react';
+import { ArrowLeft, Edit, Archive, CalendarX, Users, BookOpen, HeartPulse, FileText, Paperclip } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -12,6 +12,7 @@ import { LoadingCard } from '../components/ui/LoadingState';
 import { PageHeader, PageSection, PageStack } from '../components/ui/page';
 import { ChildForm } from '../components/forms/ChildForm';
 import { AbsencesView } from '../components/children/AbsencesView';
+import { StudentDocumentsSection } from '../components/children/StudentDocumentsSection';
 import { useChild, useChildMutations } from '../hooks/useChildren';
 import type { HealthInfo, Gender } from '../types/child';
 
@@ -247,6 +248,11 @@ export default function ChildDetailPage() {
             </CardContent>
           </Card>
         )}
+      </PageSection>
+
+      {/* Документы ученика */}
+      <PageSection>
+        <StudentDocumentsSection childId={child.id} childName={fullName} />
       </PageSection>
 
       {/* Edit Modal */}

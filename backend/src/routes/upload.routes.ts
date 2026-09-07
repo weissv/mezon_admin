@@ -24,13 +24,18 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // POST /api/upload
-router.post("/", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "DIRECTOR"]), upload.single("file"), (req, res) => {
+router.post("/", checkRole(["DEPUTY", "ADMIN", "ACCOUNTANT", "DIRECTOR", "TEACHER"]), upload.single("file"), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
     const fileUrl = `/uploads/${req.file.filename}`;
-    return res.status(200).json({ fileUrl });
+    return res.status(200).json({
+      fileUrl,
+      fileName: req.file.originalname,
+      fileSize: req.file.size,
+      fileType: req.file.mimetype,
+    });
   } catch (error) {
     console.error("Upload error:", error);
     return res.status(500).json({ error: "Internal server error" });

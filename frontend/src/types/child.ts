@@ -2,6 +2,7 @@
 // Единый источник типов для модуля «Дети»
 
 import { BaseEntity, ChildStatus } from './common';
+import { Document } from './document';
 
 // ===== Справочники =====
 
@@ -75,6 +76,12 @@ export interface Child extends BaseEntity {
   fatherName?: string | null;
   motherName?: string | null;
   parentPhone?: string | null;
+
+  documents?: Document[];
+  _count?: {
+    documents?: number;
+    temporaryAbsences?: number;
+  };
 }
 
 // ===== Child — detail page =====
@@ -89,6 +96,7 @@ export interface ClubEnrollmentSummary {
 export interface ChildDetail extends Child {
   temporaryAbsences?: TemporaryAbsence[];
   enrollments?: ClubEnrollmentSummary[];
+  documents?: Document[];
 }
 
 // ===== Temporary Absences =====

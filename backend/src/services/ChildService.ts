@@ -83,6 +83,7 @@ const parentSelect = {
 const childListInclude = {
   group: { select: groupSelect },
   parents: { select: parentSelect },
+  _count: { select: { documents: true } },
 } as const;
 
 const childDetailInclude = {
@@ -93,6 +94,9 @@ const childDetailInclude = {
   enrollments: {
     include: { club: { select: { id: true, name: true } } },
     where: { status: 'ACTIVE' as const },
+  },
+  documents: {
+    orderBy: { createdAt: 'desc' as const },
   },
 } as const;
 
@@ -508,6 +512,153 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     await this.safeQuery(() =>
       this.prisma.temporaryAbsence.delete({ where: { id: numericId } })
     );
+  }
+
+  // --- Document management ---
+
+  async getChildDocuments(
+    childId: number,
+    options?: { category?: any; search?: string }
+  ) {
+    const child = await this.prisma.child.findUnique({
+      where: { id: childId },
+      select: { id: true, firstName: true, lastName: true, middleName: true },
+    });
+    if (!child) {
+      throw new NotFoundError('Ребёнок не найден');
+    }
+
+    const where: any = { childId };
+    if (options?.category && options.category !== 'ALL') {
+      where.category = options.category;
+    }
+    if (options?.search && options.search.trim()) {
+      const q = options.search.trim();
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    const [documents, total, categoriesCount] = await Promise.all([
+      this.prisma.document.findMany({
+        where,
+        orderBy: [{ issueDate: 'desc' }, { createdAt: 'desc' }],
+      }),
+      this.prisma.document.count({ where: { childId } }),
+      this.prisma.document.groupBy({
+        by: ['category'],
+        where: { childId },
+        _count: { id: true },
+      }),
+    ]);
+
+    const byCategory: Record<string, number> = {};
+    for (const item of categoriesCount) {
+      if (item.category) {
+        byCategory[item.category] = item._count.id;
+      }
+    }
+
+    return {
+      child,
+      documents,
+      total,
+      byCategory,
+    };
+  }
+
+  async attachDocument(
+    childId: number,
+    data: {
+      name: string;
+      fileUrl: string;
+      category?: any;
+      description?: string | null;
+      fileSize?: number | null;
+      fileType?: string | null;
+      issueDate?: string | Date | null;
+      employeeId?: number | null;
+    }
+  ) {
+    const child = await this.prisma.child.findUnique({ where: { id: childId } });
+    if (!child) {
+      throw new NotFoundError('Ребёнок не найден');
+    }
+
+    const parsedIssueDate = data.issueDate
+      ? typeof data.issueDate === 'string'
+        ? new Date(data.issueDate)
+        : data.issueDate
+      : new Date();
+
+    return this.prisma.document.create({
+      data: {
+        childId,
+        name: data.name.trim(),
+        fileUrl: data.fileUrl,
+        category: data.category || 'OTHER',
+        description: data.description ? data.description.trim() : null,
+        fileSize: data.fileSize ?? null,
+        fileType: data.fileType ?? null,
+        issueDate: parsedIssueDate,
+        employeeId: data.employeeId ?? null,
+      },
+    });
+  }
+
+  async updateDocument(
+    childId: number,
+    documentId: number,
+    data: {
+      name?: string;
+      fileUrl?: string;
+      category?: any;
+      description?: string | null;
+      fileSize?: number | null;
+      fileType?: string | null;
+      issueDate?: string | Date | null;
+    }
+  ) {
+    const doc = await this.prisma.document.findFirst({
+      where: { id: documentId, childId },
+    });
+    if (!doc) {
+      throw new NotFoundError('Документ не найден');
+    }
+
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name.trim();
+    if (data.fileUrl !== undefined) updateData.fileUrl = data.fileUrl;
+    if (data.category !== undefined) updateData.category = data.category;
+    if (data.description !== undefined) updateData.description = data.description ? data.description.trim() : null;
+    if (data.fileSize !== undefined) updateData.fileSize = data.fileSize;
+    if (data.fileType !== undefined) updateData.fileType = data.fileType;
+    if (data.issueDate !== undefined) {
+      updateData.issueDate = data.issueDate
+        ? typeof data.issueDate === 'string'
+          ? new Date(data.issueDate)
+          : data.issueDate
+        : null;
+    }
+
+    return this.prisma.document.update({
+      where: { id: documentId },
+      data: updateData,
+    });
+  }
+
+  async deleteDocument(childId: number, documentId: number) {
+    const doc = await this.prisma.document.findFirst({
+      where: { id: documentId, childId },
+    });
+    if (!doc) {
+      throw new NotFoundError('Документ не найден');
+    }
+
+    await this.prisma.document.delete({
+      where: { id: documentId },
+    });
   }
 
   // --- LMS Sync (private) ---

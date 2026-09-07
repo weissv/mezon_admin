@@ -114,6 +114,17 @@ enum ItemCategory {
   OTHER // Прочее
 }
 
+enum StudentDocumentCategory {
+  DIPLOMA // Дипломы, грамоты, сертификаты, олимпиады
+  QUESTIONNAIRE // Анкеты, опросники, согласия
+  EXPLANATORY // Объяснительные записки
+  MEDICAL // Медицинские справки, выписки
+  IDENTITY // Паспорт, свидетельство о рождении, метрика
+  CONTRACT // Договоры, соглашения
+  APPLICATION // Заявления
+  OTHER // Прочее
+}
+
 enum MaintenanceStatus {
   PENDING // Ожидает одобрения (показывается Директору/Завучу)
   APPROVED // Одобрена (показывается Завхозу)
@@ -856,20 +867,27 @@ model DocumentTemplate {
 }
 
 model Document {
-  id         Int               @id @default(autoincrement())
-  name       String
-  fileUrl    String // URL/путь к скану
-  template   DocumentTemplate? @relation(fields: [templateId], references: [id])
-  templateId Int?
-  employee   Employee?         @relation(fields: [employeeId], references: [id])
-  employeeId Int?
-  child      Child?            @relation(fields: [childId], references: [id])
-  childId    Int?
-  createdAt  DateTime          @default(now())
+  id          Int                      @id @default(autoincrement())
+  name        String
+  fileUrl     String // URL/путь к скану
+  category    StudentDocumentCategory? @default(OTHER)
+  description String?
+  fileSize    Int? // размер файла в байтах
+  fileType    String? // mime тип или расширение
+  issueDate   DateTime? // дата документа/события
+  template    DocumentTemplate?        @relation(fields: [templateId], references: [id])
+  templateId  Int?
+  employee    Employee?                @relation(fields: [employeeId], references: [id])
+  employeeId  Int?
+  child       Child?                   @relation(fields: [childId], references: [id], onDelete: Cascade)
+  childId     Int?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @default(now()) @updatedAt
 
   @@index([employeeId])
   @@index([childId])
   @@index([templateId])
+  @@index([category])
 }
 
 // --- 7. КОММУНИКАЦИИ ---

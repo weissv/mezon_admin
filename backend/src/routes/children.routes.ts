@@ -10,7 +10,10 @@ import {
   createAbsenceSchema,
   updateAbsenceSchema,
   childListQuerySchema,
+  attachStudentDocumentSchema,
+  updateStudentDocumentSchema,
 } from "../schemas/child.schema";
+import { StudentDocumentCategory } from "@prisma/client";
 import { ChildService } from "../services/ChildService";
 
 const router = Router();
@@ -134,6 +137,54 @@ router.delete(
   checkRole(["ADMIN"]),
   async (req, res) => {
     await ChildService.deleteAbsence(Number(req.params.absenceId));
+    return res.status(204).send();
+  }
+);
+
+// ======== Student Documents ========
+
+// GET /api/children/:id/documents — получить документы ученика
+router.get(
+  "/:id/documents",
+  checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]),
+  async (req, res) => {
+    const { category, search } = req.query as { category?: StudentDocumentCategory; search?: string };
+    const documents = await ChildService.getChildDocuments(Number(req.params.id), { category, search });
+    return res.json(documents);
+  }
+);
+
+// POST /api/children/:id/documents — прикрепить документ к ученику
+router.post(
+  "/:id/documents",
+  checkRole(["DEPUTY", "ADMIN", "TEACHER"]),
+  validate(attachStudentDocumentSchema),
+  logAction("ATTACH_CHILD_DOCUMENT", (req) => ({ id: req.params.id, name: req.body.name, category: req.body.category })),
+  async (req, res) => {
+    const document = await ChildService.attachDocument(Number(req.params.id), req.body);
+    return res.status(201).json(document);
+  }
+);
+
+// PUT /api/children/:id/documents/:docId — обновить метаданные документа
+router.put(
+  "/:id/documents/:docId",
+  checkRole(["DEPUTY", "ADMIN", "TEACHER"]),
+  validate(updateStudentDocumentSchema),
+  logAction("UPDATE_CHILD_DOCUMENT", (req) => ({ id: req.params.id, docId: req.params.docId })),
+  async (req, res) => {
+    const document = await ChildService.updateDocument(Number(req.params.id), Number(req.params.docId), req.body);
+    return res.json(document);
+  }
+);
+
+// DELETE /api/children/:id/documents/:docId — удалить документ
+router.delete(
+  "/:id/documents/:docId",
+  checkRole(["DEPUTY", "ADMIN"]),
+  logAction("DELETE_CHILD_DOCUMENT", (req) => ({ id: req.params.id, docId: req.params.docId })),
+  async (req, res) => {
+    await ChildService.deleteDocument(Number(req.params.id), Number(req.params.docId));
     return res.status(204).send();
   }
 );

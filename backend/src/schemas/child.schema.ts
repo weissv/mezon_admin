@@ -113,3 +113,45 @@ export const childListQuerySchema = z.object({
     gender: z.enum(["MALE", "FEMALE"]).optional(),
   }),
 });
+
+export const studentDocumentCategorySchema = z.enum([
+  "DIPLOMA",
+  "QUESTIONNAIRE",
+  "EXPLANATORY",
+  "MEDICAL",
+  "IDENTITY",
+  "CONTRACT",
+  "APPLICATION",
+  "OTHER",
+]);
+
+export const attachStudentDocumentSchema = z.object({
+  body: z.object({
+    name: z.string().min(1, "Название документа обязательно"),
+    fileUrl: z.string().min(1, "Файл обязателен"),
+    category: studentDocumentCategorySchema.optional().default("OTHER"),
+    description: z.string().optional().nullable(),
+    fileSize: z.number().int().nonnegative().optional().nullable(),
+    fileType: z.string().optional().nullable(),
+    issueDate: z.string().refine((v) => !v || !isNaN(Date.parse(v)), "Неверный формат даты").optional().nullable(),
+  }),
+  params: z.object({
+    id: z.string().regex(/^\d+$/, "ID ученика должен быть числом"),
+  }),
+});
+
+export const updateStudentDocumentSchema = z.object({
+  body: z.object({
+    name: z.string().min(1, "Название документа обязательно").optional(),
+    fileUrl: z.string().min(1).optional(),
+    category: studentDocumentCategorySchema.optional(),
+    description: z.string().optional().nullable(),
+    fileSize: z.number().int().nonnegative().optional().nullable(),
+    fileType: z.string().optional().nullable(),
+    issueDate: z.string().refine((v) => !v || !isNaN(Date.parse(v)), "Неверный формат даты").optional().nullable(),
+  }),
+  params: z.object({
+    id: z.string().regex(/^\d+$/, "ID ученика должен быть числом"),
+    docId: z.string().regex(/^\d+$/, "ID документа должен быть числом"),
+  }),
+});

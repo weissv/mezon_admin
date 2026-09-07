@@ -14,6 +14,7 @@ import {
  Filter,
  X,
  Users,
+ Paperclip,
 } from 'lucide-react';
 import { DataTable, Column} from '../components/DataTable/DataTable';
 import { Button} from '../components/ui/button';
@@ -21,6 +22,7 @@ import { Input} from '../components/ui/input';
 import { Modal, ModalActions, ModalNotice, ModalSection} from '../components/Modal';
 import { Card} from '../components/Card';
 import { ChildForm} from '../components/forms/ChildForm';
+import { QuickStudentDocumentsModal } from '../components/children/QuickStudentDocumentsModal';
 import { useChildren, useChildMutations, useGroups} from '../hooks/useChildren';
 import { api} from '../lib/api';
 import { toast} from 'sonner';
@@ -72,12 +74,13 @@ export default function ChildrenPage() {
  const { groups} = useGroups();
  const navigate = useNavigate();
 
- const [isModalOpen, setIsModalOpen] = useState(false);
- const [editingChild, setEditingChild] = useState<Child | null>(null);
- const [deleteConfirm, setDeleteConfirm] = useState<Child | null>(null);
- const [isDeleting, setIsDeleting] = useState(false);
- const [isExporting, setIsExporting] = useState(false);
- const [showFilters, setShowFilters] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingChild, setEditingChild] = useState<Child | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Child | null>(null);
+  const [selectedChildForDocs, setSelectedChildForDocs] = useState<Child | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
  // --- Search handler ---
  const [searchInput, setSearchInput] = useState(filters.search ?? '');
@@ -183,28 +186,52 @@ export default function ChildrenPage() {
  return row.parentPhone || '—';
 },
 },
- { key: 'status', header: 'Статус', render: (row) => statusBadge(row.status)},
- {
- key: 'actions',
- header: '',
- render: (row) => (
- <div className="flex gap-1">
- <Button variant="ghost"size="sm"onClick={() => navigate(`/children/${row.id}`)} title="Профиль">
- <Eye className="h-4 w-4"/>
- </Button>
- <Button variant="ghost"size="sm"onClick={() => handleEdit(row)} title="Редактировать">
- <PlusCircle className="h-4 w-4"/>
- </Button>
- {row.status === 'ACTIVE' && (
- <Button variant="ghost"size="sm"onClick={() => handleArchive(row)} disabled={saving} title="В архив">
- <Archive className="h-4 w-4"/>
- </Button>
- )}
- <Button variant="ghost"size="sm"className="text-macos-red"onClick={() => setDeleteConfirm(row)} title="Удалить">
- <Trash2 className="h-4 w-4"/>
- </Button>
- </div>
- ),
+  {
+    key: 'documents',
+    header: 'Документы',
+    render: (row) => {
+      const count = row._count?.documents ?? (row.documents?.length || 0);
+      return (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedChildForDocs(row);
+          }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[12px] font-medium transition-all bg-surface-secondary/70 hover:bg-tint-blue hover:text-macos-blue border border-separator/40 hover:border-macos-blue/30 group"
+          title="Открыть документы ученика"
+        >
+          <Paperclip className="h-3.5 w-3.5 text-text-tertiary group-hover:text-macos-blue" />
+          <span>{count > 0 ? count : '0'}</span>
+        </button>
+      );
+    },
+  },
+  { key: 'status', header: 'Статус', render: (row) => statusBadge(row.status)},
+  {
+  key: 'actions',
+  header: '',
+  render: (row) => (
+  <div className="flex gap-1">
+  <Button variant="ghost"size="sm"onClick={() => navigate(`/children/${row.id}`)} title="Профиль">
+  <Eye className="h-4 w-4"/>
+  </Button>
+  <Button variant="ghost"size="sm"onClick={() => setSelectedChildForDocs(row)} title="Документы">
+  <Paperclip className="h-4 w-4"/>
+  </Button>
+  <Button variant="ghost"size="sm"onClick={() => handleEdit(row)} title="Редактировать">
+  <PlusCircle className="h-4 w-4"/>
+  </Button>
+  {row.status === 'ACTIVE' && (
+  <Button variant="ghost"size="sm"onClick={() => handleArchive(row)} disabled={saving} title="В архив">
+  <Archive className="h-4 w-4"/>
+  </Button>
+  )}
+  <Button variant="ghost"size="sm"className="text-macos-red"onClick={() => setDeleteConfirm(row)} title="Удалить">
+  <Trash2 className="h-4 w-4"/>
+  </Button>
+  </div>
+  ),
 },
  ];
 
@@ -403,6 +430,14 @@ export default function ChildrenPage() {
  </>
   ) : null}
   </Modal>
+
+  {/* Quick Student Documents Modal */}
+  <QuickStudentDocumentsModal
+    child={selectedChildForDocs}
+    isOpen={!!selectedChildForDocs}
+    onClose={() => setSelectedChildForDocs(null)}
+    onUpdated={refresh}
+  />
   </PageStack>
   );
 }
