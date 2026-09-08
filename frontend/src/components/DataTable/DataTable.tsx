@@ -27,6 +27,7 @@ export function DataTable<T extends Record<string, any>>({
   toolbar,
   emptyState,
   density = "comfortable",
+  onRowClick,
 }: {
   data: T[];
   columns: Column<T>[];
@@ -40,6 +41,7 @@ export function DataTable<T extends Record<string, any>>({
   toolbar?: React.ReactNode;
   emptyState?: React.ReactNode;
   density?: "comfortable" | "compact";
+  onRowClick?: (row: T) => void;
 }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -154,8 +156,17 @@ export function DataTable<T extends Record<string, any>>({
               data.map((row, i) => (
                 <tr
                   key={i}
+                  onClick={(e) => {
+                    if (!onRowClick) return;
+                    const target = e.target as HTMLElement;
+                    if (target.closest('button, a, input, select, textarea, [data-prevent-row-click]')) {
+                      return;
+                    }
+                    onRowClick(row);
+                  }}
                   className={clsx(
-                    "transition-colors duration-150 hover:bg-macos-blue/[0.03]",
+                    "transition-colors duration-150",
+                    onRowClick ? "cursor-pointer hover:bg-macos-blue/[0.06] active:bg-macos-blue/[0.1]" : "hover:bg-macos-blue/[0.03]",
                     i % 2 === 1 ? 'bg-fill-quaternary/20' : 'bg-transparent'
                   )}
                 >

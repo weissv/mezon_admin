@@ -44,9 +44,9 @@ export default function DashboardOverview({ overview }: DashboardOverviewProps) 
 
   return (
     <div className="space-y-3.5">
-      {/* Executive Metrics Bento Row — 100% full width */}
+      {/* Executive Metrics Bento Row — adaptive 3-col on 13" laptops, 6-col on larger screens */}
       {overview.metrics.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3">
           {overview.metrics.map(metric => {
             const style = toneStyles[metric.tone] ?? toneStyles.neutral;
             return (

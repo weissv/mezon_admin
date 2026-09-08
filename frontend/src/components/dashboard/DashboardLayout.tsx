@@ -152,22 +152,26 @@ export default function DashboardLayout({
   );
 
   const layouts: Record<string, RGLLayout[]> = useMemo(() => ({
+    xxl: gridLayout,
+    xl: gridLayout,
     lg: gridLayout,
     md: gridLayout.map(item => ({
       ...item,
       w: Math.min(item.w, 6),
       x: item.x >= 6 ? Math.max(0, item.x - 6) : item.x,
     })),
-    sm: gridLayout.map(item => ({ ...item, w: 6, x: 0 })),
-    xs: gridLayout.map(item => ({ ...item, w: 6, x: 0 })),
+    sm: gridLayout.map(item => ({ ...item, w: 1, x: 0 })),
   }), [gridLayout]);
 
   const handleLayoutChange = useCallback(
     (currentLayout: RGLLayout[], allLayouts: Partial<Record<string, RGLLayout[]>>) => {
       // КРИТИЧНО: сохраняем раскладку ТОЛЬКО в режиме редактирования!
-      // И сохраняем именно 12-колоночную раскладку lg, а не сжатые мобильные координаты
+      // И сохраняем именно 12-колоночную каноническую раскладку (xxl/xl/lg)
       if (!isEditMode) return;
-      const canonicalLayout = allLayouts.lg && allLayouts.lg.length > 0 ? allLayouts.lg : currentLayout;
+      const canonicalLayout =
+        allLayouts.xxl && allLayouts.xxl.length > 0 ? allLayouts.xxl :
+        allLayouts.xl && allLayouts.xl.length > 0 ? allLayouts.xl :
+        allLayouts.lg && allLayouts.lg.length > 0 ? allLayouts.lg : currentLayout;
       onLayoutChange(fromGridLayout(canonicalLayout));
     },
     [isEditMode, onLayoutChange]
@@ -177,15 +181,15 @@ export default function DashboardLayout({
     <ResponsiveGridLayout
       className="dashboard-grid"
       layouts={layouts}
-      breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
-      cols={{ lg: 12, md: 6, sm: 6, xs: 6 }}
+      breakpoints={{ xxl: 1560, xl: 1200, lg: 960, md: 680, sm: 480 }}
+      cols={{ xxl: 12, xl: 12, lg: 12, md: 6, sm: 1 }}
       rowHeight={84}
       isDraggable={isEditMode}
       isResizable={isEditMode}
       onLayoutChange={handleLayoutChange}
       draggableHandle=".widget-drag-handle"
       compactType="vertical"
-      margin={[18, 18]}
+      margin={[16, 16]}
     >
       {visibleWidgets.map(widget => (
         <div key={widget.id}>

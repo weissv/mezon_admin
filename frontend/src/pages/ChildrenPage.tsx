@@ -1,5 +1,5 @@
 // src/pages/ChildrenPage.tsx
-// Список детей с фильтрами, поиском и действиями
+// Премиальный реестр контингента учащихся с интерактивным Slide-Over Drawer и сегментированной фильтрацией
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
@@ -18,6 +18,11 @@ import {
   Paperclip,
   GraduationCap,
   Lock,
+  Phone,
+  Calendar,
+  Sparkles,
+  Edit,
+  CheckCircle2,
 } from 'lucide-react';
 import { DataTable, Column } from '../components/DataTable/DataTable';
 import { Button } from '../components/ui/button';
@@ -25,7 +30,7 @@ import { Input } from '../components/ui/input';
 import { Modal, ModalActions, ModalNotice, ModalSection } from '../components/Modal';
 import { Card } from '../components/Card';
 import { ChildForm } from '../components/forms/ChildForm';
-import { QuickStudentDocumentsModal } from '../components/children/QuickStudentDocumentsModal';
+import { StudentProfileDrawer } from '../components/children/StudentProfileDrawer';
 import { useChildren, useChildMutations, useGroups } from '../hooks/useChildren';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
@@ -35,20 +40,27 @@ import type { Child, ChildFilters, Gender } from '../types/child';
 
 const selectClassName = 'mezon-field';
 
-const genderLabel = (g?: Gender | null) => {
-  if (g === 'MALE') return 'М';
-  if (g === 'FEMALE') return 'Ж';
-  return '—';
-};
-
-const statusLabel = (s: string) => {
-  switch (s) {
-    case 'ACTIVE': return 'Активен';
-    case 'LEFT': return 'Выбыл';
-    case 'ARCHIVED': return 'Архив';
-    default: return s;
+function getAgeCompact(birthDateStr?: string | null): string {
+  if (!birthDateStr) return '';
+  const birth = new Date(birthDateStr);
+  if (isNaN(birth.getTime())) return '';
+  const now = new Date();
+  let years = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
+    years--;
   }
-};
+  if (years < 0) return '';
+
+  const lastDigit = years % 10;
+  const lastTwo = years % 100;
+  let word = 'лет';
+  if (lastTwo < 11 || lastTwo > 14) {
+    if (lastDigit === 1) word = 'год';
+    else if (lastDigit >= 2 && lastDigit <= 4) word = 'года';
+  }
+  return `${years} ${word}`;
+}
 
 const statusBadge = (s: string) => {
   const colors: Record<string, string> = {
@@ -56,9 +68,14 @@ const statusBadge = (s: string) => {
     LEFT: 'macos-badge-warning',
     ARCHIVED: 'macos-badge-neutral',
   };
+  const labels: Record<string, string> = {
+    ACTIVE: 'Активен',
+    LEFT: 'Выбыл',
+    ARCHIVED: 'Архив',
+  };
   return (
     <span className={`mezon-badge ${colors[s] ?? 'macos-badge-neutral'}`}>
-      {statusLabel(s)}
+      {labels[s] ?? s}
     </span>
   );
 };
@@ -86,7 +103,7 @@ export default function ChildrenPage() {
     refresh,
   } = useChildren({
     sortBy: 'lastName',
-    // Если заходит классный руководитель, сразу фильтруем по его классу
+    pageSize: 12,
     ...(isTeacher && isClassTeacher && primaryClass?.id ? { initialPage: 1 } : {}),
   });
 
@@ -97,7 +114,8 @@ export default function ChildrenPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Child | null>(null);
-  const [selectedChildForDocs, setSelectedChildForDocs] = useState<Child | null>(null);
+  const [drawerChild, setDrawerChild] = useState<Child | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -121,8 +139,21 @@ export default function ChildrenPage() {
   }, [searchInput]);
 
   // --- Handlers ---
-  const handleCreate = () => { setEditingChild(null); setIsModalOpen(true); };
-  const handleEdit = (child: Child) => { setEditingChild(child); setIsModalOpen(true); };
+  const handleCreate = () => {
+    setEditingChild(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (child: Child) => {
+    setEditingChild(child);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenDrawer = (child: Child) => {
+    setDrawerChild(child);
+    setIsDrawerOpen(true);
+  };
+
   const handleFormSuccess = () => {
     setIsModalOpen(false);
     refresh();
@@ -152,9 +183,13 @@ export default function ChildrenPage() {
     try {
       await deleteChild(deleteConfirm.id);
       setDeleteConfirm(null);
+      if (drawerChild?.id === deleteConfirm.id) {
+        setIsDrawerOpen(false);
+        setDrawerChild(null);
+      }
       refresh();
     } catch {
-      // toast from hook
+      // toast handled in hook
     } finally {
       setIsDeleting(false);
     }
@@ -165,7 +200,11 @@ export default function ChildrenPage() {
     refresh();
   };
 
-  const hasActiveFilters = !!(filters.status || (filters.groupId && !isTeacher && deputyTab !== 'MY_CLASS') || filters.gender);
+  const hasActiveFilters = !!(
+    filters.status ||
+    (filters.groupId && !isTeacher && deputyTab !== 'MY_CLASS') ||
+    filters.gender
+  );
 
   const clearFilters = () => {
     if (isTeacher && isClassTeacher && primaryClass?.id) {
@@ -211,91 +250,189 @@ export default function ChildrenPage() {
     );
   }
 
-  // --- Columns ---
+  // --- Columns Configuration ---
   const columns: Column<Child>[] = [
-    { key: 'id', header: '№' },
     {
       key: 'fullName',
-      header: 'ФИО',
+      header: 'Ученик',
+      render: (row) => {
+        const initials = `${(row.lastName || '')[0] || ''}${(row.firstName || '')[0] || ''}`.toUpperCase();
+        const avatarGradient = row.gender === 'FEMALE'
+          ? 'from-rose-500 to-amber-500'
+          : 'from-blue-600 to-indigo-600';
+        const age = getAgeCompact(row.birthDate);
+
+        return (
+          <div className="flex items-center gap-3 py-0.5">
+            <div
+              className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${avatarGradient} flex items-center justify-center text-white text-[12px] font-bold tracking-tight shadow-sm flex-shrink-0`}
+            >
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <div className="font-semibold text-text-primary group-hover:text-macos-blue transition-colors text-[13.5px] truncate">
+                {row.lastName} {row.firstName} {row.middleName || ''}
+              </div>
+              <div className="text-[11.5px] text-text-tertiary flex items-center gap-1.5 mt-0.5">
+                {age && <span>{age}</span>}
+                {age && <span>•</span>}
+                <span>д.р. {new Date(row.birthDate).toLocaleDateString('ru-RU')}</span>
+              </div>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'group',
+      header: 'Класс',
+      width: '120px',
       render: (row) => (
-        <button
-          className="text-left text-macos-blue hover:underline font-medium cursor-pointer"
-          onClick={() => navigate(`/children/${row.id}`)}
-        >
-          {row.lastName} {row.firstName} {row.middleName || ''}
-        </button>
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-secondary text-text-primary text-[12px] font-medium border border-separator/40">
+          <GraduationCap className="h-3.5 w-3.5 text-text-tertiary" />
+          <span>{row.group.name}</span>
+        </span>
       ),
     },
-    { key: 'group', header: 'Класс', render: (row) => row.group.name },
-    {
-      key: 'birthDate',
-      header: 'Дата рожд.',
-      render: (row) => new Date(row.birthDate).toLocaleDateString('ru-RU'),
-    },
-    { key: 'gender', header: 'Пол', render: (row) => genderLabel(row.gender) },
     {
       key: 'parents',
-      header: 'Родители',
+      header: 'Родители / Контакты',
       render: (row) => {
         if (row.parents?.length) {
+          const mainParent = row.parents[0];
           return (
-            <div className="text-sm">
-              {row.parents.map((p) => (
-                <div key={p.id}>
-                  {p.fullName}{p.phone ? ` (${p.phone})` : ''}
-                </div>
-              ))}
+            <div className="text-[12.5px] py-0.5">
+              <div className="font-medium text-text-primary truncate max-w-[220px]">
+                {mainParent.fullName}
+                <span className="text-[11px] text-text-tertiary font-normal ml-1.5">
+                  ({mainParent.relation || 'Родитель'})
+                </span>
+              </div>
+              {mainParent.phone && (
+                <a
+                  href={`tel:${mainParent.phone}`}
+                  data-prevent-row-click="true"
+                  className="inline-flex items-center gap-1 text-[11.5px] text-macos-blue hover:underline mt-0.5"
+                  title="Позвонить родителю"
+                >
+                  <Phone className="h-3 w-3" />
+                  <span>{mainParent.phone}</span>
+                </a>
+              )}
             </div>
           );
         }
-        return row.parentPhone || '—';
+        if (row.parentPhone) {
+          return (
+            <a
+              href={`tel:${row.parentPhone}`}
+              data-prevent-row-click="true"
+              className="inline-flex items-center gap-1 text-[12px] text-macos-blue hover:underline"
+            >
+              <Phone className="h-3 w-3" />
+              <span>{row.parentPhone}</span>
+            </a>
+          );
+        }
+        return <span className="text-text-tertiary text-xs">—</span>;
       },
     },
     {
       key: 'documents',
       header: 'Документы',
+      width: '120px',
       render: (row) => {
         const count = row._count?.documents ?? (row.documents?.length || 0);
+        const hasDocs = count > 0;
         return (
           <button
             type="button"
+            data-prevent-row-click="true"
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedChildForDocs(row);
+              handleOpenDrawer(row);
             }}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[12px] font-medium transition-all bg-surface-secondary/70 hover:bg-tint-blue hover:text-macos-blue border border-separator/40 hover:border-macos-blue/30 group cursor-pointer"
+            className={clsx(
+              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[12px] font-medium transition-all cursor-pointer border",
+              hasDocs
+                ? "bg-surface-secondary/70 text-text-secondary hover:text-macos-blue hover:bg-tint-blue hover:border-macos-blue/30 border-separator/40"
+                : "bg-surface-secondary/30 text-text-tertiary hover:text-text-primary border-separator/20"
+            )}
             title="Открыть документы ученика"
           >
-            <Paperclip className="h-3.5 w-3.5 text-text-tertiary group-hover:text-macos-blue" />
-            <span>{count > 0 ? count : '0'}</span>
+            <Paperclip className="h-3.5 w-3.5" />
+            <span>{hasDocs ? `${count} док.` : '0 док.'}</span>
           </button>
         );
       },
     },
-    { key: 'status', header: 'Статус', render: (row) => statusBadge(row.status) },
+    {
+      key: 'status',
+      header: 'Статус',
+      width: '110px',
+      render: (row) => statusBadge(row.status),
+    },
     {
       key: 'actions',
       header: '',
+      width: '130px',
       render: (row) => (
-        <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/children/${row.id}`)} title="Профиль">
+        <div className="flex items-center justify-end gap-1" data-prevent-row-click="true">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-text-tertiary hover:text-macos-blue rounded-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenDrawer(row);
+            }}
+            title="Быстрое досье (Slide-Over)"
+          >
             <Eye className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setSelectedChildForDocs(row)} title="Документы">
-            <Paperclip className="h-4 w-4" />
-          </Button>
-          {(!isTeacher) && (
-            <Button variant="ghost" size="sm" onClick={() => handleEdit(row)} title="Редактировать">
-              <PlusCircle className="h-4 w-4" />
+
+          {!isTeacher && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-text-tertiary hover:text-text-primary rounded-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit(row);
+              }}
+              title="Редактировать анкету"
+            >
+              <Edit className="h-4 w-4" />
             </Button>
           )}
-          {(!isTeacher) && row.status === 'ACTIVE' && (
-            <Button variant="ghost" size="sm" onClick={() => handleArchive(row)} disabled={saving} title="В архив">
+
+          {!isTeacher && row.status === 'ACTIVE' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-text-tertiary hover:text-amber-600 rounded-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleArchive(row);
+              }}
+              disabled={saving}
+              title="Переместить в архив"
+            >
               <Archive className="h-4 w-4" />
             </Button>
           )}
-          {(!isTeacher) && (
-            <Button variant="ghost" size="sm" className="text-macos-red" onClick={() => setDeleteConfirm(row)} title="Удалить">
+
+          {!isTeacher && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-text-tertiary hover:text-macos-red rounded-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteConfirm(row);
+              }}
+              title="Удалить профиль"
+            >
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
@@ -308,15 +445,15 @@ export default function ChildrenPage() {
     ? `Мой класс (${primaryClass?.name})`
     : isDeputyWithClass && deputyTab === 'MY_CLASS'
     ? `Мой класс (${primaryClass?.name})`
-    : 'Управление профилями детей';
+    : 'Контингент учащихся';
 
   const pageEyebrow = (isTeacher && isClassTeacher) || (isDeputyWithClass && deputyTab === 'MY_CLASS')
     ? `Классный руководитель: ${primaryClass?.name}`
-    : 'Контингент';
+    : 'Школьный контингент';
 
   const pageDescription = (isTeacher && isClassTeacher) || (isDeputyWithClass && deputyTab === 'MY_CLASS')
     ? `Список учащихся вашего класса (${primaryClass?.name}). Просмотр документов, данных родителей и карточек учеников.`
-    : 'Единый список учеников, статусов и семейных контактов. Экран приведён к общему ERP-паттерну: короткий header, плотная панель действий и предсказуемые фильтры.';
+    : 'Единый реестр личных дел, документов, медицинских сведений и семейных контактов с быстрым интерактивным досье.';
 
   return (
     <PageStack>
@@ -324,25 +461,36 @@ export default function ChildrenPage() {
         eyebrow={pageEyebrow}
         title={pageTitle}
         icon={<Users className="h-5 w-5" />}
-        meta={<span className="mezon-badge macos-badge-neutral">{total} записей</span>}
+        meta={<span className="mezon-badge macos-badge-neutral font-semibold">{total} учащихся</span>}
         description={pageDescription}
         actions={
-          <div className="mezon-kicker-list">
-            {(isTeacher && isClassTeacher) || (isDeputyWithClass && deputyTab === 'MY_CLASS') ? (
-              <span className="mezon-chip bg-tint-blue/70 text-macos-blue font-semibold border border-macos-blue/20">
-                <GraduationCap className="h-3.5 w-3.5 inline mr-1" />
-                {primaryClass?.name}
-              </span>
-            ) : null}
-            <span className="mezon-chip">Профили</span>
-            <span className="mezon-chip">Документы</span>
+          <div className="flex items-center gap-2">
+            {!isTeacher && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={isExporting}
+                className="gap-1.5"
+              >
+                <Download className="h-4 w-4" />
+                <span>{isExporting ? 'Экспорт...' : 'Экспорт Excel'}</span>
+              </Button>
+            )}
+
+            {!isTeacher && (
+              <Button onClick={handleCreate} size="sm" className="gap-1.5 font-medium shadow-sm">
+                <PlusCircle className="h-4 w-4" />
+                <span>Добавить ученика</span>
+              </Button>
+            )}
           </div>
         }
       />
 
       {/* Вкладки для завуча, назначенного классным руководителем */}
       {isDeputyWithClass && (
-        <div className="flex items-center gap-2 p-1.5 bg-surface-secondary/70 backdrop-blur-md rounded-2xl border border-separator/40 max-w-fit shadow-subtle mb-3">
+        <div className="flex items-center gap-1.5 p-1 bg-surface-secondary/70 backdrop-blur-md rounded-2xl border border-separator/40 max-w-fit shadow-subtle mb-1">
           <button
             type="button"
             onClick={() => {
@@ -355,13 +503,13 @@ export default function ChildrenPage() {
               setPage(1);
             }}
             className={clsx(
-              "px-4 py-2 rounded-xl text-[13px] font-medium transition-all flex items-center gap-2 cursor-pointer",
+              "px-3.5 py-1.5 rounded-xl text-[13px] font-medium transition-all flex items-center gap-2 cursor-pointer",
               deputyTab === 'ALL'
-                ? "bg-white text-text-primary shadow-sm font-semibold border border-separator/30"
+                ? "bg-white dark:bg-surface text-text-primary shadow-sm font-semibold border border-separator/30"
                 : "text-text-secondary hover:text-text-primary hover:bg-white/40"
             )}
           >
-            <Users className="h-4 w-4 text-text-tertiary" />
+            <Users className="h-3.5 w-3.5 text-text-tertiary" />
             <span>Все ученики</span>
           </button>
 
@@ -373,176 +521,251 @@ export default function ChildrenPage() {
               setPage(1);
             }}
             className={clsx(
-              "px-4 py-2 rounded-xl text-[13px] font-medium transition-all flex items-center gap-2 cursor-pointer",
+              "px-3.5 py-1.5 rounded-xl text-[13px] font-medium transition-all flex items-center gap-2 cursor-pointer",
               deputyTab === 'MY_CLASS'
-                ? "bg-white text-macos-blue shadow-sm font-semibold border border-macos-blue/20"
+                ? "bg-white dark:bg-surface text-macos-blue shadow-sm font-semibold border border-macos-blue/20"
                 : "text-text-secondary hover:text-macos-blue hover:bg-white/40"
             )}
           >
-            <GraduationCap className="h-4 w-4 text-macos-blue" />
+            <GraduationCap className="h-3.5 w-3.5 text-macos-blue" />
             <span>Мой класс ({primaryClass?.name})</span>
           </button>
         </div>
       )}
 
-      {/* Import/Export Card (только для админов/завучей) */}
-      {!isTeacher && (
-        <Card className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-subtle">
-          <div>
-            <p className="text-[14px] font-semibold tracking-[-0.01em]">Массовая загрузка списков</p>
-            <p className="text-[14px] leading-relaxed text-secondary mt-1">Импортируйте детей из Excel/Google Sheets или выгрузите актуальный шаблон.</p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="outline" onClick={handleExport} disabled={isExporting}>
-              <Download className="mr-2 h-4 w-4" /> {isExporting ? 'Готовим...' : 'Шаблон Excel'}
-            </Button>
-            <Button onClick={() => navigate('/integration#children')}>
-              <UploadCloud className="mr-2 h-4 w-4" /> Перейти к импорту
-            </Button>
-          </div>
-        </Card>
-      )}
+      {/* Segmented Status Tabs + Primary Filter Toolbar */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-surface-primary/80 backdrop-blur-md p-2 rounded-2xl border border-separator/40 shadow-subtle">
+        {/* Segmented Status Bar */}
+        <div className="flex items-center gap-1 p-1 bg-surface-secondary/80 rounded-xl border border-separator/30 text-xs font-medium overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => {
+              setFilters((prev: ChildFilters) => ({ ...prev, status: undefined }));
+              setPage(1);
+            }}
+            className={clsx(
+              "px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              !filters.status
+                ? "bg-white dark:bg-surface text-text-primary shadow-sm font-semibold"
+                : "text-text-secondary hover:text-text-primary"
+            )}
+          >
+            Все
+          </button>
 
-      {/* Search + Filters + Add */}
-      <PageToolbar className="mb-4">
-        <div className="mezon-toolbar-group flex-1">
-          <div className="mezon-input-shell max-w-sm">
-            <Search className="mezon-input-shell__icon h-4 w-4" />
+          <button
+            type="button"
+            onClick={() => {
+              setFilters((prev: ChildFilters) => ({ ...prev, status: 'ACTIVE' }));
+              setPage(1);
+            }}
+            className={clsx(
+              "px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5",
+              filters.status === 'ACTIVE'
+                ? "bg-white dark:bg-surface text-emerald-600 shadow-sm font-semibold"
+                : "text-text-secondary hover:text-emerald-600"
+            )}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>Активные</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setFilters((prev: ChildFilters) => ({ ...prev, status: 'LEFT' }));
+              setPage(1);
+            }}
+            className={clsx(
+              "px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5",
+              filters.status === 'LEFT'
+                ? "bg-white dark:bg-surface text-amber-600 shadow-sm font-semibold"
+                : "text-text-secondary hover:text-amber-600"
+            )}
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span>Выбывшие</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setFilters((prev: ChildFilters) => ({ ...prev, status: 'ARCHIVED' }));
+              setPage(1);
+            }}
+            className={clsx(
+              "px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5",
+              filters.status === 'ARCHIVED'
+                ? "bg-white dark:bg-surface text-text-primary shadow-sm font-semibold"
+                : "text-text-secondary hover:text-text-primary"
+            )}
+          >
+            <Archive className="h-3 w-3 text-text-tertiary" />
+            <span>Архив</span>
+          </button>
+        </div>
+
+        {/* Search Input and Quick Class Select */}
+        <div className="flex items-center gap-2 flex-1 max-w-xl">
+          <div className="mezon-input-shell flex-1">
+            <Search className="mezon-input-shell__icon h-4 w-4 text-text-tertiary" />
             <Input
-              placeholder="Поиск по ФИО..."
+              placeholder="Поиск по фамилии, имени, родителю..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
+              className="pr-8"
             />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => setSearchInput('')}
+                className="absolute right-2.5 p-1 rounded-full text-text-tertiary hover:text-text-primary"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
+
+          {/* Quick Group Selector directly in toolbar */}
+          {(!isTeacher || teacherClassGroups.length > 1) && deputyTab !== 'MY_CLASS' && (
+            <div className="w-44 flex-shrink-0">
+              <select
+                className={clsx(selectClassName, "text-xs py-2")}
+                value={filters.groupId ?? ''}
+                onChange={(e) => {
+                  setFilters((prev: ChildFilters) => ({
+                    ...prev,
+                    groupId: e.target.value ? Number(e.target.value) : undefined,
+                  }));
+                  setPage(1);
+                }}
+              >
+                <option value="">Все классы</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <Button
             variant={showFilters ? 'default' : 'outline'}
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
+            className="flex-shrink-0 text-xs gap-1"
           >
-            <Filter className="h-4 w-4 mr-1" /> Фильтры
-            {hasActiveFilters && <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-xs text-black">!</span>}
+            <Filter className="h-3.5 w-3.5" />
+            <span>Фильтр</span>
+            {hasActiveFilters && (
+              <span className="ml-1 w-2 h-2 rounded-full bg-macos-blue inline-block" />
+            )}
           </Button>
+
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
-              <X className="h-4 w-4 mr-1" /> Сбросить
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="flex-shrink-0 text-xs px-2 text-text-secondary hover:text-macos-red"
+              title="Сбросить все фильтры"
+            >
+              <X className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
-        {!isTeacher && (
-          <Button onClick={handleCreate} className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" /> Добавить ребенка
-          </Button>
-        )}
-      </PageToolbar>
+      </div>
 
-      {/* Filters panel */}
+      {/* Expanded filters panel */}
       {showFilters && (
-        <PageSection className="mb-4">
+        <PageSection className="p-4 rounded-2xl bg-surface-secondary/40 border border-separator/30">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">Статус</label>
-              <select
-                className={selectClassName}
-                value={filters.status ?? ''}
-                onChange={(e) => {
-                  setFilters((prev: ChildFilters) => ({ ...prev, status: (e.target.value as any) || undefined }));
-                  setPage(1);
-                }}
-              >
-                <option value="">Все</option>
-                <option value="ACTIVE">Активные</option>
-                <option value="LEFT">Выбывшие</option>
-                <option value="ARCHIVED">Архив</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">Класс</label>
-              {isTeacher && isClassTeacher ? (
-                teacherClassGroups.length > 1 ? (
-                  <select
-                    className={selectClassName}
-                    value={filters.groupId ?? ''}
-                    onChange={(e) => {
-                      setFilters((prev: ChildFilters) => ({ ...prev, groupId: e.target.value ? Number(e.target.value) : undefined }));
-                      setPage(1);
-                    }}
-                  >
-                    {teacherClassGroups.map((g) => (
-                      <option key={g.id} value={g.id}>{g.name}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="mezon-field flex items-center gap-1.5 bg-surface-secondary/60 text-text-primary font-medium cursor-not-allowed">
-                    <span>{primaryClass?.name}</span>
-                    <span className="text-[11px] text-text-tertiary">(Ваш класс)</span>
-                  </div>
-                )
-              ) : isDeputyWithClass && deputyTab === 'MY_CLASS' ? (
-                <div className="mezon-field flex items-center gap-1.5 bg-surface-secondary/60 text-text-primary font-medium cursor-not-allowed">
-                  <span>{primaryClass?.name}</span>
-                  <span className="text-[11px] text-text-tertiary">(Ваш класс)</span>
-                </div>
-              ) : (
-                <select
-                  className={selectClassName}
-                  value={filters.groupId ?? ''}
-                  onChange={(e) => {
-                    setFilters((prev: ChildFilters) => ({ ...prev, groupId: e.target.value ? Number(e.target.value) : undefined }));
-                    setPage(1);
-                  }}
-                >
-                  <option value="">Все классы</option>
-                  {groups.map((g) => (
-                    <option key={g.id} value={g.id}>{g.name}</option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            <div>
-              <label className="mb-1 block text-[11px] font-medium uppercase tracking-widest">Пол</label>
+              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+                Пол учащегося
+              </label>
               <select
                 className={selectClassName}
                 value={filters.gender ?? ''}
                 onChange={(e) => {
-                  setFilters((prev: ChildFilters) => ({ ...prev, gender: (e.target.value as Gender) || undefined }));
+                  setFilters((prev: ChildFilters) => ({
+                    ...prev,
+                    gender: (e.target.value as Gender) || undefined,
+                  }));
                   setPage(1);
                 }}
               >
-                <option value="">Все</option>
+                <option value="">Любой пол</option>
                 <option value="MALE">Мужской</option>
                 <option value="FEMALE">Женский</option>
               </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+                Быстрые ссылки
+              </label>
+              <div className="flex items-center gap-2 pt-0.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => navigate('/integration#children')}
+                >
+                  <UploadCloud className="h-3.5 w-3.5 mr-1.5 text-macos-blue" />
+                  Импорт из Excel
+                </Button>
+              </div>
             </div>
           </div>
         </PageSection>
       )}
 
-      {/* Table */}
+      {/* Main Interactive Table */}
       <DataTable
-        title={isTeacher && isClassTeacher || (isDeputyWithClass && deputyTab === 'MY_CLASS') ? `Ученики (${primaryClass?.name})` : "Список учеников"}
-        description="Просматривайте статусы, родителей, прикрепленные документы и классы."
+        title={
+          (isTeacher && isClassTeacher) || (isDeputyWithClass && deputyTab === 'MY_CLASS')
+            ? `Ученики (${primaryClass?.name})`
+            : "Реестр учащихся"
+        }
+        description="Кликните на строку ученика для мгновенного открытия досье и работы с документами."
         columns={columns}
         data={data}
         page={page}
-        pageSize={10}
+        pageSize={12}
         total={total}
         onPageChange={setPage}
+        onRowClick={handleOpenDrawer}
         wrapCells={true}
         density="compact"
       />
 
-      {/* Create/Edit Modal */}
+      {/* Apple Slide-Over Student Profile Drawer */}
+      <StudentProfileDrawer
+        child={drawerChild}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onEdit={handleEdit}
+        onArchive={handleArchive}
+        canManage={!isTeacher}
+        onUpdated={refresh}
+      />
+
+      {/* Create / Edit Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingChild ? 'Редактировать данные' : 'Добавить нового ребенка'}
+        title={editingChild ? 'Редактировать анкету ученика' : 'Добавить нового ученика'}
         eyebrow="Контингент"
-        description="Форма собрана по блокам, чтобы администратор мог спокойно пройти по персональным данным, родителям, договору и мединформации без лишней прокрутки внутри модалки."
+        description="Форма собрана по смысловым блокам: персональные данные, родители, договор и медицинские сведения."
         icon={<Users className="h-5 w-5" />}
         size="xl"
-        meta={editingChild ? <span className="mezon-badge macos-badge-neutral">Редактирование</span> : <span className="mezon-badge">Новый профиль</span>}
+        meta={
+          editingChild ? (
+            <span className="mezon-badge macos-badge-neutral">Редактирование</span>
+          ) : (
+            <span className="mezon-badge">Новый профиль</span>
+          )
+        }
       >
         <ChildForm
           initialData={editingChild}
@@ -551,22 +774,24 @@ export default function ChildrenPage() {
         />
       </Modal>
 
-      {/* Delete Confirmation */}
+      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={!!deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
-        title="Удаление ученика"
+        title="Удаление профиля ученика"
         eyebrow="Опасное действие"
-        description="Профиль ребёнка будет удалён вместе со связанными записями. Перед подтверждением проверьте, что удаляется именно нужный ученик."
+        description="Профиль ребёнка будет удалён вместе со связанными записями посещаемости и кружков."
         icon={<AlertCircle className="h-5 w-5" />}
         tone="danger"
         closeOnBackdrop={!isDeleting}
         closeOnEscape={!isDeleting}
         footer={
           <ModalActions>
-            <Button variant="ghost" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>Отмена</Button>
+            <Button variant="ghost" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>
+              Отмена
+            </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? 'Удаление...' : 'Удалить'}
+              {isDeleting ? 'Удаление...' : 'Удалить безвозвратно'}
             </Button>
           </ModalActions>
         }
@@ -577,33 +802,35 @@ export default function ChildrenPage() {
               Будут удалены посещаемость, отсутствия и записи в кружки, связанные с этим профилем. Это действие нельзя отменить.
             </ModalNotice>
 
-            <ModalSection title="Проверка профиля" description="Убедитесь, что выбрали правильного ученика.">
+            <ModalSection title="Проверка профиля" description="Убедитесь, что выбран нужный ученик.">
               <div className="mezon-modal-facts">
                 <div className="mezon-modal-fact">
                   <span className="mezon-modal-fact__label">Ученик</span>
-                  <span className="mezon-modal-fact__value">{deleteConfirm.lastName} {deleteConfirm.firstName}</span>
+                  <span className="mezon-modal-fact__value">
+                    {deleteConfirm.lastName} {deleteConfirm.firstName}
+                  </span>
                 </div>
                 <div className="mezon-modal-fact">
                   <span className="mezon-modal-fact__label">Класс</span>
-                  <span className="mezon-modal-fact__value">{deleteConfirm.group?.name || 'Не указан'}</span>
+                  <span className="mezon-modal-fact__value">
+                    {deleteConfirm.group?.name || 'Не указан'}
+                  </span>
                 </div>
                 <div className="mezon-modal-fact">
                   <span className="mezon-modal-fact__label">Статус</span>
-                  <span className="mezon-modal-fact__value">{statusLabel(deleteConfirm.status)}</span>
+                  <span className="mezon-modal-fact__value">
+                    {deleteConfirm.status === 'ACTIVE'
+                      ? 'Активен'
+                      : deleteConfirm.status === 'LEFT'
+                      ? 'Выбыл'
+                      : 'В архиве'}
+                  </span>
                 </div>
               </div>
             </ModalSection>
           </>
         ) : null}
       </Modal>
-
-      {/* Quick Student Documents Modal */}
-      <QuickStudentDocumentsModal
-        child={selectedChildForDocs}
-        isOpen={!!selectedChildForDocs}
-        onClose={() => setSelectedChildForDocs(null)}
-        onUpdated={refresh}
-      />
     </PageStack>
   );
 }

@@ -3,7 +3,12 @@
    ======================================== */
 
 /* ── Root ── */
-.dashboard-root { position: relative; }
+.dashboard-root {
+  position: relative;
+  max-width: 1720px;
+  margin: 0 auto;
+  width: 100%;
+}
 
 /* ── Skeleton ── */
 .dashboard-skeleton {
@@ -1371,3 +1376,70 @@
 .personalization-action-row:hover {
   background: var(--fill-quaternary);
 }
+
+/* ================================================================
+   RESPONSIVE ADAPTIVITY: 13" LAPTOPS TO 27" QHD/4K MONITORS
+   ================================================================ */
+
+/* Compact laptop screens (13"–14" displays with ~1024px–1366px logical width) */
+@media (max-width: 1366px) {
+  .bento-card__header {
+    padding: 10px 12px 0;
+  }
+  .bento-card__body {
+    padding: 8px 12px 12px;
+  }
+  .bento-card__title {
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+  }
+  .bento-actions-grid {
+    gap: 6px;
+  }
+  .bento-action-btn {
+    min-height: 40px;
+    padding: 6px 8px;
+    gap: 6px;
+    border-radius: 10px;
+  }
+  .bento-action-btn__icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+  .bento-action-btn__icon svg {
+    width: 15px;
+    height: 15px;
+  }
+  .bento-action-btn__label {
+    font-size: 11px;
+    line-height: 1.18;
+  }
+  .bento-overview__metric-value {
+    font-size: 22px;
+  }
+  .bento-overview__metric {
+    padding: 10px 12px;
+  }
+}
+
+/* Large monitors (24"–27" QHD/4K displays) */
+@media (min-width: 1800px) {
+  .bento-card__header {
+    padding: 16px 18px 0;
+  }
+  .bento-card__body {
+    padding: 12px 18px 18px;
+  }
+  .bento-card__title {
+    font-size: 12px;
+  }
+  .bento-overview__metric-value {
+    font-size: 30px;
+  }
+  .bento-action-btn {
+    min-height: 52px;
+    padding: 10px 12px;
+  }
+}
+
