@@ -15,9 +15,7 @@ export interface Group {
   capacity?: number;
   academicYear?: string | null;
   teacherId?: number | null;
-  deputyId?: number | null;
   teacher?: { id: number; firstName: string; lastName: string } | null;
-  deputy?: { id: number; firstName: string; lastName: string; position?: string } | null;
 }
 
 // ===== Parent =====
