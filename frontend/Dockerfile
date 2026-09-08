@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.7
-
 # Multi-stage build for production
 
 FROM node:20 AS deps
