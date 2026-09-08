@@ -127,6 +127,22 @@ const OPERATIONS_ROLES: Role[] = ['DEVELOPER', 'DIRECTOR', 'DEPUTY', 'ADMIN', 'Z
 // ======================== WIDGET CATALOGUE ========================
 
 export const WIDGET_CATALOGUE: WidgetDefinition[] = [
+  // Быстрые действия
+  {
+    id: 'quick-actions',
+    title: 'Быстрые действия',
+    category: 'actions',
+    description: 'Закреплённые ярлыки и действия',
+    allowedRoles: ALL_ROLES,
+    defaultSize: { w: 4, h: 4 },
+    minSize: { w: 3, h: 3 },
+    maxSize: { w: 6, h: 6 },
+    canHide: false,
+    canResize: true,
+    refreshInterval: 0,
+    dataEndpoint: '',
+  },
+
   // KPI виджеты
   {
     id: 'kpi-overview',
@@ -134,8 +150,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'kpi',
     description: 'Дети, сотрудники, кружки, доход/расход',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 12, h: 2 },
-    minSize: { w: 6, h: 2 },
+    defaultSize: { w: 6, h: 3 },
+    minSize: { w: 4, h: 2 },
     maxSize: { w: 12, h: 4 },
     canHide: true,
     canResize: true,
@@ -150,7 +166,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'finance',
     description: 'Доходы, расходы, касса и банк',
     allowedRoles: FINANCE_ROLES,
-    defaultSize: { w: 6, h: 4 },
+    defaultSize: { w: 7, h: 4 },
     minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 6 },
     canHide: true,
@@ -164,9 +180,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'finance',
     description: 'Прогноз движения денег на 30 дней',
     allowedRoles: FINANCE_ROLES,
-    defaultSize: { w: 6, h: 4 },
+    defaultSize: { w: 5, h: 4 },
     minSize: { w: 4, h: 3 },
-    maxSize: { w: 12, h: 6 },
+    maxSize: { w: 8, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 900_000,
@@ -204,9 +220,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
   },
   {
     id: 'procurement-status',
-    title: 'Статус закупок',
+    title: 'Закупки',
     category: 'operations',
-    description: 'Активные заказы и их статусы',
+    description: 'Статусы текущих заказов и поставок',
     allowedRoles: OPERATIONS_ROLES,
     defaultSize: { w: 6, h: 4 },
     minSize: { w: 4, h: 3 },
@@ -218,39 +234,39 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
   },
   {
     id: 'menu-today',
-    title: 'Меню и питание',
+    title: 'Меню столовой',
     category: 'operations',
-    description: 'Питание сегодня и статистика',
-    allowedRoles: OPERATIONS_ROLES,
+    description: 'План питания на сегодня',
+    allowedRoles: ALL_ROLES,
     defaultSize: { w: 6, h: 4 },
     minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
-    refreshInterval: 600_000,
+    refreshInterval: 300_000,
     dataEndpoint: '/api/dashboard/widgets/menu-today',
   },
 
   // Заявки и безопасность
   {
     id: 'maintenance-queue',
-    title: 'Очередь заявок',
+    title: 'Заявки на ремонт',
     category: 'operations',
-    description: 'Активные заявки на обслуживание',
-    allowedRoles: OPERATIONS_ROLES,
+    description: 'Очередь текущих заявок на обслуживание',
+    allowedRoles: ALL_ROLES,
     defaultSize: { w: 6, h: 4 },
     minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
-    refreshInterval: 180_000,
+    refreshInterval: 300_000,
     dataEndpoint: '/api/dashboard/widgets/maintenance-queue',
   },
   {
     id: 'security-summary',
     title: 'Безопасность',
     category: 'operations',
-    description: 'Последние инциденты и проверки',
+    description: 'Статус пропускной системы и инцидентов',
     allowedRoles: ADMIN_ROLES,
     defaultSize: { w: 6, h: 4 },
     minSize: { w: 4, h: 3 },
@@ -284,7 +300,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'kpi',
     description: 'Дети и сотрудники сегодня',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 6, h: 4 },
+    defaultSize: { w: 8, h: 4 },
     minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 6 },
     canHide: true,
@@ -294,11 +310,11 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
   },
   {
     id: 'calendar-today',
-    title: 'Календарь',
+    title: 'Календарь и расписание',
     category: 'activity',
-    description: 'События и задачи на сегодня',
+    description: 'События, уроки и задачи на сегодня',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 6, h: 4 },
+    defaultSize: { w: 8, h: 4 },
     minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 8 },
     canHide: true,
@@ -312,9 +328,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'activity',
     description: 'Последние уведомления и события',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 6, h: 4 },
+    defaultSize: { w: 5, h: 4 },
     minSize: { w: 4, h: 3 },
-    maxSize: { w: 12, h: 8 },
+    maxSize: { w: 8, h: 8 },
     canHide: true,
     canResize: true,
     refreshInterval: 120_000,
@@ -326,29 +342,13 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'activity',
     description: 'Последние действия в системе',
     allowedRoles: ADMIN_ROLES,
-    defaultSize: { w: 6, h: 4 },
+    defaultSize: { w: 7, h: 4 },
     minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 8 },
     canHide: true,
     canResize: true,
     refreshInterval: 120_000,
     dataEndpoint: '/api/dashboard/widgets/activity-stream',
-  },
-
-  // Быстрые действия
-  {
-    id: 'quick-actions',
-    title: 'Быстрые действия',
-    category: 'actions',
-    description: 'Закреплённые ярлыки и действия',
-    allowedRoles: ALL_ROLES,
-    defaultSize: { w: 12, h: 2 },
-    minSize: { w: 6, h: 2 },
-    maxSize: { w: 12, h: 4 },
-    canHide: false,
-    canResize: false,
-    refreshInterval: 0,
-    dataEndpoint: '',
   },
 ];
 
@@ -375,61 +375,84 @@ export function getDefaultLayout(role: Role): LayoutItem[] {
     case 'DIRECTOR':
     case 'DEVELOPER':
       return [
-        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
-        { widgetId: 'attendance-today', x: 0, y: 2, w: 6, h: 4 },
-        { widgetId: 'finance-overview', x: 6, y: 2, w: 6, h: 4 },
-        { widgetId: 'cash-forecast', x: 0, y: 6, w: 6, h: 4 },
-        { widgetId: 'unit-economics', x: 6, y: 6, w: 6, h: 4 },
-        { widgetId: 'hr-alerts', x: 0, y: 10, w: 6, h: 4 },
-        { widgetId: 'activity-stream', x: 6, y: 10, w: 6, h: 4 },
+        // Ряд 1: Посещаемость (8) + Быстрые действия (4) = 12
+        { widgetId: 'attendance-today', x: 0, y: 0, w: 8, h: 4 },
+        { widgetId: 'quick-actions', x: 8, y: 0, w: 4, h: 4 },
+        // Ряд 2: Финансовый обзор (7) + Кассовый прогноз (5) = 12
+        { widgetId: 'finance-overview', x: 0, y: 4, w: 7, h: 4 },
+        { widgetId: 'cash-forecast', x: 7, y: 4, w: 5, h: 4 },
+        // Ряд 3: Юнит-экономика (6) + Кадровые уведомления (6) = 12
+        { widgetId: 'unit-economics', x: 0, y: 8, w: 6, h: 4 },
+        { widgetId: 'hr-alerts', x: 6, y: 8, w: 6, h: 4 },
+        // Ряд 4: Лента событий (7) + Уведомления (5) = 12
+        { widgetId: 'activity-stream', x: 0, y: 12, w: 7, h: 4 },
+        { widgetId: 'notifications-feed', x: 7, y: 12, w: 5, h: 4 },
       ];
 
     case 'DEPUTY':
       return [
-        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
-        { widgetId: 'attendance-today', x: 0, y: 2, w: 8, h: 4 },
-        { widgetId: 'calendar-today', x: 8, y: 2, w: 4, h: 4 },
-        { widgetId: 'hr-alerts', x: 0, y: 6, w: 6, h: 4 },
-        { widgetId: 'activity-stream', x: 6, y: 6, w: 6, h: 4 },
+        // Ряд 1: Расписание (8) + Быстрые действия (4) = 12
+        { widgetId: 'calendar-today', x: 0, y: 0, w: 8, h: 4 },
+        { widgetId: 'quick-actions', x: 8, y: 0, w: 4, h: 4 },
+        // Ряд 2: Посещаемость (7) + Кадровые уведомления (5) = 12
+        { widgetId: 'attendance-today', x: 0, y: 4, w: 7, h: 4 },
+        { widgetId: 'hr-alerts', x: 7, y: 4, w: 5, h: 4 },
+        // Ряд 3: Лента событий (7) + Уведомления (5) = 12
+        { widgetId: 'activity-stream', x: 0, y: 8, w: 7, h: 4 },
+        { widgetId: 'notifications-feed', x: 7, y: 8, w: 5, h: 4 },
       ];
 
     case 'TEACHER':
       return [
-        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
-        { widgetId: 'attendance-today', x: 0, y: 2, w: 6, h: 4 },
-        { widgetId: 'calendar-today', x: 6, y: 2, w: 6, h: 4 },
-        { widgetId: 'notifications-feed', x: 0, y: 6, w: 12, h: 4 },
+        // Ряд 1: Расписание (8) + Быстрые действия (4) = 12
+        { widgetId: 'calendar-today', x: 0, y: 0, w: 8, h: 4 },
+        { widgetId: 'quick-actions', x: 8, y: 0, w: 4, h: 4 },
+        // Ряд 2: Посещаемость класса (6) + Уведомления (6) = 12
+        { widgetId: 'attendance-today', x: 0, y: 4, w: 6, h: 4 },
+        { widgetId: 'notifications-feed', x: 6, y: 4, w: 6, h: 4 },
       ];
 
     case 'ACCOUNTANT':
       return [
-        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
-        { widgetId: 'finance-overview', x: 0, y: 2, w: 6, h: 4 },
-        { widgetId: 'cash-forecast', x: 6, y: 2, w: 6, h: 4 },
-        { widgetId: 'unit-economics', x: 0, y: 6, w: 12, h: 4 },
+        // Ряд 1: Финансовый обзор (8) + Быстрые действия (4) = 12
+        { widgetId: 'finance-overview', x: 0, y: 0, w: 8, h: 4 },
+        { widgetId: 'quick-actions', x: 8, y: 0, w: 4, h: 4 },
+        // Ряд 2: Кассовый прогноз (6) + Юнит-экономика (6) = 12
+        { widgetId: 'cash-forecast', x: 0, y: 4, w: 6, h: 4 },
+        { widgetId: 'unit-economics', x: 6, y: 4, w: 6, h: 4 },
+        // Ряд 3: Лента событий (7) + Уведомления (5) = 12
+        { widgetId: 'activity-stream', x: 0, y: 8, w: 7, h: 4 },
+        { widgetId: 'notifications-feed', x: 7, y: 8, w: 5, h: 4 },
       ];
 
     case 'ZAVHOZ':
       return [
-        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
-        { widgetId: 'inventory-risk', x: 0, y: 2, w: 6, h: 4 },
-        { widgetId: 'maintenance-queue', x: 6, y: 2, w: 6, h: 4 },
-        { widgetId: 'procurement-status', x: 0, y: 6, w: 6, h: 4 },
-        { widgetId: 'menu-today', x: 6, y: 6, w: 6, h: 4 },
+        // Ряд 1: Очередь ремонта (8) + Быстрые действия (4) = 12
+        { widgetId: 'maintenance-queue', x: 0, y: 0, w: 8, h: 4 },
+        { widgetId: 'quick-actions', x: 8, y: 0, w: 4, h: 4 },
+        // Ряд 2: Риски склада (6) + Закупки (6) = 12
+        { widgetId: 'inventory-risk', x: 0, y: 4, w: 6, h: 4 },
+        { widgetId: 'procurement-status', x: 6, y: 4, w: 6, h: 4 },
+        // Ряд 3: Меню столовой (6) + Уведомления (6) = 12
+        { widgetId: 'menu-today', x: 0, y: 8, w: 6, h: 4 },
+        { widgetId: 'notifications-feed', x: 6, y: 8, w: 6, h: 4 },
       ];
 
     case 'ADMIN':
     default:
       return [
-        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
-        { widgetId: 'attendance-today', x: 0, y: 2, w: 6, h: 4 },
-        { widgetId: 'finance-overview', x: 6, y: 2, w: 6, h: 4 },
-        { widgetId: 'security-summary', x: 0, y: 6, w: 6, h: 4 },
-        { widgetId: 'maintenance-queue', x: 6, y: 6, w: 6, h: 4 },
-        { widgetId: 'hr-alerts', x: 0, y: 10, w: 6, h: 4 },
-        { widgetId: 'activity-stream', x: 6, y: 10, w: 6, h: 4 },
-        { widgetId: 'calendar-today', x: 0, y: 14, w: 6, h: 4 },
-        { widgetId: 'notifications-feed', x: 6, y: 14, w: 6, h: 4 },
+        // Ряд 1: Посещаемость (8) + Быстрые действия (4) = 12
+        { widgetId: 'attendance-today', x: 0, y: 0, w: 8, h: 4 },
+        { widgetId: 'quick-actions', x: 8, y: 0, w: 4, h: 4 },
+        // Ряд 2: Заявки на ремонт (6) + Безопасность (6) = 12
+        { widgetId: 'maintenance-queue', x: 0, y: 4, w: 6, h: 4 },
+        { widgetId: 'security-summary', x: 6, y: 4, w: 6, h: 4 },
+        // Ряд 3: Кадровые уведомления (6) + Финансовый обзор (6) = 12
+        { widgetId: 'hr-alerts', x: 0, y: 8, w: 6, h: 4 },
+        { widgetId: 'finance-overview', x: 6, y: 8, w: 6, h: 4 },
+        // Ряд 4: Лента событий (7) + Уведомления (5) = 12
+        { widgetId: 'activity-stream', x: 0, y: 12, w: 7, h: 4 },
+        { widgetId: 'notifications-feed', x: 7, y: 12, w: 5, h: 4 },
       ];
   }
 }

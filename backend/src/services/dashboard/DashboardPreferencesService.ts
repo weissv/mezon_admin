@@ -142,10 +142,11 @@ class DashboardPreferencesServiceClass {
   /**
    * Значения по умолчанию для данной роли
    */
-  private getDefaults(role: Role): DashboardPreferencesPayload {
+  getDefaults(role: Role): DashboardPreferencesPayload {
+    const defaultLayout = getDefaultLayout(role);
     return {
-      layout: getDefaultLayout(role),
-      enabledWidgets: getWidgetsForRole(role),
+      layout: defaultLayout,
+      enabledWidgets: defaultLayout.map(item => item.widgetId),
       collapsedSections: [],
       pinnedActions: [],
       widgetFilters: {},

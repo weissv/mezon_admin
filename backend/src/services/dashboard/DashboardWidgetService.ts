@@ -9,6 +9,7 @@ import {
   WIDGET_CATALOGUE,
   getQuickActionsForRole,
 } from '../../constants/dashboard';
+import { dashboardPreferencesService } from './DashboardPreferencesService';
 
 // ======================== CACHE ========================
 
@@ -170,7 +171,7 @@ class DashboardWidgetServiceClass {
 
   async getBootstrap(userId: number, role: Role, employeeId?: number | null): Promise<DashboardBootstrapPayload> {
     const [preferences, overview] = await Promise.all([
-      prisma.dashboardPreference.findUnique({ where: { userId } }),
+      dashboardPreferencesService.get(userId, role),
       this.getOverview(role, userId, employeeId),
     ]);
 
@@ -181,30 +182,12 @@ class DashboardWidgetServiceClass {
     const quickActions = getQuickActionsForRole(role);
 
     return {
-      preferences: preferences
-        ? {
-            layout: preferences.layout as any,
-            enabledWidgets: preferences.enabledWidgets,
-            collapsedSections: preferences.collapsedSections,
-            pinnedActions: preferences.pinnedActions,
-            widgetFilters: preferences.widgetFilters as any,
-            savedViews: preferences.savedViews as any,
-            activeView: preferences.activeView,
-          }
-        : {
-            layout: [],
-            enabledWidgets: availableWidgets.map(widget => widget.id),
-            collapsedSections: [],
-            pinnedActions: [],
-            widgetFilters: {},
-            savedViews: [],
-            activeView: null,
-          },
+      preferences,
       availableWidgets,
       quickActions,
       overview: {
         ...overview,
-        visibleWidgetCount: availableWidgets.length,
+        visibleWidgetCount: preferences.enabledWidgets.length,
         quickActionCount: quickActions.length,
       },
     };
