@@ -22,7 +22,18 @@ router.post("/login", async (req, res) => {
       email: identifier,
       deletedAt: null,
     },
-    include: { employee: true },
+    include: {
+      employee: {
+        include: {
+          classGroups: {
+            select: { id: true, name: true, grade: true, academicYear: true },
+          },
+          deputyGroups: {
+            select: { id: true, name: true, grade: true, academicYear: true },
+          },
+        },
+      },
+    },
   });
 
   if (!user) {
@@ -82,7 +93,18 @@ router.get("/me", async (req, res) => {
         id: payload.id,
         deletedAt: null,
       },
-      include: { employee: true },
+      include: {
+        employee: {
+          include: {
+            classGroups: {
+              select: { id: true, name: true, grade: true, academicYear: true },
+            },
+            deputyGroups: {
+              select: { id: true, name: true, grade: true, academicYear: true },
+            },
+          },
+        },
+      },
     });
 
     if (!me) {

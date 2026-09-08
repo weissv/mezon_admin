@@ -23,9 +23,11 @@ interface Group {
   grade?: number | null;
   academicYear?: string | null;
   teacherId?: number | null;
+  deputyId?: number | null;
   capacity?: number;
   description?: string | null;
   teacher?: Teacher | null;
+  deputy?: { id: number; firstName: string; lastName: string; position?: string } | null;
   _count?: {
     children: number;
   };
@@ -68,6 +70,7 @@ export default function GroupsPage() {
     `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
   );
   const [formTeacherId, setFormTeacherId] = useState<number | ''>('');
+  const [formDeputyId, setFormDeputyId] = useState<number | ''>('');
   const [formCapacity, setFormCapacity] = useState<number>(30);
   const [formDescription, setFormDescription] = useState<string>('');
 
@@ -98,12 +101,30 @@ export default function GroupsPage() {
     setPage(1);
   }, [search, gradeFilter]);
 
-  const teachers = employees.filter(
-    (employee) =>
-      employee.position.toLowerCase().includes('учител') ||
-      employee.position.toLowerCase().includes('педагог') ||
-      employee.position.toLowerCase().includes('преподаватель'),
-  );
+  // Кандидаты в классные руководители (включая завучей)
+  const teacherCandidates = useMemo(() => {
+    const list = employees.filter(
+      (employee) =>
+        employee.position.toLowerCase().includes('учител') ||
+        employee.position.toLowerCase().includes('педагог') ||
+        employee.position.toLowerCase().includes('преподаватель') ||
+        employee.position.toLowerCase().includes('завуч') ||
+        employee.position.toLowerCase().includes('заместител') ||
+        employee.position.toLowerCase().includes('зам.'),
+    );
+    return list.length > 0 ? list : employees;
+  }, [employees]);
+
+  // Кандидаты в завучи / кураторы
+  const deputyCandidates = useMemo(() => {
+    const list = employees.filter(
+      (employee) =>
+        employee.position.toLowerCase().includes('завуч') ||
+        employee.position.toLowerCase().includes('заместител') ||
+        employee.position.toLowerCase().includes('зам.'),
+    );
+    return list.length > 0 ? list : employees;
+  }, [employees]);
 
   const gradeOptions = useMemo(
     () =>
@@ -129,6 +150,8 @@ export default function GroupsPage() {
         group.description,
         group.teacher?.firstName,
         group.teacher?.lastName,
+        group.deputy?.firstName,
+        group.deputy?.lastName,
       ]
         .filter(Boolean)
         .join(' ')
@@ -150,6 +173,7 @@ export default function GroupsPage() {
     setFormSection('');
     setFormAcademicYear(`${new Date().getFullYear()}-${new Date().getFullYear() + 1}`);
     setFormTeacherId('');
+    setFormDeputyId('');
     setFormCapacity(30);
     setFormDescription('');
     setIsModalOpen(true);
@@ -163,6 +187,7 @@ export default function GroupsPage() {
     setFormSection(gradeMatch?.[2] || '');
     setFormAcademicYear(group.academicYear || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`);
     setFormTeacherId(group.teacherId || '');
+    setFormDeputyId(group.deputyId || '');
     setFormCapacity(group.capacity || 30);
     setFormDescription(group.description || '');
     setIsModalOpen(true);
@@ -176,6 +201,7 @@ export default function GroupsPage() {
     setFormSection(gradeMatch?.[2] || '');
     setFormAcademicYear(group.academicYear || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`);
     setFormTeacherId(group.teacherId || '');
+    setFormDeputyId(group.deputyId || '');
     setFormCapacity(group.capacity || 30);
     setFormDescription(group.description || '');
     setIsModalOpen(true);
@@ -193,6 +219,7 @@ export default function GroupsPage() {
         grade: formGrade,
         academicYear: formAcademicYear || null,
         teacherId: formTeacherId || null,
+        deputyId: formDeputyId || null,
         capacity: formCapacity,
         description: formDescription || null,
       };
@@ -241,7 +268,20 @@ export default function GroupsPage() {
             {row.teacher.lastName} {row.teacher.firstName}
           </span>
         ) : (
-          'Не назначен'
+          <span className="text-text-tertiary">Не назначен</span>
+        ),
+    },
+    {
+      key: 'deputy',
+      header: 'Завуч / Куратор',
+      render: (row) =>
+        row.deputy ? (
+          <span className="inline-flex items-center gap-1.5 font-medium text-macos-blue">
+            <UserCircle className="h-4 w-4 text-macos-blue" />
+            {row.deputy.lastName} {row.deputy.firstName}
+          </span>
+        ) : (
+          <span className="text-text-tertiary">Не назначен</span>
         ),
     },
     {
@@ -455,9 +495,26 @@ export default function GroupsPage() {
                 disabled={isViewMode}
               >
                 <option value="">Не назначен</option>
-                {(teachers.length > 0 ? teachers : employees).map((teacher) => (
+                {teacherCandidates.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.lastName} {teacher.firstName} ({teacher.position})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mezon-form-label">Завуч / Куратор класса</label>
+              <select
+                value={formDeputyId}
+                onChange={(event) => setFormDeputyId(event.target.value ? Number(event.target.value) : '')}
+                className={selectClassName}
+                disabled={isViewMode}
+              >
+                <option value="">Не назначен</option>
+                {deputyCandidates.map((deputy) => (
+                  <option key={deputy.id} value={deputy.id}>
+                    {deputy.lastName} {deputy.firstName} ({deputy.position})
                   </option>
                 ))}
               </select>

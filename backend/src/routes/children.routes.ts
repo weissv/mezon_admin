@@ -14,9 +14,31 @@ import {
   updateStudentDocumentSchema,
 } from "../schemas/child.schema";
 import { StudentDocumentCategory } from "@prisma/client";
+import { prisma } from "../prisma";
 import { ChildService } from "../services/ChildService";
 
 const router = Router();
+
+// Вспомогательные функции для проверки прав классного руководителя
+async function getTeacherClassGroupIds(employeeId?: number): Promise<number[]> {
+  if (!employeeId) return [];
+  const groups = await prisma.group.findMany({
+    where: { teacherId: employeeId },
+    select: { id: true },
+  });
+  return groups.map((g) => g.id);
+}
+
+async function verifyTeacherCanAccessChild(employeeId: number, childId: number): Promise<boolean> {
+  const teacherGroupIds = await getTeacherClassGroupIds(employeeId);
+  if (teacherGroupIds.length === 0) return false;
+  const child = await prisma.child.findUnique({
+    where: { id: childId },
+    select: { groupId: true },
+  });
+  if (!child) return false;
+  return teacherGroupIds.includes(child.groupId);
+}
 
 // ======== Child CRUD ========
 
@@ -27,13 +49,37 @@ router.get(
   validate(childListQuerySchema),
   async (req, res) => {
     const { page, pageSize, sortBy, sortOrder, status, groupId, search, gender } = req.query as Record<string, string | undefined>;
+    
+    let targetGroupId = groupId ? Number(groupId) : undefined;
+    let targetGroupIds: number[] | undefined = undefined;
+
+    // Ограничение для учителя: только классные руководители и только свой класс
+    if (req.user?.role === "TEACHER") {
+      const teacherGroupIds = await getTeacherClassGroupIds(req.user.employeeId);
+      if (teacherGroupIds.length === 0) {
+        return res.status(403).json({
+          message: "Доступ к разделу учеников открыт только для классных руководителей",
+        });
+      }
+      if (targetGroupId) {
+        if (!teacherGroupIds.includes(targetGroupId)) {
+          return res.status(403).json({
+            message: "У вас нет доступа к ученикам другого класса",
+          });
+        }
+      } else {
+        targetGroupIds = teacherGroupIds;
+      }
+    }
+
     const result = await ChildService.findMany({
       page: page ? Number(page) : undefined,
       pageSize: pageSize ? Number(pageSize) : undefined,
       sortBy,
       sortOrder: sortOrder as 'asc' | 'desc' | undefined,
       status,
-      groupId: groupId ? Number(groupId) : undefined,
+      groupId: targetGroupId,
+      groupIds: targetGroupIds,
       search,
       gender,
     });
@@ -46,7 +92,16 @@ router.get(
   "/:id",
   checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]),
   async (req, res) => {
-    const child = await ChildService.findById(Number(req.params.id));
+    const childId = Number(req.params.id);
+    if (req.user?.role === "TEACHER") {
+      const hasAccess = await verifyTeacherCanAccessChild(req.user.employeeId, childId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          message: "У вас нет доступа к данным учеников другого класса",
+        });
+      }
+    }
+    const child = await ChildService.findById(childId);
     return res.json(child);
   }
 );
@@ -104,7 +159,16 @@ router.get(
   "/:id/absences",
   checkRole(["DEPUTY", "ADMIN", "TEACHER"]),
   async (req, res) => {
-    const absences = await ChildService.getAbsences(Number(req.params.id));
+    const childId = Number(req.params.id);
+    if (req.user?.role === "TEACHER") {
+      const hasAccess = await verifyTeacherCanAccessChild(req.user.employeeId, childId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          message: "У вас нет доступа к данным учеников другого класса",
+        });
+      }
+    }
+    const absences = await ChildService.getAbsences(childId);
     return res.json(absences);
   }
 );
@@ -148,8 +212,17 @@ router.get(
   "/:id/documents",
   checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]),
   async (req, res) => {
+    const childId = Number(req.params.id);
+    if (req.user?.role === "TEACHER") {
+      const hasAccess = await verifyTeacherCanAccessChild(req.user.employeeId, childId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          message: "У вас нет доступа к документам учеников другого класса",
+        });
+      }
+    }
     const { category, search } = req.query as { category?: StudentDocumentCategory; search?: string };
-    const documents = await ChildService.getChildDocuments(Number(req.params.id), { category, search });
+    const documents = await ChildService.getChildDocuments(childId, { category, search });
     return res.json(documents);
   }
 );
@@ -161,7 +234,16 @@ router.post(
   validate(attachStudentDocumentSchema),
   logAction("ATTACH_CHILD_DOCUMENT", (req) => ({ id: req.params.id, name: req.body.name, category: req.body.category })),
   async (req, res) => {
-    const document = await ChildService.attachDocument(Number(req.params.id), req.body);
+    const childId = Number(req.params.id);
+    if (req.user?.role === "TEACHER") {
+      const hasAccess = await verifyTeacherCanAccessChild(req.user.employeeId, childId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          message: "У вас нет прав прикреплять документы к ученикам другого класса",
+        });
+      }
+    }
+    const document = await ChildService.attachDocument(childId, req.body);
     return res.status(201).json(document);
   }
 );
@@ -173,7 +255,16 @@ router.put(
   validate(updateStudentDocumentSchema),
   logAction("UPDATE_CHILD_DOCUMENT", (req) => ({ id: req.params.id, docId: req.params.docId })),
   async (req, res) => {
-    const document = await ChildService.updateDocument(Number(req.params.id), Number(req.params.docId), req.body);
+    const childId = Number(req.params.id);
+    if (req.user?.role === "TEACHER") {
+      const hasAccess = await verifyTeacherCanAccessChild(req.user.employeeId, childId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          message: "У вас нет прав редактировать документы учеников другого класса",
+        });
+      }
+    }
+    const document = await ChildService.updateDocument(childId, Number(req.params.docId), req.body);
     return res.json(document);
   }
 );
@@ -184,7 +275,16 @@ router.delete(
   checkRole(["DEPUTY", "ADMIN", "TEACHER"]),
   logAction("DELETE_CHILD_DOCUMENT", (req) => ({ id: req.params.id, docId: req.params.docId })),
   async (req, res) => {
-    await ChildService.deleteDocument(Number(req.params.id), Number(req.params.docId));
+    const childId = Number(req.params.id);
+    if (req.user?.role === "TEACHER") {
+      const hasAccess = await verifyTeacherCanAccessChild(req.user.employeeId, childId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          message: "У вас нет прав удалять документы учеников другого класса",
+        });
+      }
+    }
+    await ChildService.deleteDocument(childId, Number(req.params.docId));
     return res.status(204).send();
   }
 );

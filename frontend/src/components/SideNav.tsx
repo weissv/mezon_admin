@@ -22,12 +22,38 @@ export default function SideNav() {
     ? [user.employee.firstName, user.employee.lastName].filter(Boolean).join(" ")
     : user?.email ?? "Пользователь";
 
-  const links = getLinksWithPermissions(
+  const isClassTeacher = (user?.employee?.classGroups?.length ?? 0) > 0;
+  const isTeacher = user?.role === "TEACHER";
+
+  // Разрешённые модули с учётом статуса классного руководителя
+  const effectiveModules = [...(permissions?.modules || [])];
+  if (isTeacher) {
+    if (isClassTeacher && !effectiveModules.includes("children")) {
+      effectiveModules.push("children");
+    } else if (!isClassTeacher) {
+      const idx = effectiveModules.indexOf("children");
+      if (idx !== -1) effectiveModules.splice(idx, 1);
+    }
+  }
+
+  const rawLinks = getLinksWithPermissions(
     role,
-    permissions?.modules || [],
+    effectiveModules,
     permissions?.isFullAccess || FULL_ACCESS_ROLES.includes(role),
     user?.email
   );
+
+  const links = rawLinks.map((link) => {
+    if (link.path === "/children" && isTeacher && isClassTeacher) {
+      const primaryClassName = user?.employee?.classGroups?.[0]?.name;
+      return {
+        ...link,
+        label: primaryClassName ? `Мой класс (${primaryClassName})` : "Мой класс",
+      };
+    }
+    return link;
+  });
+
   const groupedLinks = groupModuleLinks(links);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);

@@ -236,6 +236,7 @@ model Employee {
   user                        User?
   clubs                       Club[]                 @relation("TeacherClubs")
   classGroups                 Group[]                @relation("ClassTeacher")
+  deputyGroups                Group[]                @relation("ClassDeputy")
   teacherSubjects             TeacherSubject[]
   maintenanceRequests         MaintenanceRequest[]   @relation("Requester")
   approvedMaintenanceRequests MaintenanceRequest[]   @relation("Approver")
@@ -363,6 +364,8 @@ model Group {
   academicYear String? // "2024-2025"
   teacherId    Int? // Классный руководитель (Employee)
   teacher      Employee? @relation("ClassTeacher", fields: [teacherId], references: [id])
+  deputyId     Int? // Куратор / Завуч класса (Employee)
+  deputy       Employee? @relation("ClassDeputy", fields: [deputyId], references: [id])
   capacity     Int       @default(30)
   description  String?
 
@@ -379,6 +382,7 @@ model Group {
   updatedAt        DateTime               @updatedAt
 
   @@index([teacherId])
+  @@index([deputyId])
 }
 
 model Club {

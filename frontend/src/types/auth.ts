@@ -28,12 +28,21 @@ export interface User {
   employee?: UserEmployee | null;
 }
 
+export interface UserClassGroup {
+  id: number;
+  name: string;
+  grade?: number | null;
+  academicYear?: string | null;
+}
+
 export interface UserEmployee {
   id: number;
   firstName: string;
   lastName: string;
   middleName?: string | null;
   position: string;
+  classGroups?: UserClassGroup[];
+  deputyGroups?: UserClassGroup[];
 }
 
 // Контекст аутентификации

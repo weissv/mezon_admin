@@ -19,6 +19,9 @@ router.get("/", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (
       teacher: {
         select: { id: true, firstName: true, lastName: true }
       },
+      deputy: {
+        select: { id: true, firstName: true, lastName: true, position: true }
+      },
       children: {
         where: { status: "ACTIVE" },
         select: { id: true, firstName: true, lastName: true },
@@ -44,8 +47,8 @@ router.get("/", checkRole(["DEPUTY", "ADMIN", "TEACHER", "ACCOUNTANT"]), async (
 });
 
 // POST /api/groups - создать класс
-router.post("/", checkRole(["ADMIN"]), async (req, res) => {
-  const { name, grade, academicYear, teacherId, capacity, description } = req.body;
+router.post("/", checkRole(["ADMIN", "DEPUTY"]), async (req, res) => {
+  const { name, grade, academicYear, teacherId, deputyId, capacity, description } = req.body;
   
   if (!name) {
     return res.status(400).json({ error: "Название обязательно" });
@@ -54,15 +57,19 @@ router.post("/", checkRole(["ADMIN"]), async (req, res) => {
   const group = await prisma.group.create({
     data: { 
       name,
-      grade: grade ?? null,
+      grade: grade !== undefined && grade !== null && grade !== '' ? Number(grade) : null,
       academicYear: academicYear ?? null,
-      teacherId: teacherId ?? null,
-      capacity: capacity ?? 30,
+      teacherId: teacherId ? Number(teacherId) : null,
+      deputyId: deputyId ? Number(deputyId) : null,
+      capacity: capacity ? Number(capacity) : 30,
       description: description ?? null
     },
     include: {
       teacher: {
         select: { id: true, firstName: true, lastName: true }
+      },
+      deputy: {
+        select: { id: true, firstName: true, lastName: true, position: true }
       }
     }
   });
@@ -71,23 +78,27 @@ router.post("/", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // PUT /api/groups/:id - обновить класс
-router.put("/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.put("/:id", checkRole(["ADMIN", "DEPUTY"]), async (req, res) => {
   const { id } = req.params;
-  const { name, grade, academicYear, teacherId, capacity, description } = req.body;
+  const { name, grade, academicYear, teacherId, deputyId, capacity, description } = req.body;
   
   const group = await prisma.group.update({
     where: { id: Number(id) },
     data: { 
       ...(name !== undefined && { name }),
-      ...(grade !== undefined && { grade }),
-      ...(academicYear !== undefined && { academicYear }),
-      ...(teacherId !== undefined && { teacherId }),
-      ...(capacity !== undefined && { capacity }),
-      ...(description !== undefined && { description })
+      ...(grade !== undefined && { grade: grade !== null && grade !== '' ? Number(grade) : null }),
+      ...(academicYear !== undefined && { academicYear: academicYear ?? null }),
+      ...(teacherId !== undefined && { teacherId: teacherId ? Number(teacherId) : null }),
+      ...(deputyId !== undefined && { deputyId: deputyId ? Number(deputyId) : null }),
+      ...(capacity !== undefined && { capacity: Number(capacity) }),
+      ...(description !== undefined && { description: description ?? null })
     },
     include: {
       teacher: {
         select: { id: true, firstName: true, lastName: true }
+      },
+      deputy: {
+        select: { id: true, firstName: true, lastName: true, position: true }
       }
     }
   });
@@ -96,7 +107,7 @@ router.put("/:id", checkRole(["ADMIN"]), async (req, res) => {
 });
 
 // DELETE /api/groups/:id - удалить класс
-router.delete("/:id", checkRole(["ADMIN"]), async (req, res) => {
+router.delete("/:id", checkRole(["ADMIN", "DEPUTY"]), async (req, res) => {
   const { id } = req.params;
   
   // Проверяем, есть ли дети в этом классе

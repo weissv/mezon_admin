@@ -30,7 +30,7 @@ export const MODULE_LINKS: ModuleLink[] = [
   { path: "/knowledge-base", label: "База знаний", roles: ALL_ROLES, section: "workspace" },
   { path: "/ai-assistant", label: "ИИ-Методист", roles: [...FULL_ACCESS_ROLES, "ADMIN", "TEACHER"], section: "workspace" },
   { path: "/children", label: "Дети", roles: [...FULL_ACCESS_ROLES, "ADMIN"], section: "academics" },
-  { path: "/groups", label: "Классы", roles: [...FULL_ACCESS_ROLES, "ADMIN"], section: "academics" },
+  { path: "/groups", label: "Классы", roles: [...FULL_ACCESS_ROLES, "ADMIN", "DEPUTY"], section: "academics" },
   { path: "/employees", label: "Сотрудники", roles: [...FULL_ACCESS_ROLES, "ADMIN"], section: "academics" },
   { path: "/schedule", label: "Расписание", roles: [...FULL_ACCESS_ROLES, "ADMIN", "TEACHER"], section: "academics" },
   { path: "/exams", label: "Контрольные", roles: [...FULL_ACCESS_ROLES, "DEPUTY", "ADMIN", "TEACHER"], section: "academics" },

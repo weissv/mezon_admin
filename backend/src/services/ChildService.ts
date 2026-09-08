@@ -12,6 +12,7 @@ import { InvoiceService } from './InvoiceService';
 export interface ChildFilters {
   status?: string;
   groupId?: number;
+  groupIds?: number[];
   search?: string; // multi-field: firstName, lastName, middleName
   gender?: string;
 }
@@ -127,7 +128,9 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     if (params.status) {
       where.status = params.status as ChildStatus;
     }
-    if (params.groupId) {
+    if (params.groupIds && params.groupIds.length > 0) {
+      where.groupId = { in: params.groupIds };
+    } else if (params.groupId) {
       where.groupId = params.groupId;
     }
     if (params.gender) {

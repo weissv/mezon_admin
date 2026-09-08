@@ -173,6 +173,9 @@ export default function Router() {
 
             <Route element={<RoleBasedRoute roles={["ADMIN"]} />}>
               <Route path="users" element={<UsersPage />} />
+            </Route>
+
+            <Route element={<RoleBasedRoute roles={["ADMIN", "DEPUTY"]} />}>
               <Route path="groups" element={<GroupsPage />} />
             </Route>
 

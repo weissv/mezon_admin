@@ -96,6 +96,12 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
     
     // Убираем начальный слэш для сравнения
     const moduleId = modulePath.startsWith("/") ? modulePath.slice(1) : modulePath;
+
+    // Для модуля "children" доступ учителю открыт ТОЛЬКО если он является классным руководителем
+    if (moduleId === "children" && user?.role === "TEACHER") {
+      return (user?.employee?.classGroups?.length ?? 0) > 0;
+    }
+
     return permissions.modules.includes(moduleId);
   };
 
