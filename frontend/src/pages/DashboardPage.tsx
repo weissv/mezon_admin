@@ -1,5 +1,5 @@
 import { useState, useCallback} from 'react';
-import { Settings, Pencil, X, RefreshCw, LayoutDashboard } from 'lucide-react';
+import { Settings, Pencil, X, RefreshCw, RotateCcw, LayoutDashboard } from 'lucide-react';
 import { Button} from '../components/ui/button';
 import { useDashboardPreferences} from '../hooks/useDashboardPreferences';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
@@ -133,8 +133,19 @@ export default function DashboardPage() {
         description="Главные сигналы по школе, быстрые действия и рабочие виджеты в одном ритме. Панель стала плотнее, чище и лучше приспособлена для ежедневных операторских сценариев."
         actions={
           <>
-          <Button variant="outline" size="sm" onClick={refetch} title="Обновить">
+          <Button variant="outline" size="sm" onClick={refetch} title="Обновить данные">
             <RefreshCw className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetPreferences}
+            title="Сбросить расположение виджетов к рекомендованному"
+            className="text-text-secondary hover:text-text-primary"
+          >
+            <RotateCcw className="h-4 w-4 mr-1.5" />
+            Сбросить вид
           </Button>
 
           <Button

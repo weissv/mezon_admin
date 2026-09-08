@@ -13,6 +13,38 @@ import {
 
 class DashboardPreferencesServiceClass {
   /**
+   * Санитизирует и выравнивает layout под 12-колоночную десктопную сетку
+   */
+  sanitizeLayout(layout: LayoutItem[], role: Role): LayoutItem[] {
+    if (!Array.isArray(layout) || layout.length === 0) {
+      return getDefaultLayout(role);
+    }
+
+    // Проверяем признак схлопывания мобильным/планшетным брейкпоинтом (все x=0 и w<=6)
+    const isSquashedLeft = layout.length >= 3 && layout.every(item => item.x === 0 && item.w <= 6);
+    if (isSquashedLeft) {
+      return getDefaultLayout(role);
+    }
+
+    // Проверяем корректность координат
+    const sanitized: LayoutItem[] = [];
+    for (const item of layout) {
+      const def = WIDGET_CATALOGUE.find(w => w.id === item.widgetId);
+      const minH = def?.minSize.h ?? 2;
+      const minW = def?.minSize.w ?? 4;
+      sanitized.push({
+        widgetId: item.widgetId,
+        x: Math.max(0, Math.min(11, item.x || 0)),
+        y: Math.max(0, item.y || 0),
+        w: Math.max(minW, Math.min(12, item.w || 6)),
+        h: Math.max(minH, Math.min(8, item.h || 4)),
+      });
+    }
+
+    return sanitized;
+  }
+
+  /**
    * Получить preferences пользователя (или default по роли)
    */
   async get(userId: number, role: Role): Promise<DashboardPreferencesPayload> {
@@ -24,8 +56,11 @@ class DashboardPreferencesServiceClass {
       return this.getDefaults(role);
     }
 
+    const rawLayout = record.layout as unknown as LayoutItem[];
+    const layout = this.sanitizeLayout(rawLayout, role);
+
     return {
-      layout: record.layout as unknown as LayoutItem[],
+      layout,
       enabledWidgets: record.enabledWidgets,
       collapsedSections: record.collapsedSections,
       pinnedActions: record.pinnedActions,
@@ -47,8 +82,10 @@ class DashboardPreferencesServiceClass {
       .filter(id => allowedWidgetIds.includes(id));
 
     // Фильтруем layout: оставляем только доступные виджеты
-    const layout = (data.layout ?? current.layout)
+    let layout = (data.layout ?? current.layout)
       .filter(item => allowedWidgetIds.includes(item.widgetId));
+
+    layout = this.sanitizeLayout(layout, role);
 
     // Не позволяем скрыть обязательные виджеты
     const requiredWidgets = WIDGET_CATALOGUE.filter(w => !w.canHide).map(w => w.id);

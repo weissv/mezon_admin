@@ -33,36 +33,44 @@ export default function ActivityStreamWidget({ data }: { data: ActivityStreamDat
   const entries = data.entries ?? [];
 
   return (
-    <div className="bento-list">
-      {entries.length === 0 && (
-        <p className="text-xs text-tertiary text-center py-4">Нет активности</p>
+    <div className="flex flex-col gap-1.5 h-full">
+      {entries.length === 0 ? (
+        <div className="p-4 text-center text-text-tertiary text-[12px] my-auto">
+          Лента активности пуста
+        </div>
+      ) : (
+        entries.map(entry => {
+          const cfg = ACTION_ICONS[entry.action] ?? ACTION_ICONS.update;
+          const Icon = cfg.icon;
+          return (
+            <div
+              key={entry.id}
+              className="flex items-center gap-2.5 p-2.5 rounded-xl bg-surface-primary/70 dark:bg-slate-800/40 border border-separator/30 hover:bg-surface-primary transition-all text-[12px]"
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-black/[0.04] dark:border-white/[0.06]"
+                style={{ background: cfg.bg }}
+              >
+                <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-text-primary truncate leading-tight">
+                  <span className="font-bold">{entry.userName}</span>{' '}
+                  <span className="text-text-tertiary">{ACTION_LABELS[entry.action] ?? entry.action}</span>{' '}
+                  <span className="font-semibold text-text-primary">{entry.entityName}</span>
+                </p>
+                <p className="text-[10px] text-text-tertiary truncate mt-0.5 leading-tight">
+                  <User className="h-2.5 w-2.5 inline mr-1 opacity-70" />
+                  {entry.entity}
+                </p>
+              </div>
+              <span className="text-[10px] text-text-tertiary tabular-nums whitespace-nowrap shrink-0">
+                {new Date(entry.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          );
+        })
       )}
-
-      {entries.slice(0, 7).map(entry => {
-        const cfg = ACTION_ICONS[entry.action] ?? ACTION_ICONS.update;
-        const Icon = cfg.icon;
-        return (
-          <div key={entry.id} className="bento-list-item">
-            <div className="bento-list-icon" style={{ background: cfg.bg }}>
-              <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
-            </div>
-            <div className="bento-list-item__main">
-              <p className="bento-list-item__title">
-                <span>{entry.userName}</span>{' '}
-                <span style={{ color: 'var(--text-tertiary)' }}>{ACTION_LABELS[entry.action] ?? entry.action}</span>{' '}
-                <span style={{ color: 'var(--text-secondary)' }}>{entry.entityName}</span>
-              </p>
-              <p className="bento-list-item__sub">
-                <User className="h-2.5 w-2.5 inline mr-0.5" />
-                {entry.entity}
-              </p>
-            </div>
-            <span className="text-[10px] text-tertiary whitespace-nowrap flex-shrink-0">
-              {new Date(entry.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          </div>
-        );
-      })}
     </div>
   );
 }

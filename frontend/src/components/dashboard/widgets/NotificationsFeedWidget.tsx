@@ -29,36 +29,57 @@ export default function NotificationsFeedWidget({ data }: { data: NotificationsF
   const notifications = data.notifications ?? [];
 
   return (
-    <div className="bento-list">
+    <div className="flex flex-col gap-2 h-full">
       {(data.unreadCount ?? 0) > 0 && (
-        <div className="bento-notif-unread">
-          <Bell className="h-3.5 w-3.5" />
-          {data.unreadCount} непрочитанных
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-tint-blue/80 dark:bg-blue-950/40 text-macos-blue text-[11px] font-semibold self-start border border-macos-blue/15">
+          <Bell className="h-3 w-3" />
+          <span>{data.unreadCount} непрочитанных</span>
         </div>
       )}
 
-      {notifications.length === 0 && (
-        <p className="text-xs text-tertiary text-center py-4">Нет уведомлений</p>
+      {notifications.length === 0 ? (
+        <div className="p-4 text-center text-text-tertiary text-[12px] my-auto">
+          Новых уведомлений нет
+        </div>
+      ) : (
+        notifications.map(n => {
+          const cfg = TYPE_CFG[n.type] ?? TYPE_CFG.default;
+          const Icon = cfg.icon;
+          return (
+            <div
+              key={n.id}
+              className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all text-[12px] ${
+                !n.read
+                  ? 'bg-blue-50/60 dark:bg-blue-950/30 border-blue-200/60 dark:border-blue-900/40'
+                  : 'bg-surface-primary/70 dark:bg-slate-800/40 border-separator/30 hover:bg-surface-primary'
+              }`}
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-black/[0.04] dark:border-white/[0.06]"
+                style={{ background: cfg.bg }}
+              >
+                <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-macos-blue shrink-0" />}
+                  <p className={`truncate leading-tight text-text-primary ${!n.read ? 'font-bold' : 'font-medium'}`}>
+                    {n.title}
+                  </p>
+                </div>
+                {n.body && (
+                  <p className="text-[10px] text-text-tertiary truncate mt-0.5 leading-tight">
+                    {n.body}
+                  </p>
+                )}
+              </div>
+              <span className="text-[10px] text-text-tertiary tabular-nums whitespace-nowrap shrink-0">
+                {new Date(n.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          );
+        })
       )}
-
-      {notifications.slice(0, 6).map(n => {
-        const cfg = TYPE_CFG[n.type] ?? TYPE_CFG.default;
-        const Icon = cfg.icon;
-        return (
-          <div key={n.id} className={`bento-list-item${!n.read ? ' ' : ''}`} style={!n.read ? { background: 'rgba(219,234,254,0.35)' } : undefined}>
-            <div className="bento-list-icon" style={{ background: cfg.bg }}>
-              <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
-            </div>
-            <div className="bento-list-item__main">
-              <p className={`bento-list-item__title${!n.read ? ' font-semibold' : ''}`}>{n.title}</p>
-              {n.body && <p className="bento-list-item__sub">{n.body}</p>}
-            </div>
-            <span className="text-[10px] text-tertiary whitespace-nowrap flex-shrink-0">
-              {new Date(n.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          </div>
-        );
-      })}
     </div>
   );
 }

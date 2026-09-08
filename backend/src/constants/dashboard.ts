@@ -135,9 +135,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     description: 'Дети, сотрудники, кружки, доход/расход',
     allowedRoles: ALL_ROLES,
     defaultSize: { w: 12, h: 2 },
-    minSize: { w: 4, h: 2 },
+    minSize: { w: 6, h: 2 },
     maxSize: { w: 12, h: 4 },
-    canHide: false,
+    canHide: true,
     canResize: true,
     refreshInterval: 300_000,
     dataEndpoint: '/api/dashboard/widgets/kpi-overview',
@@ -148,11 +148,11 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     id: 'finance-overview',
     title: 'Финансовый обзор',
     category: 'finance',
-    description: 'Доходы и расходы за последний период',
+    description: 'Доходы, расходы, касса и банк',
     allowedRoles: FINANCE_ROLES,
-    defaultSize: { w: 4, h: 2 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 8, h: 4 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -164,8 +164,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'finance',
     description: 'Прогноз движения денег на 30 дней',
     allowedRoles: FINANCE_ROLES,
-    defaultSize: { w: 6, h: 3 },
-    minSize: { w: 3, h: 2 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
@@ -178,8 +178,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'finance',
     description: 'Структура расходов на одного ребёнка',
     allowedRoles: FINANCE_ROLES,
-    defaultSize: { w: 6, h: 3 },
-    minSize: { w: 3, h: 2 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
@@ -194,9 +194,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'operations',
     description: 'Товары с низким остатком на складе',
     allowedRoles: OPERATIONS_ROLES,
-    defaultSize: { w: 4, h: 3 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 8, h: 6 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 300_000,
@@ -208,9 +208,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'operations',
     description: 'Активные заказы и их статусы',
     allowedRoles: OPERATIONS_ROLES,
-    defaultSize: { w: 4, h: 3 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 8, h: 6 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -222,9 +222,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'operations',
     description: 'Питание сегодня и статистика',
     allowedRoles: OPERATIONS_ROLES,
-    defaultSize: { w: 4, h: 3 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 8, h: 6 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -238,9 +238,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'operations',
     description: 'Активные заявки на обслуживание',
     allowedRoles: OPERATIONS_ROLES,
-    defaultSize: { w: 4, h: 3 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 8, h: 6 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 180_000,
@@ -252,9 +252,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'operations',
     description: 'Последние инциденты и проверки',
     allowedRoles: ADMIN_ROLES,
-    defaultSize: { w: 4, h: 3 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 8, h: 6 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 600_000,
@@ -268,8 +268,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'hr',
     description: 'Медосмотры, контракты, аттестации',
     allowedRoles: ADMIN_ROLES,
-    defaultSize: { w: 6, h: 3 },
-    minSize: { w: 3, h: 2 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
@@ -284,9 +284,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'kpi',
     description: 'Дети и сотрудники сегодня',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 4, h: 2 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 6, h: 4 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 6 },
     canHide: true,
     canResize: true,
     refreshInterval: 300_000,
@@ -298,9 +298,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'activity',
     description: 'События и задачи на сегодня',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 4, h: 3 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 8, h: 8 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 8 },
     canHide: true,
     canResize: true,
     refreshInterval: 300_000,
@@ -312,9 +312,9 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'activity',
     description: 'Последние уведомления и события',
     allowedRoles: ALL_ROLES,
-    defaultSize: { w: 4, h: 3 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 8, h: 8 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 12, h: 8 },
     canHide: true,
     canResize: true,
     refreshInterval: 120_000,
@@ -326,8 +326,8 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     category: 'activity',
     description: 'Последние действия в системе',
     allowedRoles: ADMIN_ROLES,
-    defaultSize: { w: 6, h: 3 },
-    minSize: { w: 3, h: 2 },
+    defaultSize: { w: 6, h: 4 },
+    minSize: { w: 4, h: 3 },
     maxSize: { w: 12, h: 8 },
     canHide: true,
     canResize: true,
@@ -344,7 +344,7 @@ export const WIDGET_CATALOGUE: WidgetDefinition[] = [
     allowedRoles: ALL_ROLES,
     defaultSize: { w: 12, h: 2 },
     minSize: { w: 6, h: 2 },
-    maxSize: { w: 12, h: 6 },
+    maxSize: { w: 12, h: 4 },
     canHide: false,
     canResize: false,
     refreshInterval: 0,
@@ -369,60 +369,69 @@ export const QUICK_ACTIONS_CATALOGUE: QuickAction[] = [
 
 // ======================== DEFAULT LAYOUTS ========================
 
-/** Генерирует layout по умолчанию для роли */
+/** Генерирует сбалансированный 12-колоночный layout по умолчанию для роли */
 export function getDefaultLayout(role: Role): LayoutItem[] {
-  const isFinance = FINANCE_ROLES.includes(role);
-  const isOps = OPERATIONS_ROLES.includes(role);
-  const isAdmin = ADMIN_ROLES.includes(role);
-  const topSectionBottom = 4; // quick-actions(h=2) + kpi-overview(h=2)
+  switch (role) {
+    case 'DIRECTOR':
+    case 'DEVELOPER':
+      return [
+        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
+        { widgetId: 'attendance-today', x: 0, y: 2, w: 6, h: 4 },
+        { widgetId: 'finance-overview', x: 6, y: 2, w: 6, h: 4 },
+        { widgetId: 'cash-forecast', x: 0, y: 6, w: 6, h: 4 },
+        { widgetId: 'unit-economics', x: 6, y: 6, w: 6, h: 4 },
+        { widgetId: 'hr-alerts', x: 0, y: 10, w: 6, h: 4 },
+        { widgetId: 'activity-stream', x: 6, y: 10, w: 6, h: 4 },
+      ];
 
-  const layout: LayoutItem[] = [
-    { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
-    { widgetId: 'kpi-overview', x: 0, y: 2, w: 12, h: 2 },
-    { widgetId: 'attendance-today', x: 0, y: topSectionBottom, w: 4, h: 2 },
-  ];
+    case 'DEPUTY':
+      return [
+        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
+        { widgetId: 'attendance-today', x: 0, y: 2, w: 8, h: 4 },
+        { widgetId: 'calendar-today', x: 8, y: 2, w: 4, h: 4 },
+        { widgetId: 'hr-alerts', x: 0, y: 6, w: 6, h: 4 },
+        { widgetId: 'activity-stream', x: 6, y: 6, w: 6, h: 4 },
+      ];
 
-  let nextY = topSectionBottom + 2;
+    case 'TEACHER':
+      return [
+        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
+        { widgetId: 'attendance-today', x: 0, y: 2, w: 6, h: 4 },
+        { widgetId: 'calendar-today', x: 6, y: 2, w: 6, h: 4 },
+        { widgetId: 'notifications-feed', x: 0, y: 6, w: 12, h: 4 },
+      ];
 
-  if (isFinance) {
-    layout.push(
-      { widgetId: 'finance-overview', x: 4, y: topSectionBottom, w: 4, h: 2 },
-      { widgetId: 'cash-forecast', x: 8, y: topSectionBottom, w: 4, h: 3 },
-      { widgetId: 'unit-economics', x: 0, y: topSectionBottom + 2, w: 6, h: 3 },
-    );
-    nextY = topSectionBottom + 5;
+    case 'ACCOUNTANT':
+      return [
+        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
+        { widgetId: 'finance-overview', x: 0, y: 2, w: 6, h: 4 },
+        { widgetId: 'cash-forecast', x: 6, y: 2, w: 6, h: 4 },
+        { widgetId: 'unit-economics', x: 0, y: 6, w: 12, h: 4 },
+      ];
+
+    case 'ZAVHOZ':
+      return [
+        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
+        { widgetId: 'inventory-risk', x: 0, y: 2, w: 6, h: 4 },
+        { widgetId: 'maintenance-queue', x: 6, y: 2, w: 6, h: 4 },
+        { widgetId: 'procurement-status', x: 0, y: 6, w: 6, h: 4 },
+        { widgetId: 'menu-today', x: 6, y: 6, w: 6, h: 4 },
+      ];
+
+    case 'ADMIN':
+    default:
+      return [
+        { widgetId: 'quick-actions', x: 0, y: 0, w: 12, h: 2 },
+        { widgetId: 'attendance-today', x: 0, y: 2, w: 6, h: 4 },
+        { widgetId: 'finance-overview', x: 6, y: 2, w: 6, h: 4 },
+        { widgetId: 'security-summary', x: 0, y: 6, w: 6, h: 4 },
+        { widgetId: 'maintenance-queue', x: 6, y: 6, w: 6, h: 4 },
+        { widgetId: 'hr-alerts', x: 0, y: 10, w: 6, h: 4 },
+        { widgetId: 'activity-stream', x: 6, y: 10, w: 6, h: 4 },
+        { widgetId: 'calendar-today', x: 0, y: 14, w: 6, h: 4 },
+        { widgetId: 'notifications-feed', x: 6, y: 14, w: 6, h: 4 },
+      ];
   }
-
-  let securityRowY = nextY;
-  let calendarRowY = nextY;
-
-  if (isOps) {
-    layout.push(
-      { widgetId: 'inventory-risk', x: 0, y: nextY, w: 4, h: 3 },
-      { widgetId: 'procurement-status', x: 4, y: nextY, w: 4, h: 3 },
-      { widgetId: 'menu-today', x: 8, y: nextY, w: 4, h: 3 },
-      { widgetId: 'maintenance-queue', x: 0, y: nextY + 3, w: 4, h: 3 },
-    );
-    securityRowY = nextY + 3;
-    calendarRowY = nextY + 3;
-    nextY += 6;
-  }
-
-  if (isAdmin) {
-    layout.push(
-      { widgetId: 'security-summary', x: 4, y: securityRowY, w: 4, h: 3 },
-      { widgetId: 'hr-alerts', x: 0, y: nextY, w: 6, h: 3 },
-      { widgetId: 'activity-stream', x: 6, y: nextY, w: 6, h: 3 },
-    );
-    nextY += 3;
-  }
-
-  layout.push(
-    { widgetId: 'calendar-today', x: 8, y: calendarRowY, w: 4, h: 3 },
-    { widgetId: 'notifications-feed', x: 0, y: nextY, w: 4, h: 3 },
-  );
-
-  return layout;
 }
 
 /** Возвращает id виджетов, доступные для роли */

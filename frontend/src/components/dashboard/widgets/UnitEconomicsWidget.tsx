@@ -19,35 +19,39 @@ export default function UnitEconomicsWidget({ data }: { data: UnitEcon | undefin
   const breakdown = data.breakdown ?? [];
 
   return (
-    <div className="bento-economics">
-      <div className="bento-economics__hero">
-        <div className="flex items-center gap-8">
-          <div>
-            <p className="bento-economics__label">Стоимость / ребёнок</p>
-            <p className="bento-economics__value">{formatCompact(data.costPerChild ?? 0)}</p>
-            <p className="bento-economics__sub">в месяц</p>
-          </div>
-          <div className="text-right">
-            <div className="flex items-center gap-1 justify-end text-xs text-secondary">
-              <Users className="h-3.5 w-3.5" />
-              <span>{data.childCount}</span>
-            </div>
-            <p className="text-[10px] text-tertiary mt-0.5">детей</p>
-          </div>
+    <div className="flex flex-col gap-3.5 h-full">
+      {/* Hero card */}
+      <div className="p-3.5 rounded-xl bg-surface-primary dark:bg-slate-800/60 border border-separator/40 shadow-subtle flex items-center justify-between">
+        <div>
+          <span className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider">Себестоимость / ребёнок</span>
+          <p className="text-[26px] font-black text-text-primary tracking-tight leading-tight tabular-nums">
+            {formatCompact(data.costPerChild ?? 0)}
+          </p>
+          <span className="text-[11px] text-text-tertiary">в месяц</span>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-tint-blue/80 dark:bg-blue-950/40 text-macos-blue border border-macos-blue/15">
+          <Users className="h-4 w-4" />
+          <span className="text-[13px] font-bold tabular-nums">{data.childCount}</span>
+          <span className="text-[11px] font-medium">детей</span>
         </div>
       </div>
 
-      <div className="bento-economics__bars">
+      {/* Cost breakdown list */}
+      <div className="flex flex-col gap-2 flex-1 justify-center">
         {breakdown.map((item, i) => (
-          <div key={i} className="bento-economics__bar-row">
-            <span className="bento-economics__bar-label">{item.label}</span>
-            <div className="bento-economics__bar-track">
+          <div key={i} className="flex items-center gap-2.5 text-[12px]">
+            <span className="w-28 text-text-secondary truncate text-[11px] font-medium shrink-0">
+              {item.label}
+            </span>
+            <div className="flex-1 h-2 bg-fill-quaternary dark:bg-slate-700/50 rounded-full overflow-hidden">
               <div
-                className="bento-economics__bar-fill"
-                style={{ width: `${item.pct}%`, background: BAR_COLORS[i % BAR_COLORS.length] }}
+                className="h-full rounded-full transition-all duration-300"
+                style={{ width: `${Math.max(item.pct, 2)}%`, background: BAR_COLORS[i % BAR_COLORS.length] }}
               />
             </div>
-            <span className="bento-economics__bar-pct">{item.pct}%</span>
+            <span className="w-10 text-right text-[11px] font-bold text-text-primary tabular-nums shrink-0">
+              {item.pct}%
+            </span>
           </div>
         ))}
       </div>
