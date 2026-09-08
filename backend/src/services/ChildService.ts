@@ -203,6 +203,10 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     if (!group) throw new NotFoundError('Группа');
 
     const birthDate = this.parseDate(data.birthDate, 'дата рождения');
+    // Auto-fix 2-digit years (e.g. 14 -> 2014)
+    if (birthDate.getFullYear() > 10 && birthDate.getFullYear() < 100) {
+      birthDate.setFullYear(2000 + birthDate.getFullYear());
+    }
     this.validateBirthDate(birthDate);
 
     const child = await this.safeQuery(async () => {
@@ -317,6 +321,9 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     if (data.middleName !== undefined) updateData.middleName = data.middleName || null;
     if (data.birthDate !== undefined) {
       const bd = this.parseDate(data.birthDate, 'дата рождения');
+      if (bd.getFullYear() > 10 && bd.getFullYear() < 100) {
+        bd.setFullYear(2000 + bd.getFullYear());
+      }
       this.validateBirthDate(bd);
       updateData.birthDate = bd;
     }
@@ -694,7 +701,7 @@ class ChildServiceClass extends BaseService<Child, CreateChildInput, UpdateChild
     }
     const minDate = new Date(now.getFullYear() - 25, now.getMonth(), now.getDate());
     if (date < minDate) {
-      throw new ValidationError('Дата рождения слишком далеко в прошлом');
+      throw new ValidationError(`Укажите реальную дату рождения ученика (год от 2000 до ${now.getFullYear()})`);
     }
   }
 }

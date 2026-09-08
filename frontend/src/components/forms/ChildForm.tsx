@@ -39,7 +39,25 @@ const formSchema = z.object({
  lastName: z.string().min(1, 'Фамилия обязательна'),
  firstName: z.string().min(1, 'Имя обязательно'),
  middleName: z.string().optional(),
- birthDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Неверная дата'),
+  birthDate: z
+    .string()
+    .min(1, 'Укажите дату рождения')
+    .refine((val) => {
+      if (!val) return false;
+      const parts = val.split('-');
+      const currentYear = new Date().getFullYear();
+      if (parts.length === 3) {
+        let year = parseInt(parts[0], 10);
+        if (isNaN(year)) return false;
+        if (year > 10 && year < 100) year += 2000;
+        return year >= 1990 && year <= currentYear;
+      }
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return false;
+      let year = d.getFullYear();
+      if (year > 10 && year < 100) year += 2000;
+      return year >= 1990 && year <= currentYear;
+    }, `Укажите реальную дату рождения ученика (год от 2000 до ${new Date().getFullYear()})`),
  groupId: z.coerce.number().positive('Выберите класс'),
  gender: z.enum(['MALE', 'FEMALE', '']).optional(),
  nationality: z.string().optional(),
@@ -119,6 +137,7 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
   control,
   watch,
   setValue,
+  setError,
   formState: { errors, isSubmitting},
  } = useForm<FormData>({
  resolver: zodResolver(formSchema),
@@ -165,65 +184,99 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
  const { fields: parentFields, append: appendParent, remove: removeParent} = useFieldArray({ control, name: 'parents'});
  const { fields: contractFields, append: appendContract, remove: removeContract} = useFieldArray({ control, name: 'contracts'});
 
- const onSubmit = async (data: FormData) => {
- try {
- const healthInfo = buildHealthInfo(data);
- const parents: ParentInput[] | undefined = data.parents?.length
- ? data.parents.map((p) => ({
- ...(p.id ? { id: p.id} : {}),
- fullName: p.fullName,
- relation: p.relation,
- phone: p.phone || undefined,
- email: p.email || undefined,
- workplace: p.workplace || undefined,
-}))
- : undefined;
+  const onSubmit = async (data: FormData) => {
+    try {
+      // Нормализуем дату рождения (если передан 2-значный год: 14 -> 2014)
+      let normalizedBirthDate = data.birthDate;
+      if (normalizedBirthDate) {
+        const parts = normalizedBirthDate.split('-');
+        if (parts.length === 3) {
+          const year = parseInt(parts[0], 10);
+          if (year > 10 && year < 100) {
+            parts[0] = String(2000 + year);
+            normalizedBirthDate = parts.join('-');
+          }
+        }
+      }
 
- const payload: Record<string, any> = {
- firstName: data.firstName,
- lastName: data.lastName,
- middleName: data.middleName || undefined,
- birthDate: new Date(data.birthDate).toISOString(),
- groupId: data.groupId,
- gender: data.gender || undefined,
- nationality: data.nationality || undefined,
- birthCertificateNumber: data.birthCertificateNumber || undefined,
- address: data.address || undefined,
- contractNumber: data.contractNumber || undefined,
- contractDate: data.contractDate ? new Date(data.contractDate).toISOString() : undefined,
- contracts: data.contracts?.map(c => ({
-    ...(c.id ? { id: c.id } : {}),
-    number: c.number,
-    date: new Date(c.date).toISOString(),
-    isActive: c.isActive ?? true,
-    documentUrl: c.documentUrl,
-    documentName: c.documentName,
-  })),
-  admissionOrderNumber: data.admissionOrderNumber || undefined,
-  admissionOrderDate: data.admissionOrderDate ? new Date(data.admissionOrderDate).toISOString() : undefined,
-  previousSchool: data.previousSchool || undefined,
-  dismissalOrderNumber: data.dismissalOrderNumber || undefined,
-  dismissalOrderDate: data.dismissalOrderDate ? new Date(data.dismissalOrderDate).toISOString() : undefined,
-  nextSchool: data.nextSchool || undefined,
-  admissionOrderFileUrl: data.admissionOrderFileUrl || undefined,
-  admissionOrderFileName: data.admissionOrderFileName || undefined,
-  dismissalOrderFileUrl: data.dismissalOrderFileUrl || undefined,
-  dismissalOrderFileName: data.dismissalOrderFileName || undefined,
- healthInfo,
- parents,
-};
+      const healthInfo = buildHealthInfo(data);
+      const parents: ParentInput[] | undefined = data.parents?.length
+        ? data.parents.map((p) => ({
+            ...(p.id ? { id: p.id } : {}),
+            fullName: p.fullName.trim(),
+            relation: p.relation.trim(),
+            phone: p.phone?.trim() || undefined,
+            email: p.email?.trim() || undefined,
+            workplace: p.workplace?.trim() || undefined,
+          }))
+        : undefined;
 
- if (initialData) {
- await api.put(`/api/children/${initialData.id}`, payload);
-} else {
- await api.post('/api/children', payload);
-}
- onSuccess();
-} catch (error: any) {
- const msg = error?.message || 'Ошибка сохранения';
- toast.error('Ошибка сохранения', { description: msg});
-}
-};
+      const payload: Record<string, any> = {
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        middleName: data.middleName?.trim() || undefined,
+        birthDate: new Date(normalizedBirthDate).toISOString(),
+        groupId: data.groupId,
+        gender: data.gender || undefined,
+        nationality: data.nationality?.trim() || undefined,
+        birthCertificateNumber: data.birthCertificateNumber?.trim() || undefined,
+        address: data.address?.trim() || undefined,
+        contractNumber: data.contractNumber?.trim() || undefined,
+        contractDate: data.contractDate ? new Date(data.contractDate).toISOString() : undefined,
+        contracts: data.contracts?.map((c) => ({
+          ...(c.id ? { id: c.id } : {}),
+          number: c.number.trim(),
+          date: new Date(c.date).toISOString(),
+          isActive: c.isActive ?? true,
+          documentUrl: c.documentUrl,
+          documentName: c.documentName,
+        })),
+        admissionOrderNumber: data.admissionOrderNumber?.trim() || undefined,
+        admissionOrderDate: data.admissionOrderDate ? new Date(data.admissionOrderDate).toISOString() : undefined,
+        previousSchool: data.previousSchool?.trim() || undefined,
+        dismissalOrderNumber: data.dismissalOrderNumber?.trim() || undefined,
+        dismissalOrderDate: data.dismissalOrderDate ? new Date(data.dismissalOrderDate).toISOString() : undefined,
+        nextSchool: data.nextSchool?.trim() || undefined,
+        admissionOrderFileUrl: data.admissionOrderFileUrl || undefined,
+        admissionOrderFileName: data.admissionOrderFileName || undefined,
+        dismissalOrderFileUrl: data.dismissalOrderFileUrl || undefined,
+        dismissalOrderFileName: data.dismissalOrderFileName || undefined,
+        healthInfo,
+        parents,
+      };
+
+      if (initialData) {
+        await api.put(`/api/children/${initialData.id}`, payload);
+      } else {
+        await api.post('/api/children', payload);
+      }
+      onSuccess();
+    } catch (error: any) {
+      const msg = error?.message || 'Ошибка сохранения';
+      const lowerMsg = String(msg).toLowerCase();
+
+      if (lowerMsg.includes('рождени') || lowerMsg.includes('birthdate')) {
+        setError('birthDate', { message: msg });
+      } else if (lowerMsg.includes('класс') || lowerMsg.includes('group')) {
+        setError('groupId', { message: msg });
+      } else if (lowerMsg.includes('фамил') || lowerMsg.includes('lastname')) {
+        setError('lastName', { message: msg });
+      } else if (lowerMsg.includes('имя') || lowerMsg.includes('firstname')) {
+        setError('firstName', { message: msg });
+      }
+
+      if (error?.details && typeof error.details === 'object') {
+        Object.entries(error.details).forEach(([field, fieldErrors]) => {
+          const errorText = Array.isArray(fieldErrors) ? fieldErrors[0] : String(fieldErrors);
+          if (field in data) {
+            setError(field as any, { message: errorText });
+          }
+        });
+      }
+
+      toast.error('Ошибка сохранения', { description: msg });
+    }
+  };
 
  return (
  <form onSubmit={handleSubmit(onSubmit)} className="mezon-modal-form">
@@ -259,11 +312,17 @@ export function ChildForm({ initialData, onSuccess, onCancel}: ChildFormProps) {
  </select>
  <FormError message={errors.groupId?.message} />
  </div>
- <div>
- <label className="mezon-form-label mezon-form-label--regular">Дата рождения *</label>
- <Input type="date"{...register('birthDate')} />
- <FormError message={errors.birthDate?.message} />
- </div>
+            <div>
+              <label className="mezon-form-label mezon-form-label--regular">Дата рождения *</label>
+              <Input
+                type="date"
+                min="1990-01-01"
+                max={new Date().toISOString().split('T')[0]}
+                {...register('birthDate')}
+              />
+              <FormError message={errors.birthDate?.message} />
+              <p className="mt-1 text-[11px] text-slate-400">Формат: день, месяц и 4 цифры года (например, 2014)</p>
+            </div>
  <div>
  <label className="mezon-form-label mezon-form-label--regular">Пол</label>
  <select

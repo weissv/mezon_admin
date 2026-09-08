@@ -28,6 +28,8 @@ export const contractInputSchema = z.object({
   number: z.string().min(1, "Номер договора обязателен"),
   date: z.string().refine((v) => !isNaN(Date.parse(v)), "Неверный формат даты"),
   isActive: z.boolean().optional().default(true),
+  documentUrl: z.string().optional(),
+  documentName: z.string().optional(),
 });
 
 // --- Child body ---
@@ -56,6 +58,10 @@ const childBody = z.object({
   dismissalOrderNumber: z.string().optional(),
   dismissalOrderDate: z.string().refine((v) => !v || !isNaN(Date.parse(v)), "Неверный формат даты").optional(),
   nextSchool: z.string().optional(),
+  admissionOrderFileUrl: z.string().optional(),
+  admissionOrderFileName: z.string().optional(),
+  dismissalOrderFileUrl: z.string().optional(),
+  dismissalOrderFileName: z.string().optional(),
 
   // Parents array (new)
   parents: z.array(parentInputSchema).optional(),
